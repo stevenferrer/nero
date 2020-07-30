@@ -4,6 +4,7 @@ import (
 	"github.com/dave/jennifer/jen"
 
 	gen "github.com/sf9v/nero/gen/internal"
+	"github.com/sf9v/nero/predicate"
 )
 
 const (
@@ -98,10 +99,11 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 				Range().Id("pb").Dot("Predicates").Call())).
 				Block(jen.Switch(jen.Id("p").Dot("Op")).
 					BlockFunc(func(g *jen.Group) {
-						for _, op := range ops {
-							g.Case(jen.Qual(pkgPath+"/predicate", op)).
+						for _, op := range predicate.Ops {
+							opStr := string(op)
+							g.Case(jen.Qual(pkgPath+"/predicate", opStr)).
 								Block(jen.Id("sb").Op("=").Id("sb").Dot("Where").
-									Call(jen.Qual(sqPkg, op).Block(
+									Call(jen.Qual(sqPkg, opStr).Block(
 										jen.Id("p").Dot("Field").Op(":").
 											Id("p").Dot("Val").Op(",")),
 									),
@@ -193,10 +195,11 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 				Range().Id("pb").Dot("Predicates").Call())).
 				Block(jen.Switch(jen.Id("p").Dot("Op")).
 					BlockFunc(func(g *jen.Group) {
-						for _, op := range ops {
-							g.Case(jen.Qual(pkgPath+"/predicate", op)).
+						for _, op := range predicate.Ops {
+							opStr := string(op)
+							g.Case(jen.Qual(pkgPath+"/predicate", opStr)).
 								Block(jen.Id("sb").Op("=").Id("sb").Dot("Where").
-									Call(jen.Qual(sqPkg, op).Block(
+									Call(jen.Qual(sqPkg, opStr).Block(
 										jen.Id("p").Dot("Field").Op(":").
 											Id("p").Dot("Val").Op(",")),
 									),
@@ -248,10 +251,11 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 				Range().Id("pb").Dot("Predicates").Call())).
 				Block(jen.Switch(jen.Id("p").Dot("Op")).
 					BlockFunc(func(g *jen.Group) {
-						for _, op := range ops {
-							g.Case(jen.Qual(pkgPath+"/predicate", op)).
+						for _, op := range predicate.Ops {
+							opStr := string(op)
+							g.Case(jen.Qual(pkgPath+"/predicate", opStr)).
 								Block(jen.Id("sb").Op("=").Id("sb").Dot("Where").
-									Call(jen.Qual(sqPkg, op).Block(
+									Call(jen.Qual(sqPkg, opStr).Block(
 										jen.Id("p").Dot("Field").Op(":").
 											Id("p").Dot("Val").Op(",")),
 									),

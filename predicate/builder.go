@@ -24,19 +24,22 @@ type Predicate struct {
 }
 
 // Op is predicate operator
-type Op int
+type Op string
 
 const (
 	// Eq is equal
-	Eq Op = iota
+	Eq Op = "Eq"
 	// NotEq is not equal
-	NotEq
+	NotEq Op = "NotEq"
 	// Gt is greater than
-	Gt
+	Gt Op = "Gt"
 	// GtOrEq is greater than or equal
-	GtOrEq
+	GtOrEq Op = "GtOrEq"
 	// Lt is less than
-	Lt
+	Lt Op = "Lt"
 	// LtOrEq is less than or equal
-	LtOrEq
+	LtOrEq Op = "LtOrEq"
 )
+
+// Ops is the list of predicate operators
+var Ops = []Op{Eq, NotEq, Gt, GtOrEq, Lt, LtOrEq}

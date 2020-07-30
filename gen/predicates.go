@@ -4,11 +4,8 @@ import (
 	"github.com/dave/jennifer/jen"
 
 	gen "github.com/sf9v/nero/gen/internal"
+	"github.com/sf9v/nero/predicate"
 )
-
-var ops = []string{
-	"Eq", "NotEq", "Gt", "GtOrEq", "Lt", "LtOrEq",
-}
 
 func newPredicates(schema *gen.Schema) *jen.Statement {
 	stmnt := jen.Type().Id("PredicateFunc").Func().Params(
@@ -17,12 +14,13 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 
 	predPkg := pkgPath + "/predicate"
 	for _, col := range schema.Cols {
-		for _, op := range ops {
+		for _, op := range predicate.Ops {
+			opStr := string(op)
 			field := col.CamelName()
 			if len(col.FieldName) > 0 {
 				field = col.FieldName
 			}
-			fn := toCamel(field + "_" + op)
+			fn := toCamel(field + "_" + opStr)
 			stmnt = stmnt.Func().
 				Id(fn).
 				Params(jen.Id(col.LowerCamelName()).
@@ -39,7 +37,7 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 										jen.Id("Field").Op(":").
 											Lit(col.Name).Op(","),
 										jen.Id("Op").Op(":").
-											Qual(predPkg, op).Op(","),
+											Qual(predPkg, opStr).Op(","),
 										jen.Id("Val").Op(":").
 											Id(col.LowerCamelName()).Op(","),
 									),
