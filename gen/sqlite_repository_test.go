@@ -29,7 +29,7 @@ func NewSQLiteRepository(db *sql.DB) *SQLiteRepository {
 	}
 }
 
-func (s *SQLiteRepository) Create(c *Creator) (int64, error) {
+func (s *SQLiteRepository) Create(ctx context.Context, c *Creator) (int64, error) {
 	sb := squirrel.Insert(c.collection).
 		Columns(c.columns...).
 		Values(c.name, c.updatedAt)
@@ -39,12 +39,12 @@ func (s *SQLiteRepository) Create(c *Creator) (int64, error) {
 		return 0, err
 	}
 
-	stmnt, err := s.db.Prepare(sql)
+	stmnt, err := s.db.PrepareContext(ctx, sql)
 	if err != nil {
 		return 0, err
 	}
 
-	res, err := stmnt.Exec(args...)
+	res, err := stmnt.ExecContext(ctx, args...)
 	if err != nil {
 		return 0, err
 	}
@@ -57,7 +57,7 @@ func (s *SQLiteRepository) Create(c *Creator) (int64, error) {
 	return id, nil
 }
 
-func (s *SQLiteRepository) Query(q *Queryer) ([]*internal.Example, error) {
+func (s *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*internal.Example, error) {
 	pb := &predicate.Builder{}
 	for _, pf := range q.pfs {
 		pf(pb)
@@ -106,12 +106,12 @@ func (s *SQLiteRepository) Query(q *Queryer) ([]*internal.Example, error) {
 		return nil, err
 	}
 
-	stmnt, err := s.db.Prepare(sql)
+	stmnt, err := s.db.PrepareContext(ctx, sql)
 	if err != nil {
 		return nil, err
 	}
 
-	rows, err := stmnt.Query(args...)
+	rows, err := stmnt.QueryContext(ctx, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func (s *SQLiteRepository) Query(q *Queryer) ([]*internal.Example, error) {
 	return list, nil
 }
 
-func (s *SQLiteRepository) Update(u *Updater) (int64, error) {
+func (s *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error) {
 	pb := &predicate.Builder{}
 	for _, pf := range u.pfs {
 		pf(pb)
@@ -177,12 +177,12 @@ func (s *SQLiteRepository) Update(u *Updater) (int64, error) {
 		return 0, err
 	}
 
-	stmnt, err := s.db.Prepare(sql)
+	stmnt, err := s.db.PrepareContext(ctx, sql)
 	if err != nil {
 		return 0, err
 	}
 
-	res, err := stmnt.Exec(args...)
+	res, err := stmnt.ExecContext(ctx, args...)
 	if err != nil {
 		return 0, err
 	}
@@ -195,7 +195,7 @@ func (s *SQLiteRepository) Update(u *Updater) (int64, error) {
 	return rowsAffected, nil
 }
 
-func (s *SQLiteRepository) Delete(d *Deleter) (int64, error) {
+func (s *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
 	pb := &predicate.Builder{}
 	for _, pf := range d.pfs {
 		pf(pb)
@@ -236,12 +236,12 @@ func (s *SQLiteRepository) Delete(d *Deleter) (int64, error) {
 		return 0, err
 	}
 
-	stmnt, err := s.db.Prepare(sql)
+	stmnt, err := s.db.PrepareContext(ctx, sql)
 	if err != nil {
 		return 0, err
 	}
 
-	res, err := stmnt.Exec(args...)
+	res, err := stmnt.ExecContext(ctx, args...)
 	if err != nil {
 		return 0, err
 	}

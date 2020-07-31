@@ -18,10 +18,10 @@ func Test_newRepository(t *testing.T) {
 	
 // Repository is the contract for storing Example
 type Repository interface {
-	Create(*Creator) (id int64, err error)
-	Query(*Queryer) ([]*internal.Example, error)
-	Update(*Updater) (rowsAffected int64, err error)
-	Delete(*Deleter) (rowsAffected int64, err error)
+	Create(context.Context, *Creator) (id int64, err error)
+	Query(context.Context, *Queryer) ([]*internal.Example, error)
+	Update(context.Context, *Updater) (rowsAffected int64, err error)
+	Delete(context.Context, *Deleter) (rowsAffected int64, err error)
 }
 
 `)

@@ -30,10 +30,12 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 		))).Line().Line()
 
 	rcvrParam := jen.Id("s").Op("*").Id("SQLiteRepository")
+	ctxC := jen.Qual("context", "Context")
+	ctxIDC := jen.Id("ctx")
 
 	// create method
 	stmnt = stmnt.Func().Params(rcvrParam).Id("Create").
-		Params(jen.Id("c").Op("*").Id("Creator")).
+		Params(jen.Id("ctx").Add(ctxC), jen.Id("c").Op("*").Id("Creator")).
 		Params(gen.GetTypeC(ident.Typ), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
@@ -59,11 +61,11 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id("stmnt"), jen.Err()).Op(":=").
-				Id("s").Dot("db").Dot("Prepare").Call(jen.Id("sql"))
+				Id("s").Dot("db").Dot("PrepareContext").Call(ctxIDC, jen.Id("sql"))
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id("res"), jen.Err()).Op(":=").
-				Id("stmnt").Dot("Exec").Call(jen.Id("args").Op("..."))
+				Id("stmnt").Dot("ExecContext").Call(ctxIDC, jen.Id("args").Op("..."))
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id(ident.LowerCamelName()), jen.Err()).Op(":=").
@@ -77,7 +79,7 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 	retTyp := jen.Op("[]").Op("*").
 		Qual(schema.Typ.PkgPath, schema.Typ.Name)
 	stmnt = stmnt.Func().Params(rcvrParam).Id("Query").
-		Params(jen.Id("q").Op("*").Id("Queryer")).
+		Params(jen.Id("ctx").Add(ctxC), jen.Id("q").Op("*").Id("Queryer")).
 		Params(retTyp, jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
@@ -131,11 +133,11 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id("stmnt"), jen.Err()).Op(":=").
-				Id("s").Dot("db").Dot("Prepare").Call(jen.Id("sql"))
+				Id("s").Dot("db").Dot("PrepareContext").Call(ctxIDC, jen.Id("sql"))
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id("rows"), jen.Err()).Op(":=").
-				Id("stmnt").Dot("Query").Call(jen.Id("args").Id("..."))
+				Id("stmnt").Dot("QueryContext").Call(ctxIDC, jen.Id("args").Id("..."))
 			g.Add(ifErr)
 			g.Defer().Id("rows").Dot("Close").Call().Line()
 
@@ -158,7 +160,7 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 
 	// update method
 	stmnt = stmnt.Func().Params(rcvrParam).Id("Update").
-		Params(jen.Id("u").Op("*").Id("Updater")).
+		Params(jen.Id("ctx").Add(ctxC), jen.Id("u").Op("*").Id("Updater")).
 		Params(jen.Int64(), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
@@ -219,11 +221,11 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id("stmnt"), jen.Err()).Op(":=").
-				Id("s").Dot("db").Dot("Prepare").Call(jen.Id("sql"))
+				Id("s").Dot("db").Dot("PrepareContext").Call(ctxIDC, jen.Id("sql"))
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id("res"), jen.Err()).Op(":=").
-				Id("stmnt").Dot("Exec").Call(jen.Id("args").Op("..."))
+				Id("stmnt").Dot("ExecContext").Call(ctxIDC, jen.Id("args").Op("..."))
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id("rowsAffected"), jen.Err()).Op(":=").
@@ -235,7 +237,7 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 
 	// delete method
 	stmnt = stmnt.Func().Params(rcvrParam).Id("Delete").
-		Params(jen.Id("d").Op("*").Id("Deleter")).
+		Params(jen.Id("ctx").Add(ctxC), jen.Id("d").Op("*").Id("Deleter")).
 		Params(jen.Int64(), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
@@ -275,11 +277,11 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id("stmnt"), jen.Err()).Op(":=").
-				Id("s").Dot("db").Dot("Prepare").Call(jen.Id("sql"))
+				Id("s").Dot("db").Dot("PrepareContext").Call(ctxIDC, jen.Id("sql"))
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id("res"), jen.Err()).Op(":=").
-				Id("stmnt").Dot("Exec").Call(jen.Id("args").Op("..."))
+				Id("stmnt").Dot("ExecContext").Call(ctxIDC, jen.Id("args").Op("..."))
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id("rowsAffected"), jen.Err()).Op(":=").

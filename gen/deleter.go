@@ -33,5 +33,4 @@ func newDeleter() *jen.Statement {
 		).Line().Line()
 
 	return stmnt
-
 }
