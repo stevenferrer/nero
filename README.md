@@ -1,3 +1,5 @@
+![Github Actions](https://github.com/sf9v/nero/workflows/test/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/sf9v/nero/badge.svg?branch=master)](https://coveralls.io/github/sf9v/nero?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/sf9v/nero)](https://goreportcard.com/report/github.com/sf9v/nero)
 
 # Nero
