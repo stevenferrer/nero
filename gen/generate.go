@@ -50,13 +50,6 @@ func Generate(s nero.Schemaer) ([]*OutFile, error) {
 		jf:   predsFile,
 	})
 
-	txFile := jen.NewFile(pkgName)
-	txFile.Add(newTx())
-	files = append(files, &file{
-		name: "tx.go",
-		jf:   txFile,
-	})
-
 	repoFile := jen.NewFile(pkgName)
 	repoFile.Add(newRepository(schema))
 	files = append(files, &file{

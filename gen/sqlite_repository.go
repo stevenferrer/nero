@@ -33,7 +33,7 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 	rcvrParam := jen.Id("s").Op("*").Id("SQLiteRepository")
 	ctxC := jen.Qual("context", "Context")
 	ctxIDC := jen.Id("ctx")
-	txC := jen.Id("Tx")
+	txC := jen.Qual(pkgPath, "Tx")
 
 	// tx method
 	stmnt = stmnt.Func().Params(rcvrParam).Id("Tx").

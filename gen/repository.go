@@ -13,11 +13,11 @@ func newRepository(schema *gen.Schema) *jen.Statement {
 	comment := fmt.Sprintf("Repository is the contract for storing %s",
 		schema.Typ.Name)
 	ctxC := jen.Qual("context", "Context")
-	txC := jen.Id("Tx")
+	txC := jen.Qual(pkgPath, "Tx")
 	return jen.Comment(comment).Line().
 		Type().Id("Repository").Interface(
 		jen.Id("Tx").
-			Params(ctxC).Params(jen.Id("Tx"), jen.Error()),
+			Params(ctxC).Params(txC, jen.Error()),
 		jen.Id("Create").
 			Params(ctxC, jen.Op("*").Id("Creator")).
 			Params(
