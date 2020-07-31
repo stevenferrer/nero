@@ -41,7 +41,7 @@ func (s *SQLiteRepository) Create(ctx context.Context, c *Creator) (int64, error
 	defer func() {
 		if err != nil && tx != nil {
 			if rollbackErr := tx.Rollback(); rollbackErr != nil {
-				err = errors.Wrapf(err, "rollback error: %w", rollbackErr)
+				err = errors.Wrapf(err, "rollback error: %v", rollbackErr)
 			}
 			return
 		}
@@ -67,7 +67,7 @@ func (s *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*internal.E
 	defer func() {
 		if err != nil && tx != nil {
 			if rollbackErr := tx.Rollback(); rollbackErr != nil {
-				err = errors.Wrapf(err, "rollback error: %w", rollbackErr)
+				err = errors.Wrapf(err, "rollback error: %v", rollbackErr)
 			}
 			return
 		}
@@ -93,7 +93,7 @@ func (s *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error
 	defer func() {
 		if err != nil && tx != nil {
 			if rollbackErr := tx.Rollback(); rollbackErr != nil {
-				err = errors.Wrapf(err, "rollback error: %w", rollbackErr)
+				err = errors.Wrapf(err, "rollback error: %v", rollbackErr)
 			}
 			return
 		}
@@ -119,7 +119,7 @@ func (s *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error
 	defer func() {
 		if err != nil && tx != nil {
 			if rollbackErr := tx.Rollback(); rollbackErr != nil {
-				err = errors.Wrapf(err, "rollback error: %w", rollbackErr)
+				err = errors.Wrapf(err, "rollback error: %v", rollbackErr)
 			}
 			return
 		}
