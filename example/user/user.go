@@ -1,4 +1,4 @@
-package example
+package user
 
 import (
 	"time"
@@ -6,6 +6,7 @@ import (
 	"github.com/sf9v/nero"
 )
 
+// User is a user
 type User struct {
 	ID        int64
 	Email     string
@@ -14,6 +15,7 @@ type User struct {
 	CreatedAt *time.Time
 }
 
+// Schema implements nero.Schemaer
 func (u *User) Schema() *nero.Schema {
 	return &nero.Schema{
 		Pkg:        "user",

@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	squirrel "github.com/Masterminds/squirrel"
 	_ "github.com/mattn/go-sqlite3"
-	example "github.com/sf9v/nero/example"
+	user "github.com/sf9v/nero/example/user"
 	predicate "github.com/sf9v/nero/predicate"
 )
 
@@ -49,7 +49,7 @@ func (s *SQLiteRepository) Create(c *Creator) (int64, error) {
 	return id, nil
 }
 
-func (s *SQLiteRepository) Query(q *Queryer) ([]*example.User, error) {
+func (s *SQLiteRepository) Query(q *Queryer) ([]*user.User, error) {
 	pb := &predicate.Builder{}
 	for _, pf := range q.pfs {
 		pf(pb)
@@ -109,9 +109,9 @@ func (s *SQLiteRepository) Query(q *Queryer) ([]*example.User, error) {
 	}
 	defer rows.Close()
 
-	list := []*example.User{}
+	list := []*user.User{}
 	for rows.Next() {
-		var item example.User
+		var item user.User
 		err = rows.Scan(
 			&item.ID,
 			&item.Email,
