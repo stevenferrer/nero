@@ -6,6 +6,7 @@ import (
 	"github.com/dave/jennifer/jen"
 )
 
+// GetTypeC returns the jen.Code from a typ
 func GetTypeC(typ *Typ) jen.Code {
 	c := &jen.Statement{}
 	if typ.Nillabe {
@@ -39,6 +40,7 @@ func GetTypeC(typ *Typ) jen.Code {
 	return c.Qual(typ.PkgPath, typ.Name)
 }
 
+// GetZeroValC returns the jen.Code zero value from a typ
 func GetZeroValC(typ *Typ) jen.Code {
 	if typ.Nillabe {
 		return jen.Nil()

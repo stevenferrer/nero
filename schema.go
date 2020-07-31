@@ -11,7 +11,7 @@ type Schema struct {
 	Collection string
 	// Columns is the list of columns
 	Columns Columns
-	// Pkg is the packge name of generated files
+	// Pkg is the package name of the generated files
 	Pkg string
 }
 
@@ -31,8 +31,8 @@ func NewColumn(name string, t interface{}) *column {
 	return &column{Name: name, T: t}
 }
 
-// Auto is an auto-filled column e.g. auto-increment id,
-// auto-filled date etc.
+// Auto is an auto-filled column e.g.
+// auto-increment id, auto-filled date etc.
 func (c *column) Auto() *column {
 	c.IsAuto = true
 	return c

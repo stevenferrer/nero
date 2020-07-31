@@ -4,14 +4,17 @@ package predicate
 // - Database should also be the one to dictate the supported operators
 // - The operations listed here are all the possible operators
 
+// Builder is a predicat builder
 type Builder struct {
 	predicates []*Predicate
 }
 
+// Append adds predicate to the builder
 func (b *Builder) Append(ps ...*Predicate) {
 	b.predicates = append(b.predicates, ps...)
 }
 
+// Predicates returns the list of predicates
 func (b *Builder) Predicates() []*Predicate {
 	return b.predicates
 }

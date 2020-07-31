@@ -4,6 +4,7 @@ import (
 	"reflect"
 )
 
+// Typ is a type info
 type Typ struct {
 	Name    string
 	V       interface{}
@@ -12,6 +13,7 @@ type Typ struct {
 	Nillabe bool
 }
 
+// NewTyp returns a type infor from v
 func NewTyp(v interface{}) *Typ {
 	t := reflect.TypeOf(v)
 	rt := rtype(t)
