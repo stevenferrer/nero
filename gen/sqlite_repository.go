@@ -173,23 +173,29 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 				Line()
 
 			// sql builder
-
 			g.Id("sb").Op(":=").Qual(sqPkg, "Update").
-				Call(jen.Id("u").Dot("collection")).Op(".").Line()
-			for i, col := range schema.Cols {
-				if col.Auto {
-					continue
-				}
+				Call(jen.Id("u").Dot("collection")).Op(".").
+				Do(func(s *jen.Statement) {
+					colCnt := 0
+					for _, col := range schema.Cols {
+						if col.Auto {
+							continue
+						}
+						colCnt++
+					}
 
-				s := jen.Id("Set").Call(jen.Lit(col.Name),
-					jen.Id("u").Dot(col.LowerCamelName()))
-				if i+i < len(schema.Cols) {
-					s.Add(jen.Op("."))
-				}
-
-				g.Add(s)
-
-			}
+					for i, col := range schema.Cols {
+						if col.Auto {
+							continue
+						}
+						s.Id("Set").Call(jen.Lit(col.Name),
+							jen.Id("u").Dot(col.LowerCamelName()))
+						// add dot
+						if i < colCnt {
+							s.Op(".")
+						}
+					}
+				})
 
 			g.For(jen.List(jen.Id("_"), jen.Id("p").Op(":=").
 				Range().Id("pb").Dot("Predicates").Call())).

@@ -14,12 +14,7 @@ type Typ struct {
 
 func NewTyp(v interface{}) *Typ {
 	t := reflect.TypeOf(v)
-
-	rt := t
-	for rt.Kind() == reflect.Ptr {
-		rt = t.Elem()
-	}
-
+	rt := rtype(t)
 	return &Typ{
 		T:       rt,
 		V:       v,
@@ -29,9 +24,18 @@ func NewTyp(v interface{}) *Typ {
 	}
 }
 
+func rtype(t reflect.Type) reflect.Type {
+	for t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+
+	return t
+}
+
 func nillable(t reflect.Type) bool {
 	switch t.Kind() {
-	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
+	case reflect.Slice, reflect.Array,
+		reflect.Ptr, reflect.Map:
 		return true
 	}
 	return false

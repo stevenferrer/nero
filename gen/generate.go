@@ -1,8 +1,7 @@
 package gen
 
 import (
-	"os"
-	"path"
+	"bytes"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
@@ -19,14 +18,106 @@ const (
 )
 
 type file struct {
-	path string
-	f    *jen.File
+	name string
+	jf   *jen.File
 }
 
-func Generate(schemaer nero.Schemaer, genPath string) error {
-	ns := schemaer.Schema()
+// OutFile is an output file
+type OutFile struct {
+	Name string
+	*bytes.Buffer
+}
+
+// Generate generates the repository and returns the output files
+func Generate(s nero.Schemaer) ([]*OutFile, error) {
+	schema, err := buildSchema(s)
+	if err != nil {
+		return nil, err
+	}
+
+	pkgName := strings.ToLower(schema.Pkg)
+	pkgFile := jen.NewFile(pkgName)
+	pkgFile.Const().Defs(
+		jen.Id("collection").Op("=").Lit(schema.Coln),
+	)
+
+	files := []*file{{name: "meta.go", jf: pkgFile}}
+
+	predsFile := jen.NewFile(pkgName)
+	predsFile.Add(newPredicates(schema))
+	files = append(files, &file{
+		name: "predicates.go",
+		jf:   predsFile,
+	})
+
+	repoFile := jen.NewFile(pkgName)
+	repoFile.Add(newRepository(schema))
+	files = append(files, &file{
+		name: "repository.go",
+		jf:   repoFile,
+	})
+
+	creatorFile := jen.NewFile(pkgName)
+	creatorFile.Add(newCreator(schema))
+	files = append(files, &file{
+		name: "creator.go",
+		jf:   creatorFile,
+	})
+
+	queryerFile := jen.NewFile(pkgName)
+	queryerFile.Add(newQueryer(schema))
+	files = append(files, &file{
+		name: "queryer.go",
+		jf:   queryerFile,
+	})
+
+	updaterFile := jen.NewFile(pkgName)
+	updaterFile.Add(newUpdater(schema))
+	files = append(files, &file{
+		name: "updater.go",
+		jf:   updaterFile,
+	})
+
+	deleterFile := jen.NewFile(pkgName)
+	deleterFile.Add(newDeleter())
+	files = append(files, &file{
+		name: "deleter.go",
+		jf:   deleterFile,
+	})
+
+	// sqlite repository implementation
+	sqliteRepoFile := jen.NewFile(pkgName)
+	sqliteRepoFile.Anon("github.com/mattn/go-sqlite3")
+	sqliteRepoFile.Add(newSQLiteRepo(schema))
+	files = append(files, &file{
+		name: "sqlite_repository.go",
+		jf:   sqliteRepoFile,
+	})
+
+	outFiles := []*OutFile{}
+
+	for _, file := range files {
+		buff := &bytes.Buffer{}
+		file.jf.PackageComment(header)
+		err = file.jf.Render(buff)
+		if err != nil {
+			return nil, errors.Wrap(err, "render file")
+		}
+
+		outFiles = append(outFiles, &OutFile{
+			Name:   file.name,
+			Buffer: buff,
+		})
+	}
+
+	return outFiles, nil
+}
+
+func buildSchema(s nero.Schemaer) (*gen.Schema, error) {
+	ns := s.Schema()
 	schema := &gen.Schema{
-		Typ:  gen.NewTyp(schemaer),
+		Coln: ns.Collection,
+		Typ:  gen.NewTyp(s),
 		Cols: []*gen.Col{},
 		Pkg:  ns.Pkg,
 	}
@@ -54,97 +145,14 @@ func Generate(schemaer nero.Schemaer, genPath string) error {
 	}
 
 	if identCnt == 0 {
-		return errors.New("at least one ident column is required")
+		return nil, errors.New("at least one ident column is required")
 	}
 
 	if identCnt > 1 {
-		return errors.New("only one ident column is allowed")
+		return nil, errors.New("only one ident column is allowed")
 	}
 
-	pkgName := strings.ToLower(schema.Pkg)
-	pkgFile := jen.NewFile(pkgName)
-	pkgFile.Const().Defs(
-		jen.Id("collection").Op("=").Lit(ns.Collection),
-	)
-
-	files := []*file{{
-		path: "meta.go",
-		f:    pkgFile,
-	}}
-
-	predsFile := jen.NewFile(pkgName)
-	predsFile.Add(newPredicates(schema))
-	files = append(files, &file{
-		path: "predicates.go",
-		f:    predsFile,
-	})
-
-	repoFile := jen.NewFile(pkgName)
-	repoFile.Add(newRepository(schema))
-	files = append(files, &file{
-		path: "repository.go",
-		f:    repoFile,
-	})
-
-	creatorFile := jen.NewFile(pkgName)
-	creatorFile.Add(newCreator(schema))
-	files = append(files, &file{
-		path: "creator.go",
-		f:    creatorFile,
-	})
-
-	queryerFile := jen.NewFile(pkgName)
-	queryerFile.Add(newQueryer(schema))
-	files = append(files, &file{
-		path: "queryer.go",
-		f:    queryerFile,
-	})
-
-	updaterFile := jen.NewFile(pkgName)
-	updaterFile.Add(newUpdater(schema))
-	files = append(files, &file{
-		path: "updater.go",
-		f:    updaterFile,
-	})
-
-	deleterFile := jen.NewFile(pkgName)
-	deleterFile.Add(newDeleter())
-	files = append(files, &file{
-		path: "deleter.go",
-		f:    deleterFile,
-	})
-
-	// sqlite repository implementation
-	sqliteRepoFile := jen.NewFile(pkgName)
-	sqliteRepoFile.Anon("github.com/mattn/go-sqlite3")
-	sqliteRepoFile.Add(newSQLiteRepo(schema))
-	files = append(files, &file{
-		path: "sqlite_repository.go",
-		f:    sqliteRepoFile,
-	})
-
-	basePath := path.Join(genPath)
-	err := os.MkdirAll(basePath, os.ModePerm)
-	if err != nil {
-		return errors.Wrap(err, "create base directory")
-	}
-
-	for _, file := range files {
-		filePath := path.Join(basePath, file.path)
-		f, err := os.Create(filePath)
-		if err != nil {
-			return errors.Wrapf(err, "create file: %s", filePath)
-		}
-
-		file.f.PackageComment(header)
-
-		err = file.f.Render(f)
-		if err != nil {
-			return errors.Wrap(err, "render file")
-		}
-	}
-
-	return nil
+	return schema, nil
 }
 
 func toCamel(s string) string {

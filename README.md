@@ -1,6 +1,6 @@
 # Nero
 
-An experimental repository generator in Go
+An experimental repository generator in Go.
 
 ## Assumptions
 
