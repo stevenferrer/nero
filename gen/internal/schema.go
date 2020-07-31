@@ -1,5 +1,6 @@
 package internal
 
+// Schema is an internal schema
 type Schema struct {
 	Coln  string
 	Typ   *Typ

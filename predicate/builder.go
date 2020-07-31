@@ -4,7 +4,7 @@ package predicate
 // - Database should also be the one to dictate the supported operators
 // - The operations listed here are all the possible operators
 
-// Builder is a predicat builder
+// Builder is a predicate builder
 type Builder struct {
 	predicates []*Predicate
 }
