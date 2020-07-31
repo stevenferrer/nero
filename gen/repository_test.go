@@ -18,12 +18,16 @@ func Test_newRepository(t *testing.T) {
 	
 // Repository is the contract for storing Example
 type Repository interface {
+	Tx(context.Context) (Tx, error)
 	Create(context.Context, *Creator) (id int64, err error)
 	Query(context.Context, *Queryer) ([]*internal.Example, error)
 	Update(context.Context, *Updater) (rowsAffected int64, err error)
 	Delete(context.Context, *Deleter) (rowsAffected int64, err error)
+	CreateTx(context.Context, Tx, *Creator) (id int64, err error)
+	QueryTx(context.Context, Tx, *Queryer) ([]*internal.Example, error)
+	UpdateTx(context.Context, Tx, *Updater) (rowsAffected int64, err error)
+	DeleteTx(context.Context, Tx, *Deleter) (rowsAffected int64, err error)
 }
-
 `)
 	got := fmt.Sprintf("%#v", stmt)
 	assert.Equal(t, expect, got)

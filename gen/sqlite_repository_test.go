@@ -29,17 +29,129 @@ func NewSQLiteRepository(db *sql.DB) *SQLiteRepository {
 	}
 }
 
+func (s *SQLiteRepository) Tx(ctx context.Context) (Tx, error) {
+	return s.db.BeginTx(ctx, &sql.TxOptions{})
+}
+
 func (s *SQLiteRepository) Create(ctx context.Context, c *Creator) (int64, error) {
+	tx, err := s.Tx(ctx)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if err != nil && tx != nil {
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				err = errors.Wrapf(err, "rollback error: %w", rollbackErr)
+			}
+			return
+		}
+
+		if err = tx.Commit(); err != nil {
+			err = errors.Wrap(err, "commit error")
+		}
+	}()
+
+	id, err := s.CreateTx(ctx, tx, c)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+
+func (s *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*internal.Example, error) {
+	tx, err := s.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil && tx != nil {
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				err = errors.Wrapf(err, "rollback error: %w", rollbackErr)
+			}
+			return
+		}
+
+		if err = tx.Commit(); err != nil {
+			err = errors.Wrap(err, "commit error")
+		}
+	}()
+
+	list, err := s.QueryTx(ctx, tx, q)
+	if err != nil {
+		return nil, err
+	}
+
+	return list, nil
+}
+
+func (s *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error) {
+	tx, err := s.Tx(ctx)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if err != nil && tx != nil {
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				err = errors.Wrapf(err, "rollback error: %w", rollbackErr)
+			}
+			return
+		}
+
+		if err = tx.Commit(); err != nil {
+			err = errors.Wrap(err, "commit error")
+		}
+	}()
+
+	rowsAffected, err := s.UpdateTx(ctx, tx, u)
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
+}
+
+func (s *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
+	tx, err := s.Tx(ctx)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if err != nil && tx != nil {
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				err = errors.Wrapf(err, "rollback error: %w", rollbackErr)
+			}
+			return
+		}
+
+		if err = tx.Commit(); err != nil {
+			err = errors.Wrap(err, "commit error")
+		}
+	}()
+
+	rowsAffected, err := s.DeleteTx(ctx, tx, d)
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
+}
+
+func (s *SQLiteRepository) CreateTx(ctx context.Context, tx Tx, c *Creator) (int64, error) {
+	txx, ok := tx.(*sql.Tx)
+	if !ok {
+		return 0, errors.New("expecting tx to be *sql.Tx")
+	}
+
 	sb := squirrel.Insert(c.collection).
 		Columns(c.columns...).
 		Values(c.name, c.updatedAt)
-
 	sql, args, err := sb.ToSql()
 	if err != nil {
 		return 0, err
 	}
 
-	stmnt, err := s.db.PrepareContext(ctx, sql)
+	stmnt, err := txx.PrepareContext(ctx, sql)
 	if err != nil {
 		return 0, err
 	}
@@ -57,7 +169,12 @@ func (s *SQLiteRepository) Create(ctx context.Context, c *Creator) (int64, error
 	return id, nil
 }
 
-func (s *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*internal.Example, error) {
+func (s *SQLiteRepository) QueryTx(ctx context.Context, tx Tx, q *Queryer) ([]*internal.Example, error) {
+	txx, ok := tx.(*sql.Tx)
+	if !ok {
+		return nil, errors.New("expecting tx to be *sql.Tx")
+	}
+
 	pb := &predicate.Builder{}
 	for _, pf := range q.pfs {
 		pf(pb)
@@ -106,7 +223,7 @@ func (s *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*internal.E
 		return nil, err
 	}
 
-	stmnt, err := s.db.PrepareContext(ctx, sql)
+	stmnt, err := txx.PrepareContext(ctx, sql)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +253,12 @@ func (s *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*internal.E
 	return list, nil
 }
 
-func (s *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error) {
+func (s *SQLiteRepository) UpdateTx(ctx context.Context, tx Tx, u *Updater) (int64, error) {
+	txx, ok := tx.(*sql.Tx)
+	if !ok {
+		return 0, errors.New("expecting tx to be *sql.Tx")
+	}
+
 	pb := &predicate.Builder{}
 	for _, pf := range u.pfs {
 		pf(pb)
@@ -177,7 +299,7 @@ func (s *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error
 		return 0, err
 	}
 
-	stmnt, err := s.db.PrepareContext(ctx, sql)
+	stmnt, err := txx.PrepareContext(ctx, sql)
 	if err != nil {
 		return 0, err
 	}
@@ -195,7 +317,12 @@ func (s *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error
 	return rowsAffected, nil
 }
 
-func (s *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
+func (s *SQLiteRepository) DeleteTx(ctx context.Context, tx Tx, d *Deleter) (int64, error) {
+	txx, ok := tx.(*sql.Tx)
+	if !ok {
+		return 0, errors.New("expecting tx to be *sql.Tx")
+	}
+
 	pb := &predicate.Builder{}
 	for _, pf := range d.pfs {
 		pf(pb)
@@ -236,7 +363,7 @@ func (s *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error
 		return 0, err
 	}
 
-	stmnt, err := s.db.PrepareContext(ctx, sql)
+	stmnt, err := txx.PrepareContext(ctx, sql)
 	if err != nil {
 		return 0, err
 	}
@@ -253,7 +380,6 @@ func (s *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error
 
 	return rowsAffected, nil
 }
-
 `)
 
 	got := strings.TrimSpace(fmt.Sprintf("%#v", sqliteRepo))

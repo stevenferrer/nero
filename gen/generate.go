@@ -50,6 +50,13 @@ func Generate(s nero.Schemaer) ([]*OutFile, error) {
 		jf:   predsFile,
 	})
 
+	txFile := jen.NewFile(pkgName)
+	txFile.Add(newTx())
+	files = append(files, &file{
+		name: "tx.go",
+		jf:   txFile,
+	})
+
 	repoFile := jen.NewFile(pkgName)
 	repoFile.Add(newRepository(schema))
 	files = append(files, &file{
@@ -99,6 +106,7 @@ func Generate(s nero.Schemaer) ([]*OutFile, error) {
 	for _, file := range files {
 		buff := &bytes.Buffer{}
 		file.jf.PackageComment(header)
+		file.jf.ImportAlias(sqPkg, "sq")
 		err = file.jf.Render(buff)
 		if err != nil {
 			return nil, errors.Wrap(err, "render file")

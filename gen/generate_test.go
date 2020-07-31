@@ -52,7 +52,7 @@ func Test_buildSchema(t *testing.T) {
 func TestGenerate(t *testing.T) {
 	outFiles, err := Generate(new(gen.Example))
 	assert.NoError(t, err)
-	assert.Len(t, outFiles, 8)
+	assert.Len(t, outFiles, 9)
 
 	for _, outFile := range outFiles {
 		require.NotEmpty(t, outFile.Name)

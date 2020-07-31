@@ -4,8 +4,9 @@ package user
 import (
 	"context"
 	"database/sql"
-	squirrel "github.com/Masterminds/squirrel"
+	sq "github.com/Masterminds/squirrel"
 	_ "github.com/mattn/go-sqlite3"
+	errors "github.com/pkg/errors"
 	user "github.com/sf9v/nero/example/user"
 	predicate "github.com/sf9v/nero/predicate"
 )
@@ -22,17 +23,129 @@ func NewSQLiteRepository(db *sql.DB) *SQLiteRepository {
 	}
 }
 
+func (s *SQLiteRepository) Tx(ctx context.Context) (Tx, error) {
+	return s.db.BeginTx(ctx, &sql.TxOptions{})
+}
+
 func (s *SQLiteRepository) Create(ctx context.Context, c *Creator) (int64, error) {
-	sb := squirrel.Insert(c.collection).
+	tx, err := s.Tx(ctx)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if err != nil && tx != nil {
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				err = errors.Wrapf(err, "rollback error: %v", rollbackErr)
+			}
+			return
+		}
+
+		if err = tx.Commit(); err != nil {
+			err = errors.Wrap(err, "commit error")
+		}
+	}()
+
+	id, err := s.CreateTx(ctx, tx, c)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+
+func (s *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*user.User, error) {
+	tx, err := s.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil && tx != nil {
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				err = errors.Wrapf(err, "rollback error: %v", rollbackErr)
+			}
+			return
+		}
+
+		if err = tx.Commit(); err != nil {
+			err = errors.Wrap(err, "commit error")
+		}
+	}()
+
+	list, err := s.QueryTx(ctx, tx, q)
+	if err != nil {
+		return nil, err
+	}
+
+	return list, nil
+}
+
+func (s *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error) {
+	tx, err := s.Tx(ctx)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if err != nil && tx != nil {
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				err = errors.Wrapf(err, "rollback error: %v", rollbackErr)
+			}
+			return
+		}
+
+		if err = tx.Commit(); err != nil {
+			err = errors.Wrap(err, "commit error")
+		}
+	}()
+
+	rowsAffected, err := s.UpdateTx(ctx, tx, u)
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
+}
+
+func (s *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
+	tx, err := s.Tx(ctx)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if err != nil && tx != nil {
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				err = errors.Wrapf(err, "rollback error: %v", rollbackErr)
+			}
+			return
+		}
+
+		if err = tx.Commit(); err != nil {
+			err = errors.Wrap(err, "commit error")
+		}
+	}()
+
+	rowsAffected, err := s.DeleteTx(ctx, tx, d)
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
+}
+
+func (s *SQLiteRepository) CreateTx(ctx context.Context, tx Tx, c *Creator) (int64, error) {
+	txx, ok := tx.(*sql.Tx)
+	if !ok {
+		return 0, errors.New("expecting tx to be *sql.Tx")
+	}
+
+	sb := sq.Insert(c.collection).
 		Columns(c.columns...).
 		Values(c.email, c.name, c.updatedAt)
-
 	sql, args, err := sb.ToSql()
 	if err != nil {
 		return 0, err
 	}
 
-	stmnt, err := s.db.PrepareContext(ctx, sql)
+	stmnt, err := txx.PrepareContext(ctx, sql)
 	if err != nil {
 		return 0, err
 	}
@@ -50,37 +163,42 @@ func (s *SQLiteRepository) Create(ctx context.Context, c *Creator) (int64, error
 	return id, nil
 }
 
-func (s *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*user.User, error) {
+func (s *SQLiteRepository) QueryTx(ctx context.Context, tx Tx, q *Queryer) ([]*user.User, error) {
+	txx, ok := tx.(*sql.Tx)
+	if !ok {
+		return nil, errors.New("expecting tx to be *sql.Tx")
+	}
+
 	pb := &predicate.Builder{}
 	for _, pf := range q.pfs {
 		pf(pb)
 	}
 
-	sb := squirrel.Select(q.columns...).From(q.collection)
+	sb := sq.Select(q.columns...).From(q.collection)
 	for _, p := range pb.Predicates() {
 		switch p.Op {
 		case predicate.Eq:
-			sb = sb.Where(squirrel.Eq{
+			sb = sb.Where(sq.Eq{
 				p.Field: p.Val,
 			})
 		case predicate.NotEq:
-			sb = sb.Where(squirrel.NotEq{
+			sb = sb.Where(sq.NotEq{
 				p.Field: p.Val,
 			})
 		case predicate.Gt:
-			sb = sb.Where(squirrel.Gt{
+			sb = sb.Where(sq.Gt{
 				p.Field: p.Val,
 			})
 		case predicate.GtOrEq:
-			sb = sb.Where(squirrel.GtOrEq{
+			sb = sb.Where(sq.GtOrEq{
 				p.Field: p.Val,
 			})
 		case predicate.Lt:
-			sb = sb.Where(squirrel.Lt{
+			sb = sb.Where(sq.Lt{
 				p.Field: p.Val,
 			})
 		case predicate.LtOrEq:
-			sb = sb.Where(squirrel.LtOrEq{
+			sb = sb.Where(sq.LtOrEq{
 				p.Field: p.Val,
 			})
 		}
@@ -99,7 +217,7 @@ func (s *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*user.User,
 		return nil, err
 	}
 
-	stmnt, err := s.db.PrepareContext(ctx, sql)
+	stmnt, err := txx.PrepareContext(ctx, sql)
 	if err != nil {
 		return nil, err
 	}
@@ -130,37 +248,42 @@ func (s *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*user.User,
 	return list, nil
 }
 
-func (s *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error) {
+func (s *SQLiteRepository) UpdateTx(ctx context.Context, tx Tx, u *Updater) (int64, error) {
+	txx, ok := tx.(*sql.Tx)
+	if !ok {
+		return 0, errors.New("expecting tx to be *sql.Tx")
+	}
+
 	pb := &predicate.Builder{}
 	for _, pf := range u.pfs {
 		pf(pb)
 	}
 
-	sb := squirrel.Update(u.collection).Set("email", u.email).Set("name", u.name).Set("updated_at", u.updatedAt)
+	sb := sq.Update(u.collection).Set("email", u.email).Set("name", u.name).Set("updated_at", u.updatedAt)
 	for _, p := range pb.Predicates() {
 		switch p.Op {
 		case predicate.Eq:
-			sb = sb.Where(squirrel.Eq{
+			sb = sb.Where(sq.Eq{
 				p.Field: p.Val,
 			})
 		case predicate.NotEq:
-			sb = sb.Where(squirrel.NotEq{
+			sb = sb.Where(sq.NotEq{
 				p.Field: p.Val,
 			})
 		case predicate.Gt:
-			sb = sb.Where(squirrel.Gt{
+			sb = sb.Where(sq.Gt{
 				p.Field: p.Val,
 			})
 		case predicate.GtOrEq:
-			sb = sb.Where(squirrel.GtOrEq{
+			sb = sb.Where(sq.GtOrEq{
 				p.Field: p.Val,
 			})
 		case predicate.Lt:
-			sb = sb.Where(squirrel.Lt{
+			sb = sb.Where(sq.Lt{
 				p.Field: p.Val,
 			})
 		case predicate.LtOrEq:
-			sb = sb.Where(squirrel.LtOrEq{
+			sb = sb.Where(sq.LtOrEq{
 				p.Field: p.Val,
 			})
 		}
@@ -171,7 +294,7 @@ func (s *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error
 		return 0, err
 	}
 
-	stmnt, err := s.db.PrepareContext(ctx, sql)
+	stmnt, err := txx.PrepareContext(ctx, sql)
 	if err != nil {
 		return 0, err
 	}
@@ -189,37 +312,42 @@ func (s *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error
 	return rowsAffected, nil
 }
 
-func (s *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
+func (s *SQLiteRepository) DeleteTx(ctx context.Context, tx Tx, d *Deleter) (int64, error) {
+	txx, ok := tx.(*sql.Tx)
+	if !ok {
+		return 0, errors.New("expecting tx to be *sql.Tx")
+	}
+
 	pb := &predicate.Builder{}
 	for _, pf := range d.pfs {
 		pf(pb)
 	}
 
-	sb := squirrel.Delete(d.collection)
+	sb := sq.Delete(d.collection)
 	for _, p := range pb.Predicates() {
 		switch p.Op {
 		case predicate.Eq:
-			sb = sb.Where(squirrel.Eq{
+			sb = sb.Where(sq.Eq{
 				p.Field: p.Val,
 			})
 		case predicate.NotEq:
-			sb = sb.Where(squirrel.NotEq{
+			sb = sb.Where(sq.NotEq{
 				p.Field: p.Val,
 			})
 		case predicate.Gt:
-			sb = sb.Where(squirrel.Gt{
+			sb = sb.Where(sq.Gt{
 				p.Field: p.Val,
 			})
 		case predicate.GtOrEq:
-			sb = sb.Where(squirrel.GtOrEq{
+			sb = sb.Where(sq.GtOrEq{
 				p.Field: p.Val,
 			})
 		case predicate.Lt:
-			sb = sb.Where(squirrel.Lt{
+			sb = sb.Where(sq.Lt{
 				p.Field: p.Val,
 			})
 		case predicate.LtOrEq:
-			sb = sb.Where(squirrel.LtOrEq{
+			sb = sb.Where(sq.LtOrEq{
 				p.Field: p.Val,
 			})
 		}
@@ -230,7 +358,7 @@ func (s *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error
 		return 0, err
 	}
 
-	stmnt, err := s.db.PrepareContext(ctx, sql)
+	stmnt, err := txx.PrepareContext(ctx, sql)
 	if err != nil {
 		return 0, err
 	}

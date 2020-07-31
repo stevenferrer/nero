@@ -8,7 +8,8 @@ import (
 )
 
 const (
-	sqPkg = "github.com/Masterminds/squirrel"
+	sqPkg  = "github.com/Masterminds/squirrel"
+	errPkg = "github.com/pkg/errors"
 )
 
 func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
@@ -32,12 +33,230 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 	rcvrParam := jen.Id("s").Op("*").Id("SQLiteRepository")
 	ctxC := jen.Qual("context", "Context")
 	ctxIDC := jen.Id("ctx")
+	txC := jen.Id("Tx")
+
+	// tx method
+	stmnt = stmnt.Func().Params(rcvrParam).Id("Tx").
+		Params(jen.Id("ctx").Add(ctxC)).
+		Params(txC, jen.Error()).Block(
+		jen.Return(jen.Id("s").Dot("db").Dot("BeginTx").Call(
+			ctxIDC,
+			jen.Op("&").Qual("database/sql", "TxOptions").Op("{}"),
+		))).
+		Line().Line()
 
 	// create method
 	stmnt = stmnt.Func().Params(rcvrParam).Id("Create").
-		Params(jen.Id("ctx").Add(ctxC), jen.Id("c").Op("*").Id("Creator")).
+		Params(
+			jen.Id("ctx").Add(ctxC),
+			jen.Id("c").Op("*").Id("Creator"),
+		).
 		Params(gen.GetTypeC(ident.Typ), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
+			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(gen.GetZeroValC(ident.Typ), jen.Err()))
+			g.List(jen.Id("tx"), jen.Err()).Op(":=").
+				Id("s").Dot("Tx").Call(ctxIDC)
+			g.Add(ifErr)
+
+			g.Defer().Func().Params().BlockFunc(func(g *jen.Group) {
+				g.If(jen.Err().Op("!=").Nil().Op("&&").Id("tx").Op("!=").Nil()).
+					BlockFunc(func(g *jen.Group) {
+						g.If(jen.Id("rollbackErr").Op(":=").Id("tx").Dot("Rollback")).
+							Call().Op(";").Id("rollbackErr").Op("!=").Nil().Block(
+							jen.Id("err").Op("=").Qual(errPkg, "Wrapf").Call(
+								jen.Id("err"),
+								jen.Lit(`rollback error: %v`),
+								jen.Id("rollbackErr"),
+							),
+						)
+						g.Return()
+					}).Line()
+
+				g.If(jen.Err().Op("=").Id("tx").Dot("Commit").Call().
+					Op(";").Id("err").Op("!=").Nil()).Block(
+					jen.Id("err").Op("=").Qual(errPkg, "Wrap").Call(
+						jen.Id("err"),
+						jen.Lit("commit error"),
+					),
+				)
+			}).Call().Line()
+
+			g.List(jen.Id(ident.LowerCamelName()), jen.Err()).Op(":=").
+				Id("s").Dot("CreateTx").Call(
+				ctxIDC,
+				jen.Id("tx"),
+				jen.Id("c"),
+			)
+			g.Add(ifErr).Line()
+
+			g.Return(jen.Id(ident.LowerCamelName()), jen.Nil())
+		}).Line().Line()
+
+	// query method
+	stmnt = stmnt.Func().Params(rcvrParam).Id("Query").
+		Params(
+			jen.Id("ctx").Add(ctxC),
+			jen.Id("q").Op("*").Id("Queryer"),
+		).
+		Params(
+			jen.Op("[]").Op("*").
+				Qual(schema.Typ.PkgPath, schema.Typ.Name),
+			jen.Error(),
+		).
+		BlockFunc(func(g *jen.Group) {
+			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jen.Nil(), jen.Err()))
+			g.List(jen.Id("tx"), jen.Err()).Op(":=").
+				Id("s").Dot("Tx").Call(ctxIDC)
+			g.Add(ifErr)
+
+			g.Defer().Func().Params().BlockFunc(func(g *jen.Group) {
+				g.If(jen.Err().Op("!=").Nil().Op("&&").Id("tx").Op("!=").Nil()).
+					BlockFunc(func(g *jen.Group) {
+						g.If(jen.Id("rollbackErr").Op(":=").Id("tx").Dot("Rollback")).
+							Call().Op(";").Id("rollbackErr").Op("!=").Nil().Block(
+							jen.Id("err").Op("=").Qual(errPkg, "Wrapf").Call(
+								jen.Id("err"),
+								jen.Lit(`rollback error: %v`),
+								jen.Id("rollbackErr"),
+							),
+						)
+						g.Return()
+					}).Line()
+
+				g.If(jen.Err().Op("=").Id("tx").Dot("Commit").Call().
+					Op(";").Id("err").Op("!=").Nil()).Block(
+					jen.Id("err").Op("=").Qual(errPkg, "Wrap").Call(
+						jen.Id("err"),
+						jen.Lit("commit error"),
+					),
+				)
+			}).Call().Line()
+
+			g.List(jen.Id("list"), jen.Err()).Op(":=").
+				Id("s").Dot("QueryTx").Call(ctxIDC, jen.Id("tx"), jen.Id("q"))
+			g.Add(ifErr).Line()
+
+			g.Return(jen.Id("list"), jen.Nil())
+
+		}).Line().Line()
+
+	// update method
+	stmnt = stmnt.Func().Params(rcvrParam).Id("Update").
+		Params(
+			jen.Id("ctx").Add(ctxC),
+			jen.Id("u").Op("*").Id("Updater"),
+		).
+		Params(gen.GetTypeC(ident.Typ), jen.Error()).
+		BlockFunc(func(g *jen.Group) {
+			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jen.Lit(0), jen.Err()))
+			g.List(jen.Id("tx"), jen.Err()).Op(":=").
+				Id("s").Dot("Tx").Call(ctxIDC)
+			g.Add(ifErr)
+
+			g.Defer().Func().Params().BlockFunc(func(g *jen.Group) {
+				g.If(jen.Err().Op("!=").Nil().Op("&&").Id("tx").Op("!=").Nil()).
+					BlockFunc(func(g *jen.Group) {
+						g.If(jen.Id("rollbackErr").Op(":=").Id("tx").Dot("Rollback")).
+							Call().Op(";").Id("rollbackErr").Op("!=").Nil().Block(
+							jen.Id("err").Op("=").Qual(errPkg, "Wrapf").Call(
+								jen.Id("err"),
+								jen.Lit(`rollback error: %v`),
+								jen.Id("rollbackErr"),
+							),
+						)
+						g.Return()
+					}).Line()
+
+				g.If(jen.Err().Op("=").Id("tx").Dot("Commit").Call().
+					Op(";").Id("err").Op("!=").Nil()).Block(
+					jen.Id("err").Op("=").Qual(errPkg, "Wrap").Call(
+						jen.Id("err"),
+						jen.Lit("commit error"),
+					),
+				)
+			}).Call().Line()
+
+			g.List(jen.Id("rowsAffected"), jen.Err()).Op(":=").
+				Id("s").Dot("UpdateTx").Call(
+				ctxIDC,
+				jen.Id("tx"),
+				jen.Id("u"),
+			)
+			g.Add(ifErr).Line()
+
+			g.Return(jen.Id("rowsAffected"), jen.Nil())
+		}).Line().Line()
+
+	// delete method
+	stmnt = stmnt.Func().Params(rcvrParam).Id("Delete").
+		Params(
+			jen.Id("ctx").Add(ctxC),
+			jen.Id("d").Op("*").Id("Deleter"),
+		).
+		Params(gen.GetTypeC(ident.Typ), jen.Error()).
+		BlockFunc(func(g *jen.Group) {
+			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jen.Lit(0), jen.Err()))
+			g.List(jen.Id("tx"), jen.Err()).Op(":=").
+				Id("s").Dot("Tx").Call(ctxIDC)
+			g.Add(ifErr)
+
+			g.Defer().Func().Params().BlockFunc(func(g *jen.Group) {
+				g.If(jen.Err().Op("!=").Nil().Op("&&").Id("tx").Op("!=").Nil()).
+					BlockFunc(func(g *jen.Group) {
+						g.If(jen.Id("rollbackErr").Op(":=").Id("tx").Dot("Rollback")).
+							Call().Op(";").Id("rollbackErr").Op("!=").Nil().Block(
+							jen.Id("err").Op("=").Qual(errPkg, "Wrapf").Call(
+								jen.Id("err"),
+								jen.Lit(`rollback error: %v`),
+								jen.Id("rollbackErr"),
+							),
+						)
+						g.Return()
+					}).Line()
+
+				g.If(jen.Err().Op("=").Id("tx").Dot("Commit").Call().
+					Op(";").Id("err").Op("!=").Nil()).Block(
+					jen.Id("err").Op("=").Qual(errPkg, "Wrap").Call(
+						jen.Id("err"),
+						jen.Lit("commit error"),
+					),
+				)
+			}).Call().Line()
+
+			g.List(jen.Id("rowsAffected"), jen.Err()).Op(":=").
+				Id("s").Dot("DeleteTx").Call(
+				ctxIDC,
+				jen.Id("tx"),
+				jen.Id("d"),
+			)
+			g.Add(ifErr).Line()
+
+			g.Return(jen.Id("rowsAffected"), jen.Nil())
+		}).Line().Line()
+
+	// create tx method
+	stmnt = stmnt.Func().Params(rcvrParam).Id("CreateTx").
+		Params(
+			jen.Id("ctx").Add(ctxC),
+			jen.Id("tx").Add(txC),
+			jen.Id("c").Op("*").Id("Creator"),
+		).
+		Params(gen.GetTypeC(ident.Typ), jen.Error()).
+		BlockFunc(func(g *jen.Group) {
+			// assert tx type
+			g.List(jen.Id("txx"), jen.Id("ok")).Op(":=").
+				Id("tx").Assert(jen.Op("*").Qual("database/sql", "Tx"))
+			g.If(jen.Op("!").Id("ok")).Block(
+				jen.Return(
+					gen.GetZeroValC(ident.Typ),
+					jen.Qual(errPkg, "New").Call(jen.Lit("expecting tx to be *sql.Tx")),
+				),
+			).Line()
+
 			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(gen.GetZeroValC(ident.Typ), jen.Err()))
 
@@ -54,14 +273,13 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 					}
 					g.Id("c").Dot(col.LowerCamelName())
 				}
-			}).Line()
-
+			})
 			g.List(jen.Id("sql"), jen.Id("args"), jen.Id("err")).
 				Op(":=").Id("sb").Dot("ToSql").Call()
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id("stmnt"), jen.Err()).Op(":=").
-				Id("s").Dot("db").Dot("PrepareContext").Call(ctxIDC, jen.Id("sql"))
+				Id("txx").Dot("PrepareContext").Call(ctxIDC, jen.Id("sql"))
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id("res"), jen.Err()).Op(":=").
@@ -75,13 +293,27 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 			g.Return(jen.Id(ident.LowerCamelName()), jen.Nil())
 		}).Line().Line()
 
-	// query method
-	retTyp := jen.Op("[]").Op("*").
+	// query tx method
+	queryRetTyp := jen.Op("[]").Op("*").
 		Qual(schema.Typ.PkgPath, schema.Typ.Name)
-	stmnt = stmnt.Func().Params(rcvrParam).Id("Query").
-		Params(jen.Id("ctx").Add(ctxC), jen.Id("q").Op("*").Id("Queryer")).
-		Params(retTyp, jen.Error()).
+	stmnt = stmnt.Func().Params(rcvrParam).Id("QueryTx").
+		Params(
+			jen.Id("ctx").Add(ctxC),
+			jen.Id("tx").Add(txC),
+			jen.Id("q").Op("*").Id("Queryer"),
+		).
+		Params(queryRetTyp, jen.Error()).
 		BlockFunc(func(g *jen.Group) {
+			// assert tx type
+			g.List(jen.Id("txx"), jen.Id("ok")).Op(":=").
+				Id("tx").Assert(jen.Op("*").Qual("database/sql", "Tx"))
+			g.If(jen.Op("!").Id("ok")).Block(
+				jen.Return(
+					jen.Nil(),
+					jen.Qual(errPkg, "New").Call(jen.Lit("expecting tx to be *sql.Tx")),
+				),
+			).Line()
+
 			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Nil(), jen.Err()))
 
@@ -133,7 +365,7 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id("stmnt"), jen.Err()).Op(":=").
-				Id("s").Dot("db").Dot("PrepareContext").Call(ctxIDC, jen.Id("sql"))
+				Id("txx").Dot("PrepareContext").Call(ctxIDC, jen.Id("sql"))
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id("rows"), jen.Err()).Op(":=").
@@ -141,7 +373,7 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 			g.Add(ifErr)
 			g.Defer().Id("rows").Dot("Close").Call().Line()
 
-			g.Id("list").Op(":=").Add(retTyp).Block()
+			g.Id("list").Op(":=").Add(queryRetTyp).Block()
 			g.For(jen.Id("rows").Dot("Next").Call()).BlockFunc(func(g *jen.Group) {
 				g.Var().Id("item").Qual(schema.Typ.PkgPath, schema.Typ.Name)
 				g.Err().Op("=").Id("rows").Dot("Scan").CallFunc(func(g *jen.Group) {
@@ -158,11 +390,25 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 			g.Return(jen.Id("list"), jen.Nil())
 		}).Line().Line()
 
-	// update method
-	stmnt = stmnt.Func().Params(rcvrParam).Id("Update").
-		Params(jen.Id("ctx").Add(ctxC), jen.Id("u").Op("*").Id("Updater")).
+	// update tx method
+	stmnt = stmnt.Func().Params(rcvrParam).Id("UpdateTx").
+		Params(
+			jen.Id("ctx").Add(ctxC),
+			jen.Id("tx").Add(txC),
+			jen.Id("u").Op("*").Id("Updater"),
+		).
 		Params(jen.Int64(), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
+			// assert tx type
+			g.List(jen.Id("txx"), jen.Id("ok")).Op(":=").
+				Id("tx").Assert(jen.Op("*").Qual("database/sql", "Tx"))
+			g.If(jen.Op("!").Id("ok")).Block(
+				jen.Return(
+					gen.GetZeroValC(ident.Typ),
+					jen.Qual(errPkg, "New").Call(jen.Lit("expecting tx to be *sql.Tx")),
+				),
+			).Line()
+
 			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Lit(0), jen.Err()))
 
@@ -221,7 +467,7 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id("stmnt"), jen.Err()).Op(":=").
-				Id("s").Dot("db").Dot("PrepareContext").Call(ctxIDC, jen.Id("sql"))
+				Id("txx").Dot("PrepareContext").Call(ctxIDC, jen.Id("sql"))
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id("res"), jen.Err()).Op(":=").
@@ -235,11 +481,25 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 			g.Return(jen.Id("rowsAffected"), jen.Nil())
 		}).Line().Line()
 
-	// delete method
-	stmnt = stmnt.Func().Params(rcvrParam).Id("Delete").
-		Params(jen.Id("ctx").Add(ctxC), jen.Id("d").Op("*").Id("Deleter")).
+	// delete tx method
+	stmnt = stmnt.Func().Params(rcvrParam).Id("DeleteTx").
+		Params(
+			jen.Id("ctx").Add(ctxC),
+			jen.Id("tx").Add(txC),
+			jen.Id("d").Op("*").Id("Deleter"),
+		).
 		Params(jen.Int64(), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
+			// assert tx type
+			g.List(jen.Id("txx"), jen.Id("ok")).Op(":=").
+				Id("tx").Assert(jen.Op("*").Qual("database/sql", "Tx"))
+			g.If(jen.Op("!").Id("ok")).Block(
+				jen.Return(
+					gen.GetZeroValC(ident.Typ),
+					jen.Qual(errPkg, "New").Call(jen.Lit("expecting tx to be *sql.Tx")),
+				),
+			).Line()
+
 			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Lit(0), jen.Err()))
 
@@ -277,7 +537,7 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id("stmnt"), jen.Err()).Op(":=").
-				Id("s").Dot("db").Dot("PrepareContext").Call(ctxIDC, jen.Id("sql"))
+				Id("txx").Dot("PrepareContext").Call(ctxIDC, jen.Id("sql"))
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id("res"), jen.Err()).Op(":=").
