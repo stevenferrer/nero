@@ -94,6 +94,15 @@ func Generate(s nero.Schemaer) ([]*OutFile, error) {
 		jf:   sqliteRepoFile,
 	})
 
+	// postgres repository implementation
+	pgRepoFile := jen.NewFile(pkgName)
+	pgRepoFile.Anon("github.com/lib/pq")
+	pgRepoFile.Add(newPGRepository(schema))
+	files = append(files, &file{
+		name: "pg_repository.go",
+		jf:   pgRepoFile,
+	})
+
 	outFiles := []*OutFile{}
 
 	for _, file := range files {

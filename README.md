@@ -15,7 +15,7 @@ An experimental repository generator in Go.
 - Decouple database specific logic (CRUD) by using the `Repository` interface i.e. Postgres, MariaDB, MongoDB etc. 
   Actual repository then could be implemented separately.
 - Use with pre-existing structs in your code by implementing the `Schemaer` interface
-- Generate only the client that you need i.e. I only use Postgres, so include only Postgres implementation
+- Selectively generate repository implementations
 
 ## Priorty features
 
