@@ -84,7 +84,7 @@ func TestSQLiteRepository(t *testing.T) {
 	t.Run("Update", func(t *testing.T) {
 		t.Run("Ok", func(t *testing.T) {
 			now := time.Now()
-			preds := []user.PredicateFunc{
+			preds := []user.PredFunc{
 				user.IDEq(1), user.IDNotEq(2),
 				user.IDGt(0), user.IDGtOrEq(1),
 				user.IDLt(2), user.IDLtOrEq(1),
@@ -118,7 +118,7 @@ func TestSQLiteRepository(t *testing.T) {
 
 	t.Run("Delete", func(t *testing.T) {
 		t.Run("Ok", func(t *testing.T) {
-			preds := []user.PredicateFunc{
+			preds := []user.PredFunc{
 				user.IDEq(1), user.IDNotEq(2),
 				user.IDGt(0), user.IDGtOrEq(1),
 				user.IDLt(2), user.IDLtOrEq(1),

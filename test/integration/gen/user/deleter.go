@@ -3,7 +3,7 @@ package user
 
 type Deleter struct {
 	collection string
-	pfs        []PredicateFunc
+	pfs        []PredFunc
 }
 
 func NewDeleter() *Deleter {
@@ -12,7 +12,7 @@ func NewDeleter() *Deleter {
 	}
 }
 
-func (d *Deleter) Where(pfs ...PredicateFunc) *Deleter {
+func (d *Deleter) Where(pfs ...PredFunc) *Deleter {
 	d.pfs = append(d.pfs, pfs...)
 	return d
 }

@@ -18,7 +18,7 @@ func newUpdater(schema *gen.Schema) *jen.Statement {
 			g.Id(col.LowerCamelName()).Add(gen.GetTypeC(col.Typ))
 		}
 
-		g.Id("pfs").Op("[]").Id("PredicateFunc")
+		g.Id("pfs").Op("[]").Id("PredFunc")
 	}).Line()
 
 	// factory
@@ -63,7 +63,7 @@ func newUpdater(schema *gen.Schema) *jen.Statement {
 	stmnt = stmnt.Func().
 		Params(rcvrParams).
 		Id("Where").
-		Params(jen.Id("pfs").Op("...").Id("PredicateFunc")).
+		Params(jen.Id("pfs").Op("...").Id("PredFunc")).
 		Params(retParams).
 		Block(
 			jen.Id("u").Dot("pfs").Op("=").

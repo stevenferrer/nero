@@ -9,7 +9,7 @@ type Updater struct {
 	email      *string
 	name       *string
 	updatedAt  *time.Time
-	pfs        []PredicateFunc
+	pfs        []PredFunc
 }
 
 func NewUpdater() *Updater {
@@ -34,7 +34,7 @@ func (u *Updater) UpdatedAt(updatedAt *time.Time) *Updater {
 	return u
 }
 
-func (u *Updater) Where(pfs ...PredicateFunc) *Updater {
+func (u *Updater) Where(pfs ...PredFunc) *Updater {
 	u.pfs = append(u.pfs, pfs...)
 	return u
 }

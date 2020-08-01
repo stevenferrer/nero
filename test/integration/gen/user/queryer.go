@@ -6,7 +6,7 @@ type Queryer struct {
 	columns    []string
 	limit      uint64
 	offset     uint64
-	pfs        []PredicateFunc
+	pfs        []PredFunc
 }
 
 func NewQueryer() *Queryer {
@@ -16,7 +16,7 @@ func NewQueryer() *Queryer {
 	}
 }
 
-func (q *Queryer) Where(pfs ...PredicateFunc) *Queryer {
+func (q *Queryer) Where(pfs ...PredFunc) *Queryer {
 	q.pfs = append(q.pfs, pfs...)
 	return q
 }

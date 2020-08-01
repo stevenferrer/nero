@@ -11,7 +11,7 @@ func newQueryer(schema *gen.Schema) *jen.Statement {
 		jen.Id("columns").Op("[]").String(),
 		jen.Id("limit").Uint64(),
 		jen.Id("offset").Uint64(),
-		jen.Id("pfs").Op("[]").Id("PredicateFunc"),
+		jen.Id("pfs").Op("[]").Id("PredFunc"),
 	).Line()
 
 	// factory
@@ -36,7 +36,7 @@ func newQueryer(schema *gen.Schema) *jen.Statement {
 	stmnt = stmnt.Func().
 		Params(rcvrParams).
 		Id("Where").
-		Params(jen.Id("pfs").Op("...").Id("PredicateFunc")).
+		Params(jen.Id("pfs").Op("...").Id("PredFunc")).
 		Params(retParams).
 		Block(
 			jen.Id("q").Dot("pfs").Op("=").

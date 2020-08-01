@@ -316,7 +316,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 
 			// predicates
 			g.Id("pb").Op(":=").Op("&").
-				Qual(pkgPath+"/predicate", "Builder").Block()
+				Qual(pkgPath+"/predicate", "Predicates").Block()
 			g.For(jen.List(jen.Id("_"), jen.Id("pf")).
 				Op(":=").Range().Id("q").Dot("pfs")).
 				Block(jen.Id("pf").Call(jen.Id("pb"))).
@@ -331,7 +331,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 				Call(jen.Qual(sqPkg, "Dollar")).
 				Op(".").Line().Id("RunWith").Call(jen.Id("txx"))
 			g.For(jen.List(jen.Id("_"), jen.Id("p").Op(":=").
-				Range().Id("pb").Dot("Predicates").Call())).
+				Range().Id("pb").Dot("All").Call())).
 				Block(jen.Switch(jen.Id("p").Dot("Op")).
 					BlockFunc(func(g *jen.Group) {
 						for _, op := range predicate.Ops {
@@ -406,7 +406,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 
 			// predicates
 			g.Id("pb").Op(":=").Op("&").
-				Qual(pkgPath+"/predicate", "Builder").Block()
+				Qual(pkgPath+"/predicate", "Predicates").Block()
 			g.For(jen.List(jen.Id("_"), jen.Id("pf")).
 				Op(":=").Range().Id("u").Dot("pfs")).
 				Block(jen.Id("pf").Call(jen.Id("pb"))).
@@ -443,7 +443,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 				Call(jen.Id("txx"))
 
 			g.For(jen.List(jen.Id("_"), jen.Id("p").Op(":=").
-				Range().Id("pb").Dot("Predicates").Call())).
+				Range().Id("pb").Dot("All").Call())).
 				Block(jen.Switch(jen.Id("p").Dot("Op")).
 					BlockFunc(func(g *jen.Group) {
 						for _, op := range predicate.Ops {
@@ -494,7 +494,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 
 			// predicates
 			g.Id("pb").Op(":=").Op("&").
-				Qual(pkgPath+"/predicate", "Builder").Block()
+				Qual(pkgPath+"/predicate", "Predicates").Block()
 			g.For(jen.List(jen.Id("_"), jen.Id("pf")).
 				Op(":=").Range().Id("d").Dot("pfs")).
 				Block(jen.Id("pf").Call(jen.Id("pb"))).
@@ -508,7 +508,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 				Op(".").Line().Id("RunWith").
 				Call(jen.Id("txx"))
 			g.For(jen.List(jen.Id("_"), jen.Id("p").Op(":=").
-				Range().Id("pb").Dot("Predicates").Call())).
+				Range().Id("pb").Dot("All").Call())).
 				Block(jen.Switch(jen.Id("p").Dot("Op")).
 					BlockFunc(func(g *jen.Group) {
 						for _, op := range predicate.Ops {

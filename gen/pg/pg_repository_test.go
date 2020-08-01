@@ -164,7 +164,7 @@ func (s *PGRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*
 		return nil, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	pb := &predicate.Builder{}
+	pb := &predicate.Predicates{}
 	for _, pf := range q.pfs {
 		pf(pb)
 	}
@@ -173,7 +173,7 @@ func (s *PGRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*
 		From(q.collection).
 		PlaceholderFormat(squirrel.Dollar).
 		RunWith(txx)
-	for _, p := range pb.Predicates() {
+	for _, p := range pb.All() {
 		switch p.Op {
 		case predicate.Eq:
 			qb = qb.Where(squirrel.Eq{
@@ -241,7 +241,7 @@ func (s *PGRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (in
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	pb := &predicate.Builder{}
+	pb := &predicate.Predicates{}
 	for _, pf := range u.pfs {
 		pf(pb)
 	}
@@ -251,7 +251,7 @@ func (s *PGRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (in
 		Set("updated_at", u.updatedAt).
 		PlaceholderFormat(squirrel.Dollar).
 		RunWith(txx)
-	for _, p := range pb.Predicates() {
+	for _, p := range pb.All() {
 		switch p.Op {
 		case predicate.Eq:
 			qb = qb.Where(squirrel.Eq{
@@ -299,7 +299,7 @@ func (s *PGRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (in
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	pb := &predicate.Builder{}
+	pb := &predicate.Predicates{}
 	for _, pf := range d.pfs {
 		pf(pb)
 	}
@@ -307,7 +307,7 @@ func (s *PGRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (in
 	qb := squirrel.Delete(d.collection).
 		PlaceholderFormat(squirrel.Dollar).
 		RunWith(txx)
-	for _, p := range pb.Predicates() {
+	for _, p := range pb.All() {
 		switch p.Op {
 		case predicate.Eq:
 			qb = qb.Where(squirrel.Eq{

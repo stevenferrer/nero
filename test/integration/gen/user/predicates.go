@@ -6,11 +6,11 @@ import (
 	"time"
 )
 
-type PredicateFunc func(*predicate.Builder)
+type PredFunc func(*predicate.Predicates)
 
-func IDEq(id int64) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func IDEq(id int64) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "id",
 			Op:    predicate.Eq,
 			Val:   id,
@@ -18,9 +18,9 @@ func IDEq(id int64) PredicateFunc {
 	}
 }
 
-func IDNotEq(id int64) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func IDNotEq(id int64) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "id",
 			Op:    predicate.NotEq,
 			Val:   id,
@@ -28,9 +28,9 @@ func IDNotEq(id int64) PredicateFunc {
 	}
 }
 
-func IDGt(id int64) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func IDGt(id int64) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "id",
 			Op:    predicate.Gt,
 			Val:   id,
@@ -38,9 +38,9 @@ func IDGt(id int64) PredicateFunc {
 	}
 }
 
-func IDGtOrEq(id int64) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func IDGtOrEq(id int64) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "id",
 			Op:    predicate.GtOrEq,
 			Val:   id,
@@ -48,9 +48,9 @@ func IDGtOrEq(id int64) PredicateFunc {
 	}
 }
 
-func IDLt(id int64) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func IDLt(id int64) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "id",
 			Op:    predicate.Lt,
 			Val:   id,
@@ -58,9 +58,9 @@ func IDLt(id int64) PredicateFunc {
 	}
 }
 
-func IDLtOrEq(id int64) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func IDLtOrEq(id int64) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "id",
 			Op:    predicate.LtOrEq,
 			Val:   id,
@@ -68,9 +68,9 @@ func IDLtOrEq(id int64) PredicateFunc {
 	}
 }
 
-func EmailEq(email *string) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func EmailEq(email *string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "email",
 			Op:    predicate.Eq,
 			Val:   email,
@@ -78,9 +78,9 @@ func EmailEq(email *string) PredicateFunc {
 	}
 }
 
-func EmailNotEq(email *string) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func EmailNotEq(email *string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "email",
 			Op:    predicate.NotEq,
 			Val:   email,
@@ -88,9 +88,9 @@ func EmailNotEq(email *string) PredicateFunc {
 	}
 }
 
-func EmailGt(email *string) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func EmailGt(email *string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "email",
 			Op:    predicate.Gt,
 			Val:   email,
@@ -98,9 +98,9 @@ func EmailGt(email *string) PredicateFunc {
 	}
 }
 
-func EmailGtOrEq(email *string) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func EmailGtOrEq(email *string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "email",
 			Op:    predicate.GtOrEq,
 			Val:   email,
@@ -108,9 +108,9 @@ func EmailGtOrEq(email *string) PredicateFunc {
 	}
 }
 
-func EmailLt(email *string) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func EmailLt(email *string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "email",
 			Op:    predicate.Lt,
 			Val:   email,
@@ -118,9 +118,9 @@ func EmailLt(email *string) PredicateFunc {
 	}
 }
 
-func EmailLtOrEq(email *string) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func EmailLtOrEq(email *string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "email",
 			Op:    predicate.LtOrEq,
 			Val:   email,
@@ -128,9 +128,9 @@ func EmailLtOrEq(email *string) PredicateFunc {
 	}
 }
 
-func NameEq(name *string) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func NameEq(name *string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "name",
 			Op:    predicate.Eq,
 			Val:   name,
@@ -138,9 +138,9 @@ func NameEq(name *string) PredicateFunc {
 	}
 }
 
-func NameNotEq(name *string) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func NameNotEq(name *string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "name",
 			Op:    predicate.NotEq,
 			Val:   name,
@@ -148,9 +148,9 @@ func NameNotEq(name *string) PredicateFunc {
 	}
 }
 
-func NameGt(name *string) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func NameGt(name *string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "name",
 			Op:    predicate.Gt,
 			Val:   name,
@@ -158,9 +158,9 @@ func NameGt(name *string) PredicateFunc {
 	}
 }
 
-func NameGtOrEq(name *string) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func NameGtOrEq(name *string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "name",
 			Op:    predicate.GtOrEq,
 			Val:   name,
@@ -168,9 +168,9 @@ func NameGtOrEq(name *string) PredicateFunc {
 	}
 }
 
-func NameLt(name *string) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func NameLt(name *string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "name",
 			Op:    predicate.Lt,
 			Val:   name,
@@ -178,9 +178,9 @@ func NameLt(name *string) PredicateFunc {
 	}
 }
 
-func NameLtOrEq(name *string) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func NameLtOrEq(name *string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "name",
 			Op:    predicate.LtOrEq,
 			Val:   name,
@@ -188,9 +188,9 @@ func NameLtOrEq(name *string) PredicateFunc {
 	}
 }
 
-func UpdatedAtEq(updatedAt *time.Time) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func UpdatedAtEq(updatedAt *time.Time) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "updated_at",
 			Op:    predicate.Eq,
 			Val:   updatedAt,
@@ -198,9 +198,9 @@ func UpdatedAtEq(updatedAt *time.Time) PredicateFunc {
 	}
 }
 
-func UpdatedAtNotEq(updatedAt *time.Time) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func UpdatedAtNotEq(updatedAt *time.Time) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "updated_at",
 			Op:    predicate.NotEq,
 			Val:   updatedAt,
@@ -208,9 +208,9 @@ func UpdatedAtNotEq(updatedAt *time.Time) PredicateFunc {
 	}
 }
 
-func UpdatedAtGt(updatedAt *time.Time) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func UpdatedAtGt(updatedAt *time.Time) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "updated_at",
 			Op:    predicate.Gt,
 			Val:   updatedAt,
@@ -218,9 +218,9 @@ func UpdatedAtGt(updatedAt *time.Time) PredicateFunc {
 	}
 }
 
-func UpdatedAtGtOrEq(updatedAt *time.Time) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func UpdatedAtGtOrEq(updatedAt *time.Time) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "updated_at",
 			Op:    predicate.GtOrEq,
 			Val:   updatedAt,
@@ -228,9 +228,9 @@ func UpdatedAtGtOrEq(updatedAt *time.Time) PredicateFunc {
 	}
 }
 
-func UpdatedAtLt(updatedAt *time.Time) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func UpdatedAtLt(updatedAt *time.Time) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "updated_at",
 			Op:    predicate.Lt,
 			Val:   updatedAt,
@@ -238,9 +238,9 @@ func UpdatedAtLt(updatedAt *time.Time) PredicateFunc {
 	}
 }
 
-func UpdatedAtLtOrEq(updatedAt *time.Time) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func UpdatedAtLtOrEq(updatedAt *time.Time) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "updated_at",
 			Op:    predicate.LtOrEq,
 			Val:   updatedAt,
@@ -248,9 +248,9 @@ func UpdatedAtLtOrEq(updatedAt *time.Time) PredicateFunc {
 	}
 }
 
-func CreatedAtEq(createdAt *time.Time) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func CreatedAtEq(createdAt *time.Time) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "created_at",
 			Op:    predicate.Eq,
 			Val:   createdAt,
@@ -258,9 +258,9 @@ func CreatedAtEq(createdAt *time.Time) PredicateFunc {
 	}
 }
 
-func CreatedAtNotEq(createdAt *time.Time) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func CreatedAtNotEq(createdAt *time.Time) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "created_at",
 			Op:    predicate.NotEq,
 			Val:   createdAt,
@@ -268,9 +268,9 @@ func CreatedAtNotEq(createdAt *time.Time) PredicateFunc {
 	}
 }
 
-func CreatedAtGt(createdAt *time.Time) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func CreatedAtGt(createdAt *time.Time) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "created_at",
 			Op:    predicate.Gt,
 			Val:   createdAt,
@@ -278,9 +278,9 @@ func CreatedAtGt(createdAt *time.Time) PredicateFunc {
 	}
 }
 
-func CreatedAtGtOrEq(createdAt *time.Time) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func CreatedAtGtOrEq(createdAt *time.Time) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "created_at",
 			Op:    predicate.GtOrEq,
 			Val:   createdAt,
@@ -288,9 +288,9 @@ func CreatedAtGtOrEq(createdAt *time.Time) PredicateFunc {
 	}
 }
 
-func CreatedAtLt(createdAt *time.Time) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func CreatedAtLt(createdAt *time.Time) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "created_at",
 			Op:    predicate.Lt,
 			Val:   createdAt,
@@ -298,9 +298,9 @@ func CreatedAtLt(createdAt *time.Time) PredicateFunc {
 	}
 }
 
-func CreatedAtLtOrEq(createdAt *time.Time) PredicateFunc {
-	return func(pb *predicate.Builder) {
-		pb.Append(&predicate.Predicate{
+func CreatedAtLtOrEq(createdAt *time.Time) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
 			Field: "created_at",
 			Op:    predicate.LtOrEq,
 			Val:   createdAt,

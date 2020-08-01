@@ -161,7 +161,7 @@ func (s *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) 
 		return nil, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	pb := &predicate.Builder{}
+	pb := &predicate.Predicates{}
 	for _, pf := range q.pfs {
 		pf(pb)
 	}
@@ -169,7 +169,7 @@ func (s *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) 
 	qb := sq.Select(q.columns...).
 		From(q.collection).
 		RunWith(txx)
-	for _, p := range pb.Predicates() {
+	for _, p := range pb.All() {
 		switch p.Op {
 		case predicate.Eq:
 			qb = qb.Where(sq.Eq{
@@ -238,7 +238,7 @@ func (s *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater)
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	pb := &predicate.Builder{}
+	pb := &predicate.Predicates{}
 	for _, pf := range u.pfs {
 		pf(pb)
 	}
@@ -248,7 +248,7 @@ func (s *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater)
 		Set("name", u.name).
 		Set("updated_at", u.updatedAt).
 		RunWith(txx)
-	for _, p := range pb.Predicates() {
+	for _, p := range pb.All() {
 		switch p.Op {
 		case predicate.Eq:
 			qb = qb.Where(sq.Eq{
@@ -296,14 +296,14 @@ func (s *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter)
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	pb := &predicate.Builder{}
+	pb := &predicate.Predicates{}
 	for _, pf := range d.pfs {
 		pf(pb)
 	}
 
 	qb := sq.Delete(d.collection).
 		RunWith(txx)
-	for _, p := range pb.Predicates() {
+	for _, p := range pb.All() {
 		switch p.Op {
 		case predicate.Eq:
 			qb = qb.Where(sq.Eq{

@@ -5,7 +5,7 @@ import "github.com/dave/jennifer/jen"
 func newDeleter() *jen.Statement {
 	stmnt := jen.Type().Id("Deleter").Struct(
 		jen.Id("collection").String(),
-		jen.Id("pfs").Op("[]").Id("PredicateFunc"),
+		jen.Id("pfs").Op("[]").Id("PredFunc"),
 	).Line()
 
 	// factory
@@ -21,7 +21,7 @@ func newDeleter() *jen.Statement {
 	stmnt = stmnt.Func().
 		Params(jen.Id("d").Op("*").Id("Deleter")).
 		Id("Where").
-		Params(jen.Id("pfs").Op("...").Id("PredicateFunc")).
+		Params(jen.Id("pfs").Op("...").Id("PredFunc")).
 		Params(jen.Op("*").Id("Deleter")).
 		Block(
 			jen.Id("d").Dot("pfs").Op("=").

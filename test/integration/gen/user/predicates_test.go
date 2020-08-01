@@ -14,19 +14,19 @@ import (
 
 func TestPredicates(t *testing.T) {
 	t.Run("ID", func(t *testing.T) {
-		pfs := []user.PredicateFunc{
+		pfs := []user.PredFunc{
 			user.IDEq(1), user.IDNotEq(1),
 			user.IDGt(1), user.IDGtOrEq(1),
 			user.IDLt(1), user.IDLtOrEq(1),
 		}
 
-		pb := &predicate.Builder{}
+		pb := &predicate.Predicates{}
 		for _, pf := range pfs {
 			pf(pb)
 		}
 
 		qb := sq.Select("id").From("users")
-		for _, p := range pb.Predicates() {
+		for _, p := range pb.All() {
 			require.Equal(t, int64(1), p.Val)
 			qb = addPred(qb, p)
 		}
@@ -39,19 +39,19 @@ func TestPredicates(t *testing.T) {
 
 	t.Run("Name", func(t *testing.T) {
 		name := "sf9v"
-		pfs := []user.PredicateFunc{
+		pfs := []user.PredFunc{
 			user.NameEq(&name), user.NameNotEq(&name),
 			user.NameGt(&name), user.NameGtOrEq(&name),
 			user.NameLt(&name), user.NameLtOrEq(&name),
 		}
 
-		pb := &predicate.Builder{}
+		pb := &predicate.Predicates{}
 		for _, pf := range pfs {
 			pf(pb)
 		}
 
 		qb := sq.Select("name").From("users")
-		for _, p := range pb.Predicates() {
+		for _, p := range pb.All() {
 			s, ok := p.Val.(*string)
 			require.True(t, ok)
 			require.Equal(t, name, *s)
@@ -66,19 +66,19 @@ func TestPredicates(t *testing.T) {
 
 	t.Run("Email", func(t *testing.T) {
 		email := "sf9v@gg.io"
-		pfs := []user.PredicateFunc{
+		pfs := []user.PredFunc{
 			user.EmailEq(&email), user.EmailNotEq(&email),
 			user.EmailGt(&email), user.EmailGtOrEq(&email),
 			user.EmailLt(&email), user.EmailLtOrEq(&email),
 		}
 
-		pb := &predicate.Builder{}
+		pb := &predicate.Predicates{}
 		for _, pf := range pfs {
 			pf(pb)
 		}
 
 		qb := sq.Select("email").From("users")
-		for _, p := range pb.Predicates() {
+		for _, p := range pb.All() {
 			s, ok := p.Val.(*string)
 			require.True(t, ok)
 			require.Equal(t, email, *s)
@@ -93,19 +93,19 @@ func TestPredicates(t *testing.T) {
 
 	t.Run("CreatedAt", func(t *testing.T) {
 		now := time.Now()
-		pfs := []user.PredicateFunc{
+		pfs := []user.PredFunc{
 			user.CreatedAtEq(&now), user.CreatedAtNotEq(&now),
 			user.CreatedAtGt(&now), user.CreatedAtGtOrEq(&now),
 			user.CreatedAtLt(&now), user.CreatedAtLtOrEq(&now),
 		}
 
-		pb := &predicate.Builder{}
+		pb := &predicate.Predicates{}
 		for _, pf := range pfs {
 			pf(pb)
 		}
 
 		qb := sq.Select("created_at").From("users")
-		for _, p := range pb.Predicates() {
+		for _, p := range pb.All() {
 			require.NotNil(t, p.Val)
 			_, ok := p.Val.(*time.Time)
 			require.True(t, ok)
@@ -120,19 +120,19 @@ func TestPredicates(t *testing.T) {
 
 	t.Run("UpdatedAt", func(t *testing.T) {
 		now := time.Now()
-		pfs := []user.PredicateFunc{
+		pfs := []user.PredFunc{
 			user.UpdatedAtEq(&now), user.UpdatedAtNotEq(&now),
 			user.UpdatedAtGt(&now), user.UpdatedAtGtOrEq(&now),
 			user.UpdatedAtLt(&now), user.UpdatedAtLtOrEq(&now),
 		}
 
-		pb := &predicate.Builder{}
+		pb := &predicate.Predicates{}
 		for _, pf := range pfs {
 			pf(pb)
 		}
 
 		qb := sq.Select("updated_at").From("users")
-		for _, p := range pb.Predicates() {
+		for _, p := range pb.All() {
 			require.NotNil(t, p.Val)
 			_, ok := p.Val.(*time.Time)
 			require.True(t, ok)

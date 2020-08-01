@@ -8,8 +8,8 @@ import (
 )
 
 func newPredicates(schema *gen.Schema) *jen.Statement {
-	stmnt := jen.Type().Id("PredicateFunc").Func().Params(
-		jen.Op("*").Qual(pkgPath+"/predicate", "Builder"),
+	stmnt := jen.Type().Id("PredFunc").Func().Params(
+		jen.Op("*").Qual(pkgPath+"/predicate", "Predicates"),
 	).Line()
 
 	predPkg := pkgPath + "/predicate"
@@ -25,13 +25,13 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 				Id(fn).
 				Params(jen.Id(col.LowerCamelName()).
 					Add(gen.GetTypeC(col.Typ))).
-				Params(jen.Id("PredicateFunc")).
+				Params(jen.Id("PredFunc")).
 				Block(jen.Return(
 					jen.Func().
 						Params(jen.Id("pb").Op("*").
-							Qual(predPkg, "Builder")).
+							Qual(predPkg, "Predicates")).
 						Block(
-							jen.Id("pb").Dot("Append").Call(
+							jen.Id("pb").Dot("Add").Call(
 								jen.Op("&").Qual(predPkg, "Predicate").
 									Block(
 										jen.Id("Field").Op(":").
