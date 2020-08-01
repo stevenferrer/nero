@@ -10,11 +10,11 @@ import (
 // Repository is the contract for storing User
 type Repository interface {
 	Tx(context.Context) (nero.Tx, error)
-	Create(context.Context, *Creator) (id int64, err error)
+	Create(context.Context, *Creator) (id string, err error)
 	Query(context.Context, *Queryer) ([]*user.User, error)
 	Update(context.Context, *Updater) (rowsAffected int64, err error)
 	Delete(context.Context, *Deleter) (rowsAffected int64, err error)
-	CreateTx(context.Context, nero.Tx, *Creator) (id int64, err error)
+	CreateTx(context.Context, nero.Tx, *Creator) (id string, err error)
 	QueryTx(context.Context, nero.Tx, *Queryer) ([]*user.User, error)
 	UpdateTx(context.Context, nero.Tx, *Updater) (rowsAffected int64, err error)
 	DeleteTx(context.Context, nero.Tx, *Deleter) (rowsAffected int64, err error)

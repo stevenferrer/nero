@@ -15,9 +15,9 @@ import (
 func TestPredicates(t *testing.T) {
 	t.Run("ID", func(t *testing.T) {
 		pfs := []user.PredFunc{
-			user.IDEq(1), user.IDNotEq(1),
-			user.IDGt(1), user.IDGtOrEq(1),
-			user.IDLt(1), user.IDLtOrEq(1),
+			user.IDEq("1"), user.IDNotEq("1"),
+			user.IDGt("1"), user.IDGtOrEq("1"),
+			user.IDLt("1"), user.IDLtOrEq("1"),
 		}
 
 		pb := &predicate.Predicates{}
@@ -27,7 +27,7 @@ func TestPredicates(t *testing.T) {
 
 		qb := sq.Select("id").From("users")
 		for _, p := range pb.All() {
-			require.Equal(t, int64(1), p.Val)
+			require.Equal(t, "1", p.Val)
 			qb = addPred(qb, p)
 		}
 

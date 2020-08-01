@@ -152,7 +152,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 			jen.Id("ctx").Add(ctxC),
 			jen.Id("u").Op("*").Id("Updater"),
 		).
-		Params(gen.GetTypeC(ident.Typ), jen.Error()).
+		Params(jen.Int64(), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Lit(0), jen.Err()))
@@ -200,7 +200,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 			jen.Id("ctx").Add(ctxC),
 			jen.Id("d").Op("*").Id("Deleter"),
 		).
-		Params(gen.GetTypeC(ident.Typ), jen.Error()).
+		Params(jen.Int64(), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Lit(0), jen.Err()))
@@ -282,7 +282,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 				Call(jen.Qual(sqPkg, "Dollar")).
 				Op(".").Line().Id("RunWith").Call(jen.Id("txx"))
 
-			g.Var().Id(ident.LowerCamelName()).Int64()
+			g.Var().Id(ident.LowerCamelName()).Add(gen.GetTypeC(ident.Typ))
 			g.Err().Op(":=").Id("qb").Dot("QueryRowContext").
 				Call(ctxIDC).Dot("Scan").Call(jen.Op("&").Id(ident.LowerCamelName()))
 			g.Add(ifErr).Line()
@@ -396,7 +396,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 				Id("tx").Assert(jen.Op("*").Qual("database/sql", "Tx"))
 			g.If(jen.Op("!").Id("ok")).Block(
 				jen.Return(
-					gen.GetZeroValC(ident.Typ),
+					jen.Lit(0),
 					jen.Qual(errPkg, "New").
 						Call(jen.Lit("expecting tx to be *sql.Tx")),
 				)).Line()
@@ -484,7 +484,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 				Id("tx").Assert(jen.Op("*").Qual("database/sql", "Tx"))
 			g.If(jen.Op("!").Id("ok")).Block(
 				jen.Return(
-					gen.GetZeroValC(ident.Typ),
+					jen.Lit(0),
 					jen.Qual(errPkg, "New").Call(jen.Lit("expecting tx to be *sql.Tx")),
 				),
 			).Line()

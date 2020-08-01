@@ -10,6 +10,7 @@ import (
 	nero "github.com/sf9v/nero"
 	predicate "github.com/sf9v/nero/predicate"
 	user "github.com/sf9v/nero/test/integration/user"
+	"strconv"
 )
 
 type SQLiteRepository struct {
@@ -28,10 +29,10 @@ func (s *SQLiteRepository) Tx(ctx context.Context) (nero.Tx, error) {
 	return s.db.BeginTx(ctx, &sql.TxOptions{})
 }
 
-func (s *SQLiteRepository) Create(ctx context.Context, c *Creator) (int64, error) {
+func (s *SQLiteRepository) Create(ctx context.Context, c *Creator) (string, error) {
 	tx, err := s.Tx(ctx)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 	defer func() {
 		if err != nil && tx != nil {
@@ -48,7 +49,7 @@ func (s *SQLiteRepository) Create(ctx context.Context, c *Creator) (int64, error
 
 	id, err := s.CreateTx(ctx, tx, c)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
 	return id, nil
@@ -132,10 +133,10 @@ func (s *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error
 	return rowsAffected, nil
 }
 
-func (s *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (int64, error) {
+func (s *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (string, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
-		return 0, errors.New("expecting tx to be *sql.Tx")
+		return "", errors.New("expecting tx to be *sql.Tx")
 	}
 
 	qb := sq.Insert(c.collection).
@@ -144,15 +145,15 @@ func (s *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator)
 		RunWith(txx)
 	res, err := qb.ExecContext(ctx)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
-	return id, nil
+	return strconv.FormatInt(id, 10), nil
 }
 
 func (s *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*user.User, error) {

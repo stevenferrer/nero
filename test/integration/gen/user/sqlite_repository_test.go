@@ -67,9 +67,9 @@ func TestSQLiteRepository(t *testing.T) {
 
 			// with predicates
 			users, err = repo.Query(ctx, user.NewQueryer().
-				Where(user.IDEq(2), user.IDNotEq(1),
-					user.IDGt(1), user.IDGtOrEq(2),
-					user.IDLt(3), user.IDLtOrEq(2)))
+				Where(user.IDEq("2"), user.IDNotEq("1"),
+					user.IDGt("1"), user.IDGtOrEq("2"),
+					user.IDLt("3"), user.IDLtOrEq("2")))
 			assert.NoError(t, err)
 			assert.Len(t, users, 1)
 
@@ -85,9 +85,9 @@ func TestSQLiteRepository(t *testing.T) {
 		t.Run("Ok", func(t *testing.T) {
 			now := time.Now()
 			preds := []user.PredFunc{
-				user.IDEq(1), user.IDNotEq(2),
-				user.IDGt(0), user.IDGtOrEq(1),
-				user.IDLt(2), user.IDLtOrEq(1),
+				user.IDEq("1"), user.IDNotEq("2"),
+				user.IDGt("0"), user.IDGtOrEq("1"),
+				user.IDLt("2"), user.IDLtOrEq("1"),
 			}
 
 			email := "sf9v@gg.io"
@@ -119,9 +119,9 @@ func TestSQLiteRepository(t *testing.T) {
 	t.Run("Delete", func(t *testing.T) {
 		t.Run("Ok", func(t *testing.T) {
 			preds := []user.PredFunc{
-				user.IDEq(1), user.IDNotEq(2),
-				user.IDGt(0), user.IDGtOrEq(1),
-				user.IDLt(2), user.IDLtOrEq(1),
+				user.IDEq("1"), user.IDNotEq("2"),
+				user.IDGt("0"), user.IDGtOrEq("1"),
+				user.IDLt("2"), user.IDLtOrEq("1"),
 			}
 			rowsAffected, err := repo.Delete(ctx,
 				user.NewDeleter().Where(preds...))

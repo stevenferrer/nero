@@ -8,7 +8,7 @@ import (
 
 type PredFunc func(*predicate.Predicates)
 
-func IDEq(id int64) PredFunc {
+func IDEq(id string) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
 			Field: "id",
@@ -18,7 +18,7 @@ func IDEq(id int64) PredFunc {
 	}
 }
 
-func IDNotEq(id int64) PredFunc {
+func IDNotEq(id string) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
 			Field: "id",
@@ -28,7 +28,7 @@ func IDNotEq(id int64) PredFunc {
 	}
 }
 
-func IDGt(id int64) PredFunc {
+func IDGt(id string) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
 			Field: "id",
@@ -38,7 +38,7 @@ func IDGt(id int64) PredFunc {
 	}
 }
 
-func IDGtOrEq(id int64) PredFunc {
+func IDGtOrEq(id string) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
 			Field: "id",
@@ -48,7 +48,7 @@ func IDGtOrEq(id int64) PredFunc {
 	}
 }
 
-func IDLt(id int64) PredFunc {
+func IDLt(id string) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
 			Field: "id",
@@ -58,7 +58,7 @@ func IDLt(id int64) PredFunc {
 	}
 }
 
-func IDLtOrEq(id int64) PredFunc {
+func IDLtOrEq(id string) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
 			Field: "id",
