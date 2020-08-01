@@ -1,6 +1,6 @@
 package nero
 
-// Schemaer is a contract for a nero schema
+// Schemaer is a contract for generating a repository
 type Schemaer interface {
 	Schema() *Schema
 }
@@ -12,41 +12,55 @@ type Schema struct {
 	// Collection is the name of the collection/table
 	Collection string
 	// Columns is the list of columns
-	Columns Columns
+	Columns []*Column
 }
 
-// Columns is an array of columns
-type Columns []*column
+// Column is a column
+type Column struct {
+	cfg *ColumnConfig
+}
 
-type column struct {
-	Name      string
-	T         interface{}
-	FieldName string
-	IsAuto    bool
-	IsIdent   bool
+// ColumnConfig is a column config
+type ColumnConfig struct {
+	Name  string
+	T     interface{}
+	Field string
+	Auto  bool
+	Ident bool
 }
 
 // NewColumn creates a new column
-func NewColumn(name string, t interface{}) *column {
-	return &column{Name: name, T: t}
+func NewColumn(name string, t interface{}) *Column {
+	return &Column{
+		cfg: &ColumnConfig{
+			Name: name,
+			T:    t,
+		},
+	}
+}
+
+// Cfg returns the column config
+func (c *Column) Cfg() *ColumnConfig {
+	return c.cfg
 }
 
 // Auto is an auto-filled column e.g.
 // auto-increment id, auto-filled date etc.
-func (c *column) Auto() *column {
-	c.IsAuto = true
+func (c *Column) Auto() *Column {
+	c.cfg.Auto = true
 	return c
 }
 
-func (c *column) Ident() *column {
-	c.IsIdent = true
+// Ident is an identity column
+func (c *Column) Ident() *Column {
+	c.cfg.Ident = true
 	return c
 }
 
 // Field is the struct field name. Use when nero generated the
 // wrong field for your struct e.g. your struct field is "ID"
 // but nero generated "Id" instead.
-func (c *column) Field(field string) *column {
-	c.FieldName = field
+func (c *Column) Field(field string) *Column {
+	c.cfg.Field = field
 	return c
 }

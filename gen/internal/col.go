@@ -7,7 +7,7 @@ type Col struct {
 	// Name is the column name
 	Name string
 	// FieldName overrides the struct field name
-	FieldName string
+	Field string
 	// Typ is the type info of column
 	Typ *Typ
 	// Auto is an auto-filled column

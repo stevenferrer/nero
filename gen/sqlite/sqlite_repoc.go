@@ -366,7 +366,7 @@ func NewSQLiteRepoC(schema *gen.Schema) *jen.Statement {
 				g.Var().Id("item").Qual(schema.Typ.PkgPath, schema.Typ.Name)
 				g.Err().Op("=").Id("rows").Dot("Scan").CallFunc(func(g *jen.Group) {
 					for _, col := range schema.Cols {
-						g.Line().Op("&").Id("item").Dot(col.FieldName)
+						g.Line().Op("&").Id("item").Dot(col.Field)
 					}
 					g.Line()
 				})

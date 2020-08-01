@@ -18,14 +18,14 @@ type example2 struct{}
 
 func (*example2) Schema() *nero.Schema {
 	return &nero.Schema{
-		Columns: nero.Columns{
+		Columns: []*nero.Column{
 			nero.NewColumn("id1", int64(0)).Ident(),
 			nero.NewColumn("id2", int64(0)).Ident(),
 		},
 	}
 }
 
-func Test_buildSchema(t *testing.T) {
+func TestBuildSchema(t *testing.T) {
 	schema, err := BuildSchema(new(Example))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
@@ -37,7 +37,7 @@ func Test_buildSchema(t *testing.T) {
 
 	ident := schema.Ident
 	assert.Equal(t, "id", ident.Name)
-	assert.Equal(t, "ID", ident.FieldName)
+	assert.Equal(t, "ID", ident.Field)
 
 	// no ident defined
 	_, err = BuildSchema(new(example1))

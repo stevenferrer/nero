@@ -17,8 +17,8 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 		for _, op := range predicate.Ops {
 			opStr := string(op)
 			field := col.CamelName()
-			if len(col.FieldName) > 0 {
-				field = col.FieldName
+			if len(col.Field) > 0 {
+				field = col.Field
 			}
 			fn := camel(field + "_" + opStr)
 			stmnt = stmnt.Func().

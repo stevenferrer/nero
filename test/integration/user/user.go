@@ -20,7 +20,7 @@ func (u *User) Schema() *nero.Schema {
 	return &nero.Schema{
 		Pkg:        "user",
 		Collection: "users",
-		Columns: nero.Columns{
+		Columns: []*nero.Column{
 			nero.NewColumn("id", u.ID).
 				Field("ID").Ident().Auto(),
 			nero.NewColumn("email", u.Email),

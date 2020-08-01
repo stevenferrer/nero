@@ -27,20 +27,21 @@ func BuildSchema(s nero.Schemaer) (*Schema, error) {
 	}
 
 	identCnt := 0
-	for _, co := range ns.Columns {
+	for _, column := range ns.Columns {
+		cfg := column.Cfg()
 		col := &Col{
-			Name:      co.Name,
-			FieldName: strcase.ToCamel(co.Name),
-			Typ:       NewTyp(co.T),
-			Ident:     co.IsIdent,
-			Auto:      co.IsAuto,
+			Name:  cfg.Name,
+			Field: strcase.ToCamel(cfg.Name),
+			Typ:   NewTyp(cfg.T),
+			Ident: cfg.Ident,
+			Auto:  cfg.Auto,
 		}
 
-		if len(co.FieldName) > 0 {
-			col.FieldName = co.FieldName
+		if len(cfg.Field) > 0 {
+			col.Field = cfg.Field
 		}
 
-		if co.IsIdent {
+		if cfg.Ident {
 			schema.Ident = col
 			identCnt++
 		}

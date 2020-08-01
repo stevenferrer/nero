@@ -19,7 +19,7 @@ func (e *Example) Schema() *nero.Schema {
 	return &nero.Schema{
 		Pkg:        "example",
 		Collection: "examples",
-		Columns: nero.Columns{
+		Columns: []*nero.Column{
 			nero.NewColumn("id", e.ID).Field("ID").Ident().Auto(),
 			nero.NewColumn("name", e.Name),
 			nero.NewColumn("updated_at", e.UpdatedAt),
