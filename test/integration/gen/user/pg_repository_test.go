@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/ory/dockertest/v3"
-	dc "github.com/ory/dockertest/v3/docker"
+	"github.com/ory/dockertest/v3/docker"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -33,14 +33,14 @@ func TestPGRepository(t *testing.T) {
 
 	opts := dockertest.RunOptions{
 		Repository: "postgres",
-		Tag:        "12.3",
+		Tag:        "latest",
 		Env: []string{
 			"POSTGRES_USER=" + usr,
 			"POSTGRES_PASSWORD=" + pwd,
 			"POSTGRES_DB=" + dbName,
 		},
 		ExposedPorts: []string{"5432"},
-		PortBindings: map[dc.Port][]dc.PortBinding{
+		PortBindings: map[docker.Port][]docker.PortBinding{
 			"5432": {
 				{HostIP: "0.0.0.0", HostPort: port},
 			},
@@ -67,10 +67,10 @@ func TestPGRepository(t *testing.T) {
 		log.Fatalf("Could not connect to docker: %s", err)
 	}
 
-	_, err = db.Exec(`CREATE TABLE users (
+	_, err = db.Exec(`CREATE TABLE users(
 		id bigserial PRIMARY KEY,
-		email VARCHAR (255) UNIQUE NOT NULL,
-		name VARCHAR (50) NOT NULL,
+		email VARCHAR(255) UNIQUE NOT NULL,
+		name VARCHAR(50) NOT NULL,
 		updated_at TIMESTAMP,
 		created_at TIMESTAMP DEFAULT now()
 	)`)

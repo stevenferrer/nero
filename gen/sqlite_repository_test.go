@@ -143,20 +143,11 @@ func (s *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator)
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	sb := squirrel.Insert(c.collection).
+	qb := squirrel.Insert(c.collection).
 		Columns(c.columns...).
-		Values(c.name, c.updatedAt)
-	sql, args, err := sb.ToSql()
-	if err != nil {
-		return 0, err
-	}
-
-	stmnt, err := txx.PrepareContext(ctx, sql)
-	if err != nil {
-		return 0, err
-	}
-
-	res, err := stmnt.ExecContext(ctx, args...)
+		Values(c.name, c.updatedAt).
+		RunWith(txx)
+	res, err := qb.ExecContext(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -180,55 +171,47 @@ func (s *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) 
 		pf(pb)
 	}
 
-	sb := squirrel.Select(q.columns...).From(q.collection)
+	qb := squirrel.Select(q.columns...).
+		From(q.collection).
+		RunWith(txx)
 	for _, p := range pb.Predicates() {
 		switch p.Op {
 		case predicate.Eq:
-			sb = sb.Where(squirrel.Eq{
+			qb = qb.Where(squirrel.Eq{
 				p.Field: p.Val,
 			})
 		case predicate.NotEq:
-			sb = sb.Where(squirrel.NotEq{
+			qb = qb.Where(squirrel.NotEq{
 				p.Field: p.Val,
 			})
 		case predicate.Gt:
-			sb = sb.Where(squirrel.Gt{
+			qb = qb.Where(squirrel.Gt{
 				p.Field: p.Val,
 			})
 		case predicate.GtOrEq:
-			sb = sb.Where(squirrel.GtOrEq{
+			qb = qb.Where(squirrel.GtOrEq{
 				p.Field: p.Val,
 			})
 		case predicate.Lt:
-			sb = sb.Where(squirrel.Lt{
+			qb = qb.Where(squirrel.Lt{
 				p.Field: p.Val,
 			})
 		case predicate.LtOrEq:
-			sb = sb.Where(squirrel.LtOrEq{
+			qb = qb.Where(squirrel.LtOrEq{
 				p.Field: p.Val,
 			})
 		}
 	}
 
 	if q.limit > 0 {
-		sb = sb.Limit(q.limit)
+		qb = qb.Limit(q.limit)
 	}
 
 	if q.offset > 0 {
-		sb = sb.Offset(q.offset)
+		qb = qb.Offset(q.offset)
 	}
 
-	sql, args, err := sb.ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	stmnt, err := txx.PrepareContext(ctx, sql)
-	if err != nil {
-		return nil, err
-	}
-
-	rows, err := stmnt.QueryContext(ctx, args...)
+	rows, err := qb.QueryContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -264,47 +247,40 @@ func (s *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater)
 		pf(pb)
 	}
 
-	sb := squirrel.Update(u.collection).Set("name", u.name).Set("updated_at", u.updatedAt)
+	qb := squirrel.Update(u.collection).
+		Set("name", u.name).
+		Set("updated_at", u.updatedAt).
+		RunWith(txx)
 	for _, p := range pb.Predicates() {
 		switch p.Op {
 		case predicate.Eq:
-			sb = sb.Where(squirrel.Eq{
+			qb = qb.Where(squirrel.Eq{
 				p.Field: p.Val,
 			})
 		case predicate.NotEq:
-			sb = sb.Where(squirrel.NotEq{
+			qb = qb.Where(squirrel.NotEq{
 				p.Field: p.Val,
 			})
 		case predicate.Gt:
-			sb = sb.Where(squirrel.Gt{
+			qb = qb.Where(squirrel.Gt{
 				p.Field: p.Val,
 			})
 		case predicate.GtOrEq:
-			sb = sb.Where(squirrel.GtOrEq{
+			qb = qb.Where(squirrel.GtOrEq{
 				p.Field: p.Val,
 			})
 		case predicate.Lt:
-			sb = sb.Where(squirrel.Lt{
+			qb = qb.Where(squirrel.Lt{
 				p.Field: p.Val,
 			})
 		case predicate.LtOrEq:
-			sb = sb.Where(squirrel.LtOrEq{
+			qb = qb.Where(squirrel.LtOrEq{
 				p.Field: p.Val,
 			})
 		}
 	}
 
-	sql, args, err := sb.ToSql()
-	if err != nil {
-		return 0, err
-	}
-
-	stmnt, err := txx.PrepareContext(ctx, sql)
-	if err != nil {
-		return 0, err
-	}
-
-	res, err := stmnt.ExecContext(ctx, args...)
+	res, err := qb.ExecContext(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -328,47 +304,38 @@ func (s *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter)
 		pf(pb)
 	}
 
-	sb := squirrel.Delete(d.collection)
+	qb := squirrel.Delete(d.collection).
+		RunWith(txx)
 	for _, p := range pb.Predicates() {
 		switch p.Op {
 		case predicate.Eq:
-			sb = sb.Where(squirrel.Eq{
+			qb = qb.Where(squirrel.Eq{
 				p.Field: p.Val,
 			})
 		case predicate.NotEq:
-			sb = sb.Where(squirrel.NotEq{
+			qb = qb.Where(squirrel.NotEq{
 				p.Field: p.Val,
 			})
 		case predicate.Gt:
-			sb = sb.Where(squirrel.Gt{
+			qb = qb.Where(squirrel.Gt{
 				p.Field: p.Val,
 			})
 		case predicate.GtOrEq:
-			sb = sb.Where(squirrel.GtOrEq{
+			qb = qb.Where(squirrel.GtOrEq{
 				p.Field: p.Val,
 			})
 		case predicate.Lt:
-			sb = sb.Where(squirrel.Lt{
+			qb = qb.Where(squirrel.Lt{
 				p.Field: p.Val,
 			})
 		case predicate.LtOrEq:
-			sb = sb.Where(squirrel.LtOrEq{
+			qb = qb.Where(squirrel.LtOrEq{
 				p.Field: p.Val,
 			})
 		}
 	}
 
-	sql, args, err := sb.ToSql()
-	if err != nil {
-		return 0, err
-	}
-
-	stmnt, err := txx.PrepareContext(ctx, sql)
-	if err != nil {
-		return 0, err
-	}
-
-	res, err := stmnt.ExecContext(ctx, args...)
+	res, err := qb.ExecContext(ctx)
 	if err != nil {
 		return 0, err
 	}

@@ -34,11 +34,12 @@ func TestSQLiteRepository(t *testing.T) {
 	ctx := context.Background()
 	t.Run("Create", func(t *testing.T) {
 		t.Run("Ok", func(t *testing.T) {
+			now := time.Now()
 			for i := 1; i <= 10; i++ {
 				email := fmt.Sprintf("user%d@gg.io", i)
 				name := fmt.Sprintf("user%d", i)
 				id, err := repo.Create(ctx, user.NewCreator().
-					Email(&email).Name(&name))
+					Email(&email).Name(&name).UpdatedAt(&now))
 				assert.NoError(t, err)
 				assert.NotZero(t, id)
 			}
@@ -57,6 +58,12 @@ func TestSQLiteRepository(t *testing.T) {
 			users, err := repo.Query(ctx, user.NewQueryer())
 			assert.NoError(t, err)
 			assert.Len(t, users, 10)
+			for _, u := range users {
+				require.NotNil(t, u.Email)
+				require.NotNil(t, u.Name)
+				require.NotNil(t, u.UpdatedAt)
+				require.NotNil(t, u.CreatedAt)
+			}
 
 			// with predicates
 			users, err = repo.Query(ctx, user.NewQueryer().

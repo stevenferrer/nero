@@ -260,30 +260,23 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(gen.GetZeroValC(ident.Typ), jen.Err()))
 
-			// sql builder
-			g.Id("sb").Op(":=").
-				Qual(sqPkg, "Insert").
-				Call(jen.Id("c").Dot("collection")).
-				Op(".").Line().Id("Columns").
-				Call(jen.Id("c").Dot("columns").Op("...")).
-				Op(".").Line().Id("Values").CallFunc(func(g *jen.Group) {
-				for _, col := range schema.Cols {
-					if col.Auto {
-						continue
+			// query builder
+			g.Id("qb").Op(":=").Qual(sqPkg, "Insert").
+				Call(jen.Id("c").Dot("collection")).Op(".").Line().
+				Id("Columns").
+				Call(jen.Id("c").Dot("columns").Op("...")).Op(".").Line().
+				Id("Values").
+				CallFunc(func(g *jen.Group) {
+					for _, col := range schema.Cols {
+						if col.Auto {
+							continue
+						}
+						g.Id("c").Dot(col.LowerCamelName())
 					}
-					g.Id("c").Dot(col.LowerCamelName())
-				}
-			})
-			g.List(jen.Id("sql"), jen.Id("args"), jen.Id("err")).
-				Op(":=").Id("sb").Dot("ToSql").Call()
-			g.Add(ifErr).Line()
-
-			g.List(jen.Id("stmnt"), jen.Err()).Op(":=").
-				Id("txx").Dot("PrepareContext").Call(ctxIDC, jen.Id("sql"))
-			g.Add(ifErr).Line()
-
+				}).Op(".").Line().
+				Id("RunWith").Call(jen.Id("txx"))
 			g.List(jen.Id("res"), jen.Err()).Op(":=").
-				Id("stmnt").Dot("ExecContext").Call(ctxIDC, jen.Id("args").Op("..."))
+				Id("qb").Dot("ExecContext").Call(ctxIDC)
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id(ident.LowerCamelName()), jen.Err()).Op(":=").
@@ -325,10 +318,11 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 				Block(jen.Id("pf").Call(jen.Id("pb"))).
 				Line()
 
-			// sql builder
-			g.Id("sb").Op(":=").Qual(sqPkg, "Select").
-				Call(jen.Id("q").Dot("columns").Op("...")).
-				Dot("From").Call(jen.Id("q").Dot("collection"))
+			// query builder
+			g.Id("qb").Op(":=").Qual(sqPkg, "Select").
+				Call(jen.Id("q").Dot("columns").Op("...")).Op(".").Line().
+				Id("From").Call(jen.Id("q").Dot("collection")).Op(".").Line().
+				Id("RunWith").Call(jen.Id("txx"))
 			g.For(jen.List(jen.Id("_"), jen.Id("p").Op(":=").
 				Range().Id("pb").Dot("Predicates").Call())).
 				Block(jen.Switch(jen.Id("p").Dot("Op")).
@@ -336,7 +330,7 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 						for _, op := range predicate.Ops {
 							opStr := string(op)
 							g.Case(jen.Qual(pkgPath+"/predicate", opStr)).
-								Block(jen.Id("sb").Op("=").Id("sb").Dot("Where").
+								Block(jen.Id("qb").Op("=").Id("qb").Dot("Where").
 									Call(jen.Qual(sqPkg, opStr).Block(
 										jen.Id("p").Dot("Field").Op(":").
 											Id("p").Dot("Val").Op(",")),
@@ -348,28 +342,20 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 
 			// limit
 			g.If(jen.Id("q").Dot("limit").Op(">").Lit(0)).Block(
-				jen.Id("sb").Op("=").Id("sb").Dot("Limit").Call(
+				jen.Id("qb").Op("=").Id("qb").Dot("Limit").Call(
 					jen.Id("q").Dot("limit"),
 				),
 			).Line()
 
 			// offset
 			g.If(jen.Id("q").Dot("offset").Op(">").Lit(0)).Block(
-				jen.Id("sb").Op("=").Id("sb").Dot("Offset").Call(
+				jen.Id("qb").Op("=").Id("qb").Dot("Offset").Call(
 					jen.Id("q").Dot("offset"),
 				),
 			).Line()
 
-			g.List(jen.Id("sql"), jen.Id("args"), jen.Id("err")).
-				Op(":=").Id("sb").Dot("ToSql").Call()
-			g.Add(ifErr).Line()
-
-			g.List(jen.Id("stmnt"), jen.Err()).Op(":=").
-				Id("txx").Dot("PrepareContext").Call(ctxIDC, jen.Id("sql"))
-			g.Add(ifErr).Line()
-
 			g.List(jen.Id("rows"), jen.Err()).Op(":=").
-				Id("stmnt").Dot("QueryContext").Call(ctxIDC, jen.Id("args").Id("..."))
+				Id("qb").Dot("QueryContext").Call(ctxIDC)
 			g.Add(ifErr)
 			g.Defer().Id("rows").Dot("Close").Call().Line()
 
@@ -420,9 +406,9 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 				Block(jen.Id("pf").Call(jen.Id("pb"))).
 				Line()
 
-			// sql builder
-			g.Id("sb").Op(":=").Qual(sqPkg, "Update").
-				Call(jen.Id("u").Dot("collection")).Op(".").
+			// query builder
+			g.Id("qb").Op(":=").Qual(sqPkg, "Update").
+				Call(jen.Id("u").Dot("collection")).Op(".").Line().
 				Do(func(s *jen.Statement) {
 					colCnt := 0
 					for _, col := range schema.Cols {
@@ -440,10 +426,11 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 							jen.Id("u").Dot(col.LowerCamelName()))
 						// add dot
 						if i < colCnt {
-							s.Op(".")
+							s.Op(".").Line()
 						}
 					}
-				})
+				}).Op(".").Line().
+				Id("RunWith").Call(jen.Id("txx"))
 
 			g.For(jen.List(jen.Id("_"), jen.Id("p").Op(":=").
 				Range().Id("pb").Dot("Predicates").Call())).
@@ -452,7 +439,7 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 						for _, op := range predicate.Ops {
 							opStr := string(op)
 							g.Case(jen.Qual(pkgPath+"/predicate", opStr)).
-								Block(jen.Id("sb").Op("=").Id("sb").Dot("Where").
+								Block(jen.Id("qb").Op("=").Id("qb").Dot("Where").
 									Call(jen.Qual(sqPkg, opStr).Block(
 										jen.Id("p").Dot("Field").Op(":").
 											Id("p").Dot("Val").Op(",")),
@@ -462,16 +449,8 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 					}),
 				).Line()
 
-			g.List(jen.Id("sql"), jen.Id("args"), jen.Id("err")).
-				Op(":=").Id("sb").Dot("ToSql").Call()
-			g.Add(ifErr).Line()
-
-			g.List(jen.Id("stmnt"), jen.Err()).Op(":=").
-				Id("txx").Dot("PrepareContext").Call(ctxIDC, jen.Id("sql"))
-			g.Add(ifErr).Line()
-
 			g.List(jen.Id("res"), jen.Err()).Op(":=").
-				Id("stmnt").Dot("ExecContext").Call(ctxIDC, jen.Id("args").Op("..."))
+				Id("qb").Dot("ExecContext").Call(ctxIDC)
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id("rowsAffected"), jen.Err()).Op(":=").
@@ -511,10 +490,10 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 				Block(jen.Id("pf").Call(jen.Id("pb"))).
 				Line()
 
-			// sql builder
-			g.Id("sb").Op(":=").Qual(sqPkg, "Delete").
-				Call(jen.Id("d").Dot("collection"))
-
+			// query builder
+			g.Id("qb").Op(":=").Qual(sqPkg, "Delete").
+				Call(jen.Id("d").Dot("collection")).Op(".").Line().
+				Id("RunWith").Call(jen.Id("txx"))
 			g.For(jen.List(jen.Id("_"), jen.Id("p").Op(":=").
 				Range().Id("pb").Dot("Predicates").Call())).
 				Block(jen.Switch(jen.Id("p").Dot("Op")).
@@ -522,7 +501,7 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 						for _, op := range predicate.Ops {
 							opStr := string(op)
 							g.Case(jen.Qual(pkgPath+"/predicate", opStr)).
-								Block(jen.Id("sb").Op("=").Id("sb").Dot("Where").
+								Block(jen.Id("qb").Op("=").Id("qb").Dot("Where").
 									Call(jen.Qual(sqPkg, opStr).Block(
 										jen.Id("p").Dot("Field").Op(":").
 											Id("p").Dot("Val").Op(",")),
@@ -532,16 +511,8 @@ func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
 					}),
 				).Line()
 
-			g.List(jen.Id("sql"), jen.Id("args"), jen.Id("err")).
-				Op(":=").Id("sb").Dot("ToSql").Call()
-			g.Add(ifErr).Line()
-
-			g.List(jen.Id("stmnt"), jen.Err()).Op(":=").
-				Id("txx").Dot("PrepareContext").Call(ctxIDC, jen.Id("sql"))
-			g.Add(ifErr).Line()
-
 			g.List(jen.Id("res"), jen.Err()).Op(":=").
-				Id("stmnt").Dot("ExecContext").Call(ctxIDC, jen.Id("args").Op("..."))
+				Id("qb").Dot("ExecContext").Call(ctxIDC)
 			g.Add(ifErr).Line()
 
 			g.List(jen.Id("rowsAffected"), jen.Err()).Op(":=").

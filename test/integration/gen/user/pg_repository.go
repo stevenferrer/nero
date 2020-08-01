@@ -138,12 +138,11 @@ func (s *PGRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (in
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	qb := sq.StatementBuilder.
-		PlaceholderFormat(sq.Dollar).
-		Insert(c.collection).
+	qb := sq.Insert(c.collection).
 		Columns(c.columns...).
 		Values(c.email, c.name, c.updatedAt).
 		Suffix("RETURNING \"id\"").
+		PlaceholderFormat(sq.Dollar).
 		RunWith(txx)
 	var id int64
 	err := qb.QueryRowContext(ctx).Scan(&id)
@@ -165,56 +164,48 @@ func (s *PGRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*
 		pf(pb)
 	}
 
-	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
-	sb := psql.Select(q.columns...).From(q.collection)
+	qb := sq.Select(q.columns...).
+		From(q.collection).
+		PlaceholderFormat(sq.Dollar).
+		RunWith(txx)
 	for _, p := range pb.Predicates() {
 		switch p.Op {
 		case predicate.Eq:
-			sb = sb.Where(sq.Eq{
+			qb = qb.Where(sq.Eq{
 				p.Field: p.Val,
 			})
 		case predicate.NotEq:
-			sb = sb.Where(sq.NotEq{
+			qb = qb.Where(sq.NotEq{
 				p.Field: p.Val,
 			})
 		case predicate.Gt:
-			sb = sb.Where(sq.Gt{
+			qb = qb.Where(sq.Gt{
 				p.Field: p.Val,
 			})
 		case predicate.GtOrEq:
-			sb = sb.Where(sq.GtOrEq{
+			qb = qb.Where(sq.GtOrEq{
 				p.Field: p.Val,
 			})
 		case predicate.Lt:
-			sb = sb.Where(sq.Lt{
+			qb = qb.Where(sq.Lt{
 				p.Field: p.Val,
 			})
 		case predicate.LtOrEq:
-			sb = sb.Where(sq.LtOrEq{
+			qb = qb.Where(sq.LtOrEq{
 				p.Field: p.Val,
 			})
 		}
 	}
 
 	if q.limit > 0 {
-		sb = sb.Limit(q.limit)
+		qb = qb.Limit(q.limit)
 	}
 
 	if q.offset > 0 {
-		sb = sb.Offset(q.offset)
+		qb = qb.Offset(q.offset)
 	}
 
-	sql, args, err := sb.ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	stmnt, err := txx.PrepareContext(ctx, sql)
-	if err != nil {
-		return nil, err
-	}
-
-	rows, err := stmnt.QueryContext(ctx, args...)
+	rows, err := qb.QueryContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -251,48 +242,42 @@ func (s *PGRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (in
 		pf(pb)
 	}
 
-	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
-	sb := psql.Update(u.collection).Set("email", u.email).Set("name", u.name).Set("updated_at", u.updatedAt)
+	qb := sq.Update(u.collection).
+		Set("email", u.email).
+		Set("name", u.name).
+		Set("updated_at", u.updatedAt).
+		PlaceholderFormat(sq.Dollar).
+		RunWith(txx)
 	for _, p := range pb.Predicates() {
 		switch p.Op {
 		case predicate.Eq:
-			sb = sb.Where(sq.Eq{
+			qb = qb.Where(sq.Eq{
 				p.Field: p.Val,
 			})
 		case predicate.NotEq:
-			sb = sb.Where(sq.NotEq{
+			qb = qb.Where(sq.NotEq{
 				p.Field: p.Val,
 			})
 		case predicate.Gt:
-			sb = sb.Where(sq.Gt{
+			qb = qb.Where(sq.Gt{
 				p.Field: p.Val,
 			})
 		case predicate.GtOrEq:
-			sb = sb.Where(sq.GtOrEq{
+			qb = qb.Where(sq.GtOrEq{
 				p.Field: p.Val,
 			})
 		case predicate.Lt:
-			sb = sb.Where(sq.Lt{
+			qb = qb.Where(sq.Lt{
 				p.Field: p.Val,
 			})
 		case predicate.LtOrEq:
-			sb = sb.Where(sq.LtOrEq{
+			qb = qb.Where(sq.LtOrEq{
 				p.Field: p.Val,
 			})
 		}
 	}
 
-	sql, args, err := sb.ToSql()
-	if err != nil {
-		return 0, err
-	}
-
-	stmnt, err := txx.PrepareContext(ctx, sql)
-	if err != nil {
-		return 0, err
-	}
-
-	res, err := stmnt.ExecContext(ctx, args...)
+	res, err := qb.ExecContext(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -316,48 +301,39 @@ func (s *PGRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (in
 		pf(pb)
 	}
 
-	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
-	sb := psql.Delete(d.collection)
+	qb := sq.Delete(d.collection).
+		PlaceholderFormat(sq.Dollar).
+		RunWith(txx)
 	for _, p := range pb.Predicates() {
 		switch p.Op {
 		case predicate.Eq:
-			sb = sb.Where(sq.Eq{
+			qb = qb.Where(sq.Eq{
 				p.Field: p.Val,
 			})
 		case predicate.NotEq:
-			sb = sb.Where(sq.NotEq{
+			qb = qb.Where(sq.NotEq{
 				p.Field: p.Val,
 			})
 		case predicate.Gt:
-			sb = sb.Where(sq.Gt{
+			qb = qb.Where(sq.Gt{
 				p.Field: p.Val,
 			})
 		case predicate.GtOrEq:
-			sb = sb.Where(sq.GtOrEq{
+			qb = qb.Where(sq.GtOrEq{
 				p.Field: p.Val,
 			})
 		case predicate.Lt:
-			sb = sb.Where(sq.Lt{
+			qb = qb.Where(sq.Lt{
 				p.Field: p.Val,
 			})
 		case predicate.LtOrEq:
-			sb = sb.Where(sq.LtOrEq{
+			qb = qb.Where(sq.LtOrEq{
 				p.Field: p.Val,
 			})
 		}
 	}
 
-	sql, args, err := sb.ToSql()
-	if err != nil {
-		return 0, err
-	}
-
-	stmnt, err := txx.PrepareContext(ctx, sql)
-	if err != nil {
-		return 0, err
-	}
-
-	res, err := stmnt.ExecContext(ctx, args...)
+	res, err := qb.ExecContext(ctx)
 	if err != nil {
 		return 0, err
 	}
