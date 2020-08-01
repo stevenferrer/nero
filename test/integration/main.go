@@ -5,11 +5,12 @@ import (
 	"os"
 	"path"
 
-	"github.com/sf9v/nero/example/user"
 	"github.com/sf9v/nero/gen"
+	"github.com/sf9v/nero/test/integration/user"
 )
 
 func main() {
+	// generate
 	outFiles, err := gen.Generate(new(user.User))
 	checkErr(err)
 
@@ -21,10 +22,13 @@ func main() {
 	// write files
 	for _, outFile := range outFiles {
 		filePath := path.Join(basePath, outFile.Name)
-		f, err := os.Create(filePath)
+		file, err := os.Create(filePath)
+		defer func(file *os.File) {
+			checkErr(file.Close())
+		}(file)
 		checkErr(err)
 
-		_, err = f.Write(outFile.Bytes())
+		_, err = file.Write(outFile.Bytes())
 		checkErr(err)
 	}
 }

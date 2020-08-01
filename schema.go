@@ -7,12 +7,12 @@ type Schemaer interface {
 
 // Schema is a nero schema
 type Schema struct {
+	// Pkg is the package name of the generated files
+	Pkg string
 	// Collection is the name of the collection/table
 	Collection string
 	// Columns is the list of columns
 	Columns Columns
-	// Pkg is the package name of the generated files
-	Pkg string
 }
 
 // Columns is an array of columns

@@ -1,6 +1,8 @@
 package gen
 
 import (
+	"fmt"
+
 	"github.com/dave/jennifer/jen"
 
 	gen "github.com/sf9v/nero/gen/internal"
@@ -255,37 +257,27 @@ func newPGRepository(schema *gen.Schema) *jen.Statement {
 			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(gen.GetZeroValC(ident.Typ), jen.Err()))
 
-			// postgres builder
-			g.Id("psql").Op(":=").Qual(sqPkg, "StatementBuilder").
-				Dot("PlaceholderFormat").Call(jen.Qual(sqPkg, "Dollar"))
-
-			// sql builder
-			g.Id("sb").Op(":=").Id("psql").Dot("Insert").
-				Call(jen.Id("c").Dot("collection")).
-				Op(".").Line().Id("Columns").
-				Call(jen.Id("c").Dot("columns").Op("...")).
-				Op(".").Line().Id("Values").CallFunc(func(g *jen.Group) {
-				for _, col := range schema.Cols {
-					if col.Auto {
-						continue
+			// query builder
+			g.Id("qb").Op(":=").Qual(sqPkg, "StatementBuilder").Op(".").Line().
+				Id("PlaceholderFormat").Call(jen.Qual(sqPkg, "Dollar")).Op(".").Line().
+				Id("Insert").Call(jen.Id("c").Dot("collection")).Op(".").Line().
+				Id("Columns").Call(jen.Id("c").Dot("columns").Op("...")).Op(".").Line().
+				Id("Values").
+				CallFunc(func(g *jen.Group) {
+					for _, col := range schema.Cols {
+						if col.Auto {
+							continue
+						}
+						g.Id("c").Dot(col.LowerCamelName())
 					}
-					g.Id("c").Dot(col.LowerCamelName())
-				}
-			})
-			g.List(jen.Id("sql"), jen.Id("args"), jen.Id("err")).
-				Op(":=").Id("sb").Dot("ToSql").Call()
-			g.Add(ifErr).Line()
+				}).Op(".").Line().
+				Id("Suffix").
+				Call(jen.Lit(fmt.Sprintf("RETURNING %q", ident.Name))).Op(".").Line().
+				Id("RunWith").Call(jen.Id("txx"))
 
-			g.List(jen.Id("stmnt"), jen.Err()).Op(":=").
-				Id("txx").Dot("PrepareContext").Call(ctxIDC, jen.Id("sql"))
-			g.Add(ifErr).Line()
-
-			g.List(jen.Id("res"), jen.Err()).Op(":=").
-				Id("stmnt").Dot("ExecContext").Call(ctxIDC, jen.Id("args").Op("..."))
-			g.Add(ifErr).Line()
-
-			g.List(jen.Id(ident.LowerCamelName()), jen.Err()).Op(":=").
-				Id("res").Dot("LastInsertId").Call()
+			g.Var().Id(ident.LowerCamelName()).Int64()
+			g.Err().Op(":=").Id("qb").Dot("QueryRowContext").
+				Call(ctxIDC).Dot("Scan").Call(jen.Op("&").Id(ident.LowerCamelName()))
 			g.Add(ifErr).Line()
 
 			g.Return(jen.Id(ident.LowerCamelName()), jen.Nil())

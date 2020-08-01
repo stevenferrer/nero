@@ -9,8 +9,8 @@ import (
 // User is a user
 type User struct {
 	ID        int64
-	Email     string
-	Name      string
+	Email     *string
+	Name      *string
 	UpdatedAt *time.Time
 	CreatedAt *time.Time
 }
