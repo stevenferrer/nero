@@ -1,12 +1,20 @@
-name: test
+name: ci
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run linter
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.29
 
   test:
     runs-on: ubuntu-latest
@@ -15,14 +23,11 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.14
-          
       - name: Checkout
         uses: actions/checkout@v2
-
       - name: Test
-        run: go test -v -coverprofile=profile.cov ./...
-        
-      - name: Send coverage
+        run: go test -race -coverprofile=profile.cov ./...
+      - name: Send Coverage
         uses: shogo82148/actions-goveralls@v1
         with:
           path-to-profile: profile.cov
