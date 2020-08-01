@@ -6,19 +6,11 @@
 
 An experimental repository generator in Go.
 
-## Assumptions
-
-- a collection should always have an *identity* column i.e. *id*
-
 ## Goals
 
-- Decouple database specific logic (CRUD) by using the `Repository` interface i.e. Postgres, MariaDB, MongoDB etc. 
-  Actual repository then could be implemented separately.
-- Use with pre-existing structs in your code by implementing the `Schemaer` interface
-- Selectively generate repository implementations
+- By using the `Repository` interface, database specific logic could be implemented separately e.g. PostgreSQL, MySQL/MariaDB, SQLite, MSSQL, Oracle, MongoDB etc.
+- Integrate with existing codebase by implementing the `Schemaer` interface
 
-## Priorty features
+## Assumption
 
-- Basic CRUD operations
-- Support for transactions
-- Sqlite3 & Postgresql
+Every `collection/table` shall have a surrogate key i.e. `id` column.
