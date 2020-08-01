@@ -11,7 +11,7 @@ import (
 )
 
 func Test_newRepository(t *testing.T) {
-	schema, err := buildSchema(&gen.Example{})
+	schema, err := gen.BuildSchema(&gen.Example{})
 	require.NoError(t, err)
 	stmt := newRepository(schema)
 	expect := strings.TrimSpace(`

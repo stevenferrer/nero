@@ -11,7 +11,7 @@ import (
 )
 
 func Test_newUpdater(t *testing.T) {
-	schema, err := buildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(gen.Example))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 

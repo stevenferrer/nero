@@ -5,13 +5,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sf9v/nero/gen/internal"
+	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_newCreator(t *testing.T) {
-	schema, err := buildSchema(new(internal.Example))
+	schema, err := gen.BuildSchema(new(gen.Example))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 

@@ -20,7 +20,7 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 			if len(col.FieldName) > 0 {
 				field = col.FieldName
 			}
-			fn := toCamel(field + "_" + opStr)
+			fn := camel(field + "_" + opStr)
 			stmnt = stmnt.Func().
 				Id(fn).
 				Params(jen.Id(col.LowerCamelName()).
