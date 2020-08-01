@@ -1,4 +1,4 @@
-package gen
+package pg
 
 import (
 	"fmt"
@@ -10,12 +10,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_newPGRepo(t *testing.T) {
-	schema, err := buildSchema(new(gen.Example))
+func TestNewPGRepoC(t *testing.T) {
+	schema, err := gen.BuildSchema(new(gen.Example))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
-	pgRepo := newPGRepository(schema)
+	pgRepo := NewPGRepoC(schema)
 	expect := strings.TrimSpace(`
 type PGRepository struct {
 	db *sql.DB

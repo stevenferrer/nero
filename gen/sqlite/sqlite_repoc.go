@@ -1,4 +1,4 @@
-package gen
+package sqlite
 
 import (
 	"github.com/dave/jennifer/jen"
@@ -8,11 +8,13 @@ import (
 )
 
 const (
-	sqPkg  = "github.com/Masterminds/squirrel"
-	errPkg = "github.com/pkg/errors"
+	pkgPath = "github.com/sf9v/nero"
+	sqPkg   = "github.com/Masterminds/squirrel"
+	errPkg  = "github.com/pkg/errors"
 )
 
-func newSQLiteRepo(schema *gen.Schema) *jen.Statement {
+// NewSQLiteRepoC generates an sqlite repository implementation
+func NewSQLiteRepoC(schema *gen.Schema) *jen.Statement {
 	ident := schema.Ident
 	stmnt := jen.Type().Id("SQLiteRepository").
 		Struct(jen.Id("db").Op("*").Qual("database/sql", "DB")).

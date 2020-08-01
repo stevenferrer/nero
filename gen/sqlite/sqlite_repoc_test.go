@@ -1,4 +1,4 @@
-package gen
+package sqlite
 
 import (
 	"fmt"
@@ -10,12 +10,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_newSQLiteRepo(t *testing.T) {
-	schema, err := buildSchema(new(gen.Example))
+func TestNewSQLiteRepoC(t *testing.T) {
+	schema, err := gen.BuildSchema(new(gen.Example))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
-	sqliteRepo := newSQLiteRepo(schema)
+	sqliteRepo := NewSQLiteRepoC(schema)
 	expect := strings.TrimSpace(`
 type SQLiteRepository struct {
 	db *sql.DB

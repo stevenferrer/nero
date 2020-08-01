@@ -1,4 +1,4 @@
-package gen
+package pg
 
 import (
 	"fmt"
@@ -9,7 +9,14 @@ import (
 	"github.com/sf9v/nero/predicate"
 )
 
-func newPGRepository(schema *gen.Schema) *jen.Statement {
+const (
+	pkgPath = "github.com/sf9v/nero"
+	errPkg  = "github.com/pkg/errors"
+	sqPkg   = "github.com/Masterminds/squirrel"
+)
+
+// NewPGRepoC generates postgres repository implementation
+func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 	ident := schema.Ident
 	stmnt := jen.Type().Id("PGRepository").
 		Struct(jen.Id("db").Op("*").Qual("database/sql", "DB")).
