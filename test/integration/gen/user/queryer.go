@@ -7,6 +7,7 @@ type Queryer struct {
 	limit      uint64
 	offset     uint64
 	pfs        []PredFunc
+	sfs        []SortFunc
 }
 
 func NewQueryer() *Queryer {
@@ -18,6 +19,11 @@ func NewQueryer() *Queryer {
 
 func (q *Queryer) Where(pfs ...PredFunc) *Queryer {
 	q.pfs = append(q.pfs, pfs...)
+	return q
+}
+
+func (q *Queryer) Sort(sfs ...SortFunc) *Queryer {
+	q.sfs = append(q.sfs, sfs...)
 	return q
 }
 

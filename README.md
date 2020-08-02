@@ -8,9 +8,10 @@ An experimental repository generator in Go.
 
 ## Goals
 
-- By using the `Repository` interface, database specific logic could be implemented separately e.g. PostgreSQL, MySQL/MariaDB, SQLite, MSSQL, Oracle, MongoDB etc.
-- Integrate with existing codebase by implementing the `Schemaer` interface
+- Decouple database specific logic by using `Repository` interface 
+- Integrate with existing codebase
+- Minimal
 
 ## Assumption
 
-Every `collection/table` shall have a surrogate key i.e. `id` column.
+Every `collection/table` shall always have a surrogate key i.e. `id` column.

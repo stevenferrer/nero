@@ -12,9 +12,11 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 		jen.Op("*").Qual(pkgPath+"/predicate", "Predicates"),
 	).Line()
 
+	ops := []predicate.Op{predicate.Eq, predicate.NotEq, predicate.Gt,
+		predicate.GtOrEq, predicate.Lt, predicate.LtOrEq}
 	predPkg := pkgPath + "/predicate"
 	for _, col := range schema.Cols {
-		for _, op := range predicate.Ops {
+		for _, op := range ops {
 			opStr := string(op)
 			field := col.CamelName()
 			if len(col.Field) > 0 {

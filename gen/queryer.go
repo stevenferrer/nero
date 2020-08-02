@@ -12,6 +12,7 @@ func newQueryer(schema *gen.Schema) *jen.Statement {
 		jen.Id("limit").Uint64(),
 		jen.Id("offset").Uint64(),
 		jen.Id("pfs").Op("[]").Id("PredFunc"),
+		jen.Id("sfs").Op("[]").Id("SortFunc"),
 	).Line()
 
 	// factory
@@ -43,6 +44,21 @@ func newQueryer(schema *gen.Schema) *jen.Statement {
 				Append(
 					jen.Id("q").Dot("pfs"),
 					jen.Id("pfs").Op("..."),
+				),
+			ret,
+		).Line().Line()
+
+	// sort
+	stmnt = stmnt.Func().
+		Params(rcvrParams).
+		Id("Sort").
+		Params(jen.Id("sfs").Op("...").Id("SortFunc")).
+		Params(retParams).
+		Block(
+			jen.Id("q").Dot("sfs").Op("=").
+				Append(
+					jen.Id("q").Dot("sfs"),
+					jen.Id("sfs").Op("..."),
 				),
 			ret,
 		).Line().Line()

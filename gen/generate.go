@@ -43,6 +43,13 @@ func Generate(schemaer nero.Schemaer) (Files, error) {
 		jf:   predsFile,
 	})
 
+	sortsFile := jen.NewFile(pkgName)
+	sortsFile.Add(newSorts(schema))
+	fls = append(fls, &File{
+		name: "sorts.go",
+		jf:   sortsFile,
+	})
+
 	repoFile := jen.NewFile(pkgName)
 	repoFile.Add(newRepository(schema))
 	fls = append(fls, &File{

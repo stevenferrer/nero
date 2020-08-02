@@ -4,11 +4,13 @@ package user
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	sq "github.com/Masterminds/squirrel"
 	_ "github.com/mattn/go-sqlite3"
 	errors "github.com/pkg/errors"
 	nero "github.com/sf9v/nero"
 	predicate "github.com/sf9v/nero/predicate"
+	sort "github.com/sf9v/nero/sort"
 	user "github.com/sf9v/nero/test/integration/user"
 	"strconv"
 )
@@ -43,60 +45,18 @@ func (sqlir *SQLiteRepository) Create(ctx context.Context, c *Creator) (string, 
 	return id, tx.Commit()
 }
 
-func (sqlir *SQLiteRepository) CreateM(ctx context.Context, cs ...*Creator) error {
+func (sqlir *SQLiteRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
 	tx, err := sqlir.Tx(ctx)
 	if err != nil {
 		return err
 	}
 
-	err = sqlir.CreateMTx(ctx, tx, cs...)
+	err = sqlir.CreateManyTx(ctx, tx, cs...)
 	if err != nil {
 		return rollback(tx, err)
 	}
 
 	return tx.Commit()
-}
-
-func (sqlir *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*user.User, error) {
-	tx, err := sqlir.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	list, err := sqlir.QueryTx(ctx, tx, q)
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
-
-	return list, tx.Commit()
-}
-
-func (sqlir *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error) {
-	tx, err := sqlir.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-
-	rowsAffected, err := sqlir.UpdateTx(ctx, tx, u)
-	if err != nil {
-		return 0, rollback(tx, err)
-	}
-
-	return rowsAffected, tx.Commit()
-}
-
-func (sqlir *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
-	tx, err := sqlir.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-
-	rowsAffected, err := sqlir.DeleteTx(ctx, tx, d)
-	if err != nil {
-		return 0, rollback(tx, err)
-	}
-
-	return rowsAffected, tx.Commit()
 }
 
 func (sqlir *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (string, error) {
@@ -122,7 +82,7 @@ func (sqlir *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Crea
 	return strconv.FormatInt(id, 10), nil
 }
 
-func (sqlir *SQLiteRepository) CreateMTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
+func (sqlir *SQLiteRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
 	if len(cs) == 0 {
 		return nil
 	}
@@ -146,20 +106,99 @@ func (sqlir *SQLiteRepository) CreateMTx(ctx context.Context, tx nero.Tx, cs ...
 	return nil
 }
 
+func (sqlir *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*user.User, error) {
+	tx, err := sqlir.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	list, err := sqlir.QueryTx(ctx, tx, q)
+	if err != nil {
+		return nil, rollback(tx, err)
+	}
+
+	return list, tx.Commit()
+}
+
+func (sqlir *SQLiteRepository) QueryOne(ctx context.Context, q *Queryer) (*user.User, error) {
+	tx, err := sqlir.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	item, err := sqlir.QueryOneTx(ctx, tx, q)
+	if err != nil {
+		return nil, rollback(tx, err)
+	}
+
+	return item, tx.Commit()
+}
+
 func (sqlir *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*user.User, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
 	}
 
+	qb := sqlir.buildSelect(q)
+	rows, err := qb.RunWith(txx).QueryContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []*user.User{}
+	for rows.Next() {
+		var item user.User
+		err = rows.Scan(
+			&item.ID,
+			&item.Email,
+			&item.Name,
+			&item.UpdatedAt,
+			&item.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, &item)
+	}
+
+	return list, nil
+}
+
+func (sqlir *SQLiteRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*user.User, error) {
+	txx, ok := tx.(*sql.Tx)
+	if !ok {
+		return nil, errors.New("expecting tx to be *sql.Tx")
+	}
+
+	qb := sqlir.buildSelect(q)
+	row := qb.RunWith(txx).QueryRowContext(ctx)
+
+	var item user.User
+	err := row.Scan(
+		&item.ID,
+		&item.Email,
+		&item.Name,
+		&item.UpdatedAt,
+		&item.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &item, nil
+}
+
+func (sqlir *SQLiteRepository) buildSelect(q *Queryer) sq.SelectBuilder {
+	qb := sq.Select(q.columns...).
+		From(q.collection)
+
 	pb := &predicate.Predicates{}
 	for _, pf := range q.pfs {
 		pf(pb)
 	}
-
-	qb := sq.Select(q.columns...).
-		From(q.collection).
-		RunWith(txx)
 	for _, p := range pb.All() {
 		switch p.Op {
 		case predicate.Eq:
@@ -189,6 +228,19 @@ func (sqlir *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Query
 		}
 	}
 
+	sb := &sort.Sorts{}
+	for _, sf := range q.sfs {
+		sf(sb)
+	}
+	for _, s := range sb.All() {
+		switch s.Direction {
+		case sort.Asc:
+			qb = qb.OrderBy(fmt.Sprintf("%s ASC", s.Field))
+		case sort.Desc:
+			qb = qb.OrderBy(fmt.Sprintf("%s DESC", s.Field))
+		}
+	}
+
 	if q.limit > 0 {
 		qb = qb.Limit(q.limit)
 	}
@@ -197,30 +249,21 @@ func (sqlir *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Query
 		qb = qb.Offset(q.offset)
 	}
 
-	rows, err := qb.QueryContext(ctx)
+	return qb
+}
+
+func (sqlir *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error) {
+	tx, err := sqlir.Tx(ctx)
 	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	list := []*user.User{}
-	for rows.Next() {
-		var item user.User
-		err = rows.Scan(
-			&item.ID,
-			&item.Email,
-			&item.Name,
-			&item.UpdatedAt,
-			&item.CreatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		list = append(list, &item)
+		return 0, err
 	}
 
-	return list, nil
+	rowsAffected, err := sqlir.UpdateTx(ctx, tx, u)
+	if err != nil {
+		return 0, rollback(tx, err)
+	}
+
+	return rowsAffected, tx.Commit()
 }
 
 func (sqlir *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
@@ -279,6 +322,20 @@ func (sqlir *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upda
 	}
 
 	return rowsAffected, nil
+}
+
+func (sqlir *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
+	tx, err := sqlir.Tx(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err := sqlir.DeleteTx(ctx, tx, d)
+	if err != nil {
+		return 0, rollback(tx, err)
+	}
+
+	return rowsAffected, tx.Commit()
 }
 
 func (sqlir *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {

@@ -49,29 +49,39 @@ func TestSQLiteRepository(t *testing.T) {
 			id, err := repo.Create(ctx, user.NewCreator())
 			assert.Error(t, err)
 			assert.Zero(t, id)
+
+			cctx, cancel := context.WithCancel(ctx)
+			cancel()
+			_, err = repo.Create(cctx, user.NewCreator())
+			assert.Error(t, err)
 		})
 	})
 
-	t.Run("CreateM", func(t *testing.T) {
+	t.Run("CreateMany", func(t *testing.T) {
 		t.Run("Ok", func(t *testing.T) {
 			cs := []*user.Creator{}
-			for i := 1; i <= 10; i++ {
+			for i := 11; i <= 20; i++ {
 				email := fmt.Sprintf("user_m%d@gg.io", i)
-				name := fmt.Sprintf("user_%d", i)
+				name := fmt.Sprintf("user_m%d", i)
 				now := time.Now()
 				cs = append(cs, user.NewCreator().
 					Email(&email).Name(&name).UpdatedAt(&now))
 			}
 
-			err = repo.CreateM(ctx, cs...)
+			err = repo.CreateMany(ctx, cs...)
 			assert.NoError(t, err)
 
-			err = repo.CreateM(ctx, []*user.Creator{}...)
+			err = repo.CreateMany(ctx, []*user.Creator{}...)
 			assert.NoError(t, err)
 		})
 
 		t.Run("Error", func(t *testing.T) {
-			err := repo.CreateM(ctx, user.NewCreator())
+			err := repo.CreateMany(ctx, user.NewCreator())
+			assert.Error(t, err)
+
+			cctx, cancel := context.WithCancel(ctx)
+			cancel()
+			err = repo.CreateMany(cctx, user.NewCreator())
 			assert.Error(t, err)
 		})
 	})
@@ -79,7 +89,8 @@ func TestSQLiteRepository(t *testing.T) {
 	t.Run("Query", func(t *testing.T) {
 		t.Run("Ok", func(t *testing.T) {
 			// all users
-			users, err := repo.Query(ctx, user.NewQueryer())
+			users, err := repo.Query(ctx,
+				user.NewQueryer())
 			assert.NoError(t, err)
 			assert.Len(t, users, 20)
 			for _, u := range users {
@@ -97,11 +108,47 @@ func TestSQLiteRepository(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Len(t, users, 1)
 
+			// with sort
+			// get last user
+			users, err = repo.Query(ctx, user.NewQueryer().
+				Sort(user.IDDesc(), user.CreatedAtAsc()),
+			)
+			assert.NoError(t, err)
+			assert.Equal(t, "user_m20", *users[0].Name)
+
 			// with limit and offset
 			users, err = repo.Query(ctx, user.NewQueryer().
 				Limit(1).Offset(1))
 			assert.NoError(t, err)
 			assert.Len(t, users, 1)
+		})
+
+		t.Run("Error", func(t *testing.T) {
+			cctx, cancel := context.WithCancel(ctx)
+			cancel()
+			_, err = repo.Query(cctx, user.NewQueryer())
+			assert.Error(t, err)
+		})
+	})
+
+	t.Run("QueryOne", func(t *testing.T) {
+		t.Run("Ok", func(t *testing.T) {
+			usr, err := repo.QueryOne(ctx, user.NewQueryer())
+			assert.NoError(t, err)
+			assert.NotNil(t, usr)
+			assert.Equal(t, "1", usr.ID)
+
+			_, err = repo.QueryOne(ctx, user.NewQueryer().
+				Where(user.IDEq("100")))
+			assert.Error(t, err)
+			assert.Equal(t, sql.ErrNoRows, err)
+		})
+
+		t.Run("Error", func(t *testing.T) {
+			cctx, cancel := context.WithCancel(ctx)
+			cancel()
+			_, err = repo.QueryOne(cctx, user.NewQueryer())
+			assert.Error(t, err)
 		})
 	})
 
@@ -137,6 +184,11 @@ func TestSQLiteRepository(t *testing.T) {
 		t.Run("Error", func(t *testing.T) {
 			_, err = repo.Update(ctx, user.NewUpdater())
 			assert.Error(t, err)
+
+			cctx, cancel := context.WithCancel(ctx)
+			cancel()
+			_, err = repo.Update(cctx, user.NewUpdater())
+			assert.Error(t, err)
 		})
 	})
 
@@ -152,10 +204,22 @@ func TestSQLiteRepository(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, int64(1), rowsAffected)
 
-			users, err := repo.Query(ctx,
+			usr, err := repo.QueryOne(ctx,
 				user.NewQueryer().Where(preds...))
+			assert.Error(t, err, sql.ErrNoRows)
+			assert.Nil(t, usr)
+
+			// delete all
+			rowsAffected, err = repo.Delete(ctx, user.NewDeleter())
 			assert.NoError(t, err)
-			assert.Len(t, users, 0)
+			assert.Equal(t, int64(19), rowsAffected)
+		})
+
+		t.Run("Error", func(t *testing.T) {
+			cctx, cancel := context.WithCancel(ctx)
+			cancel()
+			_, err = repo.Delete(cctx, user.NewDeleter())
+			assert.Error(t, err)
 		})
 	})
 }

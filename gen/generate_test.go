@@ -13,7 +13,7 @@ import (
 func TestGenerateExample(t *testing.T) {
 	files, err := Generate(new(gen.Example))
 	assert.NoError(t, err)
-	assert.Len(t, files, 10)
+	assert.Len(t, files, 11)
 
 	for _, file := range files {
 		require.NotEmpty(t, file.Name())

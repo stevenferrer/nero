@@ -47,60 +47,18 @@ func (pgr *PGRepository) Create(ctx context.Context, c *Creator) (int64, error) 
 	return id, tx.Commit()
 }
 
-func (pgr *PGRepository) CreateM(ctx context.Context, cs ...*Creator) error {
+func (pgr *PGRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
 	tx, err := pgr.Tx(ctx)
 	if err != nil {
 		return err
 	}
 
-	err = pgr.CreateMTx(ctx, tx, cs...)
+	err = pgr.CreateManyTx(ctx, tx, cs...)
 	if err != nil {
 		return rollback(tx, err)
 	}
 
 	return tx.Commit()
-}
-
-func (pgr *PGRepository) Query(ctx context.Context, q *Queryer) ([]*internal.Example, error) {
-	tx, err := pgr.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	list, err := pgr.QueryTx(ctx, tx, q)
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
-
-	return list, tx.Commit()
-}
-
-func (pgr *PGRepository) Update(ctx context.Context, u *Updater) (int64, error) {
-	tx, err := pgr.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-
-	rowsAffected, err := pgr.UpdateTx(ctx, tx, u)
-	if err != nil {
-		return 0, rollback(tx, err)
-	}
-
-	return rowsAffected, tx.Commit()
-}
-
-func (pgr *PGRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
-	tx, err := pgr.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-
-	rowsAffected, err := pgr.DeleteTx(ctx, tx, d)
-	if err != nil {
-		return 0, rollback(tx, err)
-	}
-
-	return rowsAffected, tx.Commit()
 }
 
 func (pgr *PGRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (int64, error) {
@@ -124,7 +82,7 @@ func (pgr *PGRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (
 	return id, nil
 }
 
-func (pgr *PGRepository) CreateMTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
+func (pgr *PGRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
 	if len(cs) == 0 {
 		return nil
 	}
@@ -150,21 +108,98 @@ func (pgr *PGRepository) CreateMTx(ctx context.Context, tx nero.Tx, cs ...*Creat
 	return nil
 }
 
+func (pgr *PGRepository) Query(ctx context.Context, q *Queryer) ([]*internal.Example, error) {
+	tx, err := pgr.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	list, err := pgr.QueryTx(ctx, tx, q)
+	if err != nil {
+		return nil, rollback(tx, err)
+	}
+
+	return list, tx.Commit()
+}
+
+func (pgr *PGRepository) QueryOne(ctx context.Context, q *Queryer) (*internal.Example, error) {
+	tx, err := pgr.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	item, err := pgr.QueryOneTx(ctx, tx, q)
+	if err != nil {
+		return nil, rollback(tx, err)
+	}
+
+	return item, tx.Commit()
+}
+
 func (pgr *PGRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*internal.Example, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
 	}
 
+	qb := pgr.buildSelect(q)
+	rows, err := qb.RunWith(txx).QueryContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := []*internal.Example{}
+	for rows.Next() {
+		var item internal.Example
+		err = rows.Scan(
+			&item.ID,
+			&item.Name,
+			&item.UpdatedAt,
+			&item.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, &item)
+	}
+
+	return list, nil
+}
+
+func (pgr *PGRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*internal.Example, error) {
+	txx, ok := tx.(*sql.Tx)
+	if !ok {
+		return nil, errors.New("expecting tx to be *sql.Tx")
+	}
+
+	qb := pgr.buildSelect(q)
+	row := qb.RunWith(txx).QueryRowContext(ctx)
+
+	var item internal.Example
+	err := row.Scan(
+		&item.ID,
+		&item.Name,
+		&item.UpdatedAt,
+		&item.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &item, nil
+}
+
+func (pgr *PGRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
+	qb := squirrel.Select(q.columns...).
+		From(q.collection).
+		PlaceholderFormat(squirrel.Dollar)
+
 	pb := &predicate.Predicates{}
 	for _, pf := range q.pfs {
 		pf(pb)
 	}
-
-	qb := squirrel.Select(q.columns...).
-		From(q.collection).
-		PlaceholderFormat(squirrel.Dollar).
-		RunWith(txx)
 	for _, p := range pb.All() {
 		switch p.Op {
 		case predicate.Eq:
@@ -194,6 +229,19 @@ func (pgr *PGRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([
 		}
 	}
 
+	sb := &sort.Sorts{}
+	for _, sf := range q.sfs {
+		sf(sb)
+	}
+	for _, s := range sb.All() {
+		switch s.Direction {
+		case sort.Asc:
+			qb = qb.OrderBy(fmt.Sprintf("%s ASC", s.Field))
+		case sort.Desc:
+			qb = qb.OrderBy(fmt.Sprintf("%s DESC", s.Field))
+		}
+	}
+
 	if q.limit > 0 {
 		qb = qb.Limit(q.limit)
 	}
@@ -202,29 +250,21 @@ func (pgr *PGRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([
 		qb = qb.Offset(q.offset)
 	}
 
-	rows, err := qb.QueryContext(ctx)
+	return qb
+}
+
+func (pgr *PGRepository) Update(ctx context.Context, u *Updater) (int64, error) {
+	tx, err := pgr.Tx(ctx)
 	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	list := []*internal.Example{}
-	for rows.Next() {
-		var item internal.Example
-		err = rows.Scan(
-			&item.ID,
-			&item.Name,
-			&item.UpdatedAt,
-			&item.CreatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		list = append(list, &item)
+		return 0, err
 	}
 
-	return list, nil
+	rowsAffected, err := pgr.UpdateTx(ctx, tx, u)
+	if err != nil {
+		return 0, rollback(tx, err)
+	}
+
+	return rowsAffected, tx.Commit()
 }
 
 func (pgr *PGRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
@@ -283,6 +323,20 @@ func (pgr *PGRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (
 	}
 
 	return rowsAffected, nil
+}
+
+func (pgr *PGRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
+	tx, err := pgr.Tx(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err := pgr.DeleteTx(ctx, tx, d)
+	if err != nil {
+		return 0, rollback(tx, err)
+	}
+
+	return rowsAffected, tx.Commit()
 }
 
 func (pgr *PGRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
