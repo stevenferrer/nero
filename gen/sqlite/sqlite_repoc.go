@@ -34,7 +34,8 @@ func NewSQLiteRepoC(schema *gen.Schema) *jen.Statement {
 			jen.Id("db").Op(":").Id("db").Op(","),
 		))).Line().Line()
 
-	rcvrParam := jen.Id("s").Op("*").Id("SQLiteRepository")
+	rcvrID := jen.Id("sqlir")
+	rcvrParam := jen.Add(rcvrID).Op("*").Id("SQLiteRepository")
 	ctxC := jen.Qual("context", "Context")
 	ctxIDC := jen.Id("ctx")
 	txC := jen.Qual(pkgPath, "Tx")
@@ -43,7 +44,7 @@ func NewSQLiteRepoC(schema *gen.Schema) *jen.Statement {
 	stmnt = stmnt.Func().Params(rcvrParam).Id("Tx").
 		Params(jen.Id("ctx").Add(ctxC)).
 		Params(txC, jen.Error()).Block(
-		jen.Return(jen.Id("s").Dot("db").Dot("BeginTx").
+		jen.Return(jen.Add(rcvrID).Dot("db").Dot("BeginTx").
 			Call(ctxIDC, jen.Nil()))).
 		Line().Line()
 
@@ -59,13 +60,13 @@ func NewSQLiteRepoC(schema *gen.Schema) *jen.Statement {
 		Params(gen.GetTypeC(ident.Typ), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			g.List(jen.Id("tx"), jen.Err()).Op(":=").
-				Id("s").Dot("Tx").Call(ctxIDC)
+				Add(rcvrID).Dot("Tx").Call(ctxIDC)
 			g.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(gen.GetZeroValC(ident.Typ), jen.Err())).
 				Line()
 
 			g.List(jen.Id(ident.LowerCamelName()), jen.Err()).Op(":=").
-				Id("s").Dot("CreateTx").Call(
+				Add(rcvrID).Dot("CreateTx").Call(
 				ctxIDC,
 				jen.Id("tx"),
 				jen.Id("c"),
@@ -89,10 +90,10 @@ func NewSQLiteRepoC(schema *gen.Schema) *jen.Statement {
 		Params(jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			g.List(jen.Id("tx"), jen.Err()).Op(":=").
-				Id("s").Dot("Tx").Call(ctxIDC)
+				Add(rcvrID).Dot("Tx").Call(ctxIDC)
 			g.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Err())).Line()
-			g.List(jen.Err()).Op("=").Id("s").Dot("CreateMTx").
+			g.List(jen.Err()).Op("=").Add(rcvrID).Dot("CreateMTx").
 				Call(ctxIDC, jen.Id("tx"), jen.Id("cs").Op("..."))
 			g.If(jen.Err().Op("!=").Nil()).
 				Block(jen.Return(txRollback)).Line()
@@ -113,12 +114,12 @@ func NewSQLiteRepoC(schema *gen.Schema) *jen.Statement {
 		).
 		BlockFunc(func(g *jen.Group) {
 			g.List(jen.Id("tx"), jen.Err()).Op(":=").
-				Id("s").Dot("Tx").Call(ctxIDC)
+				Add(rcvrID).Dot("Tx").Call(ctxIDC)
 			g.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Nil(), jen.Err())).Line()
 
 			g.List(jen.Id("list"), jen.Err()).Op(":=").
-				Id("s").Dot("QueryTx").Call(ctxIDC, jen.Id("tx"), jen.Id("q"))
+				Add(rcvrID).Dot("QueryTx").Call(ctxIDC, jen.Id("tx"), jen.Id("q"))
 			g.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Nil(), txRollback),
 			).Line()
@@ -138,12 +139,12 @@ func NewSQLiteRepoC(schema *gen.Schema) *jen.Statement {
 		Params(jen.Int64(), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			g.List(jen.Id("tx"), jen.Err()).Op(":=").
-				Id("s").Dot("Tx").Call(ctxIDC)
+				Add(rcvrID).Dot("Tx").Call(ctxIDC)
 			g.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Lit(0), jen.Err())).Line()
 
 			g.List(jen.Id("rowsAffected"), jen.Err()).Op(":=").
-				Id("s").Dot("UpdateTx").Call(
+				Add(rcvrID).Dot("UpdateTx").Call(
 				ctxIDC, jen.Id("tx"), jen.Id("u"))
 			g.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Lit(0), txRollback),
@@ -161,12 +162,12 @@ func NewSQLiteRepoC(schema *gen.Schema) *jen.Statement {
 		Params(jen.Int64(), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			g.List(jen.Id("tx"), jen.Err()).Op(":=").
-				Id("s").Dot("Tx").Call(ctxIDC)
+				Add(rcvrID).Dot("Tx").Call(ctxIDC)
 			g.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Lit(0), jen.Err())).Line()
 
 			g.List(jen.Id("rowsAffected"), jen.Err()).
-				Op(":=").Id("s").Dot("DeleteTx").
+				Op(":=").Add(rcvrID).Dot("DeleteTx").
 				Call(ctxIDC, jen.Id("tx"), jen.Id("d"))
 			g.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Lit(0), txRollback),

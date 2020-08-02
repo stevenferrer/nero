@@ -29,17 +29,17 @@ func NewPGRepository(db *sql.DB) *PGRepository {
 	}
 }
 
-func (s *PGRepository) Tx(ctx context.Context) (nero.Tx, error) {
-	return s.db.BeginTx(ctx, nil)
+func (pgr *PGRepository) Tx(ctx context.Context) (nero.Tx, error) {
+	return pgr.db.BeginTx(ctx, nil)
 }
 
-func (s *PGRepository) Create(ctx context.Context, c *Creator) (int64, error) {
-	tx, err := s.Tx(ctx)
+func (pgr *PGRepository) Create(ctx context.Context, c *Creator) (int64, error) {
+	tx, err := pgr.Tx(ctx)
 	if err != nil {
 		return 0, err
 	}
 
-	id, err := s.CreateTx(ctx, tx, c)
+	id, err := pgr.CreateTx(ctx, tx, c)
 	if err != nil {
 		return 0, rollback(tx, err)
 	}
@@ -47,13 +47,13 @@ func (s *PGRepository) Create(ctx context.Context, c *Creator) (int64, error) {
 	return id, tx.Commit()
 }
 
-func (s *PGRepository) CreateM(ctx context.Context, cs ...*Creator) error {
-	tx, err := s.Tx(ctx)
+func (pgr *PGRepository) CreateM(ctx context.Context, cs ...*Creator) error {
+	tx, err := pgr.Tx(ctx)
 	if err != nil {
 		return err
 	}
 
-	err = s.CreateMTx(ctx, tx, cs...)
+	err = pgr.CreateMTx(ctx, tx, cs...)
 	if err != nil {
 		return rollback(tx, err)
 	}
@@ -61,13 +61,13 @@ func (s *PGRepository) CreateM(ctx context.Context, cs ...*Creator) error {
 	return tx.Commit()
 }
 
-func (s *PGRepository) Query(ctx context.Context, q *Queryer) ([]*internal.Example, error) {
-	tx, err := s.Tx(ctx)
+func (pgr *PGRepository) Query(ctx context.Context, q *Queryer) ([]*internal.Example, error) {
+	tx, err := pgr.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	list, err := s.QueryTx(ctx, tx, q)
+	list, err := pgr.QueryTx(ctx, tx, q)
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
@@ -75,13 +75,13 @@ func (s *PGRepository) Query(ctx context.Context, q *Queryer) ([]*internal.Examp
 	return list, tx.Commit()
 }
 
-func (s *PGRepository) Update(ctx context.Context, u *Updater) (int64, error) {
-	tx, err := s.Tx(ctx)
+func (pgr *PGRepository) Update(ctx context.Context, u *Updater) (int64, error) {
+	tx, err := pgr.Tx(ctx)
 	if err != nil {
 		return 0, err
 	}
 
-	rowsAffected, err := s.UpdateTx(ctx, tx, u)
+	rowsAffected, err := pgr.UpdateTx(ctx, tx, u)
 	if err != nil {
 		return 0, rollback(tx, err)
 	}
@@ -89,13 +89,13 @@ func (s *PGRepository) Update(ctx context.Context, u *Updater) (int64, error) {
 	return rowsAffected, tx.Commit()
 }
 
-func (s *PGRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
-	tx, err := s.Tx(ctx)
+func (pgr *PGRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
+	tx, err := pgr.Tx(ctx)
 	if err != nil {
 		return 0, err
 	}
 
-	rowsAffected, err := s.DeleteTx(ctx, tx, d)
+	rowsAffected, err := pgr.DeleteTx(ctx, tx, d)
 	if err != nil {
 		return 0, rollback(tx, err)
 	}
@@ -103,7 +103,7 @@ func (s *PGRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
 	return rowsAffected, tx.Commit()
 }
 
-func (s *PGRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (int64, error) {
+func (pgr *PGRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
@@ -124,7 +124,7 @@ func (s *PGRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (in
 	return id, nil
 }
 
-func (s *PGRepository) CreateMTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
+func (pgr *PGRepository) CreateMTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
 	if len(cs) == 0 {
 		return nil
 	}
@@ -150,7 +150,7 @@ func (s *PGRepository) CreateMTx(ctx context.Context, tx nero.Tx, cs ...*Creator
 	return nil
 }
 
-func (s *PGRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*internal.Example, error) {
+func (pgr *PGRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*internal.Example, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
@@ -227,7 +227,7 @@ func (s *PGRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*
 	return list, nil
 }
 
-func (s *PGRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
+func (pgr *PGRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
@@ -285,7 +285,7 @@ func (s *PGRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (in
 	return rowsAffected, nil
 }
 
-func (s *PGRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
+func (pgr *PGRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")

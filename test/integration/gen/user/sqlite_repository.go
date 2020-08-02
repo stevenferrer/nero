@@ -25,17 +25,17 @@ func NewSQLiteRepository(db *sql.DB) *SQLiteRepository {
 	}
 }
 
-func (s *SQLiteRepository) Tx(ctx context.Context) (nero.Tx, error) {
-	return s.db.BeginTx(ctx, nil)
+func (sqlir *SQLiteRepository) Tx(ctx context.Context) (nero.Tx, error) {
+	return sqlir.db.BeginTx(ctx, nil)
 }
 
-func (s *SQLiteRepository) Create(ctx context.Context, c *Creator) (string, error) {
-	tx, err := s.Tx(ctx)
+func (sqlir *SQLiteRepository) Create(ctx context.Context, c *Creator) (string, error) {
+	tx, err := sqlir.Tx(ctx)
 	if err != nil {
 		return "", err
 	}
 
-	id, err := s.CreateTx(ctx, tx, c)
+	id, err := sqlir.CreateTx(ctx, tx, c)
 	if err != nil {
 		return "", rollback(tx, err)
 	}
@@ -43,13 +43,13 @@ func (s *SQLiteRepository) Create(ctx context.Context, c *Creator) (string, erro
 	return id, tx.Commit()
 }
 
-func (s *SQLiteRepository) CreateM(ctx context.Context, cs ...*Creator) error {
-	tx, err := s.Tx(ctx)
+func (sqlir *SQLiteRepository) CreateM(ctx context.Context, cs ...*Creator) error {
+	tx, err := sqlir.Tx(ctx)
 	if err != nil {
 		return err
 	}
 
-	err = s.CreateMTx(ctx, tx, cs...)
+	err = sqlir.CreateMTx(ctx, tx, cs...)
 	if err != nil {
 		return rollback(tx, err)
 	}
@@ -57,13 +57,13 @@ func (s *SQLiteRepository) CreateM(ctx context.Context, cs ...*Creator) error {
 	return tx.Commit()
 }
 
-func (s *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*user.User, error) {
-	tx, err := s.Tx(ctx)
+func (sqlir *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*user.User, error) {
+	tx, err := sqlir.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	list, err := s.QueryTx(ctx, tx, q)
+	list, err := sqlir.QueryTx(ctx, tx, q)
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
@@ -71,13 +71,13 @@ func (s *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*user.User,
 	return list, tx.Commit()
 }
 
-func (s *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error) {
-	tx, err := s.Tx(ctx)
+func (sqlir *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error) {
+	tx, err := sqlir.Tx(ctx)
 	if err != nil {
 		return 0, err
 	}
 
-	rowsAffected, err := s.UpdateTx(ctx, tx, u)
+	rowsAffected, err := sqlir.UpdateTx(ctx, tx, u)
 	if err != nil {
 		return 0, rollback(tx, err)
 	}
@@ -85,13 +85,13 @@ func (s *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error
 	return rowsAffected, tx.Commit()
 }
 
-func (s *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
-	tx, err := s.Tx(ctx)
+func (sqlir *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
+	tx, err := sqlir.Tx(ctx)
 	if err != nil {
 		return 0, err
 	}
 
-	rowsAffected, err := s.DeleteTx(ctx, tx, d)
+	rowsAffected, err := sqlir.DeleteTx(ctx, tx, d)
 	if err != nil {
 		return 0, rollback(tx, err)
 	}
@@ -99,7 +99,7 @@ func (s *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error
 	return rowsAffected, tx.Commit()
 }
 
-func (s *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (string, error) {
+func (sqlir *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (string, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return "", errors.New("expecting tx to be *sql.Tx")
@@ -122,7 +122,7 @@ func (s *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator)
 	return strconv.FormatInt(id, 10), nil
 }
 
-func (s *SQLiteRepository) CreateMTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
+func (sqlir *SQLiteRepository) CreateMTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
 	if len(cs) == 0 {
 		return nil
 	}
@@ -146,7 +146,7 @@ func (s *SQLiteRepository) CreateMTx(ctx context.Context, tx nero.Tx, cs ...*Cre
 	return nil
 }
 
-func (s *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*user.User, error) {
+func (sqlir *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*user.User, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
@@ -223,7 +223,7 @@ func (s *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) 
 	return list, nil
 }
 
-func (s *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
+func (sqlir *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
@@ -281,7 +281,7 @@ func (s *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater)
 	return rowsAffected, nil
 }
 
-func (s *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
+func (sqlir *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
