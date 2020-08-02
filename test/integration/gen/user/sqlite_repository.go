@@ -31,10 +31,10 @@ func (s *SQLiteRepository) Tx(ctx context.Context) (nero.Tx, error) {
 
 func (s *SQLiteRepository) Create(ctx context.Context, c *Creator) (string, error) {
 	tx, err := s.Tx(ctx)
-
 	if err != nil {
 		return "", err
 	}
+
 	id, err := s.CreateTx(ctx, tx, c)
 	if err != nil {
 		return "", rollback(tx, err)
@@ -48,6 +48,7 @@ func (s *SQLiteRepository) CreateM(ctx context.Context, cs ...*Creator) error {
 	if err != nil {
 		return err
 	}
+
 	err = s.CreateMTx(ctx, tx, cs...)
 	if err != nil {
 		return rollback(tx, err)
