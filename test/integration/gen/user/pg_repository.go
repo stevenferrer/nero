@@ -41,6 +41,20 @@ func (s *PGRepository) Create(ctx context.Context, c *Creator) (string, error) {
 	return id, tx.Commit()
 }
 
+func (s *PGRepository) CreateM(ctx context.Context, cs ...*Creator) error {
+	tx, err := s.Tx(ctx)
+
+	if err != nil {
+		return err
+	}
+	err = s.CreateMTx(ctx, tx, cs...)
+	if err != nil {
+		return rollback(tx, err)
+	}
+
+	return tx.Commit()
+}
+
 func (s *PGRepository) Query(ctx context.Context, q *Queryer) ([]*user.User, error) {
 	tx, err := s.Tx(ctx)
 	if err != nil {
@@ -102,6 +116,32 @@ func (s *PGRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (st
 	}
 
 	return id, nil
+}
+
+func (s *PGRepository) CreateMTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
+	if len(cs) == 0 {
+		return nil
+	}
+
+	txx, ok := tx.(*sql.Tx)
+	if !ok {
+		return errors.New("expecting tx to be *sql.Tx")
+	}
+
+	qb := sq.Insert(cs[0].collection).
+		Columns(cs[0].columns...)
+	for _, c := range cs {
+		qb = qb.Values(c.email, c.name, c.updatedAt)
+	}
+
+	qb = qb.Suffix("RETURNING \"id\"").
+		PlaceholderFormat(sq.Dollar)
+	_, err := qb.RunWith(txx).ExecContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *PGRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*user.User, error) {

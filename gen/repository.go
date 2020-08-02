@@ -14,16 +14,17 @@ func newRepository(schema *gen.Schema) *jen.Statement {
 		schema.Typ.Name)
 	ctxC := jen.Qual("context", "Context")
 	txC := jen.Qual(pkgPath, "Tx")
+	identParam := jen.Id("id").Add(gen.GetTypeC(schema.Ident.Typ))
 	return jen.Comment(comment).Line().
 		Type().Id("Repository").Interface(
 		jen.Id("Tx").
 			Params(ctxC).Params(txC, jen.Error()),
 		jen.Id("Create").
 			Params(ctxC, jen.Op("*").Id("Creator")).
-			Params(
-				jen.Id("id").Add(gen.GetTypeC(schema.Ident.Typ)),
-				jen.Err().Error(),
-			),
+			Params(identParam, jen.Err().Error()),
+		jen.Id("CreateM").
+			Params(ctxC, jen.Op("...").Op("*").Id("Creator")).
+			Params(jen.Err().Error()),
 		jen.Id("Query").
 			Params(ctxC, jen.Op("*").Id("Queryer")).
 			Params(jen.Op("[]").Add(typC), jen.Error()),
@@ -37,10 +38,10 @@ func newRepository(schema *gen.Schema) *jen.Statement {
 				jen.Id("err").Error()),
 		jen.Id("CreateTx").
 			Params(ctxC, txC, jen.Op("*").Id("Creator")).
-			Params(
-				jen.Id("id").Add(gen.GetTypeC(schema.Ident.Typ)),
-				jen.Err().Error(),
-			),
+			Params(identParam, jen.Err().Error()),
+		jen.Id("CreateMTx").
+			Params(ctxC, txC, jen.Op("...").Op("*").Id("Creator")).
+			Params(jen.Err().Error()),
 		jen.Id("QueryTx").
 			Params(ctxC, txC, jen.Op("*").Id("Queryer")).
 			Params(jen.Op("[]").Add(typC), jen.Error()),

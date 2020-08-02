@@ -13,3 +13,11 @@ func TestExampleSchema(t *testing.T) {
 	assert.Equal(t, "examples", s.Collection)
 	assert.Len(t, s.Columns, 4)
 }
+
+func TestExample2Schema(t *testing.T) {
+	e := new(Example2)
+	s := e.Schema()
+	assert.Equal(t, "example2", s.Pkg)
+	assert.Equal(t, "examples", s.Collection)
+	assert.Len(t, s.Columns, 4)
+}

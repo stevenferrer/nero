@@ -98,12 +98,36 @@ func TestPGRepository(t *testing.T) {
 		})
 	})
 
+	t.Run("CreateM", func(t *testing.T) {
+		t.Run("Ok", func(t *testing.T) {
+			cs := []*user.Creator{}
+			for i := 1; i <= 10; i++ {
+				email := fmt.Sprintf("user_m%d@gg.io", i)
+				name := fmt.Sprintf("user_%d", i)
+				now := time.Now()
+				cs = append(cs, user.NewCreator().
+					Email(&email).Name(&name).UpdatedAt(&now))
+			}
+
+			err = repo.CreateM(ctx, cs...)
+			assert.NoError(t, err)
+
+			err = repo.CreateM(ctx, []*user.Creator{}...)
+			assert.NoError(t, err)
+		})
+
+		t.Run("Error", func(t *testing.T) {
+			err := repo.CreateM(ctx, user.NewCreator())
+			assert.Error(t, err)
+		})
+	})
+
 	t.Run("Query", func(t *testing.T) {
 		t.Run("Ok", func(t *testing.T) {
 			// all users
 			users, err := repo.Query(ctx, user.NewQueryer())
 			assert.NoError(t, err)
-			assert.Len(t, users, 10)
+			assert.Len(t, users, 20)
 
 			// with predicates
 			users, err = repo.Query(ctx, user.NewQueryer().

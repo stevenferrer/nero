@@ -39,7 +39,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 	ctxIDC := jen.Id("ctx")
 	txC := jen.Qual(pkgPath, "Tx")
 
-	// tx method
+	// tx
 	stmnt = stmnt.Func().Params(rcvrParam).Id("Tx").
 		Params(jen.Id("ctx").Add(ctxC)).
 		Params(txC, jen.Error()).Block(
@@ -50,7 +50,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 	txCommit := jen.Id("tx").Dot("Commit").Call()
 	txRollback := jen.Id("rollback").Call(jen.Id("tx"), jen.Err())
 
-	// create method
+	// create
 	stmnt = stmnt.Func().Params(rcvrParam).Id("Create").
 		Params(
 			jen.Id("ctx").Add(ctxC),
@@ -61,7 +61,8 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 			g.List(jen.Id("tx"), jen.Err()).Op(":=").
 				Id("s").Dot("Tx").Call(ctxIDC)
 			g.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(gen.GetZeroValC(ident.Typ), jen.Err()))
+				jen.Return(gen.GetZeroValC(ident.Typ), jen.Err())).
+				Line()
 
 			g.List(jen.Id(ident.LowerCamelName()), jen.Err()).Op(":=").
 				Id("s").Dot("CreateTx").Call(
@@ -79,7 +80,27 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 			)
 		}).Line().Line()
 
-	// query method
+	// create many
+	stmnt = stmnt.Func().Params(rcvrParam).Id("CreateM").
+		Params(
+			jen.Id("ctx").Add(ctxC),
+			jen.Id("cs").Op("...").Op("*").Id("Creator"),
+		).
+		Params(jen.Error()).
+		BlockFunc(func(g *jen.Group) {
+			g.List(jen.Id("tx"), jen.Err()).Op(":=").
+				Id("s").Dot("Tx").Call(ctxIDC)
+			g.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jen.Err())).Line()
+			g.List(jen.Err()).Op("=").Id("s").Dot("CreateMTx").
+				Call(ctxIDC, jen.Id("tx"), jen.Id("cs").Op("..."))
+			g.If(jen.Err().Op("!=").Nil()).
+				Block(jen.Return(txRollback)).Line()
+
+			g.Return(txCommit)
+		}).Line().Line()
+
+	// query
 	stmnt = stmnt.Func().Params(rcvrParam).Id("Query").
 		Params(
 			jen.Id("ctx").Add(ctxC),
@@ -108,7 +129,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 			)
 		}).Line().Line()
 
-	// update method
+	// update
 	stmnt = stmnt.Func().Params(rcvrParam).Id("Update").
 		Params(
 			jen.Id("ctx").Add(ctxC),
@@ -131,7 +152,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 			g.Return(jen.Id("rowsAffected"), txCommit)
 		}).Line().Line()
 
-	// delete method
+	// delete
 	stmnt = stmnt.Func().Params(rcvrParam).Id("Delete").
 		Params(
 			jen.Id("ctx").Add(ctxC),
@@ -157,7 +178,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 			g.Return(jen.Id("rowsAffected"), txCommit)
 		}).Line().Line()
 
-	// create tx method
+	// create tx
 	stmnt = stmnt.Func().Params(rcvrParam).Id("CreateTx").
 		Params(
 			jen.Id("ctx").Add(ctxC),
@@ -205,7 +226,63 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 			g.Return(jen.Id(ident.LowerCamelName()), jen.Nil())
 		}).Line().Line()
 
-	// query tx method
+	// create many tx
+	stmnt = stmnt.Func().Params(rcvrParam).Id("CreateMTx").
+		Params(
+			jen.Id("ctx").Add(ctxC),
+			jen.Id("tx").Add(txC),
+			jen.Id("cs").Op("...").Op("*").Id("Creator"),
+		).
+		Params(jen.Error()).
+		BlockFunc(func(g *jen.Group) {
+			g.If(jen.Len(jen.Id("cs")).Op("==").Lit(0)).Block(
+				jen.Return(jen.Nil()),
+			).Line()
+
+			// assert tx type
+			g.List(jen.Id("txx"), jen.Id("ok")).Op(":=").
+				Id("tx").Assert(jen.Op("*").Qual("database/sql", "Tx"))
+			g.If(jen.Op("!").Id("ok")).Block(jen.Return(
+				jen.Qual(errPkg, "New").Call(jen.Lit("expecting tx to be *sql.Tx")),
+			)).Line()
+
+			// query builder
+			g.Id("qb").Op(":=").Qual(sqPkg, "Insert").
+				Call(jen.Id("cs").Index(jen.Lit(0)).
+					Dot("collection")).Op(".").Line().
+				Id("Columns").
+				Call(jen.Id("cs").Index(jen.Lit(0)).
+					Dot("columns").Op("..."))
+
+			g.For(jen.List(jen.Id("_"), jen.Id("c")).
+				Op(":=").Range().Id("cs"),
+			).BlockFunc(func(g *jen.Group) {
+				g.Id("qb").Op("=").Id("qb").Dot("Values").
+					CallFunc(func(g *jen.Group) {
+						for _, col := range schema.Cols {
+							if col.Auto {
+								continue
+							}
+							g.Id("c").Dot(col.LowerCamelName())
+						}
+					})
+			}).Line()
+
+			g.Id("qb").Op("=").Id("qb").Dot("Suffix").
+				Call(jen.Lit(fmt.Sprintf("RETURNING %q", ident.Name))).
+				Op(".").Line().Id("PlaceholderFormat").
+				Call(jen.Qual(sqPkg, "Dollar"))
+
+			g.List(jen.Id("_"), jen.Err()).Op(":=").Id("qb").
+				Dot("RunWith").Call(jen.Id("txx")).
+				Dot("ExecContext").Call(ctxIDC)
+			g.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jen.Err())).Line()
+
+			g.Return(jen.Nil())
+		}).Line().Line()
+
+	// query tx
 	queryRetTyp := jen.Op("[]").Op("*").
 		Qual(schema.Typ.PkgPath, schema.Typ.Name)
 	stmnt = stmnt.Func().Params(rcvrParam).Id("QueryTx").
@@ -297,7 +374,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 			g.Return(jen.Id("list"), jen.Nil())
 		}).Line().Line()
 
-	// update tx method
+	// update tx
 	stmnt = stmnt.Func().Params(rcvrParam).Id("UpdateTx").
 		Params(
 			jen.Id("ctx").Add(ctxC),
@@ -385,7 +462,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 			g.Return(jen.Id("rowsAffected"), jen.Nil())
 		}).Line().Line()
 
-	// delete tx method
+	// delete tx
 	stmnt = stmnt.Func().Params(rcvrParam).Id("DeleteTx").
 		Params(
 			jen.Id("ctx").Add(ctxC),

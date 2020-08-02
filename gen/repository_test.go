@@ -19,10 +19,12 @@ func Test_newRepository(t *testing.T) {
 type Repository interface {
 	Tx(context.Context) (nero.Tx, error)
 	Create(context.Context, *Creator) (id int64, err error)
+	CreateM(context.Context, ...*Creator) (err error)
 	Query(context.Context, *Queryer) ([]*internal.Example, error)
 	Update(context.Context, *Updater) (rowsAffected int64, err error)
 	Delete(context.Context, *Deleter) (rowsAffected int64, err error)
 	CreateTx(context.Context, nero.Tx, *Creator) (id int64, err error)
+	CreateMTx(context.Context, nero.Tx, ...*Creator) (err error)
 	QueryTx(context.Context, nero.Tx, *Queryer) ([]*internal.Example, error)
 	UpdateTx(context.Context, nero.Tx, *Updater) (rowsAffected int64, err error)
 	DeleteTx(context.Context, nero.Tx, *Deleter) (rowsAffected int64, err error)

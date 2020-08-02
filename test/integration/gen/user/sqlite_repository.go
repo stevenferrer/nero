@@ -31,6 +31,7 @@ func (s *SQLiteRepository) Tx(ctx context.Context) (nero.Tx, error) {
 
 func (s *SQLiteRepository) Create(ctx context.Context, c *Creator) (string, error) {
 	tx, err := s.Tx(ctx)
+
 	if err != nil {
 		return "", err
 	}
@@ -40,6 +41,19 @@ func (s *SQLiteRepository) Create(ctx context.Context, c *Creator) (string, erro
 	}
 
 	return id, tx.Commit()
+}
+
+func (s *SQLiteRepository) CreateM(ctx context.Context, cs ...*Creator) error {
+	tx, err := s.Tx(ctx)
+	if err != nil {
+		return err
+	}
+	err = s.CreateMTx(ctx, tx, cs...)
+	if err != nil {
+		return rollback(tx, err)
+	}
+
+	return tx.Commit()
 }
 
 func (s *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*user.User, error) {
@@ -105,6 +119,30 @@ func (s *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator)
 	}
 
 	return strconv.FormatInt(id, 10), nil
+}
+
+func (s *SQLiteRepository) CreateMTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
+	if len(cs) == 0 {
+		return nil
+	}
+
+	txx, ok := tx.(*sql.Tx)
+	if !ok {
+		return errors.New("expecting tx to be *sql.Tx")
+	}
+
+	qb := sq.Insert(cs[0].collection).
+		Columns(cs[0].columns...)
+	for _, c := range cs {
+		qb = qb.Values(c.email, c.name, c.updatedAt)
+	}
+
+	_, err := qb.RunWith(txx).ExecContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*user.User, error) {

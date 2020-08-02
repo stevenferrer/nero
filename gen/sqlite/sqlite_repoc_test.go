@@ -35,6 +35,7 @@ func (s *SQLiteRepository) Tx(ctx context.Context) (nero.Tx, error) {
 
 func (s *SQLiteRepository) Create(ctx context.Context, c *Creator) (int64, error) {
 	tx, err := s.Tx(ctx)
+
 	if err != nil {
 		return 0, err
 	}
@@ -44,6 +45,19 @@ func (s *SQLiteRepository) Create(ctx context.Context, c *Creator) (int64, error
 	}
 
 	return id, tx.Commit()
+}
+
+func (s *SQLiteRepository) CreateM(ctx context.Context, cs ...*Creator) error {
+	tx, err := s.Tx(ctx)
+	if err != nil {
+		return err
+	}
+	err = s.CreateMTx(ctx, tx, cs...)
+	if err != nil {
+		return rollback(tx, err)
+	}
+
+	return tx.Commit()
 }
 
 func (s *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*internal.Example, error) {
@@ -109,6 +123,30 @@ func (s *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator)
 	}
 
 	return id, nil
+}
+
+func (s *SQLiteRepository) CreateMTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
+	if len(cs) == 0 {
+		return nil
+	}
+
+	txx, ok := tx.(*sql.Tx)
+	if !ok {
+		return errors.New("expecting tx to be *sql.Tx")
+	}
+
+	qb := squirrel.Insert(cs[0].collection).
+		Columns(cs[0].columns...)
+	for _, c := range cs {
+		qb = qb.Values(c.name, c.updatedAt)
+	}
+
+	_, err := qb.RunWith(txx).ExecContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*internal.Example, error) {
