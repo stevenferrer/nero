@@ -43,11 +43,12 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 	stmnt = stmnt.Func().Params(rcvrParam).Id("Tx").
 		Params(jen.Id("ctx").Add(ctxC)).
 		Params(txC, jen.Error()).Block(
-		jen.Return(jen.Id("s").Dot("db").Dot("BeginTx").Call(
-			ctxIDC,
-			jen.Op("&").Qual("database/sql", "TxOptions").Op("{}"),
-		))).
+		jen.Return(jen.Id("s").Dot("db").Dot("BeginTx").
+			Call(ctxIDC, jen.Nil()))).
 		Line().Line()
+
+	txCommit := jen.Id("tx").Dot("Commit").Call()
+	txRollback := jen.Id("rollback").Call(jen.Id("tx"), jen.Err())
 
 	// create method
 	stmnt = stmnt.Func().Params(rcvrParam).Id("Create").
@@ -57,34 +58,10 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		).
 		Params(gen.GetTypeC(ident.Typ), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
-			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(gen.GetZeroValC(ident.Typ), jen.Err()))
 			g.List(jen.Id("tx"), jen.Err()).Op(":=").
 				Id("s").Dot("Tx").Call(ctxIDC)
-			g.Add(ifErr)
-
-			g.Defer().Func().Params().BlockFunc(func(g *jen.Group) {
-				g.If(jen.Err().Op("!=").Nil().Op("&&").Id("tx").Op("!=").Nil()).
-					BlockFunc(func(g *jen.Group) {
-						g.If(jen.Id("rollbackErr").Op(":=").Id("tx").Dot("Rollback")).
-							Call().Op(";").Id("rollbackErr").Op("!=").Nil().Block(
-							jen.Id("err").Op("=").Qual(errPkg, "Wrapf").Call(
-								jen.Id("err"),
-								jen.Lit(`rollback error: %v`),
-								jen.Id("rollbackErr"),
-							),
-						)
-						g.Return()
-					}).Line()
-
-				g.If(jen.Err().Op("=").Id("tx").Dot("Commit").Call().
-					Op(";").Id("err").Op("!=").Nil()).Block(
-					jen.Id("err").Op("=").Qual(errPkg, "Wrap").Call(
-						jen.Id("err"),
-						jen.Lit("commit error"),
-					),
-				)
-			}).Call().Line()
+			g.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(gen.GetZeroValC(ident.Typ), jen.Err()))
 
 			g.List(jen.Id(ident.LowerCamelName()), jen.Err()).Op(":=").
 				Id("s").Dot("CreateTx").Call(
@@ -92,9 +69,14 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 				jen.Id("tx"),
 				jen.Id("c"),
 			)
-			g.Add(ifErr).Line()
+			g.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(gen.GetZeroValC(ident.Typ), txRollback),
+			).Line()
 
-			g.Return(jen.Id(ident.LowerCamelName()), jen.Nil())
+			g.Return(
+				jen.Id(ident.LowerCamelName()),
+				txCommit,
+			)
 		}).Line().Line()
 
 	// query method
@@ -109,41 +91,21 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 			jen.Error(),
 		).
 		BlockFunc(func(g *jen.Group) {
-			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Nil(), jen.Err()))
 			g.List(jen.Id("tx"), jen.Err()).Op(":=").
 				Id("s").Dot("Tx").Call(ctxIDC)
-			g.Add(ifErr)
-
-			g.Defer().Func().Params().BlockFunc(func(g *jen.Group) {
-				g.If(jen.Err().Op("!=").Nil().Op("&&").Id("tx").Op("!=").Nil()).
-					BlockFunc(func(g *jen.Group) {
-						g.If(jen.Id("rollbackErr").Op(":=").Id("tx").Dot("Rollback")).
-							Call().Op(";").Id("rollbackErr").Op("!=").Nil().Block(
-							jen.Id("err").Op("=").Qual(errPkg, "Wrapf").Call(
-								jen.Id("err"),
-								jen.Lit(`rollback error: %v`),
-								jen.Id("rollbackErr"),
-							),
-						)
-						g.Return()
-					}).Line()
-
-				g.If(jen.Err().Op("=").Id("tx").Dot("Commit").Call().
-					Op(";").Id("err").Op("!=").Nil()).Block(
-					jen.Id("err").Op("=").Qual(errPkg, "Wrap").Call(
-						jen.Id("err"),
-						jen.Lit("commit error"),
-					),
-				)
-			}).Call().Line()
+			g.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jen.Nil(), jen.Err())).Line()
 
 			g.List(jen.Id("list"), jen.Err()).Op(":=").
 				Id("s").Dot("QueryTx").Call(ctxIDC, jen.Id("tx"), jen.Id("q"))
-			g.Add(ifErr).Line()
+			g.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jen.Nil(), txRollback),
+			).Line()
 
-			g.Return(jen.Id("list"), jen.Nil())
-
+			g.Return(
+				jen.Id("list"),
+				txCommit,
+			)
 		}).Line().Line()
 
 	// update method
@@ -154,44 +116,19 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		).
 		Params(jen.Int64(), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
-			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Lit(0), jen.Err()))
 			g.List(jen.Id("tx"), jen.Err()).Op(":=").
 				Id("s").Dot("Tx").Call(ctxIDC)
-			g.Add(ifErr)
-
-			g.Defer().Func().Params().BlockFunc(func(g *jen.Group) {
-				g.If(jen.Err().Op("!=").Nil().Op("&&").Id("tx").Op("!=").Nil()).
-					BlockFunc(func(g *jen.Group) {
-						g.If(jen.Id("rollbackErr").Op(":=").Id("tx").Dot("Rollback")).
-							Call().Op(";").Id("rollbackErr").Op("!=").Nil().Block(
-							jen.Id("err").Op("=").Qual(errPkg, "Wrapf").Call(
-								jen.Id("err"),
-								jen.Lit(`rollback error: %v`),
-								jen.Id("rollbackErr"),
-							),
-						)
-						g.Return()
-					}).Line()
-
-				g.If(jen.Err().Op("=").Id("tx").Dot("Commit").Call().
-					Op(";").Id("err").Op("!=").Nil()).Block(
-					jen.Id("err").Op("=").Qual(errPkg, "Wrap").Call(
-						jen.Id("err"),
-						jen.Lit("commit error"),
-					),
-				)
-			}).Call().Line()
+			g.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jen.Lit(0), jen.Err())).Line()
 
 			g.List(jen.Id("rowsAffected"), jen.Err()).Op(":=").
 				Id("s").Dot("UpdateTx").Call(
-				ctxIDC,
-				jen.Id("tx"),
-				jen.Id("u"),
-			)
-			g.Add(ifErr).Line()
+				ctxIDC, jen.Id("tx"), jen.Id("u"))
+			g.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jen.Lit(0), txRollback),
+			).Line()
 
-			g.Return(jen.Id("rowsAffected"), jen.Nil())
+			g.Return(jen.Id("rowsAffected"), txCommit)
 		}).Line().Line()
 
 	// delete method
@@ -202,34 +139,10 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		).
 		Params(jen.Int64(), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
-			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Lit(0), jen.Err()))
 			g.List(jen.Id("tx"), jen.Err()).Op(":=").
 				Id("s").Dot("Tx").Call(ctxIDC)
-			g.Add(ifErr)
-
-			g.Defer().Func().Params().BlockFunc(func(g *jen.Group) {
-				g.If(jen.Err().Op("!=").Nil().Op("&&").Id("tx").Op("!=").Nil()).
-					BlockFunc(func(g *jen.Group) {
-						g.If(jen.Id("rollbackErr").Op(":=").Id("tx").Dot("Rollback")).
-							Call().Op(";").Id("rollbackErr").Op("!=").Nil().Block(
-							jen.Id("err").Op("=").Qual(errPkg, "Wrapf").Call(
-								jen.Id("err"),
-								jen.Lit(`rollback error: %v`),
-								jen.Id("rollbackErr"),
-							),
-						)
-						g.Return()
-					}).Line()
-
-				g.If(jen.Err().Op("=").Id("tx").Dot("Commit").Call().
-					Op(";").Id("err").Op("!=").Nil()).Block(
-					jen.Id("err").Op("=").Qual(errPkg, "Wrap").Call(
-						jen.Id("err"),
-						jen.Lit("commit error"),
-					),
-				)
-			}).Call().Line()
+			g.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jen.Lit(0), jen.Err())).Line()
 
 			g.List(jen.Id("rowsAffected"), jen.Err()).Op(":=").
 				Id("s").Dot("DeleteTx").Call(
@@ -237,9 +150,11 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 				jen.Id("tx"),
 				jen.Id("d"),
 			)
-			g.Add(ifErr).Line()
+			g.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jen.Lit(0), txRollback),
+			).Line()
 
-			g.Return(jen.Id("rowsAffected"), jen.Nil())
+			g.Return(jen.Id("rowsAffected"), txCommit)
 		}).Line().Line()
 
 	// create tx method

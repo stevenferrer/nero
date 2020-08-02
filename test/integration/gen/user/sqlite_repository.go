@@ -26,7 +26,7 @@ func NewSQLiteRepository(db *sql.DB) *SQLiteRepository {
 }
 
 func (s *SQLiteRepository) Tx(ctx context.Context) (nero.Tx, error) {
-	return s.db.BeginTx(ctx, &sql.TxOptions{})
+	return s.db.BeginTx(ctx, nil)
 }
 
 func (s *SQLiteRepository) Create(ctx context.Context, c *Creator) (string, error) {
@@ -34,25 +34,12 @@ func (s *SQLiteRepository) Create(ctx context.Context, c *Creator) (string, erro
 	if err != nil {
 		return "", err
 	}
-	defer func() {
-		if err != nil && tx != nil {
-			if rollbackErr := tx.Rollback(); rollbackErr != nil {
-				err = errors.Wrapf(err, "rollback error: %v", rollbackErr)
-			}
-			return
-		}
-
-		if err = tx.Commit(); err != nil {
-			err = errors.Wrap(err, "commit error")
-		}
-	}()
-
 	id, err := s.CreateTx(ctx, tx, c)
 	if err != nil {
-		return "", err
+		return "", rollback(tx, err)
 	}
 
-	return id, nil
+	return id, tx.Commit()
 }
 
 func (s *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*user.User, error) {
@@ -60,25 +47,13 @@ func (s *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*user.User,
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		if err != nil && tx != nil {
-			if rollbackErr := tx.Rollback(); rollbackErr != nil {
-				err = errors.Wrapf(err, "rollback error: %v", rollbackErr)
-			}
-			return
-		}
-
-		if err = tx.Commit(); err != nil {
-			err = errors.Wrap(err, "commit error")
-		}
-	}()
 
 	list, err := s.QueryTx(ctx, tx, q)
 	if err != nil {
-		return nil, err
+		return nil, rollback(tx, err)
 	}
 
-	return list, nil
+	return list, tx.Commit()
 }
 
 func (s *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error) {
@@ -86,25 +61,13 @@ func (s *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error
 	if err != nil {
 		return 0, err
 	}
-	defer func() {
-		if err != nil && tx != nil {
-			if rollbackErr := tx.Rollback(); rollbackErr != nil {
-				err = errors.Wrapf(err, "rollback error: %v", rollbackErr)
-			}
-			return
-		}
-
-		if err = tx.Commit(); err != nil {
-			err = errors.Wrap(err, "commit error")
-		}
-	}()
 
 	rowsAffected, err := s.UpdateTx(ctx, tx, u)
 	if err != nil {
-		return 0, err
+		return 0, rollback(tx, err)
 	}
 
-	return rowsAffected, nil
+	return rowsAffected, tx.Commit()
 }
 
 func (s *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
@@ -112,25 +75,13 @@ func (s *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error
 	if err != nil {
 		return 0, err
 	}
-	defer func() {
-		if err != nil && tx != nil {
-			if rollbackErr := tx.Rollback(); rollbackErr != nil {
-				err = errors.Wrapf(err, "rollback error: %v", rollbackErr)
-			}
-			return
-		}
-
-		if err = tx.Commit(); err != nil {
-			err = errors.Wrap(err, "commit error")
-		}
-	}()
 
 	rowsAffected, err := s.DeleteTx(ctx, tx, d)
 	if err != nil {
-		return 0, err
+		return 0, rollback(tx, err)
 	}
 
-	return rowsAffected, nil
+	return rowsAffected, tx.Commit()
 }
 
 func (s *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (string, error) {
