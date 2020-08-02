@@ -38,6 +38,7 @@ func (s *PGRepository) Create(ctx context.Context, c *Creator) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	id, err := s.CreateTx(ctx, tx, c)
 	if err != nil {
 		return 0, rollback(tx, err)
@@ -48,10 +49,10 @@ func (s *PGRepository) Create(ctx context.Context, c *Creator) (int64, error) {
 
 func (s *PGRepository) CreateM(ctx context.Context, cs ...*Creator) error {
 	tx, err := s.Tx(ctx)
-
 	if err != nil {
 		return err
 	}
+
 	err = s.CreateMTx(ctx, tx, cs...)
 	if err != nil {
 		return rollback(tx, err)
