@@ -33,8 +33,8 @@ func TestGenerateExample(t *testing.T) {
 	require.NoError(t, err)
 
 	// render files
-	err = files.Render(basePath)
-	assert.NoError(t, err)
+	// err = files.Render(basePath)
+	// assert.NoError(t, err)
 
 	_, err = Generate(new(example1))
 	assert.Error(t, err)

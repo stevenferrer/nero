@@ -235,27 +235,27 @@ func (sqlr *SQLiteRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 		switch p.Op {
 		case predicate.Eq:
 			qb = qb.Where(squirrel.Eq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.NotEq:
 			qb = qb.Where(squirrel.NotEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.Gt:
 			qb = qb.Where(squirrel.Gt{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.GtOrEq:
 			qb = qb.Where(squirrel.GtOrEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.Lt:
 			qb = qb.Where(squirrel.Lt{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.LtOrEq:
 			qb = qb.Where(squirrel.LtOrEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		}
 	}
@@ -267,9 +267,9 @@ func (sqlr *SQLiteRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	for _, s := range sb.All() {
 		switch s.Direction {
 		case sort.Asc:
-			qb = qb.OrderBy(fmt.Sprintf("%s ASC", s.Field))
+			qb = qb.OrderBy(fmt.Sprintf("%s ASC", s.Col))
 		case sort.Desc:
-			qb = qb.OrderBy(fmt.Sprintf("%s DESC", s.Field))
+			qb = qb.OrderBy(fmt.Sprintf("%s DESC", s.Col))
 		}
 	}
 
@@ -317,27 +317,27 @@ func (sqlr *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updat
 		switch p.Op {
 		case predicate.Eq:
 			qb = qb.Where(squirrel.Eq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.NotEq:
 			qb = qb.Where(squirrel.NotEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.Gt:
 			qb = qb.Where(squirrel.Gt{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.GtOrEq:
 			qb = qb.Where(squirrel.GtOrEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.Lt:
 			qb = qb.Where(squirrel.Lt{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.LtOrEq:
 			qb = qb.Where(squirrel.LtOrEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		}
 	}
@@ -391,27 +391,27 @@ func (sqlr *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Delet
 		switch p.Op {
 		case predicate.Eq:
 			qb = qb.Where(squirrel.Eq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.NotEq:
 			qb = qb.Where(squirrel.NotEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.Gt:
 			qb = qb.Where(squirrel.Gt{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.GtOrEq:
 			qb = qb.Where(squirrel.GtOrEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.Lt:
 			qb = qb.Where(squirrel.Lt{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.LtOrEq:
 			qb = qb.Where(squirrel.LtOrEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		}
 	}
@@ -664,27 +664,27 @@ func (sqlr *SQLiteRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 		switch p.Op {
 		case predicate.Eq:
 			qb = qb.Where(squirrel.Eq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.NotEq:
 			qb = qb.Where(squirrel.NotEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.Gt:
 			qb = qb.Where(squirrel.Gt{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.GtOrEq:
 			qb = qb.Where(squirrel.GtOrEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.Lt:
 			qb = qb.Where(squirrel.Lt{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.LtOrEq:
 			qb = qb.Where(squirrel.LtOrEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		}
 	}
@@ -696,9 +696,9 @@ func (sqlr *SQLiteRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	for _, s := range sb.All() {
 		switch s.Direction {
 		case sort.Asc:
-			qb = qb.OrderBy(fmt.Sprintf("%s ASC", s.Field))
+			qb = qb.OrderBy(fmt.Sprintf("%s ASC", s.Col))
 		case sort.Desc:
-			qb = qb.OrderBy(fmt.Sprintf("%s DESC", s.Field))
+			qb = qb.OrderBy(fmt.Sprintf("%s DESC", s.Col))
 		}
 	}
 
@@ -746,27 +746,27 @@ func (sqlr *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updat
 		switch p.Op {
 		case predicate.Eq:
 			qb = qb.Where(squirrel.Eq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.NotEq:
 			qb = qb.Where(squirrel.NotEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.Gt:
 			qb = qb.Where(squirrel.Gt{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.GtOrEq:
 			qb = qb.Where(squirrel.GtOrEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.Lt:
 			qb = qb.Where(squirrel.Lt{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.LtOrEq:
 			qb = qb.Where(squirrel.LtOrEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		}
 	}
@@ -820,27 +820,27 @@ func (sqlr *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Delet
 		switch p.Op {
 		case predicate.Eq:
 			qb = qb.Where(squirrel.Eq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.NotEq:
 			qb = qb.Where(squirrel.NotEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.Gt:
 			qb = qb.Where(squirrel.Gt{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.GtOrEq:
 			qb = qb.Where(squirrel.GtOrEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.Lt:
 			qb = qb.Where(squirrel.Lt{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.LtOrEq:
 			qb = qb.Where(squirrel.LtOrEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		}
 	}

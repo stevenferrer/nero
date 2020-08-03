@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/sf9v/nero/sort"
-	"github.com/sf9v/nero/test/integration/gen/user"
+	"github.com/sf9v/nero/test/integration/basic/repository/user"
 )
 
 func TestSorts(t *testing.T) {
@@ -122,9 +122,9 @@ func TestSorts(t *testing.T) {
 func addSorts(sb sq.SelectBuilder, s *sort.Sort) sq.SelectBuilder {
 	switch s.Direction {
 	case sort.Asc:
-		return sb.OrderBy(fmt.Sprintf("%s ASC", s.Field))
+		return sb.OrderBy(fmt.Sprintf("%s ASC", s.Col))
 	case sort.Desc:
-		return sb.OrderBy(fmt.Sprintf("%s DESC", s.Field))
+		return sb.OrderBy(fmt.Sprintf("%s DESC", s.Col))
 	}
 
 	return sb

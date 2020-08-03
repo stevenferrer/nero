@@ -30,15 +30,15 @@ func BuildSchema(s nero.Schemaer) (*Schema, error) {
 	for _, column := range ns.Columns {
 		cfg := column.Cfg()
 		col := &Col{
-			Name:  cfg.Name,
-			Field: strcase.ToCamel(cfg.Name),
-			Typ:   NewTyp(cfg.T),
-			Ident: cfg.Ident,
-			Auto:  cfg.Auto,
+			Name:        cfg.Name,
+			StructField: strcase.ToCamel(cfg.Name),
+			Typ:         NewTyp(cfg.T),
+			Ident:       cfg.Ident,
+			Auto:        cfg.Auto,
 		}
 
-		if len(cfg.Field) > 0 {
-			col.Field = cfg.Field
+		if len(cfg.StructField) > 0 {
+			col.StructField = cfg.StructField
 		}
 
 		if cfg.Ident {

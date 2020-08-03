@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/sf9v/nero/predicate"
-	"github.com/sf9v/nero/test/integration/gen/user"
+	"github.com/sf9v/nero/test/integration/basic/repository/user"
 )
 
 func TestPredicates(t *testing.T) {
@@ -151,27 +151,27 @@ func addPred(sb sq.SelectBuilder,
 	switch p.Op {
 	case predicate.Eq:
 		return sb.Where(sq.Eq{
-			p.Field: p.Val,
+			p.Col: p.Val,
 		})
 	case predicate.NotEq:
 		return sb.Where(sq.NotEq{
-			p.Field: p.Val,
+			p.Col: p.Val,
 		})
 	case predicate.Gt:
 		return sb.Where(sq.Gt{
-			p.Field: p.Val,
+			p.Col: p.Val,
 		})
 	case predicate.GtOrEq:
 		return sb.Where(sq.GtOrEq{
-			p.Field: p.Val,
+			p.Col: p.Val,
 		})
 	case predicate.Lt:
 		return sb.Where(sq.Lt{
-			p.Field: p.Val,
+			p.Col: p.Val,
 		})
 	case predicate.LtOrEq:
 		return sb.Where(sq.LtOrEq{
-			p.Field: p.Val,
+			p.Col: p.Val,
 		})
 	}
 

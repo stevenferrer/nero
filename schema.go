@@ -22,11 +22,11 @@ type Column struct {
 
 // ColumnConfig is a column config
 type ColumnConfig struct {
-	Name  string
-	T     interface{}
-	Field string
-	Auto  bool
-	Ident bool
+	Name        string
+	T           interface{}
+	StructField string
+	Auto        bool
+	Ident       bool
 }
 
 // NewColumn creates a new column
@@ -44,8 +44,8 @@ func (c *Column) Cfg() *ColumnConfig {
 	return c.cfg
 }
 
-// Auto is an auto-filled column e.g.
-// auto-increment id, auto-filled date etc.
+// Auto is an auto-filled column i.e. auto-increment
+// primary key id, auto-filled date etc.
 func (c *Column) Auto() *Column {
 	c.cfg.Auto = true
 	return c
@@ -57,10 +57,10 @@ func (c *Column) Ident() *Column {
 	return c
 }
 
-// Field is the struct field name. Use when nero generated the
-// wrong field for your struct e.g. your struct field is "ID"
-// but nero generated "Id" instead.
-func (c *Column) Field(field string) *Column {
-	c.cfg.Field = field
+// StructField is the struct field name.
+// Use this when the generated struct field is wrong.
+// e.g. The struct field from generated repository is "Id" intead of "ID".
+func (c *Column) StructField(structField string) *Column {
+	c.cfg.StructField = structField
 	return c
 }

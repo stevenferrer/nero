@@ -37,7 +37,7 @@ func TestBuildSchema(t *testing.T) {
 
 	ident := schema.Ident
 	assert.Equal(t, "id", ident.Name)
-	assert.Equal(t, "ID", ident.Field)
+	assert.Equal(t, "ID", ident.StructField)
 
 	// no ident defined
 	_, err = BuildSchema(new(example1))

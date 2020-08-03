@@ -16,12 +16,12 @@ func newSorts(schema *gen.Schema) *jen.Statement {
 	dirs := []sort.Direction{sort.Asc, sort.Desc}
 	for _, col := range schema.Cols {
 		for _, dir := range dirs {
-			dirStr := string(dir)
-			field := col.CamelName()
-			if len(col.Field) > 0 {
-				field = col.Field
+			dirStr := string(dir.String())
+			structField := col.CamelName()
+			if len(col.StructField) > 0 {
+				structField = col.StructField
 			}
-			fn := camel(field + "_" + dirStr)
+			fn := camel(structField + "_" + dirStr)
 			stmnt = stmnt.Func().
 				Id(fn).Params().
 				Params(jen.Id("SortFunc")).
@@ -29,7 +29,7 @@ func newSorts(schema *gen.Schema) *jen.Statement {
 					Qual(sortPkg, "Sorts")).Block(jen.Id("srt").Dot("Add").
 					Call(
 						jen.Op("&").Qual(sortPkg, "Sort").Block(
-							jen.Id("Field").Op(":").
+							jen.Id("Col").Op(":").
 								Lit(col.Name).Op(","),
 							jen.Id("Direction").Op(":").
 								Qual(sortPkg, dirStr).Op(","),

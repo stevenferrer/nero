@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	predOps = []predicate.Op{predicate.Eq, predicate.NotEq, predicate.Gt,
+	predOps = []predicate.Operator{predicate.Eq, predicate.NotEq, predicate.Gt,
 		predicate.GtOrEq, predicate.Lt, predicate.LtOrEq}
 )
 
@@ -331,7 +331,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 				g.Var().Id("item").Qual(schema.Typ.PkgPath, schema.Typ.Name)
 				g.Err().Op("=").Id("rows").Dot("Scan").CallFunc(func(g *jen.Group) {
 					for _, col := range schema.Cols {
-						g.Line().Op("&").Id("item").Dot(col.Field)
+						g.Line().Op("&").Id("item").Dot(col.StructField)
 					}
 					g.Line()
 				})
@@ -372,7 +372,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 				Call(ctxIDC).Op(".").Line().
 				Id("Scan").CallFunc(func(g *jen.Group) {
 				for _, col := range schema.Cols {
-					g.Line().Op("&").Id("item").Dot(col.Field)
+					g.Line().Op("&").Id("item").Dot(col.StructField)
 				}
 				g.Line()
 			})
@@ -409,11 +409,11 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 				Block(jen.Switch(jen.Id("p").Dot("Op")).
 					BlockFunc(func(g *jen.Group) {
 						for _, op := range predOps {
-							opStr := string(op)
+							opStr := op.String()
 							g.Case(jen.Qual(pkgPath+"/predicate", opStr)).
 								Block(jen.Id("qb").Op("=").Id("qb").Dot("Where").
 									Call(jen.Qual(sqPkg, opStr).Block(
-										jen.Id("p").Dot("Field").Op(":").
+										jen.Id("p").Dot("Col").Op(":").
 											Id("p").Dot("Val").Op(",")),
 									),
 								)
@@ -432,17 +432,17 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 				Block(jen.Switch(jen.Id("s").Dot("Direction")).
 					BlockFunc(func(g *jen.Group) {
 						// asc
-						g.Case(jen.Qual(pkgPath+"/sort", string(sort.Asc))).
+						g.Case(jen.Qual(pkgPath+"/sort", sort.Asc.String())).
 							Block(jen.Id("qb").Op("=").Id("qb").Dot("OrderBy").
 								Call(jen.Qual("fmt", "Sprintf").Call(
 									jen.Lit("%s ASC"),
-									jen.Id("s").Dot("Field"),
+									jen.Id("s").Dot("Col"),
 								)))
 						// desc
-						g.Case(jen.Qual(pkgPath+"/sort", string(sort.Desc))).
+						g.Case(jen.Qual(pkgPath+"/sort", sort.Desc.String())).
 							Block(jen.Id("qb").Op("=").Id("qb").Dot("OrderBy").
 								Call(jen.Qual("fmt", "Sprintf").Call(
-									jen.Lit("%s DESC"), jen.Id("s").Dot("Field"),
+									jen.Lit("%s DESC"), jen.Id("s").Dot("Col"),
 								)))
 					}),
 				).Line()
@@ -551,11 +551,11 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 				Block(jen.Switch(jen.Id("p").Dot("Op")).
 					BlockFunc(func(g *jen.Group) {
 						for _, op := range predOps {
-							opStr := string(op)
+							opStr := op.String()
 							g.Case(jen.Qual(pkgPath+"/predicate", opStr)).
 								Block(jen.Id("qb").Op("=").Id("qb").Dot("Where").
 									Call(jen.Qual(sqPkg, opStr).Block(
-										jen.Id("p").Dot("Field").Op(":").
+										jen.Id("p").Dot("Col").Op(":").
 											Id("p").Dot("Val").Op(",")),
 									),
 								)
@@ -645,11 +645,11 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 				Block(jen.Switch(jen.Id("p").Dot("Op")).
 					BlockFunc(func(g *jen.Group) {
 						for _, op := range predOps {
-							opStr := string(op)
+							opStr := op.String()
 							g.Case(jen.Qual(pkgPath+"/predicate", opStr)).
 								Block(jen.Id("qb").Op("=").Id("qb").Dot("Where").
 									Call(jen.Qual(sqPkg, opStr).Block(
-										jen.Id("p").Dot("Field").Op(":").
+										jen.Id("p").Dot("Col").Op(":").
 											Id("p").Dot("Val").Op(",")),
 									),
 								)
@@ -674,7 +674,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 	return stmnt
 }
 
-func newLogBlock(rcvrID, op string) *jen.Statement {
+func newLogBlock(rcvrID, operation string) *jen.Statement {
 	return jen.If(
 		jen.Id("log").Op(":=").Id(rcvrID).Dot("log"),
 		jen.Id("log").Op("!=").Nil(),
@@ -686,7 +686,7 @@ func newLogBlock(rcvrID, op string) *jen.Statement {
 		).Op(":=").Id("qb").Dot("ToSql").Call(),
 		jen.Id("log").
 			Dot("Debug").Call().
-			Dot("Str").Call(jen.Lit("op"), jen.Lit(op)).
+			Dot("Str").Call(jen.Lit("op"), jen.Lit(operation)).
 			Dot("Str").Call(jen.Lit("stmnt"), jen.Id("sql")).Op(".").Line().
 			Id("Interface").Call(jen.Lit("args"), jen.Id("args")).
 			Dot("Err").Call(jen.Id("err")).

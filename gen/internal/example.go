@@ -20,7 +20,7 @@ func (e *Example) Schema() *nero.Schema {
 		Pkg:        "example",
 		Collection: "examples",
 		Columns: []*nero.Column{
-			nero.NewColumn("id", e.ID).Field("ID").Ident().Auto(),
+			nero.NewColumn("id", e.ID).StructField("ID").Ident().Auto(),
 			nero.NewColumn("name", e.Name),
 			nero.NewColumn("updated_at", e.UpdatedAt),
 			nero.NewColumn("created_at", e.CreatedAt).Auto(),
@@ -42,7 +42,7 @@ func (e *Example2) Schema() *nero.Schema {
 		Pkg:        "example2",
 		Collection: "examples",
 		Columns: []*nero.Column{
-			nero.NewColumn("id", e.ID).Field("ID").Ident().Auto(),
+			nero.NewColumn("id", e.ID).StructField("ID").Ident().Auto(),
 			nero.NewColumn("name", e.Name),
 			nero.NewColumn("updated_at", e.UpdatedAt),
 			nero.NewColumn("created_at", e.CreatedAt).Auto(),

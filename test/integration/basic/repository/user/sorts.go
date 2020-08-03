@@ -8,7 +8,7 @@ type SortFunc func(*sort.Sorts)
 func IDAsc() SortFunc {
 	return func(srt *sort.Sorts) {
 		srt.Add(&sort.Sort{
-			Field:     "id",
+			Col:       "id",
 			Direction: sort.Asc,
 		})
 	}
@@ -17,7 +17,7 @@ func IDAsc() SortFunc {
 func IDDesc() SortFunc {
 	return func(srt *sort.Sorts) {
 		srt.Add(&sort.Sort{
-			Field:     "id",
+			Col:       "id",
 			Direction: sort.Desc,
 		})
 	}
@@ -26,7 +26,7 @@ func IDDesc() SortFunc {
 func EmailAsc() SortFunc {
 	return func(srt *sort.Sorts) {
 		srt.Add(&sort.Sort{
-			Field:     "email",
+			Col:       "email",
 			Direction: sort.Asc,
 		})
 	}
@@ -35,7 +35,7 @@ func EmailAsc() SortFunc {
 func EmailDesc() SortFunc {
 	return func(srt *sort.Sorts) {
 		srt.Add(&sort.Sort{
-			Field:     "email",
+			Col:       "email",
 			Direction: sort.Desc,
 		})
 	}
@@ -44,7 +44,7 @@ func EmailDesc() SortFunc {
 func NameAsc() SortFunc {
 	return func(srt *sort.Sorts) {
 		srt.Add(&sort.Sort{
-			Field:     "name",
+			Col:       "name",
 			Direction: sort.Asc,
 		})
 	}
@@ -53,7 +53,7 @@ func NameAsc() SortFunc {
 func NameDesc() SortFunc {
 	return func(srt *sort.Sorts) {
 		srt.Add(&sort.Sort{
-			Field:     "name",
+			Col:       "name",
 			Direction: sort.Desc,
 		})
 	}
@@ -62,7 +62,7 @@ func NameDesc() SortFunc {
 func UpdatedAtAsc() SortFunc {
 	return func(srt *sort.Sorts) {
 		srt.Add(&sort.Sort{
-			Field:     "updated_at",
+			Col:       "updated_at",
 			Direction: sort.Asc,
 		})
 	}
@@ -71,7 +71,7 @@ func UpdatedAtAsc() SortFunc {
 func UpdatedAtDesc() SortFunc {
 	return func(srt *sort.Sorts) {
 		srt.Add(&sort.Sort{
-			Field:     "updated_at",
+			Col:       "updated_at",
 			Direction: sort.Desc,
 		})
 	}
@@ -80,7 +80,7 @@ func UpdatedAtDesc() SortFunc {
 func CreatedAtAsc() SortFunc {
 	return func(srt *sort.Sorts) {
 		srt.Add(&sort.Sort{
-			Field:     "created_at",
+			Col:       "created_at",
 			Direction: sort.Asc,
 		})
 	}
@@ -89,7 +89,7 @@ func CreatedAtAsc() SortFunc {
 func CreatedAtDesc() SortFunc {
 	return func(srt *sort.Sorts) {
 		srt.Add(&sort.Sort{
-			Field:     "created_at",
+			Col:       "created_at",
 			Direction: sort.Desc,
 		})
 	}

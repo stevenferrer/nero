@@ -1,11 +1,22 @@
 package sort
 
 // Direction is a sort direction
-type Direction string
+type Direction int
+
+func (d Direction) String() string {
+	switch d {
+	case Asc:
+		return "Asc"
+	case Desc:
+		return "Desc"
+	}
+
+	return "Invalid"
+}
 
 const (
 	// Asc is an ascending sort direction
-	Asc Direction = "Asc"
+	Asc Direction = iota
 	// Desc is a descending sort direction
-	Desc Direction = "Desc"
+	Desc
 )

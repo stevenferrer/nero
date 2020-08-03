@@ -4,7 +4,7 @@ package user
 import (
 	"context"
 	nero "github.com/sf9v/nero"
-	user "github.com/sf9v/nero/test/integration/user"
+	user "github.com/sf9v/nero/test/integration/basic/user"
 )
 
 // Repository is the contract for storing User

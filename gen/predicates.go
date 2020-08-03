@@ -12,17 +12,17 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 		jen.Op("*").Qual(pkgPath+"/predicate", "Predicates"),
 	).Line()
 
-	ops := []predicate.Op{predicate.Eq, predicate.NotEq, predicate.Gt,
+	ops := []predicate.Operator{predicate.Eq, predicate.NotEq, predicate.Gt,
 		predicate.GtOrEq, predicate.Lt, predicate.LtOrEq}
 	predPkg := pkgPath + "/predicate"
 	for _, col := range schema.Cols {
 		for _, op := range ops {
-			opStr := string(op)
-			field := col.CamelName()
-			if len(col.Field) > 0 {
-				field = col.Field
+			opStr := string(op.String())
+			structField := col.CamelName()
+			if len(col.StructField) > 0 {
+				structField = col.StructField
 			}
-			fn := camel(field + "_" + opStr)
+			fn := camel(structField + "_" + opStr)
 			stmnt = stmnt.Func().
 				Id(fn).
 				Params(jen.Id(col.LowerCamelName()).
@@ -36,7 +36,7 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 							jen.Id("pb").Dot("Add").Call(
 								jen.Op("&").Qual(predPkg, "Predicate").
 									Block(
-										jen.Id("Field").Op(":").
+										jen.Id("Col").Op(":").
 											Lit(col.Name).Op(","),
 										jen.Id("Op").Op(":").
 											Qual(predPkg, opStr).Op(","),

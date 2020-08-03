@@ -22,7 +22,7 @@ func (u *User) Schema() *nero.Schema {
 		Collection: "users",
 		Columns: []*nero.Column{
 			nero.NewColumn("id", u.ID).
-				Field("ID").Ident().Auto(),
+				StructField("ID").Ident().Auto(),
 			nero.NewColumn("email", u.Email),
 			nero.NewColumn("name", u.Name),
 			nero.NewColumn("updated_at", u.UpdatedAt),

@@ -6,7 +6,7 @@ import (
 	"path"
 
 	"github.com/sf9v/nero/gen"
-	"github.com/sf9v/nero/test/integration/user"
+	"github.com/sf9v/nero/test/integration/basic/user"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 	checkErr(err)
 
 	// create base directory
-	basePath := path.Join("gen", "user")
+	basePath := path.Join("repository", "user")
 	err = os.MkdirAll(basePath, os.ModePerm)
 	checkErr(err)
 

@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/sf9v/nero/test/integration/gen/user"
+	"github.com/sf9v/nero/test/integration/basic/repository/user"
 )
 
 func TestPGRepository(t *testing.T) {

@@ -12,7 +12,7 @@ import (
 	nero "github.com/sf9v/nero"
 	predicate "github.com/sf9v/nero/predicate"
 	sort "github.com/sf9v/nero/sort"
-	user "github.com/sf9v/nero/test/integration/user"
+	user "github.com/sf9v/nero/test/integration/basic/user"
 	"io"
 	"strconv"
 )
@@ -237,27 +237,27 @@ func (sqlr *SQLiteRepository) buildSelect(q *Queryer) sq.SelectBuilder {
 		switch p.Op {
 		case predicate.Eq:
 			qb = qb.Where(sq.Eq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.NotEq:
 			qb = qb.Where(sq.NotEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.Gt:
 			qb = qb.Where(sq.Gt{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.GtOrEq:
 			qb = qb.Where(sq.GtOrEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.Lt:
 			qb = qb.Where(sq.Lt{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.LtOrEq:
 			qb = qb.Where(sq.LtOrEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		}
 	}
@@ -269,9 +269,9 @@ func (sqlr *SQLiteRepository) buildSelect(q *Queryer) sq.SelectBuilder {
 	for _, s := range sb.All() {
 		switch s.Direction {
 		case sort.Asc:
-			qb = qb.OrderBy(fmt.Sprintf("%s ASC", s.Field))
+			qb = qb.OrderBy(fmt.Sprintf("%s ASC", s.Col))
 		case sort.Desc:
-			qb = qb.OrderBy(fmt.Sprintf("%s DESC", s.Field))
+			qb = qb.OrderBy(fmt.Sprintf("%s DESC", s.Col))
 		}
 	}
 
@@ -320,27 +320,27 @@ func (sqlr *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updat
 		switch p.Op {
 		case predicate.Eq:
 			qb = qb.Where(sq.Eq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.NotEq:
 			qb = qb.Where(sq.NotEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.Gt:
 			qb = qb.Where(sq.Gt{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.GtOrEq:
 			qb = qb.Where(sq.GtOrEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.Lt:
 			qb = qb.Where(sq.Lt{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.LtOrEq:
 			qb = qb.Where(sq.LtOrEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		}
 	}
@@ -394,27 +394,27 @@ func (sqlr *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Delet
 		switch p.Op {
 		case predicate.Eq:
 			qb = qb.Where(sq.Eq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.NotEq:
 			qb = qb.Where(sq.NotEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.Gt:
 			qb = qb.Where(sq.Gt{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.GtOrEq:
 			qb = qb.Where(sq.GtOrEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.Lt:
 			qb = qb.Where(sq.Lt{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		case predicate.LtOrEq:
 			qb = qb.Where(sq.LtOrEq{
-				p.Field: p.Val,
+				p.Col: p.Val,
 			})
 		}
 	}
