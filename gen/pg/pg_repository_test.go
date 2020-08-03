@@ -18,7 +18,8 @@ func TestNewPGRepoC(t *testing.T) {
 	pgRepo := NewPGRepoC(schema)
 	expect := strings.TrimSpace(`
 type PGRepository struct {
-	db *sql.DB
+	db  *sql.DB
+	log *zerolog.Logger
 }
 
 var _ = Repository(&PGRepository{})
@@ -26,6 +27,14 @@ var _ = Repository(&PGRepository{})
 func NewPGRepository(db *sql.DB) *PGRepository {
 	return &PGRepository{
 		db: db,
+	}
+}
+
+func (pgr *PGRepository) Debug(out io.Writer) *PGRepository {
+	lg := zerolog.New(out).With().Timestamp().Logger()
+	return &PGRepository{
+		db:  pgr.db,
+		log: &lg,
 	}
 }
 
@@ -73,6 +82,12 @@ func (pgr *PGRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (
 		Suffix("RETURNING \"id\"").
 		PlaceholderFormat(squirrel.Dollar).
 		RunWith(txx)
+	if log := pgr.log; log != nil {
+		sql, args, err := qb.ToSql()
+		log.Debug().Str("op", "Create").Str("stmnt", sql).
+			Interface("args", args).Err(err).Msg("")
+	}
+
 	var id int64
 	err := qb.QueryRowContext(ctx).Scan(&id)
 	if err != nil {
@@ -100,6 +115,12 @@ func (pgr *PGRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Cr
 
 	qb = qb.Suffix("RETURNING \"id\"").
 		PlaceholderFormat(squirrel.Dollar)
+	if log := pgr.log; log != nil {
+		sql, args, err := qb.ToSql()
+		log.Debug().Str("op", "CreateMany").Str("stmnt", sql).
+			Interface("args", args).Err(err).Msg("")
+	}
+
 	_, err := qb.RunWith(txx).ExecContext(ctx)
 	if err != nil {
 		return err
@@ -143,6 +164,12 @@ func (pgr *PGRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([
 	}
 
 	qb := pgr.buildSelect(q)
+	if log := pgr.log; log != nil {
+		sql, args, err := qb.ToSql()
+		log.Debug().Str("op", "Query").Str("stmnt", sql).
+			Interface("args", args).Err(err).Msg("")
+	}
+
 	rows, err := qb.RunWith(txx).QueryContext(ctx)
 	if err != nil {
 		return nil, err
@@ -175,15 +202,21 @@ func (pgr *PGRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer)
 	}
 
 	qb := pgr.buildSelect(q)
-	row := qb.RunWith(txx).QueryRowContext(ctx)
+	if log := pgr.log; log != nil {
+		sql, args, err := qb.ToSql()
+		log.Debug().Str("op", "One").Str("stmnt", sql).
+			Interface("args", args).Err(err).Msg("")
+	}
 
 	var item internal.Example
-	err := row.Scan(
-		&item.ID,
-		&item.Name,
-		&item.UpdatedAt,
-		&item.CreatedAt,
-	)
+	err := qb.RunWith(txx).
+		QueryRowContext(ctx).
+		Scan(
+			&item.ID,
+			&item.Name,
+			&item.UpdatedAt,
+			&item.CreatedAt,
+		)
 	if err != nil {
 		return nil, err
 	}
@@ -311,6 +344,11 @@ func (pgr *PGRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (
 			})
 		}
 	}
+	if log := pgr.log; log != nil {
+		sql, args, err := qb.ToSql()
+		log.Debug().Str("op", "Update").Str("stmnt", sql).
+			Interface("args", args).Err(err).Msg("")
+	}
 
 	res, err := qb.ExecContext(ctx)
 	if err != nil {
@@ -380,6 +418,11 @@ func (pgr *PGRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (
 				p.Field: p.Val,
 			})
 		}
+	}
+	if log := pgr.log; log != nil {
+		sql, args, err := qb.ToSql()
+		log.Debug().Str("op", "Delete").Str("stmnt", sql).
+			Interface("args", args).Err(err).Msg("")
 	}
 
 	res, err := qb.ExecContext(ctx)

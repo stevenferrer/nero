@@ -5,10 +5,28 @@ import (
 	"path"
 	"testing"
 
+	"github.com/sf9v/nero"
 	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+type example1 struct{}
+
+func (*example1) Schema() *nero.Schema {
+	return &nero.Schema{}
+}
+
+type example2 struct{}
+
+func (*example2) Schema() *nero.Schema {
+	return &nero.Schema{
+		Columns: []*nero.Column{
+			nero.NewColumn("id1", int64(0)).Ident(),
+			nero.NewColumn("id2", int64(0)).Ident(),
+		},
+	}
+}
 
 func TestGenerateExample(t *testing.T) {
 	files, err := Generate(new(gen.Example))
@@ -28,4 +46,7 @@ func TestGenerateExample(t *testing.T) {
 	// render files
 	err = files.Render(basePath)
 	assert.NoError(t, err)
+
+	_, err = Generate(new(example1))
+	assert.Error(t, err)
 }

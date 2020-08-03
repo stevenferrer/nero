@@ -13,6 +13,7 @@ import (
 const (
 	pkgPath = "github.com/sf9v/nero"
 	errPkg  = "github.com/pkg/errors"
+	logPkg  = "github.com/rs/zerolog"
 	sqPkg   = "github.com/Masterminds/squirrel"
 )
 
@@ -24,33 +25,54 @@ var (
 // NewPGRepoC generates postgres repository implementation
 func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 	ident := schema.Ident
-	stmnt := jen.Type().Id("PGRepository").
-		Struct(jen.Id("db").Op("*").Qual("database/sql", "DB")).
+
+	repoTypeName := "PGRepository"
+	stmnt := jen.Type().Id(repoTypeName).
+		Struct(
+			jen.Id("db").Op("*").Qual("database/sql", "DB"),
+			jen.Id("log").Op("*").Qual(logPkg, "Logger"),
+		).
 		Line()
 
 	stmnt = stmnt.Var().Id("_").Op("=").Id("Repository").Call(
-		jen.Op("&").Id("PGRepository").Block(),
+		jen.Op("&").Id(repoTypeName).Block(),
 	).Line()
 
 	// factory
 	stmnt = stmnt.Func().Id("NewPGRepository").
 		Params(jen.Id("db").Op("*").Qual("database/sql", "DB")).
-		Params(jen.Op("*").Id("PGRepository")).
-		Block(jen.Return(jen.Op("&").Id("PGRepository").Block(
+		Params(jen.Op("*").Id(repoTypeName)).
+		Block(jen.Return(jen.Op("&").Id(repoTypeName).Block(
 			jen.Id("db").Op(":").Id("db").Op(","),
 		))).Line().Line()
 
-	rcvrID := jen.Id("pgr")
-	rcvrParam := jen.Add(rcvrID).Op("*").Id("PGRepository")
+	rcvrID := "pgr"
+	rcvrIDC := jen.Id(rcvrID)
+	rcvrParamC := jen.Add(rcvrIDC).Op("*").Id(repoTypeName)
 	ctxC := jen.Qual("context", "Context")
 	ctxIDC := jen.Id("ctx")
 	txC := jen.Qual(pkgPath, "Tx")
 
+	// debug
+	stmnt = stmnt.Func().Params(rcvrParamC).Id("Debug").
+		Params(jen.Id("out").Qual("io", "Writer")).
+		Params(jen.Op("*").Id(repoTypeName)).
+		Block(
+			jen.Id("lg").Op(":=").Qual(logPkg, "New").
+				Call(jen.Id("out")).Dot("With").Call().
+				Dot("Timestamp").Call().Dot("Logger").Call(),
+			jen.Return(jen.Op("&").Id(repoTypeName).Block(
+				jen.Id("db").Op(":").Add(rcvrIDC).Dot("db").Op(","),
+				jen.Id("log").Op(":").Op("&").Id("lg").Op(","),
+			)),
+		).
+		Line().Line()
+
 	// tx
-	stmnt = stmnt.Func().Params(rcvrParam).Id("Tx").
+	stmnt = stmnt.Func().Params(rcvrParamC).Id("Tx").
 		Params(jen.Id("ctx").Add(ctxC)).
 		Params(txC, jen.Error()).Block(
-		jen.Return(jen.Add(rcvrID).Dot("db").Dot("BeginTx").
+		jen.Return(jen.Add(rcvrIDC).Dot("db").Dot("BeginTx").
 			Call(ctxIDC, jen.Nil()))).
 		Line().Line()
 
@@ -58,7 +80,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 	txRollback := jen.Id("rollback").Call(jen.Id("tx"), jen.Err())
 
 	// create
-	stmnt = stmnt.Func().Params(rcvrParam).Id("Create").
+	stmnt = stmnt.Func().Params(rcvrParamC).Id("Create").
 		Params(
 			jen.Id("ctx").Add(ctxC),
 			jen.Id("c").Op("*").Id("Creator"),
@@ -66,13 +88,13 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		Params(gen.GetTypeC(ident.Typ), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			g.List(jen.Id("tx"), jen.Err()).Op(":=").
-				Add(rcvrID).Dot("Tx").Call(ctxIDC)
+				Add(rcvrIDC).Dot("Tx").Call(ctxIDC)
 			g.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(gen.GetZeroValC(ident.Typ), jen.Err())).
 				Line()
 
 			g.List(jen.Id(ident.LowerCamelName()), jen.Err()).Op(":=").
-				Add(rcvrID).Dot("CreateTx").Call(
+				Add(rcvrIDC).Dot("CreateTx").Call(
 				ctxIDC,
 				jen.Id("tx"),
 				jen.Id("c"),
@@ -88,7 +110,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		}).Line().Line()
 
 	// create many
-	stmnt = stmnt.Func().Params(rcvrParam).Id("CreateMany").
+	stmnt = stmnt.Func().Params(rcvrParamC).Id("CreateMany").
 		Params(
 			jen.Id("ctx").Add(ctxC),
 			jen.Id("cs").Op("...").Op("*").Id("Creator"),
@@ -96,10 +118,10 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		Params(jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			g.List(jen.Id("tx"), jen.Err()).Op(":=").
-				Add(rcvrID).Dot("Tx").Call(ctxIDC)
+				Add(rcvrIDC).Dot("Tx").Call(ctxIDC)
 			g.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Err())).Line()
-			g.List(jen.Err()).Op("=").Add(rcvrID).Dot("CreateManyTx").
+			g.List(jen.Err()).Op("=").Add(rcvrIDC).Dot("CreateManyTx").
 				Call(ctxIDC, jen.Id("tx"), jen.Id("cs").Op("..."))
 			g.If(jen.Err().Op("!=").Nil()).
 				Block(jen.Return(txRollback)).Line()
@@ -108,7 +130,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		}).Line().Line()
 
 	// create tx
-	stmnt = stmnt.Func().Params(rcvrParam).Id("CreateTx").
+	stmnt = stmnt.Func().Params(rcvrParamC).Id("CreateTx").
 		Params(
 			jen.Id("ctx").Add(ctxC),
 			jen.Id("tx").Add(txC),
@@ -146,6 +168,8 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 				Op(".").Line().Id("PlaceholderFormat").
 				Call(jen.Qual(sqPkg, "Dollar")).
 				Op(".").Line().Id("RunWith").Call(jen.Id("txx"))
+			// debug
+			g.Add(newLogBlock(rcvrID, "Create")).Line().Line()
 
 			g.Var().Id(ident.LowerCamelName()).Add(gen.GetTypeC(ident.Typ))
 			g.Err().Op(":=").Id("qb").Dot("QueryRowContext").
@@ -156,7 +180,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		}).Line().Line()
 
 	// create many tx
-	stmnt = stmnt.Func().Params(rcvrParam).Id("CreateManyTx").
+	stmnt = stmnt.Func().Params(rcvrParamC).Id("CreateManyTx").
 		Params(
 			jen.Id("ctx").Add(ctxC),
 			jen.Id("tx").Add(txC),
@@ -202,6 +226,9 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 				Op(".").Line().Id("PlaceholderFormat").
 				Call(jen.Qual(sqPkg, "Dollar"))
 
+			// debug
+			g.Add(newLogBlock(rcvrID, "CreateMany")).Line().Line()
+
 			g.List(jen.Id("_"), jen.Err()).Op(":=").Id("qb").
 				Dot("RunWith").Call(jen.Id("txx")).
 				Dot("ExecContext").Call(ctxIDC)
@@ -212,7 +239,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		}).Line().Line()
 
 	// query
-	stmnt = stmnt.Func().Params(rcvrParam).Id("Query").
+	stmnt = stmnt.Func().Params(rcvrParamC).Id("Query").
 		Params(
 			jen.Id("ctx").Add(ctxC),
 			jen.Id("q").Op("*").Id("Queryer"),
@@ -224,12 +251,12 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		).
 		BlockFunc(func(g *jen.Group) {
 			g.List(jen.Id("tx"), jen.Err()).Op(":=").
-				Add(rcvrID).Dot("Tx").Call(ctxIDC)
+				Add(rcvrIDC).Dot("Tx").Call(ctxIDC)
 			g.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Nil(), jen.Err())).Line()
 
 			g.List(jen.Id("list"), jen.Err()).Op(":=").
-				Add(rcvrID).Dot("QueryTx").Call(ctxIDC, jen.Id("tx"), jen.Id("q"))
+				Add(rcvrIDC).Dot("QueryTx").Call(ctxIDC, jen.Id("tx"), jen.Id("q"))
 			g.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Nil(), txRollback),
 			).Line()
@@ -241,7 +268,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		}).Line().Line()
 
 	// query one
-	stmnt = stmnt.Func().Params(rcvrParam).Id("QueryOne").
+	stmnt = stmnt.Func().Params(rcvrParamC).Id("QueryOne").
 		Params(
 			jen.Id("ctx").Add(ctxC),
 			jen.Id("q").Op("*").Id("Queryer"),
@@ -252,12 +279,12 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		).
 		BlockFunc(func(g *jen.Group) {
 			g.List(jen.Id("tx"), jen.Err()).Op(":=").
-				Add(rcvrID).Dot("Tx").Call(ctxIDC)
+				Add(rcvrIDC).Dot("Tx").Call(ctxIDC)
 			g.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Nil(), jen.Err())).Line()
 
 			g.List(jen.Id("item"), jen.Err()).Op(":=").
-				Add(rcvrID).Dot("QueryOneTx").Call(ctxIDC, jen.Id("tx"), jen.Id("q"))
+				Add(rcvrIDC).Dot("QueryOneTx").Call(ctxIDC, jen.Id("tx"), jen.Id("q"))
 			g.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Nil(), txRollback),
 			).Line()
@@ -271,7 +298,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 	// query tx
 	queryRetTyp := jen.Op("[]").Op("*").
 		Qual(schema.Typ.PkgPath, schema.Typ.Name)
-	stmnt = stmnt.Func().Params(rcvrParam).Id("QueryTx").
+	stmnt = stmnt.Func().Params(rcvrParamC).Id("QueryTx").
 		Params(
 			jen.Id("ctx").Add(ctxC),
 			jen.Id("tx").Add(txC),
@@ -286,7 +313,9 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 				jen.Qual(errPkg, "New").Call(jen.Lit("expecting tx to be *sql.Tx")))).
 				Line()
 
-			g.Id("qb").Op(":=").Add(rcvrID).Dot("buildSelect").Call(jen.Id("q"))
+			g.Id("qb").Op(":=").Add(rcvrIDC).Dot("buildSelect").Call(jen.Id("q"))
+			// debug
+			g.Add(newLogBlock(rcvrID, "Query")).Line().Line()
 
 			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Nil(), jen.Err()))
@@ -315,7 +344,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		}).Line().Line()
 
 	// query one tx
-	stmnt = stmnt.Func().Params(rcvrParam).Id("QueryOneTx").
+	stmnt = stmnt.Func().Params(rcvrParamC).Id("QueryOneTx").
 		Params(
 			jen.Id("ctx").Add(ctxC),
 			jen.Id("tx").Add(txC),
@@ -333,21 +362,22 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 				jen.Return(jen.Nil(), jen.Qual(errPkg, "New").
 					Call(jen.Lit("expecting tx to be *sql.Tx")))).Line()
 
-			g.Id("qb").Op(":=").Add(rcvrID).Dot("buildSelect").Call(jen.Id("q"))
-
-			g.List(jen.Id("row")).Op(":=").Id("qb").Dot("RunWith").
-				Call(jen.Id("txx")).Dot("QueryRowContext").Call(ctxIDC).Line()
+			g.Id("qb").Op(":=").Add(rcvrIDC).Dot("buildSelect").Call(jen.Id("q"))
+			// debug
+			g.Add(newLogBlock(rcvrID, "One")).Line().Line()
 
 			g.Var().Id("item").Qual(schema.Typ.PkgPath, schema.Typ.Name)
-			g.Err().Op(":=").Id("row").Dot("Scan").CallFunc(func(g *jen.Group) {
+			g.Err().Op(":=").Id("qb").Dot("RunWith").
+				Call(jen.Id("txx")).Op(".").Line().Id("QueryRowContext").
+				Call(ctxIDC).Op(".").Line().
+				Id("Scan").CallFunc(func(g *jen.Group) {
 				for _, col := range schema.Cols {
 					g.Line().Op("&").Id("item").Dot(col.Field)
 				}
 				g.Line()
 			})
-			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Nil(), jen.Err()))
-			g.Add(ifErr).Line()
+			g.If(jen.Err().Op("!=").Nil()).
+				Block(jen.Return(jen.Nil(), jen.Err())).Line()
 
 			g.Return(
 				jen.Op("&").Id("item"),
@@ -356,7 +386,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		}).Line().Line()
 
 	// select builder
-	stmnt = stmnt.Func().Params(rcvrParam).Id("buildSelect").
+	stmnt = stmnt.Func().Params(rcvrParamC).Id("buildSelect").
 		Params(jen.Id("q").Op("*").Id("Queryer")).
 		Params(jen.Qual(sqPkg, "SelectBuilder")).
 		BlockFunc(func(g *jen.Group) {
@@ -434,7 +464,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		}).Line().Line()
 
 	// update
-	stmnt = stmnt.Func().Params(rcvrParam).Id("Update").
+	stmnt = stmnt.Func().Params(rcvrParamC).Id("Update").
 		Params(
 			jen.Id("ctx").Add(ctxC),
 			jen.Id("u").Op("*").Id("Updater"),
@@ -442,12 +472,12 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		Params(jen.Int64(), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			g.List(jen.Id("tx"), jen.Err()).Op(":=").
-				Add(rcvrID).Dot("Tx").Call(ctxIDC)
+				Add(rcvrIDC).Dot("Tx").Call(ctxIDC)
 			g.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Lit(0), jen.Err())).Line()
 
 			g.List(jen.Id("rowsAffected"), jen.Err()).Op(":=").
-				Add(rcvrID).Dot("UpdateTx").Call(
+				Add(rcvrIDC).Dot("UpdateTx").Call(
 				ctxIDC, jen.Id("tx"), jen.Id("u"))
 			g.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Lit(0), txRollback),
@@ -457,7 +487,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		}).Line().Line()
 
 	// update tx
-	stmnt = stmnt.Func().Params(rcvrParam).Id("UpdateTx").
+	stmnt = stmnt.Func().Params(rcvrParamC).Id("UpdateTx").
 		Params(
 			jen.Id("ctx").Add(ctxC),
 			jen.Id("tx").Add(txC),
@@ -531,7 +561,10 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 								)
 						}
 					}),
-				).Line()
+				)
+
+			// debug
+			g.Add(newLogBlock(rcvrID, "Update")).Line().Line()
 
 			g.List(jen.Id("res"), jen.Err()).Op(":=").
 				Id("qb").Dot("ExecContext").Call(ctxIDC)
@@ -545,7 +578,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		}).Line().Line()
 
 	// delete
-	stmnt = stmnt.Func().Params(rcvrParam).Id("Delete").
+	stmnt = stmnt.Func().Params(rcvrParamC).Id("Delete").
 		Params(
 			jen.Id("ctx").Add(ctxC),
 			jen.Id("d").Op("*").Id("Deleter"),
@@ -553,12 +586,12 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		Params(jen.Int64(), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			g.List(jen.Id("tx"), jen.Err()).Op(":=").
-				Add(rcvrID).Dot("Tx").Call(ctxIDC)
+				Add(rcvrIDC).Dot("Tx").Call(ctxIDC)
 			g.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Lit(0), jen.Err())).Line()
 
 			g.List(jen.Id("rowsAffected"), jen.Err()).Op(":=").
-				Add(rcvrID).Dot("DeleteTx").Call(
+				Add(rcvrIDC).Dot("DeleteTx").Call(
 				ctxIDC,
 				jen.Id("tx"),
 				jen.Id("d"),
@@ -571,7 +604,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		}).Line().Line()
 
 	// delete tx
-	stmnt = stmnt.Func().Params(rcvrParam).Id("DeleteTx").
+	stmnt = stmnt.Func().Params(rcvrParamC).Id("DeleteTx").
 		Params(
 			jen.Id("ctx").Add(ctxC),
 			jen.Id("tx").Add(txC),
@@ -622,7 +655,10 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 								)
 						}
 					}),
-				).Line()
+				)
+
+			// debug
+			g.Add(newLogBlock(rcvrID, "Delete")).Line().Line()
 
 			g.List(jen.Id("res"), jen.Err()).Op(":=").
 				Id("qb").Dot("ExecContext").Call(ctxIDC)
@@ -636,4 +672,24 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		})
 
 	return stmnt
+}
+
+func newLogBlock(rcvrID, op string) *jen.Statement {
+	return jen.If(
+		jen.Id("log").Op(":=").Id(rcvrID).Dot("log"),
+		jen.Id("log").Op("!=").Nil(),
+	).Block(
+		jen.List(
+			jen.Id("sql"),
+			jen.Id("args"),
+			jen.Id("err"),
+		).Op(":=").Id("qb").Dot("ToSql").Call(),
+		jen.Id("log").
+			Dot("Debug").Call().
+			Dot("Str").Call(jen.Lit("op"), jen.Lit(op)).
+			Dot("Str").Call(jen.Lit("stmnt"), jen.Id("sql")).Op(".").Line().
+			Id("Interface").Call(jen.Lit("args"), jen.Id("args")).
+			Dot("Err").Call(jen.Id("err")).
+			Dot("Msg").Call(jen.Lit("")),
+	)
 }

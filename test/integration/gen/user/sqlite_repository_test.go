@@ -4,10 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -29,8 +31,8 @@ func TestSQLiteRepository(t *testing.T) {
 	)`)
 	require.NoError(t, err)
 
-	repo := user.NewSQLiteRepository(db)
-
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnixMicro
+	repo := user.NewSQLiteRepository(db).Debug(os.Stderr)
 	ctx := context.Background()
 	t.Run("Create", func(t *testing.T) {
 		t.Run("Ok", func(t *testing.T) {

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 	"testing"
 	"time"
 
@@ -41,9 +42,7 @@ func TestPGRepository(t *testing.T) {
 		},
 		ExposedPorts: []string{"5432"},
 		PortBindings: map[docker.Port][]docker.PortBinding{
-			"5432": {
-				{HostIP: "0.0.0.0", HostPort: port},
-			},
+			"5432": {{HostIP: "localhost", HostPort: port}},
 		},
 	}
 
@@ -76,7 +75,7 @@ func TestPGRepository(t *testing.T) {
 	)`)
 	require.NoError(t, err)
 
-	repo := user.NewPGRepository(db)
+	repo := user.NewPGRepository(db).Debug(os.Stderr)
 	ctx := context.Background()
 	t.Run("Create", func(t *testing.T) {
 		t.Run("Ok", func(t *testing.T) {
