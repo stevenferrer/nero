@@ -17,17 +17,6 @@ func (*example1) Schema() *nero.Schema {
 	return &nero.Schema{}
 }
 
-type example2 struct{}
-
-func (*example2) Schema() *nero.Schema {
-	return &nero.Schema{
-		Columns: []*nero.Column{
-			nero.NewColumn("id1", int64(0)).Ident(),
-			nero.NewColumn("id2", int64(0)).Ident(),
-		},
-	}
-}
-
 func TestGenerateExample(t *testing.T) {
 	files, err := Generate(new(gen.Example))
 	assert.NoError(t, err)
