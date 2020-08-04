@@ -15,7 +15,8 @@ import (
 func TestSorts(t *testing.T) {
 	t.Run("ID", func(t *testing.T) {
 		sfs := []user.SortFunc{
-			user.IDAsc(), user.IDDesc(),
+			user.Asc(user.ColumnID),
+			user.Desc(user.ColumnID),
 		}
 
 		sb := &sort.Sorts{}
@@ -36,7 +37,8 @@ func TestSorts(t *testing.T) {
 
 	t.Run("Email", func(t *testing.T) {
 		sfs := []user.SortFunc{
-			user.EmailAsc(), user.EmailDesc(),
+			user.Asc(user.ColumnEmail),
+			user.Desc(user.ColumnEmail),
 		}
 
 		sb := &sort.Sorts{}
@@ -57,7 +59,8 @@ func TestSorts(t *testing.T) {
 
 	t.Run("Name", func(t *testing.T) {
 		sfs := []user.SortFunc{
-			user.NameAsc(), user.NameDesc(),
+			user.Asc(user.ColumnName),
+			user.Desc(user.ColumnName),
 		}
 
 		sb := &sort.Sorts{}
@@ -78,7 +81,8 @@ func TestSorts(t *testing.T) {
 
 	t.Run("UpdatedAt", func(t *testing.T) {
 		sfs := []user.SortFunc{
-			user.UpdatedAtAsc(), user.UpdatedAtDesc(),
+			user.Asc(user.ColumnUpdatedAt),
+			user.Desc(user.ColumnUpdatedAt),
 		}
 
 		sb := &sort.Sorts{}
@@ -99,7 +103,9 @@ func TestSorts(t *testing.T) {
 
 	t.Run("CreatedAt", func(t *testing.T) {
 		sfs := []user.SortFunc{
-			user.CreatedAtAsc(), user.CreatedAtDesc(),
+			// user.CreatedAtAsc(), user.CreatedAtDesc(),
+			user.Asc(user.ColumnCreatedAt),
+			user.Desc(user.ColumnCreatedAt),
 		}
 
 		sb := &sort.Sorts{}

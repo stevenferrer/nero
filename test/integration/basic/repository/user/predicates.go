@@ -188,6 +188,126 @@ func NameLtOrEq(name *string) PredFunc {
 	}
 }
 
+func AgeEq(age int) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "age",
+			Op:  predicate.Eq,
+			Val: age,
+		})
+	}
+}
+
+func AgeNotEq(age int) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "age",
+			Op:  predicate.NotEq,
+			Val: age,
+		})
+	}
+}
+
+func AgeGt(age int) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "age",
+			Op:  predicate.Gt,
+			Val: age,
+		})
+	}
+}
+
+func AgeGtOrEq(age int) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "age",
+			Op:  predicate.GtOrEq,
+			Val: age,
+		})
+	}
+}
+
+func AgeLt(age int) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "age",
+			Op:  predicate.Lt,
+			Val: age,
+		})
+	}
+}
+
+func AgeLtOrEq(age int) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "age",
+			Op:  predicate.LtOrEq,
+			Val: age,
+		})
+	}
+}
+
+func GroupEq(groupRes string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "group_res",
+			Op:  predicate.Eq,
+			Val: groupRes,
+		})
+	}
+}
+
+func GroupNotEq(groupRes string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "group_res",
+			Op:  predicate.NotEq,
+			Val: groupRes,
+		})
+	}
+}
+
+func GroupGt(groupRes string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "group_res",
+			Op:  predicate.Gt,
+			Val: groupRes,
+		})
+	}
+}
+
+func GroupGtOrEq(groupRes string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "group_res",
+			Op:  predicate.GtOrEq,
+			Val: groupRes,
+		})
+	}
+}
+
+func GroupLt(groupRes string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "group_res",
+			Op:  predicate.Lt,
+			Val: groupRes,
+		})
+	}
+}
+
+func GroupLtOrEq(groupRes string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "group_res",
+			Op:  predicate.LtOrEq,
+			Val: groupRes,
+		})
+	}
+}
+
 func UpdatedAtEq(updatedAt *time.Time) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{

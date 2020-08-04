@@ -4,50 +4,51 @@ package user
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	sq "github.com/Masterminds/squirrel"
 	_ "github.com/lib/pq"
 	errors "github.com/pkg/errors"
 	zerolog "github.com/rs/zerolog"
 	nero "github.com/sf9v/nero"
+	aggregate "github.com/sf9v/nero/aggregate"
 	predicate "github.com/sf9v/nero/predicate"
 	sort "github.com/sf9v/nero/sort"
 	user "github.com/sf9v/nero/test/integration/basic/user"
 	"io"
+	"reflect"
 )
 
-type PGRepository struct {
+type PostgreSQLRepository struct {
 	db  *sql.DB
 	log *zerolog.Logger
 }
 
-var _ = Repository(&PGRepository{})
+var _ = Repository(&PostgreSQLRepository{})
 
-func NewPGRepository(db *sql.DB) *PGRepository {
-	return &PGRepository{
+func NewPostgreSQLRepository(db *sql.DB) *PostgreSQLRepository {
+	return &PostgreSQLRepository{
 		db: db,
 	}
 }
 
-func (pgr *PGRepository) Debug(out io.Writer) *PGRepository {
+func (pg *PostgreSQLRepository) Debug(out io.Writer) *PostgreSQLRepository {
 	lg := zerolog.New(out).With().Timestamp().Logger()
-	return &PGRepository{
-		db:  pgr.db,
+	return &PostgreSQLRepository{
+		db:  pg.db,
 		log: &lg,
 	}
 }
 
-func (pgr *PGRepository) Tx(ctx context.Context) (nero.Tx, error) {
-	return pgr.db.BeginTx(ctx, nil)
+func (pg *PostgreSQLRepository) Tx(ctx context.Context) (nero.Tx, error) {
+	return pg.db.BeginTx(ctx, nil)
 }
 
-func (pgr *PGRepository) Create(ctx context.Context, c *Creator) (string, error) {
-	tx, err := pgr.Tx(ctx)
+func (pg *PostgreSQLRepository) Create(ctx context.Context, c *Creator) (string, error) {
+	tx, err := pg.Tx(ctx)
 	if err != nil {
 		return "", err
 	}
 
-	id, err := pgr.CreateTx(ctx, tx, c)
+	id, err := pg.CreateTx(ctx, tx, c)
 	if err != nil {
 		return "", rollback(tx, err)
 	}
@@ -55,13 +56,13 @@ func (pgr *PGRepository) Create(ctx context.Context, c *Creator) (string, error)
 	return id, tx.Commit()
 }
 
-func (pgr *PGRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
-	tx, err := pgr.Tx(ctx)
+func (pg *PostgreSQLRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
+	tx, err := pg.Tx(ctx)
 	if err != nil {
 		return err
 	}
 
-	err = pgr.CreateManyTx(ctx, tx, cs...)
+	err = pg.CreateManyTx(ctx, tx, cs...)
 	if err != nil {
 		return rollback(tx, err)
 	}
@@ -69,7 +70,7 @@ func (pgr *PGRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
 	return tx.Commit()
 }
 
-func (pgr *PGRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (string, error) {
+func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (string, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return "", errors.New("expecting tx to be *sql.Tx")
@@ -77,11 +78,11 @@ func (pgr *PGRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (
 
 	qb := sq.Insert(c.collection).
 		Columns(c.columns...).
-		Values(c.email, c.name, c.updatedAt).
+		Values(c.email, c.name, c.age, c.groupRes, c.updatedAt).
 		Suffix("RETURNING \"id\"").
 		PlaceholderFormat(sq.Dollar).
 		RunWith(txx)
-	if log := pgr.log; log != nil {
+	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "Create").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
@@ -96,7 +97,7 @@ func (pgr *PGRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (
 	return id, nil
 }
 
-func (pgr *PGRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
+func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
 	if len(cs) == 0 {
 		return nil
 	}
@@ -109,12 +110,12 @@ func (pgr *PGRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Cr
 	qb := sq.Insert(cs[0].collection).
 		Columns(cs[0].columns...)
 	for _, c := range cs {
-		qb = qb.Values(c.email, c.name, c.updatedAt)
+		qb = qb.Values(c.email, c.name, c.age, c.groupRes, c.updatedAt)
 	}
 
 	qb = qb.Suffix("RETURNING \"id\"").
 		PlaceholderFormat(sq.Dollar)
-	if log := pgr.log; log != nil {
+	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "CreateMany").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
@@ -128,13 +129,13 @@ func (pgr *PGRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Cr
 	return nil
 }
 
-func (pgr *PGRepository) Query(ctx context.Context, q *Queryer) ([]*user.User, error) {
-	tx, err := pgr.Tx(ctx)
+func (pg *PostgreSQLRepository) Query(ctx context.Context, q *Queryer) ([]*user.User, error) {
+	tx, err := pg.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	list, err := pgr.QueryTx(ctx, tx, q)
+	list, err := pg.QueryTx(ctx, tx, q)
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
@@ -142,13 +143,13 @@ func (pgr *PGRepository) Query(ctx context.Context, q *Queryer) ([]*user.User, e
 	return list, tx.Commit()
 }
 
-func (pgr *PGRepository) QueryOne(ctx context.Context, q *Queryer) (*user.User, error) {
-	tx, err := pgr.Tx(ctx)
+func (pg *PostgreSQLRepository) QueryOne(ctx context.Context, q *Queryer) (*user.User, error) {
+	tx, err := pg.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	item, err := pgr.QueryOneTx(ctx, tx, q)
+	item, err := pg.QueryOneTx(ctx, tx, q)
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
@@ -156,14 +157,14 @@ func (pgr *PGRepository) QueryOne(ctx context.Context, q *Queryer) (*user.User, 
 	return item, tx.Commit()
 }
 
-func (pgr *PGRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*user.User, error) {
+func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*user.User, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	qb := pgr.buildSelect(q)
-	if log := pgr.log; log != nil {
+	qb := pg.buildSelect(q)
+	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "Query").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
@@ -182,6 +183,8 @@ func (pgr *PGRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([
 			&item.ID,
 			&item.Email,
 			&item.Name,
+			&item.Age,
+			&item.Group,
 			&item.UpdatedAt,
 			&item.CreatedAt,
 		)
@@ -195,14 +198,14 @@ func (pgr *PGRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([
 	return list, nil
 }
 
-func (pgr *PGRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*user.User, error) {
+func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*user.User, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	qb := pgr.buildSelect(q)
-	if log := pgr.log; log != nil {
+	qb := pg.buildSelect(q)
+	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "One").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
@@ -215,6 +218,8 @@ func (pgr *PGRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer)
 			&item.ID,
 			&item.Email,
 			&item.Name,
+			&item.Age,
+			&item.Group,
 			&item.UpdatedAt,
 			&item.CreatedAt,
 		)
@@ -225,7 +230,7 @@ func (pgr *PGRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer)
 	return &item, nil
 }
 
-func (pgr *PGRepository) buildSelect(q *Queryer) sq.SelectBuilder {
+func (pg *PostgreSQLRepository) buildSelect(q *Queryer) sq.SelectBuilder {
 	qb := sq.Select(q.columns...).
 		From(q.collection).
 		PlaceholderFormat(sq.Dollar)
@@ -263,16 +268,17 @@ func (pgr *PGRepository) buildSelect(q *Queryer) sq.SelectBuilder {
 		}
 	}
 
-	sb := &sort.Sorts{}
+	sorts := &sort.Sorts{}
 	for _, sf := range q.sfs {
-		sf(sb)
+		sf(sorts)
 	}
-	for _, s := range sb.All() {
+	for _, s := range sorts.All() {
+		col := s.Col
 		switch s.Direction {
 		case sort.Asc:
-			qb = qb.OrderBy(fmt.Sprintf("%s ASC", s.Col))
+			qb = qb.OrderBy(col + " ASC")
 		case sort.Desc:
-			qb = qb.OrderBy(fmt.Sprintf("%s DESC", s.Col))
+			qb = qb.OrderBy(col + " DESC")
 		}
 	}
 
@@ -287,13 +293,13 @@ func (pgr *PGRepository) buildSelect(q *Queryer) sq.SelectBuilder {
 	return qb
 }
 
-func (pgr *PGRepository) Update(ctx context.Context, u *Updater) (int64, error) {
-	tx, err := pgr.Tx(ctx)
+func (pg *PostgreSQLRepository) Update(ctx context.Context, u *Updater) (int64, error) {
+	tx, err := pg.Tx(ctx)
 	if err != nil {
 		return 0, err
 	}
 
-	rowsAffected, err := pgr.UpdateTx(ctx, tx, u)
+	rowsAffected, err := pg.UpdateTx(ctx, tx, u)
 	if err != nil {
 		return 0, rollback(tx, err)
 	}
@@ -301,7 +307,7 @@ func (pgr *PGRepository) Update(ctx context.Context, u *Updater) (int64, error) 
 	return rowsAffected, tx.Commit()
 }
 
-func (pgr *PGRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
+func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
@@ -313,11 +319,23 @@ func (pgr *PGRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (
 	}
 
 	qb := sq.Update(u.collection).
-		Set("email", u.email).
-		Set("name", u.name).
-		Set("updated_at", u.updatedAt).
-		PlaceholderFormat(sq.Dollar).
-		RunWith(txx)
+		PlaceholderFormat(sq.Dollar)
+	if u.email != nil {
+		qb = qb.Set("email", u.email)
+	}
+	if u.name != nil {
+		qb = qb.Set("name", u.name)
+	}
+	if u.age != 0 {
+		qb = qb.Set("age", u.age)
+	}
+	if u.groupRes != "" {
+		qb = qb.Set("group_res", u.groupRes)
+	}
+	if u.updatedAt != nil {
+		qb = qb.Set("updated_at", u.updatedAt)
+	}
+
 	for _, p := range pb.All() {
 		switch p.Op {
 		case predicate.Eq:
@@ -346,13 +364,13 @@ func (pgr *PGRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (
 			})
 		}
 	}
-	if log := pgr.log; log != nil {
+	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "Update").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 
-	res, err := qb.ExecContext(ctx)
+	res, err := qb.RunWith(txx).ExecContext(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -365,13 +383,13 @@ func (pgr *PGRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (
 	return rowsAffected, nil
 }
 
-func (pgr *PGRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
-	tx, err := pgr.Tx(ctx)
+func (pg *PostgreSQLRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
+	tx, err := pg.Tx(ctx)
 	if err != nil {
 		return 0, err
 	}
 
-	rowsAffected, err := pgr.DeleteTx(ctx, tx, d)
+	rowsAffected, err := pg.DeleteTx(ctx, tx, d)
 	if err != nil {
 		return 0, rollback(tx, err)
 	}
@@ -379,7 +397,7 @@ func (pgr *PGRepository) Delete(ctx context.Context, d *Deleter) (int64, error) 
 	return rowsAffected, tx.Commit()
 }
 
-func (pgr *PGRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
+func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
@@ -421,7 +439,7 @@ func (pgr *PGRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (
 			})
 		}
 	}
-	if log := pgr.log; log != nil {
+	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "Delete").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
@@ -438,4 +456,138 @@ func (pgr *PGRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (
 	}
 
 	return rowsAffected, nil
+}
+
+func (pg *PostgreSQLRepository) Aggregate(ctx context.Context, a *Aggregator) error {
+	tx, err := pg.Tx(ctx)
+	if err != nil {
+		return err
+	}
+
+	err = pg.AggregateTx(ctx, tx, a)
+	if err != nil {
+		return rollback(tx, err)
+	}
+
+	return tx.Commit()
+}
+
+func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
+	txx, ok := tx.(*sql.Tx)
+	if !ok {
+		return errors.New("expecting tx to be *sql.Tx")
+	}
+
+	aggs := &aggregate.Aggregates{}
+	for _, aggf := range a.aggfs {
+		aggf(aggs)
+	}
+	cols := []string{}
+	for _, agg := range aggs.All() {
+		col := agg.Col
+		switch agg.Fn {
+		case aggregate.Avg:
+			cols = append(cols, "AVG("+col+") avg_"+col)
+		case aggregate.Count:
+			cols = append(cols, "COUNT("+col+") count_"+col)
+		case aggregate.Max:
+			cols = append(cols, "MAX("+col+") max_"+col)
+		case aggregate.Min:
+			cols = append(cols, "MIN("+col+") min_"+col)
+		case aggregate.Sum:
+			cols = append(cols, "SUM("+col+") sum_"+col)
+		}
+	}
+
+	qb := sq.Select(cols...).
+		From(a.collection).
+		PlaceholderFormat(sq.Dollar)
+
+	groups := []string{}
+	for _, group := range a.groups {
+		groups = append(groups, group.String())
+	}
+	qb = qb.GroupBy(groups...)
+
+	preds := &predicate.Predicates{}
+	for _, pf := range a.pfs {
+		pf(preds)
+	}
+	for _, p := range preds.All() {
+		switch p.Op {
+		case predicate.Eq:
+			qb = qb.Where(sq.Eq{
+				p.Col: p.Val,
+			})
+		case predicate.NotEq:
+			qb = qb.Where(sq.NotEq{
+				p.Col: p.Val,
+			})
+		case predicate.Gt:
+			qb = qb.Where(sq.Gt{
+				p.Col: p.Val,
+			})
+		case predicate.GtOrEq:
+			qb = qb.Where(sq.GtOrEq{
+				p.Col: p.Val,
+			})
+		case predicate.Lt:
+			qb = qb.Where(sq.Lt{
+				p.Col: p.Val,
+			})
+		case predicate.LtOrEq:
+			qb = qb.Where(sq.LtOrEq{
+				p.Col: p.Val,
+			})
+		}
+	}
+
+	sorts := &sort.Sorts{}
+	for _, sf := range a.sfs {
+		sf(sorts)
+	}
+	for _, s := range sorts.All() {
+		col := s.Col
+		switch s.Direction {
+		case sort.Asc:
+			qb = qb.OrderBy(col + " ASC")
+		case sort.Desc:
+			qb = qb.OrderBy(col + " DESC")
+		}
+	}
+
+	if log := pg.log; log != nil {
+		sql, args, err := qb.ToSql()
+		log.Debug().Str("op", "Aggregate").Str("stmnt", sql).
+			Interface("args", args).Err(err).Msg("")
+	}
+
+	rows, err := qb.RunWith(txx).QueryContext(ctx)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	dv := reflect.ValueOf(a.dest).Elem()
+	dt := reflect.TypeOf(dv.Interface()).Elem()
+	if dt.NumField() != len(cols) {
+		return errors.New("aggregate columns and destination struct field count should match")
+	}
+
+	for rows.Next() {
+		de := reflect.New(dt).Elem()
+		dest := make([]interface{}, de.NumField())
+		for i := 0; i < de.NumField(); i++ {
+			dest[i] = de.Field(i).Addr().Interface()
+		}
+
+		err = rows.Scan(dest...)
+		if err != nil {
+			return err
+		}
+
+		dv.Set(reflect.Append(dv, de))
+	}
+
+	return nil
 }

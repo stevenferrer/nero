@@ -8,37 +8,23 @@ import (
 )
 
 func newSorts(schema *gen.Schema) *jen.Statement {
+	sortPkg := pkgPath + "/sort"
 	stmnt := jen.Type().Id("SortFunc").Func().Params(
-		jen.Op("*").Qual(pkgPath+"/sort", "Sorts"),
+		jen.Op("*").Qual(sortPkg, "Sorts"),
 	).Line()
 
-	sortPkg := pkgPath + "/sort"
-	dirs := []sort.Direction{sort.Asc, sort.Desc}
-	for _, col := range schema.Cols {
-		for _, dir := range dirs {
-			dirStr := string(dir.String())
-			structField := col.CamelName()
-			if len(col.StructField) > 0 {
-				structField = col.StructField
-			}
-			fn := camel(structField + "_" + dirStr)
-			stmnt = stmnt.Func().
-				Id(fn).Params().
-				Params(jen.Id("SortFunc")).
-				Block(jen.Return(jen.Func().Params(jen.Id("srt").Op("*").
-					Qual(sortPkg, "Sorts")).Block(jen.Id("srt").Dot("Add").
-					Call(
-						jen.Op("&").Qual(sortPkg, "Sort").Block(
-							jen.Id("Col").Op(":").
-								Lit(col.Name).Op(","),
-							jen.Id("Direction").Op(":").
-								Qual(sortPkg, dirStr).Op(","),
-						),
-					),
-				),
-				)).
-				Line().Line()
-		}
+	directns := []sort.Direction{sort.Asc, sort.Desc}
+	for _, directn := range directns {
+		stmnt = stmnt.Func().Id(directn.String()).
+			Params(jen.Id("col").Id("Column")).
+			Params(jen.Id("SortFunc")).
+			Block(jen.Return(jen.Func().
+				Params(jen.Id("srts").Op("*").Qual(sortPkg, "Sorts")).
+				Params().Block(jen.Id("srts").Dot("Add").
+				Call(jen.Op("&").Qual(sortPkg, "Sort").Block(
+					jen.Id("Col").Op(":").Id("col").Dot("String").Call().Op(","),
+					jen.Id("Direction").Op(":").Qual(sortPkg, directn.String()).Op(","),
+				))))).Line().Line()
 	}
 
 	return stmnt

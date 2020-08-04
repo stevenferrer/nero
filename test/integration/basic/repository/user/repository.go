@@ -11,9 +11,9 @@ import (
 type Repository interface {
 	Tx(context.Context) (nero.Tx, error)
 	Create(context.Context, *Creator) (id string, err error)
-	CreateMany(context.Context, ...*Creator) (err error)
+	CreateMany(context.Context, ...*Creator) error
 	CreateTx(context.Context, nero.Tx, *Creator) (id string, err error)
-	CreateManyTx(context.Context, nero.Tx, ...*Creator) (err error)
+	CreateManyTx(context.Context, nero.Tx, ...*Creator) error
 	Query(context.Context, *Queryer) ([]*user.User, error)
 	QueryOne(context.Context, *Queryer) (*user.User, error)
 	QueryTx(context.Context, nero.Tx, *Queryer) ([]*user.User, error)
@@ -22,4 +22,6 @@ type Repository interface {
 	UpdateTx(context.Context, nero.Tx, *Updater) (rowsAffected int64, err error)
 	Delete(context.Context, *Deleter) (rowsAffected int64, err error)
 	DeleteTx(context.Context, nero.Tx, *Deleter) (rowsAffected int64, err error)
+	Aggregate(context.Context, *Aggregator) error
+	AggregateTx(context.Context, nero.Tx, *Aggregator) error
 }

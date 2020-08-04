@@ -2,9 +2,9 @@ package predicate
 
 // Predicate is a predicate
 type Predicate struct {
-	Op  Operator
 	Col string
 	Val interface{}
+	Op  Operator
 }
 
 // Predicates is a predicate builder

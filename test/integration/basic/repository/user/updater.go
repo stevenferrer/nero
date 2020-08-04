@@ -8,6 +8,8 @@ type Updater struct {
 	columns    []string
 	email      *string
 	name       *string
+	age        int
+	groupRes   string
 	updatedAt  *time.Time
 	pfs        []PredFunc
 }
@@ -15,7 +17,7 @@ type Updater struct {
 func NewUpdater() *Updater {
 	return &Updater{
 		collection: collection,
-		columns:    []string{"email", "name", "updated_at"},
+		columns:    []string{"email", "name", "age", "group_res", "updated_at"},
 	}
 }
 
@@ -26,6 +28,16 @@ func (u *Updater) Email(email *string) *Updater {
 
 func (u *Updater) Name(name *string) *Updater {
 	u.name = name
+	return u
+}
+
+func (u *Updater) Age(age int) *Updater {
+	u.age = age
+	return u
+}
+
+func (u *Updater) GroupRes(groupRes string) *Updater {
+	u.groupRes = groupRes
 	return u
 }
 

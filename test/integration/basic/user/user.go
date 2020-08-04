@@ -11,6 +11,8 @@ type User struct {
 	ID        string
 	Email     *string
 	Name      *string
+	Age       int
+	Group     string
 	UpdatedAt *time.Time
 	CreatedAt *time.Time
 }
@@ -25,6 +27,9 @@ func (u *User) Schema() *nero.Schema {
 				StructField("ID").Ident().Auto(),
 			nero.NewColumn("email", u.Email),
 			nero.NewColumn("name", u.Name),
+			nero.NewColumn("age", u.Age),
+			nero.NewColumn("group_res", u.Group).
+				StructField("Group"),
 			nero.NewColumn("updated_at", u.UpdatedAt),
 			nero.NewColumn("created_at", u.CreatedAt).
 				Auto(),

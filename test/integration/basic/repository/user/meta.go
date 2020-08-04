@@ -4,3 +4,35 @@ package user
 const (
 	collection = "users"
 )
+
+type Column int
+
+func (c Column) String() string {
+	switch c {
+	case ColumnID:
+		return "id"
+	case ColumnEmail:
+		return "email"
+	case ColumnName:
+		return "name"
+	case ColumnAge:
+		return "age"
+	case ColumnGroup:
+		return "group_res"
+	case ColumnUpdatedAt:
+		return "updated_at"
+	case ColumnCreatedAt:
+		return "created_at"
+	}
+	return "invalid"
+}
+
+const (
+	ColumnID Column = iota
+	ColumnEmail
+	ColumnName
+	ColumnAge
+	ColumnGroup
+	ColumnUpdatedAt
+	ColumnCreatedAt
+)

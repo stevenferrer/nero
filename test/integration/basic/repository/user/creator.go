@@ -8,13 +8,15 @@ type Creator struct {
 	columns    []string
 	email      *string
 	name       *string
+	age        int
+	groupRes   string
 	updatedAt  *time.Time
 }
 
 func NewCreator() *Creator {
 	return &Creator{
 		collection: collection,
-		columns:    []string{"email", "name", "updated_at"},
+		columns:    []string{"email", "name", "age", "group_res", "updated_at"},
 	}
 }
 
@@ -25,6 +27,16 @@ func (c *Creator) Email(email *string) *Creator {
 
 func (c *Creator) Name(name *string) *Creator {
 	c.name = name
+	return c
+}
+
+func (c *Creator) Age(age int) *Creator {
+	c.age = age
+	return c
+}
+
+func (c *Creator) GroupRes(groupRes string) *Creator {
+	c.groupRes = groupRes
 	return c
 }
 

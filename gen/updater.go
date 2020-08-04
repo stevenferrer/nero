@@ -26,16 +26,16 @@ func newUpdater(schema *gen.Schema) *jen.Statement {
 		Params(jen.Op("*").Id("Updater")).Block(
 		jen.Return(jen.Op("&").Id("Updater").Block(
 			jen.Id("collection").Op(":").Id("collection").Op(","),
-			jen.Id("columns").Op(":").Op("[]").String().ValuesFunc(func(g *jen.Group) {
-				for _, col := range schema.Cols {
-					if col.Auto {
-						continue
+			jen.Id("columns").Op(":").Op("[]").String().
+				ValuesFunc(func(g *jen.Group) {
+					for _, col := range schema.Cols {
+						if col.Auto {
+							continue
+						}
+						g.Lit(col.Name)
 					}
-					g.Lit(col.Name)
-				}
-			}).Op(","),
-		)),
-	).Line().Line()
+				}).Op(","),
+		))).Line().Line()
 
 	rcvrParams := jen.Id("u").Op("*").Id("Updater")
 	retParams := jen.Op("*").Id("Updater")
@@ -46,23 +46,19 @@ func newUpdater(schema *gen.Schema) *jen.Statement {
 		if col.Auto {
 			continue
 		}
-		stmnt = stmnt.Func().
-			Params(rcvrParams).
-			Id(col.CamelName()).
-			Params(jen.Id(col.LowerCamelName()).
-				Add(gen.GetTypeC(col.Type))).
+		colLowerCamel := col.LowerCamelName()
+		stmnt = stmnt.Func().Params(rcvrParams).Id(col.CamelName()).
+			Params(jen.Id(colLowerCamel).Add(gen.GetTypeC(col.Type))).
 			Params(retParams).
 			Block(
-				jen.Id("u").Dot(col.LowerCamelName()).
-					Op("=").Id(col.LowerCamelName()),
+				jen.Id("u").Dot(colLowerCamel).
+					Op("=").Id(colLowerCamel),
 				ret,
 			).Line().Line()
 	}
 
 	// where
-	stmnt = stmnt.Func().
-		Params(rcvrParams).
-		Id("Where").
+	stmnt = stmnt.Func().Params(rcvrParams).Id("Where").
 		Params(jen.Id("pfs").Op("...").Id("PredFunc")).
 		Params(retParams).
 		Block(

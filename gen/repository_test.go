@@ -19,9 +19,9 @@ func Test_newRepository(t *testing.T) {
 type Repository interface {
 	Tx(context.Context) (nero.Tx, error)
 	Create(context.Context, *Creator) (id int64, err error)
-	CreateMany(context.Context, ...*Creator) (err error)
+	CreateMany(context.Context, ...*Creator) error
 	CreateTx(context.Context, nero.Tx, *Creator) (id int64, err error)
-	CreateManyTx(context.Context, nero.Tx, ...*Creator) (err error)
+	CreateManyTx(context.Context, nero.Tx, ...*Creator) error
 	Query(context.Context, *Queryer) ([]*internal.Example, error)
 	QueryOne(context.Context, *Queryer) (*internal.Example, error)
 	QueryTx(context.Context, nero.Tx, *Queryer) ([]*internal.Example, error)
@@ -30,6 +30,8 @@ type Repository interface {
 	UpdateTx(context.Context, nero.Tx, *Updater) (rowsAffected int64, err error)
 	Delete(context.Context, *Deleter) (rowsAffected int64, err error)
 	DeleteTx(context.Context, nero.Tx, *Deleter) (rowsAffected int64, err error)
+	Aggregate(context.Context, *Aggregator) error
+	AggregateTx(context.Context, nero.Tx, *Aggregator) error
 }
 `)
 	got := fmt.Sprintf("%#v", stmt)

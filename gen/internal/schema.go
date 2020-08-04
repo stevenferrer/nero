@@ -10,6 +10,7 @@ import (
 
 // Schema is an internal schema
 type Schema struct {
+	// Coln is the collection
 	Coln  string
 	Type  *mira.Type
 	Ident *Col
@@ -51,7 +52,7 @@ func BuildSchema(s nero.Schemaer) (*Schema, error) {
 	}
 
 	if identCnt == 0 {
-		return nil, errors.New("at least one ident column is required")
+		return nil, errors.New("an ident column is required")
 	}
 
 	if identCnt > 1 {

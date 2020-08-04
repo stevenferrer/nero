@@ -20,7 +20,7 @@ func (*example1) Schema() *nero.Schema {
 func TestGenerateExample(t *testing.T) {
 	files, err := Generate(new(gen.Example))
 	assert.NoError(t, err)
-	assert.Len(t, files, 11)
+	assert.Len(t, files, 13)
 
 	for _, file := range files {
 		require.NotEmpty(t, file.Name())
@@ -33,8 +33,8 @@ func TestGenerateExample(t *testing.T) {
 	require.NoError(t, err)
 
 	// render files
-	// err = files.Render(basePath)
-	// assert.NoError(t, err)
+	err = files.Render(basePath)
+	assert.NoError(t, err)
 
 	_, err = Generate(new(example1))
 	assert.Error(t, err)

@@ -26,35 +26,32 @@ func newCreator(schema *gen.Schema) *jen.Statement {
 		Params(jen.Op("*").Id("Creator")).Block(
 		jen.Return(jen.Op("&").Id("Creator").Block(
 			jen.Id("collection").Op(":").Id("collection").Op(","),
-			jen.Id("columns").Op(":").Op("[]").String().ValuesFunc(func(g *jen.Group) {
-				for _, col := range schema.Cols {
-					if col.Auto {
-						continue
+			jen.Id("columns").Op(":").Op("[]").String().
+				ValuesFunc(func(g *jen.Group) {
+					for _, col := range schema.Cols {
+						if col.Auto {
+							continue
+						}
+						g.Lit(col.Name)
 					}
-					g.Lit(col.Name)
-				}
-			}).Op(","),
-		)),
-	).Line().Line()
+				}).Op(","),
+		))).Line().Line()
 
-	rcvrParams := jen.Id("c").Op("*").Id("Creator")
+	rcvrParamsC := jen.Id("c").Op("*").Id("Creator")
 
 	// methods
 	for _, col := range schema.Cols {
 		if col.Auto {
 			continue
 		}
-		stmnt = stmnt.Func().
-			Params(rcvrParams).
-			Id(col.CamelName()).
-			Params(jen.Id(col.LowerCamelName()).
+		colLowerCamel := col.LowerCamelName()
+		stmnt = stmnt.Func().Params(rcvrParamsC).Id(col.CamelName()).
+			Params(jen.Id(colLowerCamel).
 				Add(gen.GetTypeC(col.Type))).
-			Params(jen.Op("*").Id("Creator")).
-			Block(
-				jen.Id("c").Dot(col.LowerCamelName()).
-					Op("=").Id(col.LowerCamelName()),
-				jen.Return(jen.Id("c")),
-			).Line().Line()
+			Params(jen.Op("*").Id("Creator")).Block(
+			jen.Id("c").Dot(colLowerCamel).
+				Op("=").Id(colLowerCamel),
+			jen.Return(jen.Id("c"))).Line().Line()
 	}
 
 	return stmnt

@@ -14,14 +14,11 @@ func newDeleter() *jen.Statement {
 		jen.Return(jen.Op("&").Id("Deleter").Block(
 			jen.Id("collection").Op(":").
 				Id("collection").Op(","),
-		)),
-	).Line().Line()
+		))).Line().Line()
 
 	// where
-	stmnt = stmnt.Func().
-		Params(jen.Id("d").Op("*").Id("Deleter")).
-		Id("Where").
-		Params(jen.Id("pfs").Op("...").Id("PredFunc")).
+	stmnt = stmnt.Func().Params(jen.Id("d").Op("*").Id("Deleter")).
+		Id("Where").Params(jen.Id("pfs").Op("...").Id("PredFunc")).
 		Params(jen.Op("*").Id("Deleter")).
 		Block(
 			jen.Id("d").Dot("pfs").Op("=").

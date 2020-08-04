@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"testing"
 	"time"
@@ -70,21 +71,42 @@ func TestPGRepository(t *testing.T) {
 		id bigserial PRIMARY KEY,
 		email VARCHAR(255) UNIQUE NOT NULL,
 		name VARCHAR(50) NOT NULL,
+		age INTEGER NOT NULL,
+		group_res VARCHAR(20) NOT NULL,
 		updated_at TIMESTAMP,
 		created_at TIMESTAMP DEFAULT now()
 	)`)
 	require.NoError(t, err)
 
-	repo := user.NewPGRepository(db).Debug(os.Stderr)
+	repo := user.NewPostgreSQLRepository(db).Debug(os.Stderr)
+	randomAge := func() int {
+		return rand.Intn(30-18) + 18
+	}
+
 	ctx := context.Background()
 	t.Run("Create", func(t *testing.T) {
 		t.Run("Ok", func(t *testing.T) {
 			now := time.Now()
-			for i := 1; i <= 10; i++ {
-				email := fmt.Sprintf("user%d@gg.io", i)
-				name := fmt.Sprintf("user%d", i)
-				id, err := repo.Create(ctx, user.NewCreator().
-					Email(&email).Name(&name).UpdatedAt(&now))
+			for i := 1; i <= 50; i++ {
+				group := "human"
+				if i%2 == 0 {
+					group = "charr"
+				} else if i%3 == 0 {
+					group = "norn"
+				} else if i%4 == 0 {
+					group = "sylvari"
+				}
+
+				email := fmt.Sprintf("%s_%d@gg.io", group, i)
+				name := fmt.Sprintf("%s_%d", group, i)
+				age := randomAge()
+
+				cr := user.NewCreator().
+					Email(&email).Name(&name).
+					Age(age).GroupRes(group).
+					UpdatedAt(&now)
+
+				id, err := repo.Create(ctx, cr)
 				assert.NoError(t, err)
 				assert.NotZero(t, id)
 			}
@@ -104,16 +126,29 @@ func TestPGRepository(t *testing.T) {
 
 	t.Run("CreateMany", func(t *testing.T) {
 		t.Run("Ok", func(t *testing.T) {
-			cs := []*user.Creator{}
-			for i := 11; i <= 20; i++ {
-				email := fmt.Sprintf("user_m%d@gg.io", i)
-				name := fmt.Sprintf("user_m%d", i)
+			crs := []*user.Creator{}
+			for i := 51; i <= 100; i++ {
+				group := "human"
+				if i%2 == 0 {
+					group = "charr"
+				} else if i%3 == 0 {
+					group = "norn"
+				} else if i%4 == 0 {
+					group = "sylvari"
+				}
+
+				email := fmt.Sprintf("%s_%d_mm@gg.io", group, i)
+				name := fmt.Sprintf("%s_%d_mm", group, i)
+				age := randomAge()
 				now := time.Now()
-				cs = append(cs, user.NewCreator().
-					Email(&email).Name(&name).UpdatedAt(&now))
+
+				cr := user.NewCreator().
+					Email(&email).Name(&name).
+					Age(age).UpdatedAt(&now)
+				crs = append(crs, cr)
 			}
 
-			err = repo.CreateMany(ctx, cs...)
+			err = repo.CreateMany(ctx, crs...)
 			assert.NoError(t, err)
 
 			err = repo.CreateMany(ctx, []*user.Creator{}...)
@@ -137,7 +172,7 @@ func TestPGRepository(t *testing.T) {
 			users, err := repo.Query(ctx,
 				user.NewQueryer())
 			assert.NoError(t, err)
-			assert.Len(t, users, 20)
+			assert.Len(t, users, 100)
 			for _, u := range users {
 				require.NotNil(t, u.Email)
 				require.NotNil(t, u.Name)
@@ -153,13 +188,36 @@ func TestPGRepository(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Len(t, users, 1)
 
+			users, err = repo.Query(ctx, user.NewQueryer().
+				Where(
+					user.AgeEq(18), user.AgeNotEq(30),
+					user.AgeGt(17), user.AgeGtOrEq(18),
+					user.AgeLt(30), user.AgeLtOrEq(19),
+				),
+			)
+			assert.NoError(t, err)
+			assert.NotZero(t, len(users))
+
+			users, err = repo.Query(ctx, user.NewQueryer().
+				Where(
+					user.GroupEq("norn"), user.GroupNotEq("human"),
+					user.GroupGt("n"), user.GroupGtOrEq("norn"),
+					user.GroupLt("nornn"), user.GroupLtOrEq("norn"),
+				),
+			)
+			assert.NoError(t, err)
+			assert.NotZero(t, len(users))
+
 			// with sort
 			// get last user
 			users, err = repo.Query(ctx, user.NewQueryer().
-				Sort(user.IDDesc(), user.CreatedAtAsc()),
+				Sort(
+					user.Desc(user.ColumnID),
+					user.Asc(user.ColumnCreatedAt),
+				),
 			)
 			assert.NoError(t, err)
-			assert.Equal(t, "user_m20", *users[0].Name)
+			assert.Equal(t, "charr_100_mm", *users[0].Name)
 
 			// with limit and offset
 			users, err = repo.Query(ctx, user.NewQueryer().
@@ -184,7 +242,7 @@ func TestPGRepository(t *testing.T) {
 			assert.Equal(t, "1", usr.ID)
 
 			_, err = repo.QueryOne(ctx, user.NewQueryer().
-				Where(user.IDEq("100")))
+				Where(user.IDEq("9999")))
 			assert.Error(t, err)
 			assert.Equal(t, sql.ErrNoRows, err)
 		})
@@ -194,6 +252,42 @@ func TestPGRepository(t *testing.T) {
 			cancel()
 			_, err = repo.QueryOne(cctx, user.NewQueryer())
 			assert.Error(t, err)
+		})
+	})
+
+	t.Run("Aggregate", func(t *testing.T) {
+		t.Run("Ok", func(t *testing.T) {
+			type aggt struct {
+				AvgAge   float64
+				MinAge   float64
+				MaxAge   float64
+				CountAge float64
+				SumAge   float64
+			}
+
+			agg := []aggt{}
+
+			a := user.NewAggregator(&agg).
+				Aggregate(
+					user.Avg(user.ColumnAge),
+					user.Min(user.ColumnAge),
+					user.Max(user.ColumnAge),
+					user.Count(user.ColumnAge),
+					user.Sum(user.ColumnAge),
+				).
+				Where(user.AgeGt(18)).
+				Group(user.ColumnGroup).
+				Sort(user.Asc(user.ColumnGroup))
+
+			err := repo.Aggregate(ctx, a)
+			require.NoError(t, err)
+			assert.Len(t, agg, 4)
+
+			for _, ag := range agg {
+				assert.NotZero(t, ag.AvgAge)
+				assert.NotZero(t, ag.MinAge)
+				assert.NotZero(t, ag.MaxAge)
+			}
 		})
 	})
 
@@ -208,9 +302,12 @@ func TestPGRepository(t *testing.T) {
 
 			email := "sf9v@gg.io"
 			name := "sf9v"
-			rowsAffected, err := repo.Update(ctx, user.NewUpdater().
-				Email(&email).Name(&name).
-				UpdatedAt(&now).Where(preds...),
+			rowsAffected, err := repo.Update(ctx,
+				user.NewUpdater().
+					Email(&email).
+					Name(&name).
+					UpdatedAt(&now).
+					Where(preds...),
 			)
 			assert.NoError(t, err)
 			assert.Equal(t, int64(1), rowsAffected)
@@ -257,7 +354,7 @@ func TestPGRepository(t *testing.T) {
 			// delete all
 			rowsAffected, err = repo.Delete(ctx, user.NewDeleter())
 			assert.NoError(t, err)
-			assert.Equal(t, int64(19), rowsAffected)
+			assert.Equal(t, int64(99), rowsAffected)
 		})
 
 		t.Run("Error", func(t *testing.T) {

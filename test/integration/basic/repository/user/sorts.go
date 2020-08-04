@@ -5,91 +5,19 @@ import sort "github.com/sf9v/nero/sort"
 
 type SortFunc func(*sort.Sorts)
 
-func IDAsc() SortFunc {
-	return func(srt *sort.Sorts) {
-		srt.Add(&sort.Sort{
-			Col:       "id",
+func Asc(col Column) SortFunc {
+	return func(srts *sort.Sorts) {
+		srts.Add(&sort.Sort{
+			Col:       col.String(),
 			Direction: sort.Asc,
 		})
 	}
 }
 
-func IDDesc() SortFunc {
-	return func(srt *sort.Sorts) {
-		srt.Add(&sort.Sort{
-			Col:       "id",
-			Direction: sort.Desc,
-		})
-	}
-}
-
-func EmailAsc() SortFunc {
-	return func(srt *sort.Sorts) {
-		srt.Add(&sort.Sort{
-			Col:       "email",
-			Direction: sort.Asc,
-		})
-	}
-}
-
-func EmailDesc() SortFunc {
-	return func(srt *sort.Sorts) {
-		srt.Add(&sort.Sort{
-			Col:       "email",
-			Direction: sort.Desc,
-		})
-	}
-}
-
-func NameAsc() SortFunc {
-	return func(srt *sort.Sorts) {
-		srt.Add(&sort.Sort{
-			Col:       "name",
-			Direction: sort.Asc,
-		})
-	}
-}
-
-func NameDesc() SortFunc {
-	return func(srt *sort.Sorts) {
-		srt.Add(&sort.Sort{
-			Col:       "name",
-			Direction: sort.Desc,
-		})
-	}
-}
-
-func UpdatedAtAsc() SortFunc {
-	return func(srt *sort.Sorts) {
-		srt.Add(&sort.Sort{
-			Col:       "updated_at",
-			Direction: sort.Asc,
-		})
-	}
-}
-
-func UpdatedAtDesc() SortFunc {
-	return func(srt *sort.Sorts) {
-		srt.Add(&sort.Sort{
-			Col:       "updated_at",
-			Direction: sort.Desc,
-		})
-	}
-}
-
-func CreatedAtAsc() SortFunc {
-	return func(srt *sort.Sorts) {
-		srt.Add(&sort.Sort{
-			Col:       "created_at",
-			Direction: sort.Asc,
-		})
-	}
-}
-
-func CreatedAtDesc() SortFunc {
-	return func(srt *sort.Sorts) {
-		srt.Add(&sort.Sort{
-			Col:       "created_at",
+func Desc(col Column) SortFunc {
+	return func(srts *sort.Sorts) {
+		srts.Add(&sort.Sort{
+			Col:       col.String(),
 			Direction: sort.Desc,
 		})
 	}

@@ -10,7 +10,7 @@ import (
 
 	"github.com/sf9v/nero"
 	gen "github.com/sf9v/nero/gen/internal"
-	"github.com/sf9v/nero/gen/pg"
+	"github.com/sf9v/nero/gen/postgres"
 	"github.com/sf9v/nero/gen/sqlite"
 )
 
@@ -29,12 +29,9 @@ func Generate(schemaer nero.Schemaer) (Files, error) {
 	}
 
 	pkgName := strings.ToLower(schema.Pkg)
-	pkgFile := jen.NewFile(pkgName)
-	pkgFile.Const().Defs(
-		jen.Id("collection").Op("=").Lit(schema.Coln),
-	)
-
-	fls := []*File{{name: "meta.go", jf: pkgFile}}
+	metaFile := jen.NewFile(pkgName)
+	metaFile.Add(newMeta(schema))
+	fls := []*File{{name: "meta.go", jf: metaFile}}
 
 	predsFile := jen.NewFile(pkgName)
 	predsFile.Add(newPredicates(schema))
@@ -50,11 +47,25 @@ func Generate(schemaer nero.Schemaer) (Files, error) {
 		jf:   sortsFile,
 	})
 
+	aggsFile := jen.NewFile(pkgName)
+	aggsFile.Add(newAggregates(schema))
+	fls = append(fls, &File{
+		name: "aggregates.go",
+		jf:   aggsFile,
+	})
+
 	repoFile := jen.NewFile(pkgName)
 	repoFile.Add(newRepository(schema))
 	fls = append(fls, &File{
 		name: "repository.go",
 		jf:   repoFile,
+	})
+
+	aggtrFile := jen.NewFile(pkgName)
+	aggtrFile.Add(newAggregator(schema))
+	fls = append(fls, &File{
+		name: "aggregator.go",
+		jf:   aggtrFile,
 	})
 
 	creatorFile := jen.NewFile(pkgName)
@@ -86,21 +97,21 @@ func Generate(schemaer nero.Schemaer) (Files, error) {
 	})
 
 	// sqlite repository implementation
-	sqliteRepoFile := jen.NewFile(pkgName)
-	sqliteRepoFile.Anon("github.com/mattn/go-sqlite3")
-	sqliteRepoFile.Add(sqlite.NewSQLiteRepoC(schema))
+	sqliteFile := jen.NewFile(pkgName)
+	sqliteFile.Anon("github.com/mattn/go-sqlite3")
+	sqliteFile.Add(sqlite.NewSQLiteRepo(schema))
 	fls = append(fls, &File{
-		name: "sqlite_repository.go",
-		jf:   sqliteRepoFile,
+		name: "sqlite.go",
+		jf:   sqliteFile,
 	})
 
 	// postgres repository implementation
-	pgRepoFile := jen.NewFile(pkgName)
-	pgRepoFile.Anon("github.com/lib/pq")
-	pgRepoFile.Add(pg.NewPGRepoC(schema))
+	postgresFile := jen.NewFile(pkgName)
+	postgresFile.Anon("github.com/lib/pq")
+	postgresFile.Add(postgres.NewPostgreSQLRepo(schema))
 	fls = append(fls, &File{
-		name: "pg_repository.go",
-		jf:   pgRepoFile,
+		name: "postgres.go",
+		jf:   postgresFile,
 	})
 
 	txFile := jen.NewFile(pkgName)

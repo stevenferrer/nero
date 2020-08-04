@@ -13,7 +13,7 @@ type Queryer struct {
 func NewQueryer() *Queryer {
 	return &Queryer{
 		collection: collection,
-		columns:    []string{"id", "email", "name", "updated_at", "created_at"},
+		columns:    []string{"id", "email", "name", "age", "group_res", "updated_at", "created_at"},
 	}
 }
 
