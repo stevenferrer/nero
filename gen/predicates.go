@@ -26,7 +26,7 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 			stmnt = stmnt.Func().
 				Id(fn).
 				Params(jen.Id(col.LowerCamelName()).
-					Add(gen.GetTypeC(col.Typ))).
+					Add(gen.GetTypeC(col.Type))).
 				Params(jen.Id("PredFunc")).
 				Block(jen.Return(
 					jen.Func().

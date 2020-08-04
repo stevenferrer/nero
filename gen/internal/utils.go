@@ -4,18 +4,19 @@ import (
 	"reflect"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/sf9v/mira"
 )
 
 // GetTypeC returns the jen.Code from a typ
-func GetTypeC(typ *Typ) jen.Code {
+func GetTypeC(typ *mira.Type) jen.Code {
 	c := &jen.Statement{}
-	if typ.Nillabe {
+	if typ.Nillable() {
 		c = c.Op("*")
 	}
 
 	// built-in types
-	if typ.PkgPath == "" {
-		switch typ.T.Kind() {
+	if typ.PkgPath() == "" {
+		switch typ.T().Kind() {
 		case reflect.Int:
 			return c.Int()
 		case reflect.Int32:
@@ -37,18 +38,18 @@ func GetTypeC(typ *Typ) jen.Code {
 		}
 	}
 
-	return c.Qual(typ.PkgPath, typ.Name)
+	return c.Qual(typ.PkgPath(), typ.Name())
 }
 
 // GetZeroValC returns the jen.Code zero value from a typ
-func GetZeroValC(typ *Typ) jen.Code {
-	if typ.Nillabe {
+func GetZeroValC(typ *mira.Type) jen.Code {
+	if typ.Nillable() {
 		return jen.Nil()
 	}
 
 	// built-in types
-	if typ.PkgPath == "" {
-		switch typ.T.Kind() {
+	if typ.PkgPath() == "" {
+		switch typ.T().Kind() {
 		case reflect.Int, reflect.Int32, reflect.Int64,
 			reflect.Uint, reflect.Uint32, reflect.Uint64,
 			reflect.Float32, reflect.Float64:
@@ -58,5 +59,5 @@ func GetZeroValC(typ *Typ) jen.Code {
 		}
 	}
 
-	return jen.Qual(typ.PkgPath, typ.Name).Op("{").Op("}")
+	return jen.Qual(typ.PkgPath(), typ.Name()).Op("{").Op("}")
 }

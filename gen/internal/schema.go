@@ -3,6 +3,7 @@ package internal
 import (
 	"github.com/iancoleman/strcase"
 	"github.com/pkg/errors"
+	"github.com/sf9v/mira"
 
 	"github.com/sf9v/nero"
 )
@@ -10,7 +11,7 @@ import (
 // Schema is an internal schema
 type Schema struct {
 	Coln  string
-	Typ   *Typ
+	Type  *mira.Type
 	Ident *Col
 	Cols  []*Col
 	Pkg   string
@@ -21,7 +22,7 @@ func BuildSchema(s nero.Schemaer) (*Schema, error) {
 	ns := s.Schema()
 	schema := &Schema{
 		Coln: ns.Collection,
-		Typ:  NewTyp(s),
+		Type: mira.NewType(s),
 		Cols: []*Col{},
 		Pkg:  ns.Pkg,
 	}
@@ -32,7 +33,7 @@ func BuildSchema(s nero.Schemaer) (*Schema, error) {
 		col := &Col{
 			Name:        cfg.Name,
 			StructField: strcase.ToCamel(cfg.Name),
-			Typ:         NewTyp(cfg.T),
+			Type:        mira.NewType(cfg.T),
 			Ident:       cfg.Ident,
 			Auto:        cfg.Auto,
 		}

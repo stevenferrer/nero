@@ -15,7 +15,7 @@ func newUpdater(schema *gen.Schema) *jen.Statement {
 			if col.Auto {
 				continue
 			}
-			g.Id(col.LowerCamelName()).Add(gen.GetTypeC(col.Typ))
+			g.Id(col.LowerCamelName()).Add(gen.GetTypeC(col.Type))
 		}
 
 		g.Id("pfs").Op("[]").Id("PredFunc")
@@ -50,7 +50,7 @@ func newUpdater(schema *gen.Schema) *jen.Statement {
 			Params(rcvrParams).
 			Id(col.CamelName()).
 			Params(jen.Id(col.LowerCamelName()).
-				Add(gen.GetTypeC(col.Typ))).
+				Add(gen.GetTypeC(col.Type))).
 			Params(retParams).
 			Block(
 				jen.Id("u").Dot(col.LowerCamelName()).

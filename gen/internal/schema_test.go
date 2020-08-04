@@ -30,7 +30,7 @@ func TestBuildSchema(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
-	assert.Equal(t, "Example", schema.Typ.Name)
+	assert.Equal(t, "Example", schema.Type.Name())
 	assert.Equal(t, "examples", schema.Coln)
 	assert.Equal(t, "example", schema.Pkg)
 	assert.Len(t, schema.Cols, 4)

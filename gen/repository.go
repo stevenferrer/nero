@@ -9,12 +9,12 @@ import (
 )
 
 func newRepository(schema *gen.Schema) *jen.Statement {
-	schemaTypeC := jen.Op("*").Qual(schema.Typ.PkgPath, schema.Typ.Name)
+	schemaTypeC := jen.Op("*").Qual(schema.Type.PkgPath(), schema.Type.Name())
 	comment := fmt.Sprintf("Repository is the contract for storing %s",
-		schema.Typ.Name)
+		schema.Type.Name())
 	ctxC := jen.Qual("context", "Context")
 	txC := jen.Qual(pkgPath, "Tx")
-	identParam := jen.Id("id").Add(gen.GetTypeC(schema.Ident.Typ))
+	identParam := jen.Id("id").Add(gen.GetTypeC(schema.Ident.Type))
 	return jen.Comment(comment).Line().
 		Type().Id("Repository").Interface(
 		jen.Id("Tx").

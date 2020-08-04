@@ -85,12 +85,12 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 			jen.Id("ctx").Add(ctxC),
 			jen.Id("c").Op("*").Id("Creator"),
 		).
-		Params(gen.GetTypeC(ident.Typ), jen.Error()).
+		Params(gen.GetTypeC(ident.Type), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			g.List(jen.Id("tx"), jen.Err()).Op(":=").
 				Add(rcvrIDC).Dot("Tx").Call(ctxIDC)
 			g.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(gen.GetZeroValC(ident.Typ), jen.Err())).
+				jen.Return(gen.GetZeroValC(ident.Type), jen.Err())).
 				Line()
 
 			g.List(jen.Id(ident.LowerCamelName()), jen.Err()).Op(":=").
@@ -100,7 +100,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 				jen.Id("c"),
 			)
 			g.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(gen.GetZeroValC(ident.Typ), txRollback),
+				jen.Return(gen.GetZeroValC(ident.Type), txRollback),
 			).Line()
 
 			g.Return(
@@ -136,20 +136,20 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 			jen.Id("tx").Add(txC),
 			jen.Id("c").Op("*").Id("Creator"),
 		).
-		Params(gen.GetTypeC(ident.Typ), jen.Error()).
+		Params(gen.GetTypeC(ident.Type), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			// assert tx type
 			g.List(jen.Id("txx"), jen.Id("ok")).Op(":=").
 				Id("tx").Assert(jen.Op("*").Qual("database/sql", "Tx"))
 			g.If(jen.Op("!").Id("ok")).Block(
 				jen.Return(
-					gen.GetZeroValC(ident.Typ),
+					gen.GetZeroValC(ident.Type),
 					jen.Qual(errPkg, "New").Call(jen.Lit("expecting tx to be *sql.Tx")),
 				),
 			).Line()
 
 			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(gen.GetZeroValC(ident.Typ), jen.Err()))
+				jen.Return(gen.GetZeroValC(ident.Type), jen.Err()))
 
 			// query builder
 			g.Id("qb").Op(":=").Qual(sqPkg, "Insert").
@@ -171,7 +171,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 			// debug
 			g.Add(newLogBlock(rcvrID, "Create")).Line().Line()
 
-			g.Var().Id(ident.LowerCamelName()).Add(gen.GetTypeC(ident.Typ))
+			g.Var().Id(ident.LowerCamelName()).Add(gen.GetTypeC(ident.Type))
 			g.Err().Op(":=").Id("qb").Dot("QueryRowContext").
 				Call(ctxIDC).Dot("Scan").Call(jen.Op("&").Id(ident.LowerCamelName()))
 			g.Add(ifErr).Line()
@@ -246,7 +246,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 		).
 		Params(
 			jen.Op("[]").Op("*").
-				Qual(schema.Typ.PkgPath, schema.Typ.Name),
+				Qual(schema.Type.PkgPath(), schema.Type.Name()),
 			jen.Error(),
 		).
 		BlockFunc(func(g *jen.Group) {
@@ -274,7 +274,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 			jen.Id("q").Op("*").Id("Queryer"),
 		).
 		Params(
-			jen.Op("*").Qual(schema.Typ.PkgPath, schema.Typ.Name),
+			jen.Op("*").Qual(schema.Type.PkgPath(), schema.Type.Name()),
 			jen.Error(),
 		).
 		BlockFunc(func(g *jen.Group) {
@@ -297,7 +297,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 
 	// query tx
 	queryRetTyp := jen.Op("[]").Op("*").
-		Qual(schema.Typ.PkgPath, schema.Typ.Name)
+		Qual(schema.Type.PkgPath(), schema.Type.Name())
 	stmnt = stmnt.Func().Params(rcvrParamC).Id("QueryTx").
 		Params(
 			jen.Id("ctx").Add(ctxC),
@@ -328,7 +328,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 
 			g.Id("list").Op(":=").Add(queryRetTyp).Block()
 			g.For(jen.Id("rows").Dot("Next").Call()).BlockFunc(func(g *jen.Group) {
-				g.Var().Id("item").Qual(schema.Typ.PkgPath, schema.Typ.Name)
+				g.Var().Id("item").Qual(schema.Type.PkgPath(), schema.Type.Name())
 				g.Err().Op("=").Id("rows").Dot("Scan").CallFunc(func(g *jen.Group) {
 					for _, col := range schema.Cols {
 						g.Line().Op("&").Id("item").Dot(col.StructField)
@@ -351,7 +351,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 			jen.Id("q").Op("*").Id("Queryer"),
 		).
 		Params(
-			jen.Op("*").Qual(schema.Typ.PkgPath, schema.Typ.Name),
+			jen.Op("*").Qual(schema.Type.PkgPath(), schema.Type.Name()),
 			jen.Error(),
 		).
 		BlockFunc(func(g *jen.Group) {
@@ -366,7 +366,7 @@ func NewPGRepoC(schema *gen.Schema) *jen.Statement {
 			// debug
 			g.Add(newLogBlock(rcvrID, "One")).Line().Line()
 
-			g.Var().Id("item").Qual(schema.Typ.PkgPath, schema.Typ.Name)
+			g.Var().Id("item").Qual(schema.Type.PkgPath(), schema.Type.Name())
 			g.Err().Op(":=").Id("qb").Dot("RunWith").
 				Call(jen.Id("txx")).Op(".").Line().Id("QueryRowContext").
 				Call(ctxIDC).Op(".").Line().

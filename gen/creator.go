@@ -17,7 +17,7 @@ func newCreator(schema *gen.Schema) *jen.Statement {
 					continue
 				}
 				g.Id(col.LowerCamelName()).
-					Add(gen.GetTypeC(col.Typ))
+					Add(gen.GetTypeC(col.Type))
 			}
 		}).Line()
 
@@ -48,7 +48,7 @@ func newCreator(schema *gen.Schema) *jen.Statement {
 			Params(rcvrParams).
 			Id(col.CamelName()).
 			Params(jen.Id(col.LowerCamelName()).
-				Add(gen.GetTypeC(col.Typ))).
+				Add(gen.GetTypeC(col.Type))).
 			Params(jen.Op("*").Id("Creator")).
 			Block(
 				jen.Id("c").Dot(col.LowerCamelName()).

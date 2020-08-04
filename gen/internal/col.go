@@ -1,6 +1,9 @@
 package internal
 
-import "github.com/iancoleman/strcase"
+import (
+	"github.com/iancoleman/strcase"
+	"github.com/sf9v/mira"
+)
 
 // Col is a column
 type Col struct {
@@ -8,8 +11,8 @@ type Col struct {
 	Name string
 	// StructField overrides the struct field name
 	StructField string
-	// Typ is the type info of column
-	Typ *Typ
+	// Type is the type info of column
+	Type *mira.Type
 	// Auto is an auto-filled column
 	Auto bool
 	// Ident is an identity column .i.e. id
