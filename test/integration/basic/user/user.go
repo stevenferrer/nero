@@ -12,10 +12,22 @@ type User struct {
 	Email     *string
 	Name      *string
 	Age       int
-	Group     string
+	Group     Group
 	UpdatedAt *time.Time
 	CreatedAt *time.Time
 }
+
+// Group is a group
+type Group string
+
+// Groups
+const (
+	Human   Group = "human"
+	Charr   Group = "charr"
+	Norn    Group = "norn"
+	Sylvari Group = "sylvari"
+	Outcast Group = "outcast"
+)
 
 // Schema implements nero.Schemaer
 func (u *User) Schema() *nero.Schema {

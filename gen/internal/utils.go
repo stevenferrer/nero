@@ -47,16 +47,13 @@ func GetZeroValC(typ *mira.Type) jen.Code {
 		return jen.Nil()
 	}
 
-	// built-in types
-	if typ.PkgPath() == "" {
-		switch typ.T().Kind() {
-		case reflect.Int, reflect.Int32, reflect.Int64,
-			reflect.Uint, reflect.Uint32, reflect.Uint64,
-			reflect.Float32, reflect.Float64:
-			return jen.Lit(0)
-		case reflect.String:
-			return jen.Lit("")
-		}
+	switch typ.T().Kind() {
+	case reflect.Int, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint32, reflect.Uint64,
+		reflect.Float32, reflect.Float64:
+		return jen.Lit(0)
+	case reflect.String:
+		return jen.Lit("")
 	}
 
 	return jen.Qual(typ.PkgPath(), typ.Name()).Op("{").Op("}")

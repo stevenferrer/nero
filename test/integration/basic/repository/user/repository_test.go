@@ -8,7 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sf9v/nero/test/integration/basic/repository/user"
+	userr "github.com/sf9v/nero/test/integration/basic/repository/user"
+	"github.com/sf9v/nero/test/integration/basic/user"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -17,7 +18,7 @@ func randAge() int {
 	return rand.Intn(30-18) + 18
 }
 
-func newRepoTestRunner(repo user.Repository) func(t *testing.T) {
+func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 	return func(t *testing.T) {
 		var err error
 		ctx := context.Background()
@@ -25,20 +26,20 @@ func newRepoTestRunner(repo user.Repository) func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				now := time.Now()
 				for i := 1; i <= 50; i++ {
-					group := "human"
+					group := user.Human
 					if i%2 == 0 {
-						group = "charr"
+						group = user.Charr
 					} else if i%3 == 0 {
-						group = "norn"
+						group = user.Norn
 					} else if i%4 == 0 {
-						group = "sylvari"
+						group = user.Sylvari
 					}
 
 					email := fmt.Sprintf("%s_%d@gg.io", group, i)
 					name := fmt.Sprintf("%s_%d", group, i)
 					age := randAge()
 
-					cr := user.NewCreator().
+					cr := userr.NewCreator().
 						Email(&email).Name(&name).
 						Age(age).Group(group).
 						UpdatedAt(&now)
@@ -50,20 +51,20 @@ func newRepoTestRunner(repo user.Repository) func(t *testing.T) {
 			})
 
 			t.Run("Error", func(t *testing.T) {
-				id, err := repo.Create(ctx, user.NewCreator())
+				id, err := repo.Create(ctx, userr.NewCreator())
 				assert.Error(t, err)
 				assert.Zero(t, id)
 
 				cctx, cancel := context.WithCancel(ctx)
 				cancel()
-				_, err = repo.Create(cctx, user.NewCreator())
+				_, err = repo.Create(cctx, userr.NewCreator())
 				assert.Error(t, err)
 			})
 		})
 
 		t.Run("CreateMany", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
-				crs := []*user.Creator{}
+				crs := []*userr.Creator{}
 				for i := 51; i <= 100; i++ {
 					group := "human"
 					if i%2 == 0 {
@@ -79,7 +80,7 @@ func newRepoTestRunner(repo user.Repository) func(t *testing.T) {
 					age := randAge()
 					now := time.Now()
 
-					cr := user.NewCreator().
+					cr := userr.NewCreator().
 						Email(&email).Name(&name).
 						Age(age).UpdatedAt(&now)
 					crs = append(crs, cr)
@@ -88,17 +89,17 @@ func newRepoTestRunner(repo user.Repository) func(t *testing.T) {
 				err = repo.CreateMany(ctx, crs...)
 				assert.NoError(t, err)
 
-				err = repo.CreateMany(ctx, []*user.Creator{}...)
+				err = repo.CreateMany(ctx, []*userr.Creator{}...)
 				assert.NoError(t, err)
 			})
 
 			t.Run("Error", func(t *testing.T) {
-				err := repo.CreateMany(ctx, user.NewCreator())
+				err := repo.CreateMany(ctx, userr.NewCreator())
 				assert.Error(t, err)
 
 				cctx, cancel := context.WithCancel(ctx)
 				cancel()
-				err = repo.CreateMany(cctx, user.NewCreator())
+				err = repo.CreateMany(cctx, userr.NewCreator())
 				assert.Error(t, err)
 			})
 		})
@@ -107,7 +108,7 @@ func newRepoTestRunner(repo user.Repository) func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				// all users
 				users, err := repo.Query(ctx,
-					user.NewQueryer())
+					userr.NewQueryer())
 				assert.NoError(t, err)
 				assert.Len(t, users, 100)
 				for _, u := range users {
@@ -118,28 +119,28 @@ func newRepoTestRunner(repo user.Repository) func(t *testing.T) {
 				}
 
 				// with predicates
-				users, err = repo.Query(ctx, user.NewQueryer().
-					Where(user.IDEq("2"), user.IDNotEq("1"),
-						user.IDGt("1"), user.IDGtOrEq("2"),
-						user.IDLt("3"), user.IDLtOrEq("2")))
+				users, err = repo.Query(ctx, userr.NewQueryer().
+					Where(userr.IDEq("2"), userr.IDNotEq("1"),
+						userr.IDGt("1"), userr.IDGtOrEq("2"),
+						userr.IDLt("3"), userr.IDLtOrEq("2")))
 				assert.NoError(t, err)
 				assert.Len(t, users, 1)
 
-				users, err = repo.Query(ctx, user.NewQueryer().
+				users, err = repo.Query(ctx, userr.NewQueryer().
 					Where(
-						user.AgeEq(18), user.AgeNotEq(30),
-						user.AgeGt(17), user.AgeGtOrEq(18),
-						user.AgeLt(30), user.AgeLtOrEq(19),
+						userr.AgeEq(18), userr.AgeNotEq(30),
+						userr.AgeGt(17), userr.AgeGtOrEq(18),
+						userr.AgeLt(30), userr.AgeLtOrEq(19),
 					),
 				)
 				assert.NoError(t, err)
 				assert.NotZero(t, len(users))
 
-				users, err = repo.Query(ctx, user.NewQueryer().
+				users, err = repo.Query(ctx, userr.NewQueryer().
 					Where(
-						user.GroupEq("norn"), user.GroupNotEq("human"),
-						user.GroupGt("n"), user.GroupGtOrEq("norn"),
-						user.GroupLt("nornn"), user.GroupLtOrEq("norn"),
+						userr.GroupEq(user.Norn), userr.GroupNotEq(user.Human),
+						userr.GroupGt("n"), userr.GroupGtOrEq(user.Norn),
+						userr.GroupLt("nornn"), userr.GroupLtOrEq(user.Norn),
 					),
 				)
 				assert.NoError(t, err)
@@ -147,17 +148,17 @@ func newRepoTestRunner(repo user.Repository) func(t *testing.T) {
 
 				// with sort
 				// get last user
-				users, err = repo.Query(ctx, user.NewQueryer().
+				users, err = repo.Query(ctx, userr.NewQueryer().
 					Sort(
-						user.Desc(user.ColumnID),
-						user.Asc(user.ColumnCreatedAt),
+						userr.Desc(userr.ColumnID),
+						userr.Asc(userr.ColumnCreatedAt),
 					),
 				)
 				assert.NoError(t, err)
 				assert.Equal(t, "charr_100_mm", *users[0].Name)
 
 				// with limit and offset
-				users, err = repo.Query(ctx, user.NewQueryer().
+				users, err = repo.Query(ctx, userr.NewQueryer().
 					Limit(1).Offset(1))
 				assert.NoError(t, err)
 				assert.Len(t, users, 1)
@@ -166,20 +167,20 @@ func newRepoTestRunner(repo user.Repository) func(t *testing.T) {
 			t.Run("Error", func(t *testing.T) {
 				cctx, cancel := context.WithCancel(ctx)
 				cancel()
-				_, err = repo.Query(cctx, user.NewQueryer())
+				_, err = repo.Query(cctx, userr.NewQueryer())
 				assert.Error(t, err)
 			})
 		})
 
 		t.Run("QueryOne", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
-				usr, err := repo.QueryOne(ctx, user.NewQueryer())
+				usr, err := repo.QueryOne(ctx, userr.NewQueryer())
 				assert.NoError(t, err)
 				assert.NotNil(t, usr)
 				assert.Equal(t, "1", usr.ID)
 
-				_, err = repo.QueryOne(ctx, user.NewQueryer().
-					Where(user.IDEq("9999")))
+				_, err = repo.QueryOne(ctx, userr.NewQueryer().
+					Where(userr.IDEq("9999")))
 				assert.Error(t, err)
 				assert.Equal(t, sql.ErrNoRows, err)
 			})
@@ -187,7 +188,7 @@ func newRepoTestRunner(repo user.Repository) func(t *testing.T) {
 			t.Run("Error", func(t *testing.T) {
 				cctx, cancel := context.WithCancel(ctx)
 				cancel()
-				_, err = repo.QueryOne(cctx, user.NewQueryer())
+				_, err = repo.QueryOne(cctx, userr.NewQueryer())
 				assert.Error(t, err)
 			})
 		})
@@ -205,18 +206,18 @@ func newRepoTestRunner(repo user.Repository) func(t *testing.T) {
 
 				agg := []aggt{}
 
-				a := user.NewAggregator(&agg).
+				a := userr.NewAggregator(&agg).
 					Aggregate(
-						user.Avg(user.ColumnAge),
-						user.Min(user.ColumnAge),
-						user.Max(user.ColumnAge),
-						user.Count(user.ColumnAge),
-						user.Sum(user.ColumnAge),
-						user.None(user.ColumnGroup),
+						userr.Avg(userr.ColumnAge),
+						userr.Min(userr.ColumnAge),
+						userr.Max(userr.ColumnAge),
+						userr.Count(userr.ColumnAge),
+						userr.Sum(userr.ColumnAge),
+						userr.None(userr.ColumnGroup),
 					).
-					Where(user.AgeGt(18), user.GroupNotEq("")).
-					Group(user.ColumnGroup).
-					Sort(user.Asc(user.ColumnGroup))
+					Where(userr.AgeGt(18), userr.GroupNotEq("")).
+					Group(userr.ColumnGroup).
+					Sort(userr.Asc(userr.ColumnGroup))
 
 				err := repo.Aggregate(ctx, a)
 				require.NoError(t, err)
@@ -236,28 +237,28 @@ func newRepoTestRunner(repo user.Repository) func(t *testing.T) {
 		t.Run("Update", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				now := time.Now()
-				preds := []user.PredFunc{
-					user.IDEq("1"), user.IDNotEq("2"),
-					user.IDGt("0"), user.IDGtOrEq("1"),
-					user.IDLt("2"), user.IDLtOrEq("1"),
+				preds := []userr.PredFunc{
+					userr.IDEq("1"), userr.IDNotEq("2"),
+					userr.IDGt("0"), userr.IDGtOrEq("1"),
+					userr.IDLt("2"), userr.IDLtOrEq("1"),
 				}
 
-				email := "mega_norn@gg.io"
-				name := "mega_norn"
+				email := "outcast@gg.io"
+				name := "outcastn"
 				age := 300
 				rowsAffected, err := repo.Update(ctx,
-					user.NewUpdater().
+					userr.NewUpdater().
 						Email(&email).
 						Name(&name).
 						Age(age).
-						Group("norn").
+						Group(user.Outcast).
 						UpdatedAt(&now).
 						Where(preds...),
 				)
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), rowsAffected)
 
-				users, err := repo.Query(ctx, user.NewQueryer().
+				users, err := repo.Query(ctx, userr.NewQueryer().
 					Where(preds...))
 				assert.NoError(t, err)
 				assert.Len(t, users, 1)
@@ -270,35 +271,35 @@ func newRepoTestRunner(repo user.Repository) func(t *testing.T) {
 			})
 
 			t.Run("Error", func(t *testing.T) {
-				_, err = repo.Update(ctx, user.NewUpdater())
+				_, err = repo.Update(ctx, userr.NewUpdater())
 				assert.Error(t, err)
 
 				cctx, cancel := context.WithCancel(ctx)
 				cancel()
-				_, err = repo.Update(cctx, user.NewUpdater())
+				_, err = repo.Update(cctx, userr.NewUpdater())
 				assert.Error(t, err)
 			})
 		})
 
 		t.Run("Delete", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
-				preds := []user.PredFunc{
-					user.IDEq("1"), user.IDNotEq("2"),
-					user.IDGt("0"), user.IDGtOrEq("1"),
-					user.IDLt("2"), user.IDLtOrEq("1"),
+				preds := []userr.PredFunc{
+					userr.IDEq("1"), userr.IDNotEq("2"),
+					userr.IDGt("0"), userr.IDGtOrEq("1"),
+					userr.IDLt("2"), userr.IDLtOrEq("1"),
 				}
 				rowsAffected, err := repo.Delete(ctx,
-					user.NewDeleter().Where(preds...))
+					userr.NewDeleter().Where(preds...))
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), rowsAffected)
 
 				usr, err := repo.QueryOne(ctx,
-					user.NewQueryer().Where(preds...))
+					userr.NewQueryer().Where(preds...))
 				assert.Error(t, err, sql.ErrNoRows)
 				assert.Nil(t, usr)
 
 				// delete all
-				rowsAffected, err = repo.Delete(ctx, user.NewDeleter())
+				rowsAffected, err = repo.Delete(ctx, userr.NewDeleter())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(99), rowsAffected)
 			})
@@ -306,7 +307,7 @@ func newRepoTestRunner(repo user.Repository) func(t *testing.T) {
 			t.Run("Error", func(t *testing.T) {
 				cctx, cancel := context.WithCancel(ctx)
 				cancel()
-				_, err = repo.Delete(cctx, user.NewDeleter())
+				_, err = repo.Delete(cctx, userr.NewDeleter())
 				assert.Error(t, err)
 			})
 		})

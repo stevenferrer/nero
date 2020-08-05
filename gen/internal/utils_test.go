@@ -7,6 +7,7 @@ import (
 
 	"github.com/dave/jennifer/jen"
 	"github.com/sf9v/mira"
+	"github.com/sf9v/nero/example"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -152,13 +153,26 @@ func TestGetTypeC(t *testing.T) {
 			},
 			want: jen.Qual("math/big", "Int"),
 		},
-
 		{
 			name: "*big.Int",
 			args: args{
 				typ: mira.NewType(big.NewInt(0)),
 			},
 			want: jen.Op("*").Qual("math/big", "Int"),
+		},
+		{
+			name: "CustomString",
+			args: args{
+				typ: mira.NewType(example.CustomString("")),
+			},
+			want: jen.Qual("example", "CustomString"),
+		},
+		{
+			name: "CustomStringOne",
+			args: args{
+				typ: mira.NewType(example.CustomStringOne),
+			},
+			want: jen.Qual("example", "CustomString"),
 		},
 	}
 	for _, tt := range tests {
@@ -318,6 +332,20 @@ func TestGetZeroValC(t *testing.T) {
 				typ: mira.NewType(big.NewInt(0)),
 			},
 			want: jen.Nil(),
+		},
+		{
+			name: "CustomString",
+			args: args{
+				typ: mira.NewType(example.CustomString("")),
+			},
+			want: jen.Lit(""),
+		},
+		{
+			name: "CustomStringOne",
+			args: args{
+				typ: mira.NewType(example.CustomStringOne),
+			},
+			want: jen.Lit(""),
 		},
 	}
 	for _, tt := range tests {

@@ -3,6 +3,7 @@ package user
 
 import (
 	predicate "github.com/sf9v/nero/predicate"
+	user "github.com/sf9v/nero/test/integration/basic/user"
 	"time"
 )
 
@@ -248,7 +249,7 @@ func AgeLtOrEq(age int) PredFunc {
 	}
 }
 
-func GroupEq(group string) PredFunc {
+func GroupEq(group user.Group) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
 			Col: "group_res",
@@ -258,7 +259,7 @@ func GroupEq(group string) PredFunc {
 	}
 }
 
-func GroupNotEq(group string) PredFunc {
+func GroupNotEq(group user.Group) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
 			Col: "group_res",
@@ -268,7 +269,7 @@ func GroupNotEq(group string) PredFunc {
 	}
 }
 
-func GroupGt(group string) PredFunc {
+func GroupGt(group user.Group) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
 			Col: "group_res",
@@ -278,7 +279,7 @@ func GroupGt(group string) PredFunc {
 	}
 }
 
-func GroupGtOrEq(group string) PredFunc {
+func GroupGtOrEq(group user.Group) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
 			Col: "group_res",
@@ -288,7 +289,7 @@ func GroupGtOrEq(group string) PredFunc {
 	}
 }
 
-func GroupLt(group string) PredFunc {
+func GroupLt(group user.Group) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
 			Col: "group_res",
@@ -298,7 +299,7 @@ func GroupLt(group string) PredFunc {
 	}
 }
 
-func GroupLtOrEq(group string) PredFunc {
+func GroupLtOrEq(group user.Group) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
 			Col: "group_res",
