@@ -496,6 +496,8 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 			cols = append(cols, "MIN("+col+") min_"+col)
 		case aggregate.Sum:
 			cols = append(cols, "SUM("+col+") sum_"+col)
+		case aggregate.None:
+			cols = append(cols, col)
 		}
 	}
 

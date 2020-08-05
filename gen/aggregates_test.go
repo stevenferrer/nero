@@ -57,6 +57,15 @@ func Sum(col Column) AggFunc {
 		})
 	}
 }
+
+func None(col Column) AggFunc {
+	return func(aggs *aggregate.Aggregates) {
+		aggs.Add(&aggregate.Aggregate{
+			Col: col.String(),
+			Fn:  aggregate.None,
+		})
+	}
+}
 `
 	expect = strings.TrimSpace(expect)
 	got := strings.TrimSpace(fmt.Sprintf("%#v", meta))

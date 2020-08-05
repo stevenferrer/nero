@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/sf9v/nero/aggregate"
 	"github.com/sf9v/nero/sort"
 )
 
@@ -60,6 +61,16 @@ func newAggregateTxBlock() *jen.Statement {
 					BlockFunc(func(g *jen.Group) {
 						// switch block
 						for _, aggFn := range aggFns {
+							if aggFn == aggregate.None {
+								g.Case(jen.Qual(aggPkg, aggFn.String())).Block(
+									jen.Id("cols").Op("=").Append(
+										jen.Id("cols"),
+										jen.Id("col"),
+									),
+								)
+								continue
+							}
+
 							fnUp := strings.ToUpper(aggFn.String())
 							fnLow := strings.ToLower(aggFn.String())
 							g.Case(jen.Qual(aggPkg, aggFn.String())).Block(

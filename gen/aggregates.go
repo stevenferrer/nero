@@ -14,7 +14,7 @@ func newAggregates() *jen.Statement {
 	aggFns := []aggregate.Function{
 		aggregate.Avg, aggregate.Count,
 		aggregate.Max, aggregate.Min,
-		aggregate.Sum,
+		aggregate.Sum, aggregate.None,
 	}
 
 	for _, aggFn := range aggFns {

@@ -200,6 +200,7 @@ func newRepoTestRunner(repo user.Repository) func(t *testing.T) {
 					MaxAge   float64
 					CountAge float64
 					SumAge   float64
+					Group    string
 				}
 
 				agg := []aggt{}
@@ -211,19 +212,23 @@ func newRepoTestRunner(repo user.Repository) func(t *testing.T) {
 						user.Max(user.ColumnAge),
 						user.Count(user.ColumnAge),
 						user.Sum(user.ColumnAge),
+						user.None(user.ColumnGroup),
 					).
-					Where(user.AgeGt(18)).
+					Where(user.AgeGt(18), user.GroupNotEq("")).
 					Group(user.ColumnGroup).
 					Sort(user.Asc(user.ColumnGroup))
 
 				err := repo.Aggregate(ctx, a)
 				require.NoError(t, err)
-				assert.Len(t, agg, 4)
+				assert.Len(t, agg, 3)
 
 				for _, ag := range agg {
 					assert.NotZero(t, ag.AvgAge)
 					assert.NotZero(t, ag.MinAge)
 					assert.NotZero(t, ag.MaxAge)
+					assert.NotZero(t, ag.CountAge)
+					assert.NotZero(t, ag.SumAge)
+					assert.NotEmpty(t, ag.Group)
 				}
 			})
 		})

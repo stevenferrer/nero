@@ -34,7 +34,7 @@ var (
 	predOps = []predicate.Operator{predicate.Eq, predicate.NotEq,
 		predicate.Gt, predicate.GtOrEq, predicate.Lt, predicate.LtOrEq}
 	aggFns = []aggregate.Function{aggregate.Avg, aggregate.Count,
-		aggregate.Max, aggregate.Min, aggregate.Sum}
+		aggregate.Max, aggregate.Min, aggregate.Sum, aggregate.None}
 )
 
 // NewSQLiteRepo generates an sqlite repository implementation

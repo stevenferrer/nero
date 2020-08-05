@@ -517,6 +517,8 @@ func (sl *SQLiteRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggr
 			cols = append(cols, "MIN("+col+") min_"+col)
 		case aggregate.Sum:
 			cols = append(cols, "SUM("+col+") sum_"+col)
+		case aggregate.None:
+			cols = append(cols, col)
 		}
 	}
 

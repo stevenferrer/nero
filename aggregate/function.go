@@ -15,6 +15,8 @@ func (f Function) String() string {
 		return "Min"
 	case Sum:
 		return "Sum"
+	case None:
+		return "None"
 	}
 
 	return "Invalid"
@@ -23,12 +25,15 @@ func (f Function) String() string {
 const (
 	// Avg is average aggregate function
 	Avg Function = iota
-	// Count is count aggregate function
+	// Count is the count aggregate function
 	Count
-	// Max is max aggregate function
+	// Max is the max aggregate function
 	Max
-	// Min is min aggregate function
+	// Min is the min aggregate function
 	Min
-	// Sum is sum aggregate function
+	// Sum is the sum aggregate function
 	Sum
+	// None is not an aggregate function and is only used
+	// when you want to include a column in the result
+	None
 )
