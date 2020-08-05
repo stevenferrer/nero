@@ -8,11 +8,13 @@ An experimental repository generator in Go.
 
 ## Motivation
 
-Throughout our codebase, we heavily use the `Repository` pattern and we often [write our queries manually](https://golang.org/pkg/database/sql/#example_DB_QueryContext). It becomes tedious when you have more and more tables to maintain. So, we decided to create `nero` to automate the task of writing the repository implementations.
+Throughout our codebase, we heavily use the *[repository pattern](https://martinfowler.com/eaaCatalog/repository.html)* and we often [write our queries manually](https://golang.org/pkg/database/sql/#example_DB_QueryContext). It becomes tedious when you have more and more tables to maintain. One small change and you end-up changing a lot of things. So, we decided to experiment on creating *nero* to automate the process of creating our *[data-access layer](https://en.wikipedia.org/wiki/Data_access_layer)* code.
 
 ## Inspiration
 
-In search for alternative [data-access layer](https://en.wikipedia.org/wiki/Data_access_layer), we discovered [ent](https://entgo.io/), an ORM that uses *code generation* to make fluent data-access API. We fell in-love with the idea and that's when we started to ponder about generating a *data-access layer* code that would *fit our needs*.
+Before we thought of this project, we tried many different ORMs and found [ent](https://entgo.io/). *Ent* is an ORM that uses *code generation* to make fluent and convenient data-access API. It is so convinient that we started using it on some parts of our system. 
+
+However, due to our heavy use of *repository pattern*, it is still very difficult to for us to migrate all of our code. That's when we started to ponder about the idea generating our data access layer code.
 
 ## Goals
 
@@ -22,4 +24,4 @@ In search for alternative [data-access layer](https://en.wikipedia.org/wiki/Data
 
 ## Assumption
 
-Every `collection/table` shall always have a surrogate key i.e. `id` column.
+The only assumption that we make is: Every *collection/table* will always have a surrogate key i.e. *id column*.
