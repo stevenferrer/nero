@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/sf9v/nero"
+	"github.com/sf9v/nero/example"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -26,14 +27,14 @@ func (*example2) Schema() *nero.Schema {
 }
 
 func TestBuildSchema(t *testing.T) {
-	schema, err := BuildSchema(new(Example))
+	schema, err := BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
-	assert.Equal(t, "Example", schema.Type.Name())
-	assert.Equal(t, "examples", schema.Coln)
-	assert.Equal(t, "example", schema.Pkg)
-	assert.Len(t, schema.Cols, 4)
+	assert.Equal(t, "User", schema.Type.Name())
+	assert.Equal(t, "users", schema.Coln)
+	assert.Equal(t, "user", schema.Pkg)
+	assert.Len(t, schema.Cols, 5)
 
 	ident := schema.Ident
 	assert.Equal(t, "id", ident.Name)

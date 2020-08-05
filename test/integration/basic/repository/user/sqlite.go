@@ -31,25 +31,25 @@ func NewSQLiteRepository(db *sql.DB) *SQLiteRepository {
 	}
 }
 
-func (sqlr *SQLiteRepository) Debug(out io.Writer) *SQLiteRepository {
+func (sl *SQLiteRepository) Debug(out io.Writer) *SQLiteRepository {
 	lg := zerolog.New(out).With().Timestamp().Logger()
 	return &SQLiteRepository{
-		db:  sqlr.db,
+		db:  sl.db,
 		log: &lg,
 	}
 }
 
-func (sqlr *SQLiteRepository) Tx(ctx context.Context) (nero.Tx, error) {
-	return sqlr.db.BeginTx(ctx, nil)
+func (sl *SQLiteRepository) Tx(ctx context.Context) (nero.Tx, error) {
+	return sl.db.BeginTx(ctx, nil)
 }
 
-func (sqlr *SQLiteRepository) Create(ctx context.Context, c *Creator) (string, error) {
-	tx, err := sqlr.Tx(ctx)
+func (sl *SQLiteRepository) Create(ctx context.Context, c *Creator) (string, error) {
+	tx, err := sl.Tx(ctx)
 	if err != nil {
 		return "", err
 	}
 
-	id, err := sqlr.CreateTx(ctx, tx, c)
+	id, err := sl.CreateTx(ctx, tx, c)
 	if err != nil {
 		return "", rollback(tx, err)
 	}
@@ -57,13 +57,13 @@ func (sqlr *SQLiteRepository) Create(ctx context.Context, c *Creator) (string, e
 	return id, tx.Commit()
 }
 
-func (sqlr *SQLiteRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
-	tx, err := sqlr.Tx(ctx)
+func (sl *SQLiteRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
+	tx, err := sl.Tx(ctx)
 	if err != nil {
 		return err
 	}
 
-	err = sqlr.CreateManyTx(ctx, tx, cs...)
+	err = sl.CreateManyTx(ctx, tx, cs...)
 	if err != nil {
 		return rollback(tx, err)
 	}
@@ -71,7 +71,7 @@ func (sqlr *SQLiteRepository) CreateMany(ctx context.Context, cs ...*Creator) er
 	return tx.Commit()
 }
 
-func (sqlr *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (string, error) {
+func (sl *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (string, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return "", errors.New("expecting tx to be *sql.Tx")
@@ -79,9 +79,9 @@ func (sqlr *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creat
 
 	qb := sq.Insert(c.collection).
 		Columns(c.columns...).
-		Values(c.email, c.name, c.age, c.groupRes, c.updatedAt).
+		Values(c.email, c.name, c.age, c.group, c.updatedAt).
 		RunWith(txx)
-	if log := sqlr.log; log != nil {
+	if log := sl.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "Create").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
@@ -100,7 +100,7 @@ func (sqlr *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creat
 	return strconv.FormatInt(id, 10), nil
 }
 
-func (sqlr *SQLiteRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
+func (sl *SQLiteRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
 	if len(cs) == 0 {
 		return nil
 	}
@@ -113,9 +113,9 @@ func (sqlr *SQLiteRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs .
 	qb := sq.Insert(cs[0].collection).
 		Columns(cs[0].columns...)
 	for _, c := range cs {
-		qb = qb.Values(c.email, c.name, c.age, c.groupRes, c.updatedAt)
+		qb = qb.Values(c.email, c.name, c.age, c.group, c.updatedAt)
 	}
-	if log := sqlr.log; log != nil {
+	if log := sl.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "CreateMany").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
@@ -129,13 +129,13 @@ func (sqlr *SQLiteRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs .
 	return nil
 }
 
-func (sqlr *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*user.User, error) {
-	tx, err := sqlr.Tx(ctx)
+func (sl *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*user.User, error) {
+	tx, err := sl.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	list, err := sqlr.QueryTx(ctx, tx, q)
+	list, err := sl.QueryTx(ctx, tx, q)
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
@@ -143,13 +143,13 @@ func (sqlr *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*user.Us
 	return list, tx.Commit()
 }
 
-func (sqlr *SQLiteRepository) QueryOne(ctx context.Context, q *Queryer) (*user.User, error) {
-	tx, err := sqlr.Tx(ctx)
+func (sl *SQLiteRepository) QueryOne(ctx context.Context, q *Queryer) (*user.User, error) {
+	tx, err := sl.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	item, err := sqlr.QueryOneTx(ctx, tx, q)
+	item, err := sl.QueryOneTx(ctx, tx, q)
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
@@ -157,14 +157,14 @@ func (sqlr *SQLiteRepository) QueryOne(ctx context.Context, q *Queryer) (*user.U
 	return item, tx.Commit()
 }
 
-func (sqlr *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*user.User, error) {
+func (sl *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*user.User, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	qb := sqlr.buildSelect(q)
-	if log := sqlr.log; log != nil {
+	qb := sl.buildSelect(q)
+	if log := sl.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "Query").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
@@ -198,14 +198,14 @@ func (sqlr *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Querye
 	return list, nil
 }
 
-func (sqlr *SQLiteRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*user.User, error) {
+func (sl *SQLiteRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*user.User, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	qb := sqlr.buildSelect(q)
-	if log := sqlr.log; log != nil {
+	qb := sl.buildSelect(q)
+	if log := sl.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "QueryOne").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
@@ -230,7 +230,7 @@ func (sqlr *SQLiteRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Que
 	return &item, nil
 }
 
-func (sqlr *SQLiteRepository) buildSelect(q *Queryer) sq.SelectBuilder {
+func (sl *SQLiteRepository) buildSelect(q *Queryer) sq.SelectBuilder {
 	qb := sq.Select(q.columns...).
 		From(q.collection)
 
@@ -292,13 +292,13 @@ func (sqlr *SQLiteRepository) buildSelect(q *Queryer) sq.SelectBuilder {
 	return qb
 }
 
-func (sqlr *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error) {
-	tx, err := sqlr.Tx(ctx)
+func (sl *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error) {
+	tx, err := sl.Tx(ctx)
 	if err != nil {
 		return 0, err
 	}
 
-	rowsAffected, err := sqlr.UpdateTx(ctx, tx, u)
+	rowsAffected, err := sl.UpdateTx(ctx, tx, u)
 	if err != nil {
 		return 0, rollback(tx, err)
 	}
@@ -306,7 +306,7 @@ func (sqlr *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, er
 	return rowsAffected, tx.Commit()
 }
 
-func (sqlr *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
+func (sl *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
@@ -327,8 +327,8 @@ func (sqlr *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updat
 	if u.age != 0 {
 		qb = qb.Set("age", u.age)
 	}
-	if u.groupRes != "" {
-		qb = qb.Set("group_res", u.groupRes)
+	if u.group != "" {
+		qb = qb.Set("group_res", u.group)
 	}
 	if u.updatedAt != nil {
 		qb = qb.Set("updated_at", u.updatedAt)
@@ -362,7 +362,7 @@ func (sqlr *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updat
 			})
 		}
 	}
-	if log := sqlr.log; log != nil {
+	if log := sl.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "Update").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
@@ -381,13 +381,13 @@ func (sqlr *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updat
 	return rowsAffected, nil
 }
 
-func (sqlr *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
-	tx, err := sqlr.Tx(ctx)
+func (sl *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
+	tx, err := sl.Tx(ctx)
 	if err != nil {
 		return 0, err
 	}
 
-	rowsAffected, err := sqlr.DeleteTx(ctx, tx, d)
+	rowsAffected, err := sl.DeleteTx(ctx, tx, d)
 	if err != nil {
 		return 0, rollback(tx, err)
 	}
@@ -395,7 +395,7 @@ func (sqlr *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, er
 	return rowsAffected, tx.Commit()
 }
 
-func (sqlr *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
+func (sl *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
@@ -436,7 +436,7 @@ func (sqlr *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Delet
 			})
 		}
 	}
-	if log := sqlr.log; log != nil {
+	if log := sl.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "Delete").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
@@ -455,13 +455,13 @@ func (sqlr *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Delet
 	return rowsAffected, nil
 }
 
-func (sqlr *SQLiteRepository) Aggregate(ctx context.Context, a *Aggregator) error {
-	tx, err := sqlr.Tx(ctx)
+func (sl *SQLiteRepository) Aggregate(ctx context.Context, a *Aggregator) error {
+	tx, err := sl.Tx(ctx)
 	if err != nil {
 		return err
 	}
 
-	err = sqlr.AggregateTx(ctx, tx, a)
+	err = sl.AggregateTx(ctx, tx, a)
 	if err != nil {
 		return rollback(tx, err)
 	}
@@ -469,7 +469,7 @@ func (sqlr *SQLiteRepository) Aggregate(ctx context.Context, a *Aggregator) erro
 	return tx.Commit()
 }
 
-func (sqlr *SQLiteRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
+func (sl *SQLiteRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return errors.New("expecting tx to be *sql.Tx")
@@ -551,7 +551,7 @@ func (sqlr *SQLiteRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Ag
 		}
 	}
 
-	if log := sqlr.log; log != nil {
+	if log := sl.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "Aggregate").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")

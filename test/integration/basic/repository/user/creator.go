@@ -9,7 +9,7 @@ type Creator struct {
 	email      *string
 	name       *string
 	age        int
-	groupRes   string
+	group      string
 	updatedAt  *time.Time
 }
 
@@ -35,8 +35,8 @@ func (c *Creator) Age(age int) *Creator {
 	return c
 }
 
-func (c *Creator) GroupRes(groupRes string) *Creator {
-	c.groupRes = groupRes
+func (c *Creator) Group(group string) *Creator {
+	c.group = group
 	return c
 }
 

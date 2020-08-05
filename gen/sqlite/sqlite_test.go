@@ -5,13 +5,48 @@ import (
 	"strings"
 	"testing"
 
-	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/sf9v/nero/example"
+	gen "github.com/sf9v/nero/gen/internal"
 )
 
+func Test_newTypeDefBlock(t *testing.T) {
+	block := newTypeDefBlock()
+	expect := strings.TrimSpace(`
+type SQLiteRepository struct {
+	db  *sql.DB
+	log *zerolog.Logger
+}
+`)
+
+	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
+	assert.Equal(t, expect, got)
+}
+
+func Test_newTypeAssertBlock(t *testing.T) {
+	block := newTypeAssertBlock()
+	expect := `var _ = Repository(&SQLiteRepository{})`
+	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
+	assert.Equal(t, expect, got)
+}
+
+func Test_newDebugLogBlock(t *testing.T) {
+	block := newDebugLogBlock("Query")
+	expect := strings.TrimSpace(`
+if log := sl.log; log != nil {
+	sql, args, err := qb.ToSql()
+	log.Debug().Str("op", "Query").Str("stmnt", sql).
+		Interface("args", args).Err(err).Msg("")
+}
+`)
+	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
+	assert.Equal(t, expect, got)
+}
+
 func TestNewSQLiteRepo(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
@@ -30,25 +65,25 @@ func NewSQLiteRepository(db *sql.DB) *SQLiteRepository {
 	}
 }
 
-func (sqlr *SQLiteRepository) Debug(out io.Writer) *SQLiteRepository {
+func (sl *SQLiteRepository) Debug(out io.Writer) *SQLiteRepository {
 	lg := zerolog.New(out).With().Timestamp().Logger()
 	return &SQLiteRepository{
-		db:  sqlr.db,
+		db:  sl.db,
 		log: &lg,
 	}
 }
 
-func (sqlr *SQLiteRepository) Tx(ctx context.Context) (nero.Tx, error) {
-	return sqlr.db.BeginTx(ctx, nil)
+func (sl *SQLiteRepository) Tx(ctx context.Context) (nero.Tx, error) {
+	return sl.db.BeginTx(ctx, nil)
 }
 
-func (sqlr *SQLiteRepository) Create(ctx context.Context, c *Creator) (int64, error) {
-	tx, err := sqlr.Tx(ctx)
+func (sl *SQLiteRepository) Create(ctx context.Context, c *Creator) (int64, error) {
+	tx, err := sl.Tx(ctx)
 	if err != nil {
 		return 0, err
 	}
 
-	id, err := sqlr.CreateTx(ctx, tx, c)
+	id, err := sl.CreateTx(ctx, tx, c)
 	if err != nil {
 		return 0, rollback(tx, err)
 	}
@@ -56,13 +91,13 @@ func (sqlr *SQLiteRepository) Create(ctx context.Context, c *Creator) (int64, er
 	return id, tx.Commit()
 }
 
-func (sqlr *SQLiteRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
-	tx, err := sqlr.Tx(ctx)
+func (sl *SQLiteRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
+	tx, err := sl.Tx(ctx)
 	if err != nil {
 		return err
 	}
 
-	err = sqlr.CreateManyTx(ctx, tx, cs...)
+	err = sl.CreateManyTx(ctx, tx, cs...)
 	if err != nil {
 		return rollback(tx, err)
 	}
@@ -70,7 +105,7 @@ func (sqlr *SQLiteRepository) CreateMany(ctx context.Context, cs ...*Creator) er
 	return tx.Commit()
 }
 
-func (sqlr *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (int64, error) {
+func (sl *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
@@ -78,9 +113,9 @@ func (sqlr *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creat
 
 	qb := squirrel.Insert(c.collection).
 		Columns(c.columns...).
-		Values(c.name, c.updatedAt).
+		Values(c.name, c.group, c.updatedAt).
 		RunWith(txx)
-	if log := sqlr.log; log != nil {
+	if log := sl.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "Create").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
@@ -99,7 +134,7 @@ func (sqlr *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creat
 	return id, nil
 }
 
-func (sqlr *SQLiteRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
+func (sl *SQLiteRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
 	if len(cs) == 0 {
 		return nil
 	}
@@ -112,9 +147,9 @@ func (sqlr *SQLiteRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs .
 	qb := squirrel.Insert(cs[0].collection).
 		Columns(cs[0].columns...)
 	for _, c := range cs {
-		qb = qb.Values(c.name, c.updatedAt)
+		qb = qb.Values(c.name, c.group, c.updatedAt)
 	}
-	if log := sqlr.log; log != nil {
+	if log := sl.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "CreateMany").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
@@ -128,13 +163,13 @@ func (sqlr *SQLiteRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs .
 	return nil
 }
 
-func (sqlr *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*internal.Example, error) {
-	tx, err := sqlr.Tx(ctx)
+func (sl *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*example.User, error) {
+	tx, err := sl.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	list, err := sqlr.QueryTx(ctx, tx, q)
+	list, err := sl.QueryTx(ctx, tx, q)
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
@@ -142,13 +177,13 @@ func (sqlr *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*interna
 	return list, tx.Commit()
 }
 
-func (sqlr *SQLiteRepository) QueryOne(ctx context.Context, q *Queryer) (*internal.Example, error) {
-	tx, err := sqlr.Tx(ctx)
+func (sl *SQLiteRepository) QueryOne(ctx context.Context, q *Queryer) (*example.User, error) {
+	tx, err := sl.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	item, err := sqlr.QueryOneTx(ctx, tx, q)
+	item, err := sl.QueryOneTx(ctx, tx, q)
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
@@ -156,14 +191,14 @@ func (sqlr *SQLiteRepository) QueryOne(ctx context.Context, q *Queryer) (*intern
 	return item, tx.Commit()
 }
 
-func (sqlr *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*internal.Example, error) {
+func (sl *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*example.User, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	qb := sqlr.buildSelect(q)
-	if log := sqlr.log; log != nil {
+	qb := sl.buildSelect(q)
+	if log := sl.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "Query").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
@@ -175,12 +210,13 @@ func (sqlr *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Querye
 	}
 	defer rows.Close()
 
-	list := []*internal.Example{}
+	list := []*example.User{}
 	for rows.Next() {
-		var item internal.Example
+		var item example.User
 		err = rows.Scan(
 			&item.ID,
 			&item.Name,
+			&item.Group,
 			&item.UpdatedAt,
 			&item.CreatedAt,
 		)
@@ -194,25 +230,26 @@ func (sqlr *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Querye
 	return list, nil
 }
 
-func (sqlr *SQLiteRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*internal.Example, error) {
+func (sl *SQLiteRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*example.User, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	qb := sqlr.buildSelect(q)
-	if log := sqlr.log; log != nil {
+	qb := sl.buildSelect(q)
+	if log := sl.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "QueryOne").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 
-	var item internal.Example
+	var item example.User
 	err := qb.RunWith(txx).
 		QueryRowContext(ctx).
 		Scan(
 			&item.ID,
 			&item.Name,
+			&item.Group,
 			&item.UpdatedAt,
 			&item.CreatedAt,
 		)
@@ -223,7 +260,7 @@ func (sqlr *SQLiteRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Que
 	return &item, nil
 }
 
-func (sqlr *SQLiteRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
+func (sl *SQLiteRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	qb := squirrel.Select(q.columns...).
 		From(q.collection)
 
@@ -285,13 +322,13 @@ func (sqlr *SQLiteRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	return qb
 }
 
-func (sqlr *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error) {
-	tx, err := sqlr.Tx(ctx)
+func (sl *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error) {
+	tx, err := sl.Tx(ctx)
 	if err != nil {
 		return 0, err
 	}
 
-	rowsAffected, err := sqlr.UpdateTx(ctx, tx, u)
+	rowsAffected, err := sl.UpdateTx(ctx, tx, u)
 	if err != nil {
 		return 0, rollback(tx, err)
 	}
@@ -299,7 +336,7 @@ func (sqlr *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, er
 	return rowsAffected, tx.Commit()
 }
 
-func (sqlr *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
+func (sl *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
@@ -313,6 +350,9 @@ func (sqlr *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updat
 	qb := squirrel.Update(u.collection)
 	if u.name != "" {
 		qb = qb.Set("name", u.name)
+	}
+	if u.group != "" {
+		qb = qb.Set("group_res", u.group)
 	}
 	if u.updatedAt != nil {
 		qb = qb.Set("updated_at", u.updatedAt)
@@ -346,7 +386,7 @@ func (sqlr *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updat
 			})
 		}
 	}
-	if log := sqlr.log; log != nil {
+	if log := sl.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "Update").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
@@ -365,13 +405,13 @@ func (sqlr *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updat
 	return rowsAffected, nil
 }
 
-func (sqlr *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
-	tx, err := sqlr.Tx(ctx)
+func (sl *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
+	tx, err := sl.Tx(ctx)
 	if err != nil {
 		return 0, err
 	}
 
-	rowsAffected, err := sqlr.DeleteTx(ctx, tx, d)
+	rowsAffected, err := sl.DeleteTx(ctx, tx, d)
 	if err != nil {
 		return 0, rollback(tx, err)
 	}
@@ -379,7 +419,7 @@ func (sqlr *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, er
 	return rowsAffected, tx.Commit()
 }
 
-func (sqlr *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
+func (sl *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
@@ -420,7 +460,7 @@ func (sqlr *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Delet
 			})
 		}
 	}
-	if log := sqlr.log; log != nil {
+	if log := sl.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "Delete").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
@@ -439,13 +479,13 @@ func (sqlr *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Delet
 	return rowsAffected, nil
 }
 
-func (sqlr *SQLiteRepository) Aggregate(ctx context.Context, a *Aggregator) error {
-	tx, err := sqlr.Tx(ctx)
+func (sl *SQLiteRepository) Aggregate(ctx context.Context, a *Aggregator) error {
+	tx, err := sl.Tx(ctx)
 	if err != nil {
 		return err
 	}
 
-	err = sqlr.AggregateTx(ctx, tx, a)
+	err = sl.AggregateTx(ctx, tx, a)
 	if err != nil {
 		return rollback(tx, err)
 	}
@@ -453,7 +493,7 @@ func (sqlr *SQLiteRepository) Aggregate(ctx context.Context, a *Aggregator) erro
 	return tx.Commit()
 }
 
-func (sqlr *SQLiteRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
+func (sl *SQLiteRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return errors.New("expecting tx to be *sql.Tx")
@@ -535,7 +575,7 @@ func (sqlr *SQLiteRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Ag
 		}
 	}
 
-	if log := sqlr.log; log != nil {
+	if log := sl.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "Aggregate").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
@@ -573,38 +613,5 @@ func (sqlr *SQLiteRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Ag
 `)
 
 	got := strings.TrimSpace(fmt.Sprintf("%#v", stmnt))
-	assert.Equal(t, expect, got)
-}
-
-func Test_newTypeDefBlock(t *testing.T) {
-	block := newTypeDefBlock()
-	expect := strings.TrimSpace(`
-type SQLiteRepository struct {
-	db  *sql.DB
-	log *zerolog.Logger
-}
-`)
-
-	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
-	assert.Equal(t, expect, got)
-}
-
-func Test_newTypeAssertBlock(t *testing.T) {
-	block := newTypeAssertBlock()
-	expect := `var _ = Repository(&SQLiteRepository{})`
-	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
-	assert.Equal(t, expect, got)
-}
-
-func Test_newDebugLogBlock(t *testing.T) {
-	block := newDebugLogBlock("Query")
-	expect := strings.TrimSpace(`
-if log := sqlr.log; log != nil {
-	sql, args, err := qb.ToSql()
-	log.Debug().Str("op", "Query").Str("stmnt", sql).
-		Interface("args", args).Err(err).Msg("")
-}
-`)
-	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
 	assert.Equal(t, expect, got)
 }

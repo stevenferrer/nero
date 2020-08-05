@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/sf9v/nero/example"
 	gen "github.com/sf9v/nero/gen/internal"
 )
 
@@ -34,7 +35,7 @@ func (pg *PostgreSQLRepository) Aggregate(ctx context.Context, a *Aggregator) er
 }
 
 func Test_newAggregateTxBlock(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 

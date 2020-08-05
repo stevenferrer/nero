@@ -16,8 +16,12 @@ func newCreator(schema *gen.Schema) *jen.Statement {
 				if col.Auto {
 					continue
 				}
-				g.Id(col.LowerCamelName()).
-					Add(gen.GetTypeC(col.Type))
+				colField := col.CamelName()
+				if len(col.StructField) > 0 {
+					colField = col.StructField
+				}
+				colField = lowCamel(colField)
+				g.Id(colField).Add(gen.GetTypeC(col.Type))
 			}
 		}).Line()
 
@@ -44,14 +48,20 @@ func newCreator(schema *gen.Schema) *jen.Statement {
 		if col.Auto {
 			continue
 		}
-		colLowerCamel := col.LowerCamelName()
-		stmnt = stmnt.Func().Params(rcvrParamsC).Id(col.CamelName()).
-			Params(jen.Id(colLowerCamel).
-				Add(gen.GetTypeC(col.Type))).
-			Params(jen.Op("*").Id("Creator")).Block(
-			jen.Id("c").Dot(colLowerCamel).
-				Op("=").Id(colLowerCamel),
-			jen.Return(jen.Id("c"))).Line().Line()
+		methodID := col.CamelName()
+		if len(col.StructField) > 0 {
+			methodID = col.StructField
+		}
+
+		paramID := lowCamel(methodID)
+		stmnt = stmnt.Func().Params(rcvrParamsC).Id(methodID).
+			Params(jen.Id(paramID).Add(gen.GetTypeC(col.Type))).
+			Params(jen.Op("*").Id("Creator")).
+			Block(
+				jen.Id("c").Dot(paramID).
+					Op("=").Id(paramID),
+				jen.Return(jen.Id("c")),
+			).Line().Line()
 	}
 
 	return stmnt

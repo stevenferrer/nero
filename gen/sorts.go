@@ -3,11 +3,10 @@ package gen
 import (
 	"github.com/dave/jennifer/jen"
 
-	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/sf9v/nero/sort"
 )
 
-func newSorts(schema *gen.Schema) *jen.Statement {
+func newSorts() *jen.Statement {
 	sortPkg := pkgPath + "/sort"
 	stmnt := jen.Type().Id("SortFunc").Func().Params(
 		jen.Op("*").Qual(sortPkg, "Sorts"),

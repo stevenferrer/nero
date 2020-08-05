@@ -5,17 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func Test_newSorts(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
-	require.NoError(t, err)
-	require.NotNil(t, schema)
-
-	predicates := newSorts(schema)
+	predicates := newSorts()
 	expect := strings.TrimSpace(`
 type SortFunc func(*sort.Sorts)
 

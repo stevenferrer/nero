@@ -26,6 +26,7 @@ func (fl *File) Bytes() []byte {
 }
 
 // Render renders the file to the base path
+// TODO: auto create base path
 func (fl *File) Render(basePath string) error {
 	f, err := os.Create(path.Join(basePath, fl.name))
 	if err != nil {

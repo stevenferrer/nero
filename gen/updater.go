@@ -15,7 +15,11 @@ func newUpdater(schema *gen.Schema) *jen.Statement {
 			if col.Auto {
 				continue
 			}
-			g.Id(col.LowerCamelName()).Add(gen.GetTypeC(col.Type))
+			field := col.LowerCamelName()
+			if len(col.StructField) > 0 {
+				field = lowCamel(col.StructField)
+			}
+			g.Id(field).Add(gen.GetTypeC(col.Type))
 		}
 
 		g.Id("pfs").Op("[]").Id("PredFunc")
@@ -37,37 +41,43 @@ func newUpdater(schema *gen.Schema) *jen.Statement {
 				}).Op(","),
 		))).Line().Line()
 
-	rcvrParams := jen.Id("u").Op("*").Id("Updater")
-	retParams := jen.Op("*").Id("Updater")
-	ret := jen.Return(jen.Id("u"))
+	rcvrParamsC := jen.Id("u").Op("*").Id("Updater")
+	retParamsC := jen.Op("*").Id("Updater")
+	retIDC := jen.Return(jen.Id("u"))
 
 	// methods
 	for _, col := range schema.Cols {
 		if col.Auto {
 			continue
 		}
-		colLowerCamel := col.LowerCamelName()
-		stmnt = stmnt.Func().Params(rcvrParams).Id(col.CamelName()).
-			Params(jen.Id(colLowerCamel).Add(gen.GetTypeC(col.Type))).
-			Params(retParams).
+
+		methodID := col.CamelName()
+		if len(col.StructField) > 0 {
+			methodID = lowCamel(col.StructField)
+		}
+
+		paramID := lowCamel(methodID)
+
+		stmnt = stmnt.Func().Params(rcvrParamsC).Id(camel(methodID)).
+			Params(jen.Id(paramID).Add(gen.GetTypeC(col.Type))).
+			Params(retParamsC).
 			Block(
-				jen.Id("u").Dot(colLowerCamel).
-					Op("=").Id(colLowerCamel),
-				ret,
+				jen.Id("u").Dot(paramID).Op("=").Id(paramID),
+				retIDC,
 			).Line().Line()
 	}
 
 	// where
-	stmnt = stmnt.Func().Params(rcvrParams).Id("Where").
+	stmnt = stmnt.Func().Params(rcvrParamsC).Id("Where").
 		Params(jen.Id("pfs").Op("...").Id("PredFunc")).
-		Params(retParams).
+		Params(retParamsC).
 		Block(
 			jen.Id("u").Dot("pfs").Op("=").
 				Append(
 					jen.Id("u").Dot("pfs"),
 					jen.Id("pfs").Op("..."),
 				),
-			ret,
+			retIDC,
 		).Line().Line()
 
 	return stmnt

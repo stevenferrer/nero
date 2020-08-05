@@ -5,13 +5,15 @@ import (
 	"strings"
 	"testing"
 
-	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/sf9v/nero/example"
+	gen "github.com/sf9v/nero/gen/internal"
 )
 
 func Test_newPredicates(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
@@ -135,6 +137,66 @@ func NameLtOrEq(name string) PredFunc {
 			Col: "name",
 			Op:  predicate.LtOrEq,
 			Val: name,
+		})
+	}
+}
+
+func GroupEq(group string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "group_res",
+			Op:  predicate.Eq,
+			Val: group,
+		})
+	}
+}
+
+func GroupNotEq(group string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "group_res",
+			Op:  predicate.NotEq,
+			Val: group,
+		})
+	}
+}
+
+func GroupGt(group string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "group_res",
+			Op:  predicate.Gt,
+			Val: group,
+		})
+	}
+}
+
+func GroupGtOrEq(group string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "group_res",
+			Op:  predicate.GtOrEq,
+			Val: group,
+		})
+	}
+}
+
+func GroupLt(group string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "group_res",
+			Op:  predicate.Lt,
+			Val: group,
+		})
+	}
+}
+
+func GroupLtOrEq(group string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "group_res",
+			Op:  predicate.LtOrEq,
+			Val: group,
 		})
 	}
 }

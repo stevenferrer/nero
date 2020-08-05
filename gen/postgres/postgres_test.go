@@ -5,13 +5,48 @@ import (
 	"strings"
 	"testing"
 
-	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/sf9v/nero/example"
+	gen "github.com/sf9v/nero/gen/internal"
 )
 
+func Test_newTypeDefBlock(t *testing.T) {
+	block := newTypeDefBlock()
+	expect := strings.TrimSpace(`
+type PostgreSQLRepository struct {
+	db  *sql.DB
+	log *zerolog.Logger
+}
+`)
+
+	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
+	assert.Equal(t, expect, got)
+}
+
+func Test_newTypeAssertBlock(t *testing.T) {
+	block := newTypeAssertBlock()
+	expect := `var _ = Repository(&PostgreSQLRepository{})`
+	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
+	assert.Equal(t, expect, got)
+}
+
+func Test_newDebugLogBlock(t *testing.T) {
+	block := newDebugLogBlock("Query")
+	expect := strings.TrimSpace(`
+if log := pg.log; log != nil {
+	sql, args, err := qb.ToSql()
+	log.Debug().Str("op", "Query").Str("stmnt", sql).
+		Interface("args", args).Err(err).Msg("")
+}
+`)
+	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
+	assert.Equal(t, expect, got)
+}
+
 func TestNewPostgreSQLRepo(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
@@ -78,7 +113,7 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 
 	qb := squirrel.Insert(c.collection).
 		Columns(c.columns...).
-		Values(c.name, c.updatedAt).
+		Values(c.name, c.group, c.updatedAt).
 		Suffix("RETURNING \"id\"").
 		PlaceholderFormat(squirrel.Dollar).
 		RunWith(txx)
@@ -110,7 +145,7 @@ func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs
 	qb := squirrel.Insert(cs[0].collection).
 		Columns(cs[0].columns...)
 	for _, c := range cs {
-		qb = qb.Values(c.name, c.updatedAt)
+		qb = qb.Values(c.name, c.group, c.updatedAt)
 	}
 
 	qb = qb.Suffix("RETURNING \"id\"").
@@ -129,7 +164,7 @@ func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs
 	return nil
 }
 
-func (pg *PostgreSQLRepository) Query(ctx context.Context, q *Queryer) ([]*internal.Example, error) {
+func (pg *PostgreSQLRepository) Query(ctx context.Context, q *Queryer) ([]*example.User, error) {
 	tx, err := pg.Tx(ctx)
 	if err != nil {
 		return nil, err
@@ -143,7 +178,7 @@ func (pg *PostgreSQLRepository) Query(ctx context.Context, q *Queryer) ([]*inter
 	return list, tx.Commit()
 }
 
-func (pg *PostgreSQLRepository) QueryOne(ctx context.Context, q *Queryer) (*internal.Example, error) {
+func (pg *PostgreSQLRepository) QueryOne(ctx context.Context, q *Queryer) (*example.User, error) {
 	tx, err := pg.Tx(ctx)
 	if err != nil {
 		return nil, err
@@ -157,7 +192,7 @@ func (pg *PostgreSQLRepository) QueryOne(ctx context.Context, q *Queryer) (*inte
 	return item, tx.Commit()
 }
 
-func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*internal.Example, error) {
+func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*example.User, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
@@ -176,12 +211,13 @@ func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Quer
 	}
 	defer rows.Close()
 
-	list := []*internal.Example{}
+	list := []*example.User{}
 	for rows.Next() {
-		var item internal.Example
+		var item example.User
 		err = rows.Scan(
 			&item.ID,
 			&item.Name,
+			&item.Group,
 			&item.UpdatedAt,
 			&item.CreatedAt,
 		)
@@ -195,7 +231,7 @@ func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Quer
 	return list, nil
 }
 
-func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*internal.Example, error) {
+func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*example.User, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
@@ -208,12 +244,13 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 			Interface("args", args).Err(err).Msg("")
 	}
 
-	var item internal.Example
+	var item example.User
 	err := qb.RunWith(txx).
 		QueryRowContext(ctx).
 		Scan(
 			&item.ID,
 			&item.Name,
+			&item.Group,
 			&item.UpdatedAt,
 			&item.CreatedAt,
 		)
@@ -316,6 +353,9 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 		PlaceholderFormat(squirrel.Dollar)
 	if u.name != "" {
 		qb = qb.Set("name", u.name)
+	}
+	if u.group != "" {
+		qb = qb.Set("group_res", u.group)
 	}
 	if u.updatedAt != nil {
 		qb = qb.Set("updated_at", u.updatedAt)
@@ -579,38 +619,5 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 `)
 
 	got := strings.TrimSpace(fmt.Sprintf("%#v", stmnt))
-	assert.Equal(t, expect, got)
-}
-
-func Test_newTypeDefBlock(t *testing.T) {
-	block := newTypeDefBlock()
-	expect := strings.TrimSpace(`
-type PostgreSQLRepository struct {
-	db  *sql.DB
-	log *zerolog.Logger
-}
-`)
-
-	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
-	assert.Equal(t, expect, got)
-}
-
-func Test_newTypeAssertBlock(t *testing.T) {
-	block := newTypeAssertBlock()
-	expect := `var _ = Repository(&PostgreSQLRepository{})`
-	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
-	assert.Equal(t, expect, got)
-}
-
-func Test_newDebugLogBlock(t *testing.T) {
-	block := newDebugLogBlock("Query")
-	expect := strings.TrimSpace(`
-if log := pg.log; log != nil {
-	sql, args, err := qb.ToSql()
-	log.Debug().Str("op", "Query").Str("stmnt", sql).
-		Interface("args", args).Err(err).Msg("")
-}
-`)
-	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
 	assert.Equal(t, expect, got)
 }

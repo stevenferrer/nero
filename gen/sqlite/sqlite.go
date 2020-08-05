@@ -19,7 +19,7 @@ const (
 	errPkg = "github.com/pkg/errors"
 
 	typeName = "SQLiteRepository"
-	rcvrID   = "sqlr"
+	rcvrID   = "sl"
 )
 
 var (

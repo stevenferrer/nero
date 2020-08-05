@@ -41,14 +41,14 @@ func Generate(schemaer nero.Schemaer) (Files, error) {
 	})
 
 	sortsFile := jen.NewFile(pkgName)
-	sortsFile.Add(newSorts(schema))
+	sortsFile.Add(newSorts())
 	fls = append(fls, &File{
 		name: "sorts.go",
 		jf:   sortsFile,
 	})
 
 	aggsFile := jen.NewFile(pkgName)
-	aggsFile.Add(newAggregates(schema))
+	aggsFile.Add(newAggregates())
 	fls = append(fls, &File{
 		name: "aggregates.go",
 		jf:   aggsFile,
@@ -139,4 +139,8 @@ func Generate(schemaer nero.Schemaer) (Files, error) {
 
 func camel(s string) string {
 	return strcase.ToCamel(s)
+}
+
+func lowCamel(s string) string {
+	return strcase.ToLowerCamel(s)
 }

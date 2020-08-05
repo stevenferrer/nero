@@ -9,7 +9,7 @@ type Updater struct {
 	email      *string
 	name       *string
 	age        int
-	groupRes   string
+	group      string
 	updatedAt  *time.Time
 	pfs        []PredFunc
 }
@@ -36,8 +36,8 @@ func (u *Updater) Age(age int) *Updater {
 	return u
 }
 
-func (u *Updater) GroupRes(groupRes string) *Updater {
-	u.groupRes = groupRes
+func (u *Updater) Group(group string) *Updater {
+	u.group = group
 	return u
 }
 

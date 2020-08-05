@@ -5,17 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func Test_newAggregates(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
-	require.NoError(t, err)
-	require.NotNil(t, schema)
-
-	meta := newAggregates(schema)
+	meta := newAggregates()
 	expect := `
 type AggFunc func(*aggregate.Aggregates)
 

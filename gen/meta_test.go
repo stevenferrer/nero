@@ -5,20 +5,22 @@ import (
 	"strings"
 	"testing"
 
-	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/sf9v/nero/example"
+	gen "github.com/sf9v/nero/gen/internal"
 )
 
 func Test_newMeta(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
 	meta := newMeta(schema)
 	expect := `
 const (
-	collection = "examples"
+	collection = "users"
 )
 
 type Column int
@@ -29,6 +31,8 @@ func (c Column) String() string {
 		return "id"
 	case ColumnName:
 		return "name"
+	case ColumnGroup:
+		return "group_res"
 	case ColumnUpdatedAt:
 		return "updated_at"
 	case ColumnCreatedAt:
@@ -40,6 +44,7 @@ func (c Column) String() string {
 const (
 	ColumnID Column = iota
 	ColumnName
+	ColumnGroup
 	ColumnUpdatedAt
 	ColumnCreatedAt
 )

@@ -18,13 +18,14 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 	for _, col := range schema.Cols {
 		for _, op := range ops {
 			opStr := op.String()
-			structField := col.CamelName()
+			field := col.CamelName()
 			if len(col.StructField) > 0 {
-				structField = col.StructField
+				field = col.StructField
 			}
-			fn := camel(structField + "_" + opStr)
-			stmnt = stmnt.Func().Id(fn).
-				Params(jen.Id(col.LowerCamelName()).
+			fnName := camel(field + "_" + opStr)
+			paramID := lowCamel(field)
+			stmnt = stmnt.Func().Id(fnName).
+				Params(jen.Id(paramID).
 					Add(gen.GetTypeC(col.Type))).
 				Params(jen.Id("PredFunc")).
 				Block(jen.Return(jen.Func().Params(jen.Id("pb").Op("*").
@@ -37,7 +38,7 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 								jen.Id("Op").Op(":").
 									Qual(predPkg, opStr).Op(","),
 								jen.Id("Val").Op(":").
-									Id(col.LowerCamelName()).Op(","),
+									Id(paramID).Op(","),
 							),
 					)),
 				)).

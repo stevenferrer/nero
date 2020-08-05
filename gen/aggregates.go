@@ -3,10 +3,9 @@ package gen
 import (
 	"github.com/dave/jennifer/jen"
 	"github.com/sf9v/nero/aggregate"
-	gen "github.com/sf9v/nero/gen/internal"
 )
 
-func newAggregates(schema *gen.Schema) *jen.Statement {
+func newAggregates() *jen.Statement {
 	aggPkg := pkgPath + "/aggregate"
 	stmnt := jen.Type().Id("AggFunc").Func().Params(
 		jen.Op("*").Qual(aggPkg, "Aggregates"),

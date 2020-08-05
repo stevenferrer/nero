@@ -8,11 +8,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/sf9v/nero/example"
 	gen "github.com/sf9v/nero/gen/internal"
 )
 
 func Test_newCreateBlock(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
@@ -60,8 +61,8 @@ func (pg *PostgreSQLRepository) CreateMany(ctx context.Context, cs ...*Creator) 
 }
 
 func Test_newCreateTxBlock(t *testing.T) {
-	t.Run("int64 id", func(t *testing.T) {
-		schema, err := gen.BuildSchema(new(gen.Example))
+	t.Run("schema with integer id", func(t *testing.T) {
+		schema, err := gen.BuildSchema(new(example.User))
 		require.NoError(t, err)
 		require.NotNil(t, schema)
 
@@ -75,7 +76,7 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 
 	qb := squirrel.Insert(c.collection).
 		Columns(c.columns...).
-		Values(c.name, c.updatedAt).
+		Values(c.name, c.group, c.updatedAt).
 		Suffix("RETURNING \"id\"").
 		PlaceholderFormat(squirrel.Dollar).
 		RunWith(txx)
@@ -99,8 +100,8 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		assert.Equal(t, expect, got)
 	})
 
-	t.Run("string id", func(t *testing.T) {
-		schema, err := gen.BuildSchema(new(gen.Example2))
+	t.Run("schema with string id", func(t *testing.T) {
+		schema, err := gen.BuildSchema(new(example.Group))
 		require.NoError(t, err)
 		require.NotNil(t, schema)
 
@@ -140,7 +141,7 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 }
 
 func Test_newCreateManyTxBlock(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
@@ -159,7 +160,7 @@ func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs
 	qb := squirrel.Insert(cs[0].collection).
 		Columns(cs[0].columns...)
 	for _, c := range cs {
-		qb = qb.Values(c.name, c.updatedAt)
+		qb = qb.Values(c.name, c.group, c.updatedAt)
 	}
 
 	qb = qb.Suffix("RETURNING \"id\"").

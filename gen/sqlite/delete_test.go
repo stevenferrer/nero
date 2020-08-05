@@ -11,13 +11,13 @@ import (
 func Test_newDeleteBlock(t *testing.T) {
 	block := newDeleteBlock()
 	expect := strings.TrimSpace(`
-func (sqlr *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
-	tx, err := sqlr.Tx(ctx)
+func (sl *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
+	tx, err := sl.Tx(ctx)
 	if err != nil {
 		return 0, err
 	}
 
-	rowsAffected, err := sqlr.DeleteTx(ctx, tx, d)
+	rowsAffected, err := sl.DeleteTx(ctx, tx, d)
 	if err != nil {
 		return 0, rollback(tx, err)
 	}
@@ -33,7 +33,7 @@ func (sqlr *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, er
 func Test_newDeleteTxBlock(t *testing.T) {
 	block := newDeleteTxBlock()
 	expect := strings.TrimSpace(`
-func (sqlr *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
+func (sl *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
@@ -74,7 +74,7 @@ func (sqlr *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Delet
 			})
 		}
 	}
-	if log := sqlr.log; log != nil {
+	if log := sl.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "Delete").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")

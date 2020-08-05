@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"github.com/dave/jennifer/jen"
+	"github.com/iancoleman/strcase"
 	gen "github.com/sf9v/nero/gen/internal"
 )
 
@@ -64,11 +65,16 @@ func newUpdateTxBlock(schema *gen.Schema) *jen.Statement {
 					continue
 				}
 
-				g.If(jen.Id("u").Dot(col.LowerCamelName()).
+				field := col.LowerCamelName()
+				if len(col.StructField) > 0 {
+					field = strcase.ToLowerCamel(col.StructField)
+				}
+
+				g.If(jen.Id("u").Dot(field).
 					Op("!=").Add(gen.GetZeroValC(col.Type))).
 					Block(jen.Id("qb").Op("=").Id("qb").Dot("Set").Call(
 						jen.Lit(col.Name),
-						jen.Id("u").Dot(col.LowerCamelName()),
+						jen.Id("u").Dot(field),
 					))
 			}
 

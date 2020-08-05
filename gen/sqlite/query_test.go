@@ -8,23 +8,24 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/sf9v/nero/example"
 	gen "github.com/sf9v/nero/gen/internal"
 )
 
 func Test_newQueryBlock(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
 	block := newQueryBlock(schema)
 	expect := strings.TrimSpace(`
-func (sqlr *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*internal.Example, error) {
-	tx, err := sqlr.Tx(ctx)
+func (sl *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*example.User, error) {
+	tx, err := sl.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	list, err := sqlr.QueryTx(ctx, tx, q)
+	list, err := sl.QueryTx(ctx, tx, q)
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
@@ -38,19 +39,19 @@ func (sqlr *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*interna
 }
 
 func Test_newQueryOneBlock(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
 	block := newQueryOneBlock(schema)
 	expect := strings.TrimSpace(`
-func (sqlr *SQLiteRepository) QueryOne(ctx context.Context, q *Queryer) (*internal.Example, error) {
-	tx, err := sqlr.Tx(ctx)
+func (sl *SQLiteRepository) QueryOne(ctx context.Context, q *Queryer) (*example.User, error) {
+	tx, err := sl.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	item, err := sqlr.QueryOneTx(ctx, tx, q)
+	item, err := sl.QueryOneTx(ctx, tx, q)
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
@@ -64,20 +65,20 @@ func (sqlr *SQLiteRepository) QueryOne(ctx context.Context, q *Queryer) (*intern
 }
 
 func Test_newQueryTxBlock(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
 	block := newQueryTxBlock(schema)
 	expect := strings.TrimSpace(`
-func (sqlr *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*internal.Example, error) {
+func (sl *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*example.User, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	qb := sqlr.buildSelect(q)
-	if log := sqlr.log; log != nil {
+	qb := sl.buildSelect(q)
+	if log := sl.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "Query").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
@@ -89,12 +90,13 @@ func (sqlr *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Querye
 	}
 	defer rows.Close()
 
-	list := []*internal.Example{}
+	list := []*example.User{}
 	for rows.Next() {
-		var item internal.Example
+		var item example.User
 		err = rows.Scan(
 			&item.ID,
 			&item.Name,
+			&item.Group,
 			&item.UpdatedAt,
 			&item.CreatedAt,
 		)
@@ -114,31 +116,32 @@ func (sqlr *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Querye
 }
 
 func Test_newQueryOneTxBlock(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
 	block := newQueryOneTxBlock(schema)
 	expect := strings.TrimSpace(`
-func (sqlr *SQLiteRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*internal.Example, error) {
+func (sl *SQLiteRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*example.User, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	qb := sqlr.buildSelect(q)
-	if log := sqlr.log; log != nil {
+	qb := sl.buildSelect(q)
+	if log := sl.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "QueryOne").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 
-	var item internal.Example
+	var item example.User
 	err := qb.RunWith(txx).
 		QueryRowContext(ctx).
 		Scan(
 			&item.ID,
 			&item.Name,
+			&item.Group,
 			&item.UpdatedAt,
 			&item.CreatedAt,
 		)
@@ -157,7 +160,7 @@ func (sqlr *SQLiteRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Que
 func Test_newSelectBuilderBlock(t *testing.T) {
 	block := newSelectBuilderBlock()
 	expect := strings.TrimSpace(`
-func (sqlr *SQLiteRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
+func (sl *SQLiteRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	qb := squirrel.Select(q.columns...).
 		From(q.collection)
 

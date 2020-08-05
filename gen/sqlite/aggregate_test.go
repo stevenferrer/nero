@@ -9,18 +9,20 @@ import (
 	"github.com/stretchr/testify/require"
 
 	gen "github.com/sf9v/nero/gen/internal"
+
+	"github.com/sf9v/nero/example"
 )
 
 func Test_newAggregateBlock(t *testing.T) {
 	aggBlocks := newAggregateBlock()
 	expect := strings.TrimSpace(`
-func (sqlr *SQLiteRepository) Aggregate(ctx context.Context, a *Aggregator) error {
-	tx, err := sqlr.Tx(ctx)
+func (sl *SQLiteRepository) Aggregate(ctx context.Context, a *Aggregator) error {
+	tx, err := sl.Tx(ctx)
 	if err != nil {
 		return err
 	}
 
-	err = sqlr.AggregateTx(ctx, tx, a)
+	err = sl.AggregateTx(ctx, tx, a)
 	if err != nil {
 		return rollback(tx, err)
 	}
@@ -34,13 +36,13 @@ func (sqlr *SQLiteRepository) Aggregate(ctx context.Context, a *Aggregator) erro
 }
 
 func Test_newAggregateTxBlock(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
 	aggBlocks := newAggregateTxBlock()
 	expect := strings.TrimSpace(`
-func (sqlr *SQLiteRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
+func (sl *SQLiteRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return errors.New("expecting tx to be *sql.Tx")
@@ -122,7 +124,7 @@ func (sqlr *SQLiteRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Ag
 		}
 	}
 
-	if log := sqlr.log; log != nil {
+	if log := sl.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "Aggregate").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")

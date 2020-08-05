@@ -8,19 +8,20 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/sf9v/nero/example"
 	gen "github.com/sf9v/nero/gen/internal"
 )
 
 func Test_newUpdateBlock(t *testing.T) {
 	block := newUpdateBlock()
 	expect := strings.TrimSpace(`
-func (sqlr *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error) {
-	tx, err := sqlr.Tx(ctx)
+func (sl *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error) {
+	tx, err := sl.Tx(ctx)
 	if err != nil {
 		return 0, err
 	}
 
-	rowsAffected, err := sqlr.UpdateTx(ctx, tx, u)
+	rowsAffected, err := sl.UpdateTx(ctx, tx, u)
 	if err != nil {
 		return 0, rollback(tx, err)
 	}
@@ -34,13 +35,13 @@ func (sqlr *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, er
 }
 
 func Test_newUpdateTxBlock(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
 	block := newUpdateTxBlock(schema)
 	expect := strings.TrimSpace(`
-func (sqlr *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
+func (sl *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
@@ -54,6 +55,9 @@ func (sqlr *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updat
 	qb := squirrel.Update(u.collection)
 	if u.name != "" {
 		qb = qb.Set("name", u.name)
+	}
+	if u.group != "" {
+		qb = qb.Set("group_res", u.group)
 	}
 	if u.updatedAt != nil {
 		qb = qb.Set("updated_at", u.updatedAt)
@@ -87,7 +91,7 @@ func (sqlr *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updat
 			})
 		}
 	}
-	if log := sqlr.log; log != nil {
+	if log := sl.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("op", "Update").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")

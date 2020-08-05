@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/sf9v/nero/example"
 	gen "github.com/sf9v/nero/gen/internal"
 )
 
@@ -34,7 +35,7 @@ func (pg *PostgreSQLRepository) Update(ctx context.Context, u *Updater) (int64, 
 }
 
 func Test_newUpdateTxBlock(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
@@ -55,6 +56,9 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 		PlaceholderFormat(squirrel.Dollar)
 	if u.name != "" {
 		qb = qb.Set("name", u.name)
+	}
+	if u.group != "" {
+		qb = qb.Set("group_res", u.group)
 	}
 	if u.updatedAt != nil {
 		qb = qb.Set("updated_at", u.updatedAt)

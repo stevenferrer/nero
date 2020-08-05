@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/iancoleman/strcase"
 	gen "github.com/sf9v/nero/gen/internal"
 )
 
@@ -91,7 +92,11 @@ func newCreateTxBlock(schema *gen.Schema) *jen.Statement {
 						if col.Auto {
 							continue
 						}
-						g.Id("c").Dot(col.LowerCamelName())
+						field := col.LowerCamelName()
+						if len(col.StructField) > 0 {
+							field = strcase.ToLowerCamel(col.StructField)
+						}
+						g.Id("c").Dot(field)
 					}
 				}).Op(".").Line().Id("Suffix").
 				Call(jen.Lit(fmt.Sprintf("RETURNING %q", ident.Name))).
@@ -148,7 +153,11 @@ func newCreateManyTxBlock(schema *gen.Schema) *jen.Statement {
 							if col.Auto {
 								continue
 							}
-							g.Id("c").Dot(col.LowerCamelName())
+							field := col.LowerCamelName()
+							if len(col.StructField) > 0 {
+								field = strcase.ToLowerCamel(col.StructField)
+							}
+							g.Id("c").Dot(field)
 						}
 					})
 			}).Line()

@@ -5,13 +5,15 @@ import (
 	"strings"
 	"testing"
 
-	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/sf9v/nero/example"
+	gen "github.com/sf9v/nero/gen/internal"
 )
 
 func Test_newUpdater(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
@@ -21,6 +23,7 @@ type Updater struct {
 	collection string
 	columns    []string
 	name       string
+	group      string
 	updatedAt  *time.Time
 	pfs        []PredFunc
 }
@@ -28,12 +31,17 @@ type Updater struct {
 func NewUpdater() *Updater {
 	return &Updater{
 		collection: collection,
-		columns:    []string{"name", "updated_at"},
+		columns:    []string{"name", "group_res", "updated_at"},
 	}
 }
 
 func (u *Updater) Name(name string) *Updater {
 	u.name = name
+	return u
+}
+
+func (u *Updater) Group(group string) *Updater {
+	u.group = group
 	return u
 }
 

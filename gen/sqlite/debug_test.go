@@ -11,10 +11,10 @@ import (
 func Test_newDebugBlock(t *testing.T) {
 	block := newDebugBlock()
 	expect := strings.TrimSpace(`
-func (sqlr *SQLiteRepository) Debug(out io.Writer) *SQLiteRepository {
+func (sl *SQLiteRepository) Debug(out io.Writer) *SQLiteRepository {
 	lg := zerolog.New(out).With().Timestamp().Logger()
 	return &SQLiteRepository{
-		db:  sqlr.db,
+		db:  sl.db,
 		log: &lg,
 	}
 }

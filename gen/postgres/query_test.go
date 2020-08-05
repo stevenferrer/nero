@@ -8,17 +8,18 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/sf9v/nero/example"
 	gen "github.com/sf9v/nero/gen/internal"
 )
 
 func Test_newQueryBlock(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
 	block := newQueryBlock(schema)
 	expect := strings.TrimSpace(`
-func (pg *PostgreSQLRepository) Query(ctx context.Context, q *Queryer) ([]*internal.Example, error) {
+func (pg *PostgreSQLRepository) Query(ctx context.Context, q *Queryer) ([]*example.User, error) {
 	tx, err := pg.Tx(ctx)
 	if err != nil {
 		return nil, err
@@ -38,13 +39,13 @@ func (pg *PostgreSQLRepository) Query(ctx context.Context, q *Queryer) ([]*inter
 }
 
 func Test_newQueryOneBlock(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
 	block := newQueryOneBlock(schema)
 	expect := strings.TrimSpace(`
-func (pg *PostgreSQLRepository) QueryOne(ctx context.Context, q *Queryer) (*internal.Example, error) {
+func (pg *PostgreSQLRepository) QueryOne(ctx context.Context, q *Queryer) (*example.User, error) {
 	tx, err := pg.Tx(ctx)
 	if err != nil {
 		return nil, err
@@ -64,13 +65,13 @@ func (pg *PostgreSQLRepository) QueryOne(ctx context.Context, q *Queryer) (*inte
 }
 
 func Test_newQueryTxBlock(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
 	block := newQueryTxBlock(schema)
 	expect := strings.TrimSpace(`
-func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*internal.Example, error) {
+func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*example.User, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
@@ -89,12 +90,13 @@ func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Quer
 	}
 	defer rows.Close()
 
-	list := []*internal.Example{}
+	list := []*example.User{}
 	for rows.Next() {
-		var item internal.Example
+		var item example.User
 		err = rows.Scan(
 			&item.ID,
 			&item.Name,
+			&item.Group,
 			&item.UpdatedAt,
 			&item.CreatedAt,
 		)
@@ -114,13 +116,13 @@ func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Quer
 }
 
 func Test_newQueryOneTxBlock(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
 	block := newQueryOneTxBlock(schema)
 	expect := strings.TrimSpace(`
-func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*internal.Example, error) {
+func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*example.User, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
@@ -133,12 +135,13 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 			Interface("args", args).Err(err).Msg("")
 	}
 
-	var item internal.Example
+	var item example.User
 	err := qb.RunWith(txx).
 		QueryRowContext(ctx).
 		Scan(
 			&item.ID,
 			&item.Name,
+			&item.Group,
 			&item.UpdatedAt,
 			&item.CreatedAt,
 		)

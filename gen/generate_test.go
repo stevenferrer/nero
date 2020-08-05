@@ -5,10 +5,11 @@ import (
 	"path"
 	"testing"
 
-	"github.com/sf9v/nero"
-	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/sf9v/nero"
+	"github.com/sf9v/nero/example"
 )
 
 type example1 struct{}
@@ -17,8 +18,8 @@ func (*example1) Schema() *nero.Schema {
 	return &nero.Schema{}
 }
 
-func TestGenerateExample(t *testing.T) {
-	files, err := Generate(new(gen.Example))
+func TestGenerate(t *testing.T) {
+	files, err := Generate(new(example.User))
 	assert.NoError(t, err)
 	assert.Len(t, files, 13)
 
@@ -28,7 +29,7 @@ func TestGenerateExample(t *testing.T) {
 	}
 
 	// create base directory
-	basePath := path.Join("gen", "example")
+	basePath := path.Join("gen", "user")
 	err = os.MkdirAll(basePath, os.ModePerm)
 	require.NoError(t, err)
 

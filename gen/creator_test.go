@@ -8,10 +8,12 @@ import (
 	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/sf9v/nero/example"
 )
 
 func Test_newCreator(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
@@ -21,18 +23,24 @@ type Creator struct {
 	collection string
 	columns    []string
 	name       string
+	group      string
 	updatedAt  *time.Time
 }
 
 func NewCreator() *Creator {
 	return &Creator{
 		collection: collection,
-		columns:    []string{"name", "updated_at"},
+		columns:    []string{"name", "group_res", "updated_at"},
 	}
 }
 
 func (c *Creator) Name(name string) *Creator {
 	c.name = name
+	return c
+}
+
+func (c *Creator) Group(group string) *Creator {
+	c.group = group
 	return c
 }
 

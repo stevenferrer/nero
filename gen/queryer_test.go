@@ -5,13 +5,15 @@ import (
 	"strings"
 	"testing"
 
-	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/sf9v/nero/example"
+	gen "github.com/sf9v/nero/gen/internal"
 )
 
 func Test_newQueryer(t *testing.T) {
-	schema, err := gen.BuildSchema(new(gen.Example))
+	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
@@ -29,7 +31,7 @@ type Queryer struct {
 func NewQueryer() *Queryer {
 	return &Queryer{
 		collection: collection,
-		columns:    []string{"id", "name", "updated_at", "created_at"},
+		columns:    []string{"id", "name", "group_res", "updated_at", "created_at"},
 	}
 }
 

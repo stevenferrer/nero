@@ -11,8 +11,8 @@ import (
 func Test_newTxBlock(t *testing.T) {
 	block := newTxBlock()
 	expect := strings.TrimSpace(`
-func (sqlr *SQLiteRepository) Tx(ctx context.Context) (nero.Tx, error) {
-	return sqlr.db.BeginTx(ctx, nil)
+func (sl *SQLiteRepository) Tx(ctx context.Context) (nero.Tx, error) {
+	return sl.db.BeginTx(ctx, nil)
 }
 `)
 	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
