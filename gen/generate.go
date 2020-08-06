@@ -11,7 +11,6 @@ import (
 	"github.com/sf9v/nero"
 	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/sf9v/nero/gen/postgres"
-	"github.com/sf9v/nero/gen/sqlite"
 )
 
 const (
@@ -94,15 +93,6 @@ func Generate(schemaer nero.Schemaer) (Files, error) {
 	fls = append(fls, &File{
 		name: "deleter.go",
 		jf:   deleterFile,
-	})
-
-	// sqlite repository implementation
-	sqliteFile := jen.NewFile(pkgName)
-	sqliteFile.Anon("github.com/mattn/go-sqlite3")
-	sqliteFile.Add(sqlite.NewSQLiteRepo(schema))
-	fls = append(fls, &File{
-		name: "sqlite.go",
-		jf:   sqliteFile,
 	})
 
 	// postgres repository implementation

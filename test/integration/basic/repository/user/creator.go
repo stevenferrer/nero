@@ -2,6 +2,7 @@
 package user
 
 import (
+	uuid "github.com/google/uuid"
 	user "github.com/sf9v/nero/test/integration/basic/user"
 	"time"
 )
@@ -9,6 +10,7 @@ import (
 type Creator struct {
 	collection string
 	columns    []string
+	uID        uuid.UUID
 	email      *string
 	name       *string
 	age        int
@@ -19,8 +21,13 @@ type Creator struct {
 func NewCreator() *Creator {
 	return &Creator{
 		collection: collection,
-		columns:    []string{"email", "name", "age", "group_res", "updated_at"},
+		columns:    []string{"uid", "email", "name", "age", "group_res", "updated_at"},
 	}
+}
+
+func (c *Creator) UID(uID uuid.UUID) *Creator {
+	c.uID = uID
+	return c
 }
 
 func (c *Creator) Email(email *string) *Creator {

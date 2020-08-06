@@ -3,12 +3,14 @@ package user
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/sf9v/nero"
 )
 
 // User is a user
 type User struct {
 	ID        string
+	UID       uuid.UUID
 	Email     *string
 	Name      *string
 	Age       int
@@ -37,6 +39,8 @@ func (u *User) Schema() *nero.Schema {
 		Columns: []*nero.Column{
 			nero.NewColumn("id", u.ID).
 				StructField("ID").Ident().Auto(),
+			nero.NewColumn("uid", u.UID).
+				StructField("UID"),
 			nero.NewColumn("email", u.Email),
 			nero.NewColumn("name", u.Name),
 			nero.NewColumn("age", u.Age),

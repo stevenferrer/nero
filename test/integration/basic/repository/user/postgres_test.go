@@ -65,6 +65,7 @@ func TestPGRepository(t *testing.T) {
 
 	_, err = db.Exec(`CREATE TABLE users(
 		id bigserial PRIMARY KEY,
+		uid UUID NOT NULL,
 		email VARCHAR(255) UNIQUE NOT NULL,
 		name VARCHAR(50) NOT NULL,
 		age INTEGER NOT NULL,

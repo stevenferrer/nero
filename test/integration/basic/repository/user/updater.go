@@ -2,6 +2,7 @@
 package user
 
 import (
+	uuid "github.com/google/uuid"
 	user "github.com/sf9v/nero/test/integration/basic/user"
 	"time"
 )
@@ -9,6 +10,7 @@ import (
 type Updater struct {
 	collection string
 	columns    []string
+	uID        uuid.UUID
 	email      *string
 	name       *string
 	age        int
@@ -20,8 +22,13 @@ type Updater struct {
 func NewUpdater() *Updater {
 	return &Updater{
 		collection: collection,
-		columns:    []string{"email", "name", "age", "group_res", "updated_at"},
+		columns:    []string{"uid", "email", "name", "age", "group_res", "updated_at"},
 	}
+}
+
+func (u *Updater) UID(uID uuid.UUID) *Updater {
+	u.uID = uID
+	return u
 }
 
 func (u *Updater) Email(email *string) *Updater {

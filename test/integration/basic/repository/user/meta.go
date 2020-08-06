@@ -11,6 +11,8 @@ func (c Column) String() string {
 	switch c {
 	case ColumnID:
 		return "id"
+	case ColumnUID:
+		return "uid"
 	case ColumnEmail:
 		return "email"
 	case ColumnName:
@@ -29,6 +31,7 @@ func (c Column) String() string {
 
 const (
 	ColumnID Column = iota
+	ColumnUID
 	ColumnEmail
 	ColumnName
 	ColumnAge

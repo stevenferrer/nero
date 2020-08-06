@@ -2,6 +2,7 @@
 package user
 
 import (
+	uuid "github.com/google/uuid"
 	predicate "github.com/sf9v/nero/predicate"
 	user "github.com/sf9v/nero/test/integration/basic/user"
 	"time"
@@ -65,6 +66,66 @@ func IDLtOrEq(id string) PredFunc {
 			Col: "id",
 			Op:  predicate.LtOrEq,
 			Val: id,
+		})
+	}
+}
+
+func UIDEq(uID uuid.UUID) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "uid",
+			Op:  predicate.Eq,
+			Val: uID,
+		})
+	}
+}
+
+func UIDNotEq(uID uuid.UUID) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "uid",
+			Op:  predicate.NotEq,
+			Val: uID,
+		})
+	}
+}
+
+func UIDGt(uID uuid.UUID) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "uid",
+			Op:  predicate.Gt,
+			Val: uID,
+		})
+	}
+}
+
+func UIDGtOrEq(uID uuid.UUID) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "uid",
+			Op:  predicate.GtOrEq,
+			Val: uID,
+		})
+	}
+}
+
+func UIDLt(uID uuid.UUID) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "uid",
+			Op:  predicate.Lt,
+			Val: uID,
+		})
+	}
+}
+
+func UIDLtOrEq(uID uuid.UUID) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "uid",
+			Op:  predicate.LtOrEq,
+			Val: uID,
 		})
 	}
 }

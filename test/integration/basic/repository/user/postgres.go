@@ -78,7 +78,7 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 
 	qb := sq.Insert(c.collection).
 		Columns(c.columns...).
-		Values(c.email, c.name, c.age, c.group, c.updatedAt).
+		Values(c.uID, c.email, c.name, c.age, c.group, c.updatedAt).
 		Suffix("RETURNING \"id\"").
 		PlaceholderFormat(sq.Dollar).
 		RunWith(txx)
@@ -110,7 +110,7 @@ func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs
 	qb := sq.Insert(cs[0].collection).
 		Columns(cs[0].columns...)
 	for _, c := range cs {
-		qb = qb.Values(c.email, c.name, c.age, c.group, c.updatedAt)
+		qb = qb.Values(c.uID, c.email, c.name, c.age, c.group, c.updatedAt)
 	}
 
 	qb = qb.Suffix("RETURNING \"id\"").
@@ -181,6 +181,7 @@ func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Quer
 		var item user.User
 		err = rows.Scan(
 			&item.ID,
+			&item.UID,
 			&item.Email,
 			&item.Name,
 			&item.Age,
@@ -216,6 +217,7 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 		QueryRowContext(ctx).
 		Scan(
 			&item.ID,
+			&item.UID,
 			&item.Email,
 			&item.Name,
 			&item.Age,
@@ -320,6 +322,9 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 
 	qb := sq.Update(u.collection).
 		PlaceholderFormat(sq.Dollar)
+	if u.uID != [16]uint8{} {
+		qb = qb.Set("uid", u.uID)
+	}
 	if u.email != nil {
 		qb = qb.Set("email", u.email)
 	}

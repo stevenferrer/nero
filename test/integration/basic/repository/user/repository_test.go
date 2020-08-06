@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	uuid "github.com/google/uuid"
 	userr "github.com/sf9v/nero/test/integration/basic/repository/user"
 	"github.com/sf9v/nero/test/integration/basic/user"
 	"github.com/stretchr/testify/assert"
@@ -22,6 +23,8 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 	return func(t *testing.T) {
 		var err error
 		ctx := context.Background()
+
+		uids := []uuid.UUID{}
 		t.Run("Create", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				now := time.Now()
@@ -39,9 +42,15 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 					name := fmt.Sprintf("%s_%d", group, i)
 					age := randAge()
 
+					uid := uuid.New()
+					uids = append(uids, uid)
+
 					cr := userr.NewCreator().
-						Email(&email).Name(&name).
-						Age(age).Group(group).
+						UID(uid).
+						Email(&email).
+						Name(&name).
+						Age(age).
+						Group(group).
 						UpdatedAt(&now)
 
 					id, err := repo.Create(ctx, cr)
@@ -79,10 +88,15 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 					name := fmt.Sprintf("%s_%d_mm", group, i)
 					age := randAge()
 					now := time.Now()
+					uid := uuid.New()
+					uids = append(uids, uid)
 
 					cr := userr.NewCreator().
-						Email(&email).Name(&name).
-						Age(age).UpdatedAt(&now)
+						UID(uuid.New()).
+						Email(&email).
+						Name(&name).
+						Age(age).
+						UpdatedAt(&now)
 					crs = append(crs, cr)
 				}
 
@@ -141,6 +155,15 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 						userr.GroupEq(user.Norn), userr.GroupNotEq(user.Human),
 						userr.GroupGt("n"), userr.GroupGtOrEq(user.Norn),
 						userr.GroupLt("nornn"), userr.GroupLtOrEq(user.Norn),
+					),
+				)
+				assert.NoError(t, err)
+				assert.NotZero(t, len(users))
+
+				users, err = repo.Query(ctx, userr.NewQueryer().
+					Where(
+						userr.UIDEq(uids[0]), userr.UIDNotEq(uids[1]),
+						userr.UIDGtOrEq(uids[0]), userr.UIDLtOrEq(uids[0]),
 					),
 				)
 				assert.NoError(t, err)
