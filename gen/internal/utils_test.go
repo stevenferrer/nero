@@ -8,6 +8,7 @@ import (
 	"github.com/dave/jennifer/jen"
 	"github.com/sf9v/mira"
 	"github.com/sf9v/nero/example"
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -173,6 +174,69 @@ func TestGetTypeC(t *testing.T) {
 				typ: mira.NewType(example.CustomStringOne),
 			},
 			want: jen.Qual("example", "CustomString"),
+		},
+		{
+			name: "map[string]string",
+			args: args{
+				typ: mira.NewType(map[string]string{}),
+			},
+			want: jen.Map(jen.String()).String(),
+		},
+		{
+			name: "map[string]*string",
+			args: args{
+				typ: mira.NewType(map[string]*string{}),
+			},
+			want: jen.Map(jen.String()).Op("*").String(),
+		},
+		{
+			name: "map[int64]*big.Int",
+			args: args{
+				typ: mira.NewType(map[int64]*big.Int{}),
+			},
+			want: jen.Map(jen.Int64()).Op("*").Qual("math/big", "Int"),
+		},
+		{
+			name: "[]string",
+			args: args{
+				typ: mira.NewType([]string{}),
+			},
+			want: jen.Index().String(),
+		},
+		{
+			name: "[]*string",
+			args: args{
+				typ: mira.NewType([]*string{}),
+			},
+			want: jen.Index().Op("*").String(),
+		},
+		{
+			name: "[]int64",
+			args: args{
+				typ: mira.NewType([]int64{}),
+			},
+			want: jen.Index().Int64(),
+		},
+		{
+			name: "[]*int64",
+			args: args{
+				typ: mira.NewType([]*int64{}),
+			},
+			want: jen.Index().Op("*").Int64(),
+		},
+		{
+			name: "[]decimal.Decimal",
+			args: args{
+				typ: mira.NewType([]decimal.Decimal{}),
+			},
+			want: jen.Index().Qual("github.com/shopspring/decimal", "Decimal"),
+		},
+		{
+			name: "[]*decimal.Decimal",
+			args: args{
+				typ: mira.NewType([]*decimal.Decimal{}),
+			},
+			want: jen.Index().Op("*").Qual("github.com/shopspring/decimal", "Decimal"),
 		},
 	}
 	for _, tt := range tests {

@@ -2,23 +2,24 @@ package gen
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	"github.com/sf9v/nero/example"
 	gen "github.com/sf9v/nero/gen/internal"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_newPredicates(t *testing.T) {
-	schema, err := gen.BuildSchema(new(example.User))
-	require.NoError(t, err)
-	require.NotNil(t, schema)
+	t.Run("all columns with predicates", func(t *testing.T) {
+		schema, err := gen.BuildSchema(new(example.User))
+		require.NoError(t, err)
+		require.NotNil(t, schema)
 
-	predicates := newPredicates(schema)
-	expect := strings.TrimSpace(`
+		predicates := newPredicates(schema)
+		expect := strings.TrimSpace(`
 type PredFunc func(*predicate.Predicates)
 
 func IDEq(id int64) PredFunc {
@@ -322,6 +323,128 @@ func CreatedAtLtOrEq(createdAt *time.Time) PredFunc {
 }
 `)
 
-	got := strings.TrimSpace(fmt.Sprintf("%#v", predicates))
-	assert.Equal(t, expect, got)
+		got := strings.TrimSpace(fmt.Sprintf("%#v", predicates))
+		assert.Equal(t, expect, got)
+	})
+
+	t.Run("some columns without predicates", func(t *testing.T) {
+		schema, err := gen.BuildSchema(new(example.NoPreds))
+		require.NoError(t, err)
+		require.NotNil(t, schema)
+
+		predicates := newPredicates(schema)
+		expect := strings.TrimSpace(`
+type PredFunc func(*predicate.Predicates)
+
+func IDEq(id int64) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "id",
+			Op:  predicate.Eq,
+			Val: id,
+		})
+	}
+}
+
+func IDNotEq(id int64) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "id",
+			Op:  predicate.NotEq,
+			Val: id,
+		})
+	}
+}
+
+func IDGt(id int64) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "id",
+			Op:  predicate.Gt,
+			Val: id,
+		})
+	}
+}
+
+func IDGtOrEq(id int64) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "id",
+			Op:  predicate.GtOrEq,
+			Val: id,
+		})
+	}
+}
+
+func IDLt(id int64) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "id",
+			Op:  predicate.Lt,
+			Val: id,
+		})
+	}
+}
+
+func IDLtOrEq(id int64) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "id",
+			Op:  predicate.LtOrEq,
+			Val: id,
+		})
+	}
+}
+`)
+
+		got := strings.TrimSpace(fmt.Sprintf("%#v", predicates))
+		assert.Equal(t, expect, got)
+	})
+}
+
+func Test_hasPreds(t *testing.T) {
+	type args struct {
+		t reflect.Type
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "map",
+			args: args{
+				t: reflect.TypeOf(map[string]string{}),
+			},
+			want: false,
+		},
+		{
+			name: "slice",
+			args: args{
+				t: reflect.TypeOf([]string{}),
+			},
+			want: false,
+		},
+		{
+			name: "array",
+			args: args{
+				t: reflect.TypeOf([1]string{}),
+			},
+			want: false,
+		},
+		{
+			name: "string",
+			args: args{
+				t: reflect.TypeOf(""),
+			},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := hasPreds(tt.args.t); got != tt.want {
+				t.Errorf("hasPreds() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

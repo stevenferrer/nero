@@ -1,6 +1,8 @@
 package gen
 
 import (
+	"reflect"
+
 	"github.com/dave/jennifer/jen"
 
 	gen "github.com/sf9v/nero/gen/internal"
@@ -16,6 +18,10 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 		predicate.GtOrEq, predicate.Lt, predicate.LtOrEq}
 	predPkg := pkgPath + "/predicate"
 	for _, col := range schema.Cols {
+		if !hasPreds(col.Type.T()) {
+			continue
+		}
+
 		for _, op := range ops {
 			opStr := op.String()
 			field := col.CamelName()
@@ -47,4 +53,14 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 	}
 
 	return stmnt
+}
+
+func hasPreds(t reflect.Type) bool {
+	switch t.Kind() {
+	case reflect.Map, reflect.Slice,
+		reflect.Array:
+		return false
+	}
+
+	return true
 }

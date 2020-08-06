@@ -10,35 +10,50 @@ import (
 // GetTypeC returns the jen.Code from a typ
 func GetTypeC(typ *mira.Type) jen.Code {
 	c := &jen.Statement{}
-	if typ.Nillable() {
-		c = c.Op("*")
-	}
+	nillable := typ.Nillable()
 
 	// built-in types
 	if typ.PkgPath() == "" {
 		switch typ.T().Kind() {
 		case reflect.Int:
-			return c.Int()
+			return c.Add(starc(nillable)).Int()
 		case reflect.Int32:
-			return c.Int32()
+			return c.Add(starc(nillable)).Int32()
 		case reflect.Int64:
-			return c.Int64()
+			return c.Add(starc(nillable)).Int64()
 		case reflect.Uint:
-			return c.Uint()
+			return c.Add(starc(nillable)).Uint()
 		case reflect.Uint32:
-			return c.Uint32()
+			return c.Add(starc(nillable)).Uint32()
 		case reflect.Uint64:
-			return c.Uint64()
+			return c.Add(starc(nillable)).Uint64()
 		case reflect.Float32:
-			return c.Float32()
+			return c.Add(starc(nillable)).Float32()
 		case reflect.Float64:
-			return c.Float64()
+			return c.Add(starc(nillable)).Float64()
 		case reflect.String:
-			return c.String()
+			return c.Add(starc(nillable)).String()
+		case reflect.Map:
+			// get key type
+			kt := mira.NewType(reflect.New(typ.T().Key()).Elem().Interface())
+			// get element type
+			et := mira.NewType(reflect.New(typ.T().Elem()).Elem().Interface())
+			return c.Map(GetTypeC(kt)).Add(GetTypeC(et))
+		case reflect.Slice:
+			et := mira.NewType(reflect.New(typ.T().Elem()).Elem().Interface())
+			return c.Index().Add(GetTypeC(et))
 		}
 	}
 
-	return c.Qual(typ.PkgPath(), typ.Name())
+	return c.Add(starc(nillable)).Qual(typ.PkgPath(), typ.Name())
+}
+
+func starc(nillable bool) *jen.Statement {
+	if nillable {
+		return jen.Op("*")
+	}
+
+	return nil
 }
 
 // GetZeroValC returns the jen.Code zero value from a typ
