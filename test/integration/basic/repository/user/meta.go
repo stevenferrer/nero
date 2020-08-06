@@ -21,6 +21,8 @@ func (c Column) String() string {
 		return "age"
 	case ColumnGroup:
 		return "group_res"
+	case ColumnKv:
+		return "kv"
 	case ColumnUpdatedAt:
 		return "updated_at"
 	case ColumnCreatedAt:
@@ -36,6 +38,7 @@ const (
 	ColumnName
 	ColumnAge
 	ColumnGroup
+	ColumnKv
 	ColumnUpdatedAt
 	ColumnCreatedAt
 )

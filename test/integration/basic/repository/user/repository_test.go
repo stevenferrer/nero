@@ -9,6 +9,7 @@ import (
 	"time"
 
 	uuid "github.com/google/uuid"
+	example "github.com/sf9v/nero/example"
 	userr "github.com/sf9v/nero/test/integration/basic/repository/user"
 	"github.com/sf9v/nero/test/integration/basic/user"
 	"github.com/stretchr/testify/assert"
@@ -25,6 +26,7 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 		ctx := context.Background()
 
 		uids := []uuid.UUID{}
+		kv := example.Map{"asdf": "jklm"}
 		t.Run("Create", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				now := time.Now()
@@ -51,6 +53,7 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 						Name(&name).
 						Age(age).
 						Group(group).
+						Kv(kv).
 						UpdatedAt(&now)
 
 					id, err := repo.Create(ctx, cr)
@@ -96,6 +99,7 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 						Email(&email).
 						Name(&name).
 						Age(age).
+						Kv(kv).
 						UpdatedAt(&now)
 					crs = append(crs, cr)
 				}

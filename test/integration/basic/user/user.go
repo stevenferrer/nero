@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/sf9v/nero"
+	"github.com/sf9v/nero/example"
 )
 
 // User is a user
@@ -14,6 +15,7 @@ type User struct {
 	Email     *string
 	Name      *string
 	Age       int
+	Kv        example.Map
 	Group     Group
 	UpdatedAt *time.Time
 	CreatedAt *time.Time
@@ -46,6 +48,7 @@ func (u *User) Schema() *nero.Schema {
 			nero.NewColumn("age", u.Age),
 			nero.NewColumn("group_res", u.Group).
 				StructField("Group"),
+			nero.NewColumn("kv", u.Kv),
 			nero.NewColumn("updated_at", u.UpdatedAt),
 			nero.NewColumn("created_at", u.CreatedAt).
 				Auto(),

@@ -3,6 +3,7 @@ package user
 
 import (
 	uuid "github.com/google/uuid"
+	example "github.com/sf9v/nero/example"
 	user "github.com/sf9v/nero/test/integration/basic/user"
 	"time"
 )
@@ -15,6 +16,7 @@ type Updater struct {
 	name       *string
 	age        int
 	group      user.Group
+	kv         example.Map
 	updatedAt  *time.Time
 	pfs        []PredFunc
 }
@@ -22,7 +24,7 @@ type Updater struct {
 func NewUpdater() *Updater {
 	return &Updater{
 		collection: collection,
-		columns:    []string{"uid", "email", "name", "age", "group_res", "updated_at"},
+		columns:    []string{"uid", "email", "name", "age", "group_res", "kv", "updated_at"},
 	}
 }
 
@@ -48,6 +50,11 @@ func (u *Updater) Age(age int) *Updater {
 
 func (u *Updater) Group(group user.Group) *Updater {
 	u.group = group
+	return u
+}
+
+func (u *Updater) Kv(kv example.Map) *Updater {
+	u.kv = kv
 	return u
 }
 

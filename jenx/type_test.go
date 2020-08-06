@@ -8,6 +8,7 @@ import (
 	"github.com/dave/jennifer/jen"
 	"github.com/google/uuid"
 	"github.com/sf9v/mira"
+	"github.com/sf9v/nero/example"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -327,6 +328,13 @@ func TestType(t *testing.T) {
 				v: [16]*uuid.UUID{},
 			},
 			want: jen.Index(jen.Lit(16)).Op("*").Qual("github.com/google/uuid", "UUID"),
+		},
+		{
+			name: "Map",
+			args: args{
+				v: example.Map{},
+			},
+			want: jen.Qual("github.com/sf9v/nero/example", "Map"),
 		},
 	}
 	for _, tt := range tests {

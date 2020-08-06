@@ -78,7 +78,7 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 
 	qb := sq.Insert(c.collection).
 		Columns(c.columns...).
-		Values(c.uID, c.email, c.name, c.age, c.group, c.updatedAt).
+		Values(c.uID, c.email, c.name, c.age, c.group, c.kv, c.updatedAt).
 		Suffix("RETURNING \"id\"").
 		PlaceholderFormat(sq.Dollar).
 		RunWith(txx)
@@ -110,7 +110,7 @@ func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs
 	qb := sq.Insert(cs[0].collection).
 		Columns(cs[0].columns...)
 	for _, c := range cs {
-		qb = qb.Values(c.uID, c.email, c.name, c.age, c.group, c.updatedAt)
+		qb = qb.Values(c.uID, c.email, c.name, c.age, c.group, c.kv, c.updatedAt)
 	}
 
 	qb = qb.Suffix("RETURNING \"id\"").
@@ -186,6 +186,7 @@ func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Quer
 			&item.Name,
 			&item.Age,
 			&item.Group,
+			&item.Kv,
 			&item.UpdatedAt,
 			&item.CreatedAt,
 		)
@@ -222,6 +223,7 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 			&item.Name,
 			&item.Age,
 			&item.Group,
+			&item.Kv,
 			&item.UpdatedAt,
 			&item.CreatedAt,
 		)
@@ -336,6 +338,9 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 	}
 	if u.group != "" {
 		qb = qb.Set("group_res", u.group)
+	}
+	if u.kv != nil {
+		qb = qb.Set("kv", u.kv)
 	}
 	if u.updatedAt != nil {
 		qb = qb.Set("updated_at", u.updatedAt)

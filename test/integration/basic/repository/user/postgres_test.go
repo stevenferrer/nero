@@ -70,6 +70,7 @@ func TestPGRepository(t *testing.T) {
 		name VARCHAR(50) NOT NULL,
 		age INTEGER NOT NULL,
 		group_res VARCHAR(20) NOT NULL,
+		kv jsonb NULL,
 		updated_at TIMESTAMP,
 		created_at TIMESTAMP DEFAULT now()
 	)`)

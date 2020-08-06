@@ -65,9 +65,13 @@ func Type(v interface{}) *jen.Statement {
 		reflect.Float64, reflect.String, reflect.Struct:
 		return jen.Add(star(isPtr)).Qual(mt.PkgPath(), mt.Name())
 	case reflect.Map:
-		kt := reflect.New(mt.T().Key()).Elem().Interface()
-		et := reflect.New(mt.T().Elem()).Elem().Interface()
-		return c.Add(star(isPtr)).Map(Type(kt)).Add(Type(et))
+		if len(mt.Name()) == 0 {
+			kt := reflect.New(mt.T().Key()).Elem().Interface()
+			et := reflect.New(mt.T().Elem()).Elem().Interface()
+			return c.Add(star(isPtr)).Map(Type(kt)).Add(Type(et))
+		}
+
+		return jen.Add(star(isPtr)).Qual(mt.PkgPath(), mt.Name())
 	case reflect.Array:
 		if len(rt.Name()) == 0 {
 			ev := reflect.New(mt.T().Elem()).Elem().Interface()

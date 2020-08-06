@@ -3,6 +3,7 @@ package user
 
 import (
 	uuid "github.com/google/uuid"
+	example "github.com/sf9v/nero/example"
 	user "github.com/sf9v/nero/test/integration/basic/user"
 	"time"
 )
@@ -15,13 +16,14 @@ type Creator struct {
 	name       *string
 	age        int
 	group      user.Group
+	kv         example.Map
 	updatedAt  *time.Time
 }
 
 func NewCreator() *Creator {
 	return &Creator{
 		collection: collection,
-		columns:    []string{"uid", "email", "name", "age", "group_res", "updated_at"},
+		columns:    []string{"uid", "email", "name", "age", "group_res", "kv", "updated_at"},
 	}
 }
 
@@ -47,6 +49,11 @@ func (c *Creator) Age(age int) *Creator {
 
 func (c *Creator) Group(group user.Group) *Creator {
 	c.group = group
+	return c
+}
+
+func (c *Creator) Kv(kv example.Map) *Creator {
+	c.kv = kv
 	return c
 }
 

@@ -8,7 +8,6 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/iancoleman/strcase v0.0.0-20191112232945-16388991a334
 	github.com/lib/pq v1.8.0
-	github.com/mattn/go-sqlite3 v1.14.0
 	github.com/ory/dockertest/v3 v3.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.19.0
