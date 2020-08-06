@@ -6,21 +6,23 @@ import (
 	"github.com/dave/jennifer/jen"
 	"github.com/iancoleman/strcase"
 	gen "github.com/sf9v/nero/gen/internal"
+	"github.com/sf9v/nero/jenx"
 )
 
 func newCreateBlock(schema *gen.Schema) *jen.Statement {
 	ident := schema.Ident
+	identv := ident.Type.V()
 	return jen.Func().Params(rcvrParamC).Id("Create").
 		Params(
 			jen.Id("ctx").Add(ctxC),
 			jen.Id("c").Op("*").Id("Creator"),
 		).
-		Params(gen.GetTypeC(ident.Type), jen.Error()).
+		Params(jenx.Type(identv), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			g.List(jen.Id("tx"), jen.Err()).Op(":=").
 				Add(rcvrIDC).Dot("Tx").Call(ctxIDC)
 			g.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(gen.GetZeroValC(ident.Type), jen.Err())).
+				jen.Return(jenx.Zero(identv), jen.Err())).
 				Line()
 
 			g.List(jen.Id(ident.LowerCamelName()), jen.Err()).Op(":=").
@@ -30,7 +32,7 @@ func newCreateBlock(schema *gen.Schema) *jen.Statement {
 				jen.Id("c"),
 			)
 			g.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(gen.GetZeroValC(ident.Type), txRollbackC),
+				jen.Return(jenx.Zero(identv), txRollbackC),
 			).Line()
 
 			g.Return(
@@ -62,25 +64,26 @@ func newCreateManyBlock() *jen.Statement {
 
 func newCreateTxBlock(schema *gen.Schema) *jen.Statement {
 	ident := schema.Ident
+	identv := ident.Type.V()
 	return jen.Func().Params(rcvrParamC).Id("CreateTx").
 		Params(
 			jen.Id("ctx").Add(ctxC),
 			jen.Id("tx").Add(txC),
 			jen.Id("c").Op("*").Id("Creator"),
 		).
-		Params(gen.GetTypeC(ident.Type), jen.Error()).
+		Params(jenx.Type(identv), jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			// assert tx type
 			g.List(jen.Id("txx"), jen.Id("ok")).Op(":=").
 				Id("tx").Assert(jen.Op("*").Qual("database/sql", "Tx"))
 			g.If(jen.Op("!").Id("ok")).Block(
 				jen.Return(
-					gen.GetZeroValC(ident.Type),
+					jenx.Zero(identv),
 					jen.Qual(errPkg, "New").Call(jen.Lit("expecting tx to be *sql.Tx")),
 				)).Line()
 
 			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(gen.GetZeroValC(ident.Type), jen.Err()))
+				jen.Return(jenx.Zero(identv), jen.Err()))
 
 			// query builder
 			g.Id("qb").Op(":=").Qual(sqPkg, "Insert").
@@ -106,7 +109,7 @@ func newCreateTxBlock(schema *gen.Schema) *jen.Statement {
 			// debug
 			g.Add(newDebugLogBlock("Create")).Line().Line()
 
-			g.Var().Id(ident.LowerCamelName()).Add(gen.GetTypeC(ident.Type))
+			g.Var().Id(ident.LowerCamelName()).Add(jenx.Type(identv))
 			g.Err().Op(":=").Id("qb").Dot("QueryRowContext").
 				Call(ctxIDC).Dot("Scan").Call(jen.Op("&").Id(ident.LowerCamelName()))
 			g.Add(ifErr).Line()

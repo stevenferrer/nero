@@ -1,2 +1,2 @@
-// Package generate contains code generation tests
+// Package gen contains code generation tests
 package gen

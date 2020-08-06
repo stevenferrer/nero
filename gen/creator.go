@@ -2,6 +2,7 @@ package gen
 
 import (
 	"github.com/dave/jennifer/jen"
+	"github.com/sf9v/nero/jenx"
 
 	gen "github.com/sf9v/nero/gen/internal"
 )
@@ -21,7 +22,7 @@ func newCreator(schema *gen.Schema) *jen.Statement {
 					colField = col.StructField
 				}
 				colField = lowCamel(colField)
-				g.Id(colField).Add(gen.GetTypeC(col.Type))
+				g.Id(colField).Add(jenx.Type(col.Type.V()))
 			}
 		}).Line()
 
@@ -55,7 +56,7 @@ func newCreator(schema *gen.Schema) *jen.Statement {
 
 		paramID := lowCamel(methodID)
 		stmnt = stmnt.Func().Params(rcvrParamsC).Id(methodID).
-			Params(jen.Id(paramID).Add(gen.GetTypeC(col.Type))).
+			Params(jen.Id(paramID).Add(jenx.Type(col.Type.V()))).
 			Params(jen.Op("*").Id("Creator")).
 			Block(
 				jen.Id("c").Dot(paramID).

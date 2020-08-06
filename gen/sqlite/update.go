@@ -4,6 +4,7 @@ import (
 	"github.com/dave/jennifer/jen"
 	"github.com/iancoleman/strcase"
 	gen "github.com/sf9v/nero/gen/internal"
+	"github.com/sf9v/nero/jenx"
 )
 
 func newUpdateBlock() *jen.Statement {
@@ -70,8 +71,9 @@ func newUpdateTxBlock(schema *gen.Schema) *jen.Statement {
 					field = strcase.ToLowerCamel(col.StructField)
 				}
 
+				colv := col.Type.V()
 				g.If(jen.Id("u").Dot(field).
-					Op("!=").Add(gen.GetZeroValC(col.Type))).
+					Op("!=").Add(jenx.Zero(colv))).
 					Block(jen.Id("qb").Op("=").Id("qb").Dot("Set").Call(
 						jen.Lit(col.Name),
 						jen.Id("u").Dot(field),

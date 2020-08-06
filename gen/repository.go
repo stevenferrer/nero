@@ -6,6 +6,7 @@ import (
 	"github.com/dave/jennifer/jen"
 
 	gen "github.com/sf9v/nero/gen/internal"
+	"github.com/sf9v/nero/jenx"
 )
 
 func newRepository(schema *gen.Schema) *jen.Statement {
@@ -14,7 +15,8 @@ func newRepository(schema *gen.Schema) *jen.Statement {
 		schema.Type.Name())
 	ctxC := jen.Qual("context", "Context")
 	txC := jen.Qual(pkgPath, "Tx")
-	identParamC := jen.Id("id").Add(gen.GetTypeC(schema.Ident.Type))
+	identv := schema.Ident.Type.V()
+	identParamC := jen.Id("id").Add(jenx.Type(identv))
 	rowsAffectedC := jen.Id("rowsAffected").Int64()
 	return jen.Comment(comment).Line().
 		Type().Id("Repository").Interface(

@@ -4,6 +4,7 @@ import (
 	"github.com/dave/jennifer/jen"
 
 	gen "github.com/sf9v/nero/gen/internal"
+	"github.com/sf9v/nero/jenx"
 )
 
 func newUpdater(schema *gen.Schema) *jen.Statement {
@@ -19,7 +20,8 @@ func newUpdater(schema *gen.Schema) *jen.Statement {
 			if len(col.StructField) > 0 {
 				field = lowCamel(col.StructField)
 			}
-			g.Id(field).Add(gen.GetTypeC(col.Type))
+			colv := col.Type.V()
+			g.Id(field).Add(jenx.Type(colv))
 		}
 
 		g.Id("pfs").Op("[]").Id("PredFunc")
@@ -58,8 +60,9 @@ func newUpdater(schema *gen.Schema) *jen.Statement {
 
 		paramID := lowCamel(methodID)
 
+		colv := col.Type.V()
 		stmnt = stmnt.Func().Params(rcvrParamsC).Id(camel(methodID)).
-			Params(jen.Id(paramID).Add(gen.GetTypeC(col.Type))).
+			Params(jen.Id(paramID).Add(jenx.Type(colv))).
 			Params(retParamsC).
 			Block(
 				jen.Id("u").Dot(paramID).Op("=").Id(paramID),

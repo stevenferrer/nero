@@ -4,6 +4,7 @@ import (
 	"reflect"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/sf9v/nero/jenx"
 
 	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/sf9v/nero/predicate"
@@ -32,7 +33,7 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 			paramID := lowCamel(field)
 			stmnt = stmnt.Func().Id(fnName).
 				Params(jen.Id(paramID).
-					Add(gen.GetTypeC(col.Type))).
+					Add(jenx.Type(col.Type.V()))).
 				Params(jen.Id("PredFunc")).
 				Block(jen.Return(jen.Func().Params(jen.Id("pb").Op("*").
 					Qual(predPkg, "Predicates")).
