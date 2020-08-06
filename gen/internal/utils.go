@@ -10,29 +10,31 @@ import (
 // GetTypeC returns the jen.Code from a typ
 func GetTypeC(typ *mira.Type) jen.Code {
 	c := &jen.Statement{}
-	nillable := typ.Nillable()
+	nillable := typ.IsNillable()
 
 	// built-in types
 	if typ.PkgPath() == "" {
 		switch typ.T().Kind() {
 		case reflect.Int:
-			return c.Add(starc(nillable)).Int()
+			return c.Add(star(nillable)).Int()
 		case reflect.Int32:
-			return c.Add(starc(nillable)).Int32()
+			return c.Add(star(nillable)).Int32()
 		case reflect.Int64:
-			return c.Add(starc(nillable)).Int64()
+			return c.Add(star(nillable)).Int64()
 		case reflect.Uint:
-			return c.Add(starc(nillable)).Uint()
+			return c.Add(star(nillable)).Uint()
 		case reflect.Uint32:
-			return c.Add(starc(nillable)).Uint32()
+			return c.Add(star(nillable)).Uint32()
 		case reflect.Uint64:
-			return c.Add(starc(nillable)).Uint64()
+			return c.Add(star(nillable)).Uint64()
 		case reflect.Float32:
-			return c.Add(starc(nillable)).Float32()
+			return c.Add(star(nillable)).Float32()
 		case reflect.Float64:
-			return c.Add(starc(nillable)).Float64()
+			return c.Add(star(nillable)).Float64()
+		case reflect.Bool:
+			return c.Add(star(nillable)).Bool()
 		case reflect.String:
-			return c.Add(starc(nillable)).String()
+			return c.Add(star(nillable)).String()
 		case reflect.Map:
 			// get key type
 			kt := mira.NewType(reflect.New(typ.T().Key()).Elem().Interface())
@@ -45,10 +47,10 @@ func GetTypeC(typ *mira.Type) jen.Code {
 		}
 	}
 
-	return c.Add(starc(nillable)).Qual(typ.PkgPath(), typ.Name())
+	return c.Add(star(nillable)).Qual(typ.PkgPath(), typ.Name())
 }
 
-func starc(nillable bool) *jen.Statement {
+func star(nillable bool) *jen.Statement {
 	if nillable {
 		return jen.Op("*")
 	}
@@ -58,17 +60,19 @@ func starc(nillable bool) *jen.Statement {
 
 // GetZeroValC returns the jen.Code zero value from a typ
 func GetZeroValC(typ *mira.Type) jen.Code {
-	if typ.Nillable() {
+	if typ.IsNillable() {
 		return jen.Nil()
 	}
 
-	switch typ.T().Kind() {
-	case reflect.Int, reflect.Int32, reflect.Int64,
-		reflect.Uint, reflect.Uint32, reflect.Uint64,
-		reflect.Float32, reflect.Float64:
+	if typ.IsNumeric() {
 		return jen.Lit(0)
+	}
+
+	switch typ.T().Kind() {
 	case reflect.String:
 		return jen.Lit("")
+	case reflect.Bool:
+		return jen.False()
 	}
 
 	return jen.Qual(typ.PkgPath(), typ.Name()).Op("{").Op("}")

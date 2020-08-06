@@ -11,7 +11,7 @@ require (
 	github.com/ory/dockertest/v3 v3.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.19.0
-	github.com/sf9v/mira v0.0.0-20200804000213-15cd9f365912
+	github.com/sf9v/mira v0.0.0-20200806075724-21dcf456da5c
 	github.com/shopspring/decimal v1.2.0
 	github.com/stretchr/testify v1.6.1
 )

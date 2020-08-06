@@ -148,6 +148,20 @@ func TestGetTypeC(t *testing.T) {
 			want: jen.Op("*").String(),
 		},
 		{
+			name: "bool",
+			args: args{
+				typ: mira.NewType(false),
+			},
+			want: jen.Bool(),
+		},
+		{
+			name: "*bool",
+			args: args{
+				typ: mira.NewType(mira.BoolPtr(false)),
+			},
+			want: jen.Op("*").Bool(),
+		},
+		{
 			name: "big.Int",
 			args: args{
 				typ: mira.NewType(big.Int{}),
@@ -380,6 +394,20 @@ func TestGetZeroValC(t *testing.T) {
 			name: "*string",
 			args: args{
 				typ: mira.NewType(mira.StrPtr("")),
+			},
+			want: jen.Nil(),
+		},
+		{
+			name: "bool",
+			args: args{
+				typ: mira.NewType(true),
+			},
+			want: jen.False(),
+		},
+		{
+			name: "*bool",
+			args: args{
+				typ: mira.NewType(mira.BoolPtr(false)),
 			},
 			want: jen.Nil(),
 		},
