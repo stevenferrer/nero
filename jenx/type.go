@@ -19,12 +19,20 @@ func Type(v interface{}) *jen.Statement {
 		switch rt.Kind() {
 		case reflect.Int:
 			return c.Add(star(isPtr)).Int()
+		case reflect.Int8:
+			return c.Add(star(isPtr)).Int8()
+		case reflect.Int16:
+			return c.Add(star(isPtr)).Int16()
 		case reflect.Int32:
 			return c.Add(star(isPtr)).Int32()
 		case reflect.Int64:
 			return c.Add(star(isPtr)).Int64()
 		case reflect.Uint:
 			return c.Add(star(isPtr)).Uint()
+		case reflect.Uint8:
+			return c.Add(star(isPtr)).Uint8()
+		case reflect.Uint16:
+			return c.Add(star(isPtr)).Uint16()
 		case reflect.Uint32:
 			return c.Add(star(isPtr)).Uint32()
 		case reflect.Uint64:

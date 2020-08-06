@@ -395,6 +395,66 @@ func IDLtOrEq(id int64) PredFunc {
 		})
 	}
 }
+
+func AEq(a [1]string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "a",
+			Op:  predicate.Eq,
+			Val: a,
+		})
+	}
+}
+
+func ANotEq(a [1]string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "a",
+			Op:  predicate.NotEq,
+			Val: a,
+		})
+	}
+}
+
+func AGt(a [1]string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "a",
+			Op:  predicate.Gt,
+			Val: a,
+		})
+	}
+}
+
+func AGtOrEq(a [1]string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "a",
+			Op:  predicate.GtOrEq,
+			Val: a,
+		})
+	}
+}
+
+func ALt(a [1]string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "a",
+			Op:  predicate.Lt,
+			Val: a,
+		})
+	}
+}
+
+func ALtOrEq(a [1]string) PredFunc {
+	return func(pb *predicate.Predicates) {
+		pb.Add(&predicate.Predicate{
+			Col: "a",
+			Op:  predicate.LtOrEq,
+			Val: a,
+		})
+	}
+}
 `)
 
 		got := strings.TrimSpace(fmt.Sprintf("%#v", predicates))
@@ -430,7 +490,7 @@ func Test_hasPreds(t *testing.T) {
 			args: args{
 				t: reflect.TypeOf([1]string{}),
 			},
-			want: false,
+			want: true,
 		},
 		{
 			name: "string",
@@ -442,9 +502,8 @@ func Test_hasPreds(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := hasPreds(tt.args.t); got != tt.want {
-				t.Errorf("hasPreds() = %v, want %v", got, tt.want)
-			}
+			got := hasPreds(tt.args.t)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

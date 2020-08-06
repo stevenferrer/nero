@@ -58,8 +58,7 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 
 func hasPreds(t reflect.Type) bool {
 	switch t.Kind() {
-	case reflect.Map, reflect.Slice,
-		reflect.Array:
+	case reflect.Map, reflect.Slice:
 		return false
 	}
 

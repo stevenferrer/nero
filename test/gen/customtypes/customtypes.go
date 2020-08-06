@@ -1,6 +1,9 @@
 package customtypes
 
-import "github.com/sf9v/nero"
+import (
+	"github.com/segmentio/ksuid"
+	"github.com/sf9v/nero"
+)
 
 type Custom struct {
 	ID             int64
@@ -14,6 +17,7 @@ type Custom struct {
 	PtrItem        *Item
 	Items          []Item
 	PtrItems       []*Item
+	KSID           ksuid.KSUID
 }
 
 type Item struct {
@@ -28,6 +32,7 @@ func (c *Custom) Schema() *nero.Schema {
 		Columns: []*nero.Column{
 			nero.NewColumn("id", c.ID).
 				StructField("ID").Ident().Auto(),
+			nero.NewColumn("ksid", c.KSID).StructField("KSID"),
 			nero.NewColumn("s", c.S),
 			nero.NewColumn("map_str_str", c.MapStrStr),
 			nero.NewColumn("map_str_ptr_str", c.MapStrPtrStr),

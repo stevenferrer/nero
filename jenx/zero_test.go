@@ -216,7 +216,7 @@ func TestZero(t *testing.T) {
 			args: args{
 				v: uuid.UUID{},
 			},
-			want: jen.Qual("github.com/google/uuid", "UUID").Values(),
+			want: jen.Index(jen.Lit(16)).Uint8().Values(),
 		},
 		{
 			name: "*uuid.UUID",

@@ -35,6 +35,34 @@ func TestType(t *testing.T) {
 			want: jen.Op("*").Int(),
 		},
 		{
+			name: "int8",
+			args: args{
+				v: int8(0),
+			},
+			want: jen.Int8(),
+		},
+		{
+			name: "*int8",
+			args: args{
+				v: mira.Int8Ptr(0),
+			},
+			want: jen.Op("*").Int8(),
+		},
+		{
+			name: "int16",
+			args: args{
+				v: int16(0),
+			},
+			want: jen.Int16(),
+		},
+		{
+			name: "*int16",
+			args: args{
+				v: mira.Int16Ptr(0),
+			},
+			want: jen.Op("*").Int16(),
+		},
+		{
 			name: "int32",
 			args: args{
 				v: int32(0),
@@ -75,6 +103,20 @@ func TestType(t *testing.T) {
 				v: mira.UintPtr(0),
 			},
 			want: jen.Op("*").Uint(),
+		},
+		{
+			name: "uint16",
+			args: args{
+				v: uint16(0),
+			},
+			want: jen.Uint16(),
+		},
+		{
+			name: "*uint",
+			args: args{
+				v: mira.Uint16Ptr(0),
+			},
+			want: jen.Op("*").Uint16(),
 		},
 		{
 			name: "uint32",
