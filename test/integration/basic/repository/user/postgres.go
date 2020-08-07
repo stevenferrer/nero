@@ -4,6 +4,7 @@ package user
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	sq "github.com/Masterminds/squirrel"
 	_ "github.com/lib/pq"
 	errors "github.com/pkg/errors"
@@ -76,8 +77,13 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		return "", errors.New("expecting tx to be *sql.Tx")
 	}
 
-	qb := sq.Insert(c.collection).
-		Columns(c.columns...).
+	table := fmt.Sprintf("%q", c.collection)
+	columns := []string{}
+	for _, col := range c.columns {
+		columns = append(columns, fmt.Sprintf("%q", col))
+	}
+	qb := sq.Insert(table).
+		Columns(columns...).
 		Values(c.uID, c.email, c.name, c.age, c.group, c.kv, c.updatedAt).
 		Suffix("RETURNING \"id\"").
 		PlaceholderFormat(sq.Dollar).
@@ -107,8 +113,12 @@ func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs
 		return errors.New("expecting tx to be *sql.Tx")
 	}
 
-	qb := sq.Insert(cs[0].collection).
-		Columns(cs[0].columns...)
+	table := fmt.Sprintf("%q", cs[0].collection)
+	columns := []string{}
+	for _, col := range cs[0].columns {
+		columns = append(columns, fmt.Sprintf("%q", col))
+	}
+	qb := sq.Insert(table).Columns(columns...)
 	for _, c := range cs {
 		qb = qb.Values(c.uID, c.email, c.name, c.age, c.group, c.kv, c.updatedAt)
 	}
@@ -235,8 +245,13 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 }
 
 func (pg *PostgreSQLRepository) buildSelect(q *Queryer) sq.SelectBuilder {
-	qb := sq.Select(q.columns...).
-		From(q.collection).
+	table := fmt.Sprintf("%q", q.collection)
+	columns := []string{}
+	for _, col := range q.columns {
+		columns = append(columns, fmt.Sprintf("%q", col))
+	}
+	qb := sq.Select(columns...).
+		From(table).
 		PlaceholderFormat(sq.Dollar)
 
 	pb := &predicate.Predicates{}
@@ -246,29 +261,17 @@ func (pg *PostgreSQLRepository) buildSelect(q *Queryer) sq.SelectBuilder {
 	for _, p := range pb.All() {
 		switch p.Op {
 		case predicate.Eq:
-			qb = qb.Where(sq.Eq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
 		case predicate.NotEq:
-			qb = qb.Where(sq.NotEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
 		case predicate.Gt:
-			qb = qb.Where(sq.Gt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
 		case predicate.GtOrEq:
-			qb = qb.Where(sq.GtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
 		case predicate.Lt:
-			qb = qb.Where(sq.Lt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
 		case predicate.LtOrEq:
-			qb = qb.Where(sq.LtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
 		}
 	}
 
@@ -277,7 +280,7 @@ func (pg *PostgreSQLRepository) buildSelect(q *Queryer) sq.SelectBuilder {
 		sf(sorts)
 	}
 	for _, s := range sorts.All() {
-		col := s.Col
+		col := fmt.Sprintf("%q", s.Col)
 		switch s.Direction {
 		case sort.Asc:
 			qb = qb.OrderBy(col + " ASC")
@@ -322,56 +325,45 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 		pf(pb)
 	}
 
-	qb := sq.Update(u.collection).
+	table := fmt.Sprintf("%q", u.collection)
+	qb := sq.Update(table).
 		PlaceholderFormat(sq.Dollar)
-	if u.uID != [16]uint8{} {
-		qb = qb.Set("uid", u.uID)
+	if u.uID != [20]uint8{} {
+		qb = qb.Set("\"uid\"", u.uID)
 	}
 	if u.email != nil {
-		qb = qb.Set("email", u.email)
+		qb = qb.Set("\"email\"", u.email)
 	}
 	if u.name != nil {
-		qb = qb.Set("name", u.name)
+		qb = qb.Set("\"name\"", u.name)
 	}
 	if u.age != 0 {
-		qb = qb.Set("age", u.age)
+		qb = qb.Set("\"age\"", u.age)
 	}
 	if u.group != "" {
-		qb = qb.Set("group_res", u.group)
+		qb = qb.Set("\"group\"", u.group)
 	}
 	if u.kv != nil {
-		qb = qb.Set("kv", u.kv)
+		qb = qb.Set("\"kv\"", u.kv)
 	}
 	if u.updatedAt != nil {
-		qb = qb.Set("updated_at", u.updatedAt)
+		qb = qb.Set("\"updated_at\"", u.updatedAt)
 	}
 
 	for _, p := range pb.All() {
 		switch p.Op {
 		case predicate.Eq:
-			qb = qb.Where(sq.Eq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
 		case predicate.NotEq:
-			qb = qb.Where(sq.NotEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
 		case predicate.Gt:
-			qb = qb.Where(sq.Gt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
 		case predicate.GtOrEq:
-			qb = qb.Where(sq.GtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
 		case predicate.Lt:
-			qb = qb.Where(sq.Lt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
 		case predicate.LtOrEq:
-			qb = qb.Where(sq.LtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
 		}
 	}
 	if log := pg.log; log != nil {
@@ -418,35 +410,24 @@ func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Del
 		pf(pb)
 	}
 
-	qb := sq.Delete(d.collection).
+	table := fmt.Sprintf("%q", d.collection)
+	qb := sq.Delete(table).
 		PlaceholderFormat(sq.Dollar).
 		RunWith(txx)
 	for _, p := range pb.All() {
 		switch p.Op {
 		case predicate.Eq:
-			qb = qb.Where(sq.Eq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
 		case predicate.NotEq:
-			qb = qb.Where(sq.NotEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
 		case predicate.Gt:
-			qb = qb.Where(sq.Gt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
 		case predicate.GtOrEq:
-			qb = qb.Where(sq.GtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
 		case predicate.Lt:
-			qb = qb.Where(sq.Lt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
 		case predicate.LtOrEq:
-			qb = qb.Where(sq.LtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
 		}
 	}
 	if log := pg.log; log != nil {
@@ -495,29 +476,30 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 	cols := []string{}
 	for _, agg := range aggs.All() {
 		col := agg.Col
+		qcol := fmt.Sprintf("%q", col)
 		switch agg.Fn {
 		case aggregate.Avg:
-			cols = append(cols, "AVG("+col+") avg_"+col)
+			cols = append(cols, "AVG("+qcol+") avg_"+col)
 		case aggregate.Count:
-			cols = append(cols, "COUNT("+col+") count_"+col)
+			cols = append(cols, "COUNT("+qcol+") count_"+col)
 		case aggregate.Max:
-			cols = append(cols, "MAX("+col+") max_"+col)
+			cols = append(cols, "MAX("+qcol+") max_"+col)
 		case aggregate.Min:
-			cols = append(cols, "MIN("+col+") min_"+col)
+			cols = append(cols, "MIN("+qcol+") min_"+col)
 		case aggregate.Sum:
-			cols = append(cols, "SUM("+col+") sum_"+col)
+			cols = append(cols, "SUM("+qcol+") sum_"+col)
 		case aggregate.None:
-			cols = append(cols, col)
+			cols = append(cols, qcol)
 		}
 	}
 
-	qb := sq.Select(cols...).
-		From(a.collection).
+	table := fmt.Sprintf("%q", a.collection)
+	qb := sq.Select(cols...).From(table).
 		PlaceholderFormat(sq.Dollar)
 
 	groups := []string{}
 	for _, group := range a.groups {
-		groups = append(groups, group.String())
+		groups = append(groups, fmt.Sprintf("%q", group.String()))
 	}
 	qb = qb.GroupBy(groups...)
 
@@ -528,29 +510,17 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 	for _, p := range preds.All() {
 		switch p.Op {
 		case predicate.Eq:
-			qb = qb.Where(sq.Eq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
 		case predicate.NotEq:
-			qb = qb.Where(sq.NotEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
 		case predicate.Gt:
-			qb = qb.Where(sq.Gt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
 		case predicate.GtOrEq:
-			qb = qb.Where(sq.GtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
 		case predicate.Lt:
-			qb = qb.Where(sq.Lt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
 		case predicate.LtOrEq:
-			qb = qb.Where(sq.LtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
 		}
 	}
 
@@ -559,7 +529,7 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 		sf(sorts)
 	}
 	for _, s := range sorts.All() {
-		col := s.Col
+		col := fmt.Sprintf("%q", s.Col)
 		switch s.Direction {
 		case sort.Asc:
 			qb = qb.OrderBy(col + " ASC")

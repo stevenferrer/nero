@@ -3,6 +3,7 @@ package postgres
 import (
 	"github.com/dave/jennifer/jen"
 	gen "github.com/sf9v/nero/gen/internal"
+	"github.com/sf9v/nero/predicate"
 	"github.com/sf9v/nero/sort"
 )
 
@@ -164,11 +165,27 @@ func newSelectBuilderBlock() *jen.Statement {
 		Params(jen.Id("q").Op("*").Id("Queryer")).
 		Params(jen.Qual(sqPkg, "SelectBuilder")).
 		BlockFunc(func(g *jen.Group) {
+			// quote table name
+			g.Id("table").Op(":=").Qual("fmt", "Sprintf").
+				Call(jen.Lit("%q"), jen.Id("q").Dot("collection"))
+
+			// quote column names
+			g.Id("columns").Op(":=").Index().String().Values()
+			g.For(jen.List(jen.Id("_"), jen.Id("col")).Op(":=").
+				Range().Id("q").Dot("columns")).Block(
+				jen.Id("columns").Op("=").Append(
+					jen.Id("columns"),
+					jen.Qual("fmt", "Sprintf").Call(
+						jen.Lit("%q"), jen.Id("col"),
+					),
+				),
+			)
+
 			// query builder
 			g.Id("qb").Op(":=").Qual(sqPkg, "Select").
-				Call(jen.Id("q").Dot("columns").Op("...")).
+				Call(jen.Id("columns").Op("...")).
 				Op(".").Line().Id("From").
-				Call(jen.Id("q").Dot("collection")).
+				Call(jen.Id("table")).
 				Op(".").Line().Id("PlaceholderFormat").
 				Call(jen.Qual(sqPkg, "Dollar")).Line()
 
@@ -180,19 +197,38 @@ func newSelectBuilderBlock() *jen.Statement {
 				Block(jen.Id("pf").Call(jen.Id("pb")))
 			g.For(jen.List(jen.Id("_"), jen.Id("p").Op(":=").
 				Range().Id("pb").Dot("All").Call())).
-				Block(jen.Switch(jen.Id("p").Dot("Op")).
-					BlockFunc(func(g *jen.Group) {
-						for _, op := range predOps {
-							opStr := op.String()
-							g.Case(jen.Qual(pkgPath+"/predicate", opStr)).
-								Block(jen.Id("qb").Op("=").Id("qb").Dot("Where").
-									Call(jen.Qual(sqPkg, opStr).
-										Block(
-											jen.Id("p").Dot("Col").Op(":").
-												Id("p").Dot("Val").Op(",")),
-									))
-						}
-					})).Line()
+				Block(
+					// switch block
+					jen.Switch(jen.Id("p").Dot("Op")).
+						BlockFunc(func(g *jen.Group) {
+							for _, op := range predOps {
+								var oprtr = "="
+								switch op {
+								case predicate.Eq:
+									oprtr = "="
+								case predicate.NotEq:
+									oprtr = "<>"
+								case predicate.Gt:
+									oprtr = ">"
+								case predicate.GtOrEq:
+									oprtr = ">="
+								case predicate.Lt:
+									oprtr = "<"
+								case predicate.LtOrEq:
+									oprtr = "<="
+								}
+
+								g.Case(jen.Qual(pkgPath+"/predicate", op.String())).
+									Block(jen.Id("qb").Op("=").Id("qb").Dot("Where").
+										Call(
+											jen.Qual("fmt", "Sprintf").Call(
+												jen.Lit("%q "+oprtr+" ?"),
+												jen.Id("p").Dot("Col"),
+											),
+											jen.Id("p").Dot("Val"),
+										))
+							}
+						})).Line()
 
 			// sorts
 			g.Id("sorts").Op(":=").Op("&").
@@ -203,7 +239,8 @@ func newSelectBuilderBlock() *jen.Statement {
 			g.For(jen.List(jen.Id("_"), jen.Id("s").Op(":=").
 				Range().Id("sorts").Dot("All").Call())).
 				Block(
-					jen.Id("col").Op(":=").Id("s").Dot("Col"),
+					jen.Id("col").Op(":=").Qual("fmt", "Sprintf").
+						Call(jen.Lit("%q"), jen.Id("s").Dot("Col")),
 					jen.Switch(jen.Id("s").Dot("Direction")).
 						BlockFunc(func(g *jen.Group) {
 							// ascending

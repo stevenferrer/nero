@@ -3,7 +3,7 @@ package user
 
 import (
 	"context"
-	uuid "github.com/google/uuid"
+	ksuid "github.com/segmentio/ksuid"
 	nero "github.com/sf9v/nero"
 	example "github.com/sf9v/nero/example"
 	user "github.com/sf9v/nero/test/integration/basic/user"
@@ -32,7 +32,7 @@ type Repository interface {
 type Creator struct {
 	collection string
 	columns    []string
-	uID        uuid.UUID
+	uID        ksuid.KSUID
 	email      *string
 	name       *string
 	age        int
@@ -44,11 +44,11 @@ type Creator struct {
 func NewCreator() *Creator {
 	return &Creator{
 		collection: collection,
-		columns:    []string{"uid", "email", "name", "age", "group_res", "kv", "updated_at"},
+		columns:    []string{"uid", "email", "name", "age", "group", "kv", "updated_at"},
 	}
 }
 
-func (c *Creator) UID(uID uuid.UUID) *Creator {
+func (c *Creator) UID(uID ksuid.KSUID) *Creator {
 	c.uID = uID
 	return c
 }
@@ -95,7 +95,7 @@ type Queryer struct {
 func NewQueryer() *Queryer {
 	return &Queryer{
 		collection: collection,
-		columns:    []string{"id", "uid", "email", "name", "age", "group_res", "kv", "updated_at", "created_at"},
+		columns:    []string{"id", "uid", "email", "name", "age", "group", "kv", "updated_at", "created_at"},
 	}
 }
 
@@ -122,7 +122,7 @@ func (q *Queryer) Offset(offset uint64) *Queryer {
 type Updater struct {
 	collection string
 	columns    []string
-	uID        uuid.UUID
+	uID        ksuid.KSUID
 	email      *string
 	name       *string
 	age        int
@@ -135,11 +135,11 @@ type Updater struct {
 func NewUpdater() *Updater {
 	return &Updater{
 		collection: collection,
-		columns:    []string{"uid", "email", "name", "age", "group_res", "kv", "updated_at"},
+		columns:    []string{"uid", "email", "name", "age", "group", "kv", "updated_at"},
 	}
 }
 
-func (u *Updater) UID(uID uuid.UUID) *Updater {
+func (u *Updater) UID(uID ksuid.KSUID) *Updater {
 	u.uID = uID
 	return u
 }

@@ -3,7 +3,7 @@ package user
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/segmentio/ksuid"
 	"github.com/sf9v/nero"
 	"github.com/sf9v/nero/example"
 )
@@ -11,7 +11,7 @@ import (
 // User is a user
 type User struct {
 	ID        string
-	UID       uuid.UUID
+	UID       ksuid.KSUID
 	Email     *string
 	Name      *string
 	Age       int
@@ -46,7 +46,7 @@ func (u *User) Schema() *nero.Schema {
 			nero.NewColumn("email", u.Email),
 			nero.NewColumn("name", u.Name),
 			nero.NewColumn("age", u.Age),
-			nero.NewColumn("group_res", u.Group).
+			nero.NewColumn("group", u.Group).
 				StructField("Group"),
 			nero.NewColumn("kv", u.Kv),
 			nero.NewColumn("updated_at", u.UpdatedAt),

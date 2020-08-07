@@ -54,29 +54,30 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 	cols := []string{}
 	for _, agg := range aggs.All() {
 		col := agg.Col
+		qcol := fmt.Sprintf("%q", col)
 		switch agg.Fn {
 		case aggregate.Avg:
-			cols = append(cols, "AVG("+col+") avg_"+col)
+			cols = append(cols, "AVG("+qcol+") avg_"+col)
 		case aggregate.Count:
-			cols = append(cols, "COUNT("+col+") count_"+col)
+			cols = append(cols, "COUNT("+qcol+") count_"+col)
 		case aggregate.Max:
-			cols = append(cols, "MAX("+col+") max_"+col)
+			cols = append(cols, "MAX("+qcol+") max_"+col)
 		case aggregate.Min:
-			cols = append(cols, "MIN("+col+") min_"+col)
+			cols = append(cols, "MIN("+qcol+") min_"+col)
 		case aggregate.Sum:
-			cols = append(cols, "SUM("+col+") sum_"+col)
+			cols = append(cols, "SUM("+qcol+") sum_"+col)
 		case aggregate.None:
-			cols = append(cols, col)
+			cols = append(cols, qcol)
 		}
 	}
 
-	qb := squirrel.Select(cols...).
-		From(a.collection).
+	table := fmt.Sprintf("%q", a.collection)
+	qb := squirrel.Select(cols...).From(table).
 		PlaceholderFormat(squirrel.Dollar)
 
 	groups := []string{}
 	for _, group := range a.groups {
-		groups = append(groups, group.String())
+		groups = append(groups, fmt.Sprintf("%q", group.String()))
 	}
 	qb = qb.GroupBy(groups...)
 
@@ -87,29 +88,17 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 	for _, p := range preds.All() {
 		switch p.Op {
 		case predicate.Eq:
-			qb = qb.Where(squirrel.Eq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
 		case predicate.NotEq:
-			qb = qb.Where(squirrel.NotEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
 		case predicate.Gt:
-			qb = qb.Where(squirrel.Gt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
 		case predicate.GtOrEq:
-			qb = qb.Where(squirrel.GtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
 		case predicate.Lt:
-			qb = qb.Where(squirrel.Lt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
 		case predicate.LtOrEq:
-			qb = qb.Where(squirrel.LtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
 		}
 	}
 
@@ -118,7 +107,7 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 		sf(sorts)
 	}
 	for _, s := range sorts.All() {
-		col := s.Col
+		col := fmt.Sprintf("%q", s.Col)
 		switch s.Direction {
 		case sort.Asc:
 			qb = qb.OrderBy(col + " ASC")

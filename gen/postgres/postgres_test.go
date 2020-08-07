@@ -111,8 +111,13 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	qb := squirrel.Insert(c.collection).
-		Columns(c.columns...).
+	table := fmt.Sprintf("%q", c.collection)
+	columns := []string{}
+	for _, col := range c.columns {
+		columns = append(columns, fmt.Sprintf("%q", col))
+	}
+	qb := squirrel.Insert(table).
+		Columns(columns...).
 		Values(c.name, c.group, c.updatedAt).
 		Suffix("RETURNING \"id\"").
 		PlaceholderFormat(squirrel.Dollar).
@@ -142,8 +147,12 @@ func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs
 		return errors.New("expecting tx to be *sql.Tx")
 	}
 
-	qb := squirrel.Insert(cs[0].collection).
-		Columns(cs[0].columns...)
+	table := fmt.Sprintf("%q", cs[0].collection)
+	columns := []string{}
+	for _, col := range cs[0].columns {
+		columns = append(columns, fmt.Sprintf("%q", col))
+	}
+	qb := squirrel.Insert(table).Columns(columns...)
 	for _, c := range cs {
 		qb = qb.Values(c.name, c.group, c.updatedAt)
 	}
@@ -262,8 +271,13 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 }
 
 func (pg *PostgreSQLRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
-	qb := squirrel.Select(q.columns...).
-		From(q.collection).
+	table := fmt.Sprintf("%q", q.collection)
+	columns := []string{}
+	for _, col := range q.columns {
+		columns = append(columns, fmt.Sprintf("%q", col))
+	}
+	qb := squirrel.Select(columns...).
+		From(table).
 		PlaceholderFormat(squirrel.Dollar)
 
 	pb := &predicate.Predicates{}
@@ -273,29 +287,17 @@ func (pg *PostgreSQLRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	for _, p := range pb.All() {
 		switch p.Op {
 		case predicate.Eq:
-			qb = qb.Where(squirrel.Eq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
 		case predicate.NotEq:
-			qb = qb.Where(squirrel.NotEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
 		case predicate.Gt:
-			qb = qb.Where(squirrel.Gt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
 		case predicate.GtOrEq:
-			qb = qb.Where(squirrel.GtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
 		case predicate.Lt:
-			qb = qb.Where(squirrel.Lt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
 		case predicate.LtOrEq:
-			qb = qb.Where(squirrel.LtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
 		}
 	}
 
@@ -304,7 +306,7 @@ func (pg *PostgreSQLRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 		sf(sorts)
 	}
 	for _, s := range sorts.All() {
-		col := s.Col
+		col := fmt.Sprintf("%q", s.Col)
 		switch s.Direction {
 		case sort.Asc:
 			qb = qb.OrderBy(col + " ASC")
@@ -349,44 +351,33 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 		pf(pb)
 	}
 
-	qb := squirrel.Update(u.collection).
+	table := fmt.Sprintf("%q", u.collection)
+	qb := squirrel.Update(table).
 		PlaceholderFormat(squirrel.Dollar)
 	if u.name != "" {
-		qb = qb.Set("name", u.name)
+		qb = qb.Set("\"name\"", u.name)
 	}
 	if u.group != "" {
-		qb = qb.Set("group_res", u.group)
+		qb = qb.Set("\"group_res\"", u.group)
 	}
 	if u.updatedAt != nil {
-		qb = qb.Set("updated_at", u.updatedAt)
+		qb = qb.Set("\"updated_at\"", u.updatedAt)
 	}
 
 	for _, p := range pb.All() {
 		switch p.Op {
 		case predicate.Eq:
-			qb = qb.Where(squirrel.Eq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
 		case predicate.NotEq:
-			qb = qb.Where(squirrel.NotEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
 		case predicate.Gt:
-			qb = qb.Where(squirrel.Gt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
 		case predicate.GtOrEq:
-			qb = qb.Where(squirrel.GtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
 		case predicate.Lt:
-			qb = qb.Where(squirrel.Lt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
 		case predicate.LtOrEq:
-			qb = qb.Where(squirrel.LtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
 		}
 	}
 	if log := pg.log; log != nil {
@@ -433,35 +424,24 @@ func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Del
 		pf(pb)
 	}
 
-	qb := squirrel.Delete(d.collection).
+	table := fmt.Sprintf("%q", d.collection)
+	qb := squirrel.Delete(table).
 		PlaceholderFormat(squirrel.Dollar).
 		RunWith(txx)
 	for _, p := range pb.All() {
 		switch p.Op {
 		case predicate.Eq:
-			qb = qb.Where(squirrel.Eq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
 		case predicate.NotEq:
-			qb = qb.Where(squirrel.NotEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
 		case predicate.Gt:
-			qb = qb.Where(squirrel.Gt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
 		case predicate.GtOrEq:
-			qb = qb.Where(squirrel.GtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
 		case predicate.Lt:
-			qb = qb.Where(squirrel.Lt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
 		case predicate.LtOrEq:
-			qb = qb.Where(squirrel.LtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
 		}
 	}
 	if log := pg.log; log != nil {
@@ -510,29 +490,30 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 	cols := []string{}
 	for _, agg := range aggs.All() {
 		col := agg.Col
+		qcol := fmt.Sprintf("%q", col)
 		switch agg.Fn {
 		case aggregate.Avg:
-			cols = append(cols, "AVG("+col+") avg_"+col)
+			cols = append(cols, "AVG("+qcol+") avg_"+col)
 		case aggregate.Count:
-			cols = append(cols, "COUNT("+col+") count_"+col)
+			cols = append(cols, "COUNT("+qcol+") count_"+col)
 		case aggregate.Max:
-			cols = append(cols, "MAX("+col+") max_"+col)
+			cols = append(cols, "MAX("+qcol+") max_"+col)
 		case aggregate.Min:
-			cols = append(cols, "MIN("+col+") min_"+col)
+			cols = append(cols, "MIN("+qcol+") min_"+col)
 		case aggregate.Sum:
-			cols = append(cols, "SUM("+col+") sum_"+col)
+			cols = append(cols, "SUM("+qcol+") sum_"+col)
 		case aggregate.None:
-			cols = append(cols, col)
+			cols = append(cols, qcol)
 		}
 	}
 
-	qb := squirrel.Select(cols...).
-		From(a.collection).
+	table := fmt.Sprintf("%q", a.collection)
+	qb := squirrel.Select(cols...).From(table).
 		PlaceholderFormat(squirrel.Dollar)
 
 	groups := []string{}
 	for _, group := range a.groups {
-		groups = append(groups, group.String())
+		groups = append(groups, fmt.Sprintf("%q", group.String()))
 	}
 	qb = qb.GroupBy(groups...)
 
@@ -543,29 +524,17 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 	for _, p := range preds.All() {
 		switch p.Op {
 		case predicate.Eq:
-			qb = qb.Where(squirrel.Eq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
 		case predicate.NotEq:
-			qb = qb.Where(squirrel.NotEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
 		case predicate.Gt:
-			qb = qb.Where(squirrel.Gt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
 		case predicate.GtOrEq:
-			qb = qb.Where(squirrel.GtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
 		case predicate.Lt:
-			qb = qb.Where(squirrel.Lt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
 		case predicate.LtOrEq:
-			qb = qb.Where(squirrel.LtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
 		}
 	}
 
@@ -574,7 +543,7 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 		sf(sorts)
 	}
 	for _, s := range sorts.All() {
-		col := s.Col
+		col := fmt.Sprintf("%q", s.Col)
 		switch s.Direction {
 		case sort.Asc:
 			qb = qb.OrderBy(col + " ASC")

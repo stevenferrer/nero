@@ -1,6 +1,9 @@
 package postgres
 
-import "github.com/dave/jennifer/jen"
+import (
+	"github.com/dave/jennifer/jen"
+	"github.com/sf9v/nero/predicate"
+)
 
 func newDeleteBlock() *jen.Statement {
 	return jen.Func().Params(rcvrParamC).Id("Delete").
@@ -46,9 +49,6 @@ func newDeleteTxBlock() *jen.Statement {
 				),
 			).Line()
 
-			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Lit(0), jen.Err()))
-
 			// predicates
 			g.Id("pb").Op(":=").Op("&").
 				Qual(pkgPath+"/predicate", "Predicates").Block()
@@ -56,31 +56,57 @@ func newDeleteTxBlock() *jen.Statement {
 				Op(":=").Range().Id("d").Dot("pfs")).
 				Block(jen.Id("pf").Call(jen.Id("pb"))).Line()
 
+			// quote table name
+			g.Id("table").Op(":=").Qual("fmt", "Sprintf").
+				Call(jen.Lit("%q"), jen.Id("d").Dot("collection"))
+
 			// query builder
 			g.Id("qb").Op(":=").Qual(sqPkg, "Delete").
-				Call(jen.Id("d").Dot("collection")).
+				Call(jen.Id("table")).
 				Op(".").Line().Id("PlaceholderFormat").
 				Call(jen.Qual(sqPkg, "Dollar")).
 				Op(".").Line().Id("RunWith").
 				Call(jen.Id("txx"))
 			g.For(jen.List(jen.Id("_"), jen.Id("p").Op(":=").
 				Range().Id("pb").Dot("All").Call())).
-				Block(jen.Switch(jen.Id("p").Dot("Op")).
-					BlockFunc(func(g *jen.Group) {
-						for _, op := range predOps {
-							opStr := op.String()
-							g.Case(jen.Qual(pkgPath+"/predicate", opStr)).
-								Block(jen.Id("qb").Op("=").Id("qb").Dot("Where").
-									Call(jen.Qual(sqPkg, opStr).Block(
-										jen.Id("p").Dot("Col").Op(":").
-											Id("p").Dot("Val").Op(",")),
-									),
-								)
-						}
-					}))
+				Block(
+					// switch block
+					jen.Switch(jen.Id("p").Dot("Op")).
+						BlockFunc(func(g *jen.Group) {
+							for _, op := range predOps {
+								var oprtr = "="
+								switch op {
+								case predicate.Eq:
+									oprtr = "="
+								case predicate.NotEq:
+									oprtr = "<>"
+								case predicate.Gt:
+									oprtr = ">"
+								case predicate.GtOrEq:
+									oprtr = ">="
+								case predicate.Lt:
+									oprtr = "<"
+								case predicate.LtOrEq:
+									oprtr = "<="
+								}
+
+								g.Case(jen.Qual(pkgPath+"/predicate", op.String())).
+									Block(jen.Id("qb").Op("=").Id("qb").Dot("Where").
+										Call(
+											jen.Qual("fmt", "Sprintf").Call(
+												jen.Lit("%q "+oprtr+" ?"),
+												jen.Id("p").Dot("Col"),
+											),
+											jen.Id("p").Dot("Val"),
+										))
+							}
+						}))
 
 			// debug
 			g.Add(newDebugLogBlock("Delete")).Line().Line()
+
+			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jen.Lit(0), jen.Err()))
 
 			g.List(jen.Id("res"), jen.Err()).Op(":=").
 				Id("qb").Dot("ExecContext").Call(ctxIDC)

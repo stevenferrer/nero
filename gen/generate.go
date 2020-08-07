@@ -65,41 +65,6 @@ func Generate(schemaer nero.Schemaer) (Files, error) {
 		jf:   repoFile,
 	})
 
-	// creatorFile := jen.NewFile(pkgName)
-	// creatorFile.Add(newCreator(schema))
-	// fls = append(fls, &File{
-	// 	name: "creator.go",
-	// 	jf:   creatorFile,
-	// })
-
-	// queryerFile := jen.NewFile(pkgName)
-	// queryerFile.Add(newQueryer(schema))
-	// fls = append(fls, &File{
-	// 	name: "queryer.go",
-	// 	jf:   queryerFile,
-	// })
-
-	// updaterFile := jen.NewFile(pkgName)
-	// updaterFile.Add(newUpdater(schema))
-	// fls = append(fls, &File{
-	// 	name: "updater.go",
-	// 	jf:   updaterFile,
-	// })
-
-	// deleterFile := jen.NewFile(pkgName)
-	// deleterFile.Add(newDeleter())
-	// fls = append(fls, &File{
-	// 	name: "deleter.go",
-	// 	jf:   deleterFile,
-	// })
-
-	// aggtrFile := jen.NewFile(pkgName)
-	// aggtrFile.Add(newAggregator(schema))
-	// fls = append(fls, &File{
-	// 	name: "aggregator.go",
-	// 	jf:   aggtrFile,
-	// })
-
 	// postgres repository implementation
 	postgresFile := jen.NewFile(pkgName)
 	postgresFile.Anon("github.com/lib/pq")

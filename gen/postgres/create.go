@@ -82,13 +82,26 @@ func newCreateTxBlock(schema *gen.Schema) *jen.Statement {
 					jen.Qual(errPkg, "New").Call(jen.Lit("expecting tx to be *sql.Tx")),
 				)).Line()
 
-			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jenx.Zero(identv), jen.Err()))
+			// quote table name
+			g.Id("table").Op(":=").Qual("fmt", "Sprintf").
+				Call(jen.Lit("%q"), jen.Id("c").Dot("collection"))
+
+			// quote column names
+			g.Id("columns").Op(":=").Index().String().Values()
+			g.For(jen.List(jen.Id("_"), jen.Id("col")).Op(":=").
+				Range().Id("c").Dot("columns")).Block(
+				jen.Id("columns").Op("=").Append(
+					jen.Id("columns"),
+					jen.Qual("fmt", "Sprintf").Call(
+						jen.Lit("%q"), jen.Id("col"),
+					),
+				),
+			)
 
 			// query builder
 			g.Id("qb").Op(":=").Qual(sqPkg, "Insert").
-				Call(jen.Id("c").Dot("collection")).Op(".").Line().
-				Id("Columns").Call(jen.Id("c").Dot("columns").
+				Call(jen.Id("table")).Op(".").Line().
+				Id("Columns").Call(jen.Id("columns").
 				Op("...")).Op(".").Line().Id("Values").
 				CallFunc(func(g *jen.Group) {
 					for _, col := range schema.Cols {
@@ -112,7 +125,9 @@ func newCreateTxBlock(schema *gen.Schema) *jen.Statement {
 			g.Var().Id(ident.LowerCamelName()).Add(jenx.Type(identv))
 			g.Err().Op(":=").Id("qb").Dot("QueryRowContext").
 				Call(ctxIDC).Dot("Scan").Call(jen.Op("&").Id(ident.LowerCamelName()))
-			g.Add(ifErr).Line()
+			g.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jenx.Zero(identv), jen.Err()),
+			).Line()
 
 			g.Return(jen.Id(ident.LowerCamelName()), jen.Nil())
 		})
@@ -139,13 +154,30 @@ func newCreateManyTxBlock(schema *gen.Schema) *jen.Statement {
 				jen.Qual(errPkg, "New").Call(jen.Lit("expecting tx to be *sql.Tx")),
 			)).Line()
 
+			// quote table name
+			g.Id("table").Op(":=").Qual("fmt", "Sprintf").
+				Call(
+					jen.Lit("%q"),
+					jen.Id("cs").Index(jen.Lit(0)).Dot("collection"),
+				)
+
+			// quote column names
+			g.Id("columns").Op(":=").Index().String().Values()
+			g.For(jen.List(jen.Id("_"), jen.Id("col")).Op(":=").
+				Range().Id("cs").Index(jen.Lit(0)).Dot("columns")).
+				Block(
+					jen.Id("columns").Op("=").Append(
+						jen.Id("columns"),
+						jen.Qual("fmt", "Sprintf").Call(
+							jen.Lit("%q"), jen.Id("col"),
+						),
+					),
+				)
+
 			// query builder
 			g.Id("qb").Op(":=").Qual(sqPkg, "Insert").
-				Call(jen.Id("cs").Index(jen.Lit(0)).
-					Dot("collection")).Op(".").Line().
-				Id("Columns").
-				Call(jen.Id("cs").Index(jen.Lit(0)).
-					Dot("columns").Op("..."))
+				Call(jen.Id("table")).Dot("Columns").
+				Call(jen.Id("columns").Op("..."))
 
 			g.For(jen.List(jen.Id("_"), jen.Id("c")).
 				Op(":=").Range().Id("cs"),

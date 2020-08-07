@@ -74,8 +74,13 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	qb := squirrel.Insert(c.collection).
-		Columns(c.columns...).
+	table := fmt.Sprintf("%q", c.collection)
+	columns := []string{}
+	for _, col := range c.columns {
+		columns = append(columns, fmt.Sprintf("%q", col))
+	}
+	qb := squirrel.Insert(table).
+		Columns(columns...).
 		Values(c.name, c.group, c.updatedAt).
 		Suffix("RETURNING \"id\"").
 		PlaceholderFormat(squirrel.Dollar).
@@ -113,8 +118,13 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		return "", errors.New("expecting tx to be *sql.Tx")
 	}
 
-	qb := squirrel.Insert(c.collection).
-		Columns(c.columns...).
+	table := fmt.Sprintf("%q", c.collection)
+	columns := []string{}
+	for _, col := range c.columns {
+		columns = append(columns, fmt.Sprintf("%q", col))
+	}
+	qb := squirrel.Insert(table).
+		Columns(columns...).
 		Values(c.name, c.updatedAt).
 		Suffix("RETURNING \"id\"").
 		PlaceholderFormat(squirrel.Dollar).
@@ -157,8 +167,12 @@ func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs
 		return errors.New("expecting tx to be *sql.Tx")
 	}
 
-	qb := squirrel.Insert(cs[0].collection).
-		Columns(cs[0].columns...)
+	table := fmt.Sprintf("%q", cs[0].collection)
+	columns := []string{}
+	for _, col := range cs[0].columns {
+		columns = append(columns, fmt.Sprintf("%q", col))
+	}
+	qb := squirrel.Insert(table).Columns(columns...)
 	for _, c := range cs {
 		qb = qb.Values(c.name, c.group, c.updatedAt)
 	}

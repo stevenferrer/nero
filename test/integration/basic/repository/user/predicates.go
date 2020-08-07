@@ -2,7 +2,7 @@
 package user
 
 import (
-	uuid "github.com/google/uuid"
+	ksuid "github.com/segmentio/ksuid"
 	predicate "github.com/sf9v/nero/predicate"
 	user "github.com/sf9v/nero/test/integration/basic/user"
 	"time"
@@ -70,7 +70,7 @@ func IDLtOrEq(id string) PredFunc {
 	}
 }
 
-func UIDEq(uID uuid.UUID) PredFunc {
+func UIDEq(uID ksuid.KSUID) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
 			Col: "uid",
@@ -80,7 +80,7 @@ func UIDEq(uID uuid.UUID) PredFunc {
 	}
 }
 
-func UIDNotEq(uID uuid.UUID) PredFunc {
+func UIDNotEq(uID ksuid.KSUID) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
 			Col: "uid",
@@ -90,7 +90,7 @@ func UIDNotEq(uID uuid.UUID) PredFunc {
 	}
 }
 
-func UIDGt(uID uuid.UUID) PredFunc {
+func UIDGt(uID ksuid.KSUID) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
 			Col: "uid",
@@ -100,7 +100,7 @@ func UIDGt(uID uuid.UUID) PredFunc {
 	}
 }
 
-func UIDGtOrEq(uID uuid.UUID) PredFunc {
+func UIDGtOrEq(uID ksuid.KSUID) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
 			Col: "uid",
@@ -110,7 +110,7 @@ func UIDGtOrEq(uID uuid.UUID) PredFunc {
 	}
 }
 
-func UIDLt(uID uuid.UUID) PredFunc {
+func UIDLt(uID ksuid.KSUID) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
 			Col: "uid",
@@ -120,7 +120,7 @@ func UIDLt(uID uuid.UUID) PredFunc {
 	}
 }
 
-func UIDLtOrEq(uID uuid.UUID) PredFunc {
+func UIDLtOrEq(uID ksuid.KSUID) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
 			Col: "uid",
@@ -313,7 +313,7 @@ func AgeLtOrEq(age int) PredFunc {
 func GroupEq(group user.Group) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
-			Col: "group_res",
+			Col: "group",
 			Op:  predicate.Eq,
 			Val: group,
 		})
@@ -323,7 +323,7 @@ func GroupEq(group user.Group) PredFunc {
 func GroupNotEq(group user.Group) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
-			Col: "group_res",
+			Col: "group",
 			Op:  predicate.NotEq,
 			Val: group,
 		})
@@ -333,7 +333,7 @@ func GroupNotEq(group user.Group) PredFunc {
 func GroupGt(group user.Group) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
-			Col: "group_res",
+			Col: "group",
 			Op:  predicate.Gt,
 			Val: group,
 		})
@@ -343,7 +343,7 @@ func GroupGt(group user.Group) PredFunc {
 func GroupGtOrEq(group user.Group) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
-			Col: "group_res",
+			Col: "group",
 			Op:  predicate.GtOrEq,
 			Val: group,
 		})
@@ -353,7 +353,7 @@ func GroupGtOrEq(group user.Group) PredFunc {
 func GroupLt(group user.Group) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
-			Col: "group_res",
+			Col: "group",
 			Op:  predicate.Lt,
 			Val: group,
 		})
@@ -363,7 +363,7 @@ func GroupLt(group user.Group) PredFunc {
 func GroupLtOrEq(group user.Group) PredFunc {
 	return func(pb *predicate.Predicates) {
 		pb.Add(&predicate.Predicate{
-			Col: "group_res",
+			Col: "group",
 			Op:  predicate.LtOrEq,
 			Val: group,
 		})

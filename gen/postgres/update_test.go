@@ -52,44 +52,33 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 		pf(pb)
 	}
 
-	qb := squirrel.Update(u.collection).
+	table := fmt.Sprintf("%q", u.collection)
+	qb := squirrel.Update(table).
 		PlaceholderFormat(squirrel.Dollar)
 	if u.name != "" {
-		qb = qb.Set("name", u.name)
+		qb = qb.Set("\"name\"", u.name)
 	}
 	if u.group != "" {
-		qb = qb.Set("group_res", u.group)
+		qb = qb.Set("\"group_res\"", u.group)
 	}
 	if u.updatedAt != nil {
-		qb = qb.Set("updated_at", u.updatedAt)
+		qb = qb.Set("\"updated_at\"", u.updatedAt)
 	}
 
 	for _, p := range pb.All() {
 		switch p.Op {
 		case predicate.Eq:
-			qb = qb.Where(squirrel.Eq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
 		case predicate.NotEq:
-			qb = qb.Where(squirrel.NotEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
 		case predicate.Gt:
-			qb = qb.Where(squirrel.Gt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
 		case predicate.GtOrEq:
-			qb = qb.Where(squirrel.GtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
 		case predicate.Lt:
-			qb = qb.Where(squirrel.Lt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
 		case predicate.LtOrEq:
-			qb = qb.Where(squirrel.LtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
 		}
 	}
 	if log := pg.log; log != nil {

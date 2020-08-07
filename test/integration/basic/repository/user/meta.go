@@ -20,7 +20,7 @@ func (c Column) String() string {
 	case ColumnAge:
 		return "age"
 	case ColumnGroup:
-		return "group_res"
+		return "group"
 	case ColumnKv:
 		return "kv"
 	case ColumnUpdatedAt:

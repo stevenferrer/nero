@@ -5,6 +5,7 @@ import (
 
 	"github.com/dave/jennifer/jen"
 	"github.com/sf9v/nero/aggregate"
+	"github.com/sf9v/nero/predicate"
 	"github.com/sf9v/nero/sort"
 )
 
@@ -57,6 +58,9 @@ func newAggregateTxBlock() *jen.Statement {
 				Op(":=").Range().Id("aggs").Dot("All").Call(),
 			).Block(
 				jen.Id("col").Op(":=").Id("agg").Dot("Col"),
+				// quoted column
+				jen.Id("qcol").Op(":=").Qual("fmt", "Sprintf").
+					Call(jen.Lit("%q"), jen.Id("col")),
 				jen.Switch(jen.Id("agg").Dot("Fn").
 					BlockFunc(func(g *jen.Group) {
 						// switch block
@@ -65,7 +69,7 @@ func newAggregateTxBlock() *jen.Statement {
 								g.Case(jen.Qual(aggPkg, aggFn.String())).Block(
 									jen.Id("cols").Op("=").Append(
 										jen.Id("cols"),
-										jen.Id("col"),
+										jen.Id("qcol"),
 									),
 								)
 								continue
@@ -73,21 +77,25 @@ func newAggregateTxBlock() *jen.Statement {
 
 							fnUp := strings.ToUpper(aggFn.String())
 							fnLow := strings.ToLower(aggFn.String())
-							g.Case(jen.Qual(aggPkg, aggFn.String())).Block(
-								jen.Id("cols").Op("=").Append(
-									jen.Id("cols"),
-									jen.Lit(fnUp+"(").Op("+").Id("col").
-										Op("+").Lit(") "+fnLow+"_").
-										Op("+").Id("col"),
-								),
-							)
+							g.Case(jen.Qual(aggPkg, aggFn.String())).
+								Block(
+									jen.Id("cols").Op("=").Append(
+										jen.Id("cols"),
+										jen.Lit(fnUp+"(").Op("+").Id("qcol").Op("+").
+											Lit(") "+fnLow+"_").Op("+").Id("col"),
+									),
+								)
 						}
 					}))).Line()
 
+			// quote table name
+			g.Id("table").Op(":=").Qual("fmt", "Sprintf").
+				Call(jen.Lit("%q"), jen.Id("a").Dot("collection"))
+
 			// query builder
 			g.Id("qb").Op(":=").Qual(sqPkg, "Select").
-				Call(jen.Id("cols").Op("...")).Op(".").Line().
-				Id("From").Call(jen.Id("a").Dot("collection")).
+				Call(jen.Id("cols").Op("...")).
+				Dot("From").Call(jen.Id("table")).
 				Op(".").Line().Id("PlaceholderFormat").
 				Call(jen.Qual(sqPkg, "Dollar")).Line()
 
@@ -97,7 +105,9 @@ func newAggregateTxBlock() *jen.Statement {
 				Block(
 					jen.Id("groups").Op("=").Append(
 						jen.Id("groups"),
-						jen.Id("group").Dot("String").Call(),
+						// quote group clause columns
+						jen.Qual("fmt", "Sprintf").
+							Call(jen.Lit("%q"), jen.Id("group").Dot("String").Call()),
 					))
 
 			g.Id("qb").Op("=").Id("qb").Dot("GroupBy").
@@ -111,20 +121,38 @@ func newAggregateTxBlock() *jen.Statement {
 				Block(jen.Id("pf").Call(jen.Id("preds")))
 			g.For(jen.List(jen.Id("_"), jen.Id("p").Op(":=").
 				Range().Id("preds").Dot("All").Call())).
-				Block(jen.Switch(jen.Id("p").Dot("Op")).
-					BlockFunc(func(g *jen.Group) {
-						for _, op := range predOps {
-							opStr := op.String()
-							g.Case(jen.Qual(predPkg, opStr)).
-								Block(jen.Id("qb").Op("=").Id("qb").Dot("Where").
-									Call(jen.Qual(sqPkg, opStr).
-										Block(
-											jen.Id("p").Dot("Col").Op(":").
-												Id("p").Dot("Val").Op(","),
-										)),
-								)
-						}
-					})).Line()
+				Block(
+					// switch block
+					jen.Switch(jen.Id("p").Dot("Op")).
+						BlockFunc(func(g *jen.Group) {
+							for _, op := range predOps {
+								var oprtr = "="
+								switch op {
+								case predicate.Eq:
+									oprtr = "="
+								case predicate.NotEq:
+									oprtr = "<>"
+								case predicate.Gt:
+									oprtr = ">"
+								case predicate.GtOrEq:
+									oprtr = ">="
+								case predicate.Lt:
+									oprtr = "<"
+								case predicate.LtOrEq:
+									oprtr = "<="
+								}
+
+								g.Case(jen.Qual(pkgPath+"/predicate", op.String())).
+									Block(jen.Id("qb").Op("=").Id("qb").Dot("Where").
+										Call(
+											jen.Qual("fmt", "Sprintf").Call(
+												jen.Lit("%q "+oprtr+" ?"),
+												jen.Id("p").Dot("Col"),
+											),
+											jen.Id("p").Dot("Val"),
+										))
+							}
+						})).Line()
 
 			// sorts
 			g.Id("sorts").Op(":=").Op("&").
@@ -135,7 +163,8 @@ func newAggregateTxBlock() *jen.Statement {
 			g.For(jen.List(jen.Id("_"), jen.Id("s").Op(":=").
 				Range().Id("sorts").Dot("All").Call())).
 				Block(
-					jen.Id("col").Op(":=").Id("s").Dot("Col"),
+					jen.Id("col").Op(":=").Qual("fmt", "Sprintf").
+						Call(jen.Lit("%q"), jen.Id("s").Dot("Col")),
 					jen.Switch(jen.Id("s").Dot("Direction")).
 						BlockFunc(func(g *jen.Group) {
 							// ascending

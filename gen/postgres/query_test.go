@@ -161,8 +161,13 @@ func Test_newSelectBuilderBlock(t *testing.T) {
 	block := newSelectBuilderBlock()
 	expect := strings.TrimSpace(`
 func (pg *PostgreSQLRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
-	qb := squirrel.Select(q.columns...).
-		From(q.collection).
+	table := fmt.Sprintf("%q", q.collection)
+	columns := []string{}
+	for _, col := range q.columns {
+		columns = append(columns, fmt.Sprintf("%q", col))
+	}
+	qb := squirrel.Select(columns...).
+		From(table).
 		PlaceholderFormat(squirrel.Dollar)
 
 	pb := &predicate.Predicates{}
@@ -172,29 +177,17 @@ func (pg *PostgreSQLRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	for _, p := range pb.All() {
 		switch p.Op {
 		case predicate.Eq:
-			qb = qb.Where(squirrel.Eq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
 		case predicate.NotEq:
-			qb = qb.Where(squirrel.NotEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
 		case predicate.Gt:
-			qb = qb.Where(squirrel.Gt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
 		case predicate.GtOrEq:
-			qb = qb.Where(squirrel.GtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
 		case predicate.Lt:
-			qb = qb.Where(squirrel.Lt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
 		case predicate.LtOrEq:
-			qb = qb.Where(squirrel.LtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
 		}
 	}
 
@@ -203,7 +196,7 @@ func (pg *PostgreSQLRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 		sf(sorts)
 	}
 	for _, s := range sorts.All() {
-		col := s.Col
+		col := fmt.Sprintf("%q", s.Col)
 		switch s.Direction {
 		case sort.Asc:
 			qb = qb.OrderBy(col + " ASC")

@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	uuid "github.com/google/uuid"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
+	"github.com/segmentio/ksuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -21,7 +21,7 @@ import (
 	user "github.com/sf9v/nero/test/integration/basic/user"
 )
 
-func TestPGRepository(t *testing.T) {
+func TestPostgreSQLRepository(t *testing.T) {
 	var (
 		usr    = "postgres"
 		pwd    = "postgres"
@@ -38,7 +38,7 @@ func TestPGRepository(t *testing.T) {
 
 	opts := dockertest.RunOptions{
 		Repository: "postgres",
-		Tag:        "latest",
+		Tag:        "12-alpine",
 		Env: []string{
 			"POSTGRES_USER=" + usr,
 			"POSTGRES_PASSWORD=" + pwd,
@@ -71,12 +71,12 @@ func TestPGRepository(t *testing.T) {
 	}
 
 	_, err = db.Exec(`CREATE TABLE users(
-		id bigserial PRIMARY KEY,
-		uid UUID NOT NULL,
+		id bigint GENERATED always AS IDENTITY PRIMARY KEY,
+		uid varchar(27) NOT NULL UNIQUE,
 		email VARCHAR(255) UNIQUE NOT NULL,
-		name VARCHAR(50) NOT NULL,
+		"name" VARCHAR(50) NOT NULL,
 		age INTEGER NOT NULL,
-		group_res VARCHAR(20) NOT NULL,
+		"group" VARCHAR(20) NOT NULL,
 		kv jsonb NULL,
 		updated_at TIMESTAMP,
 		created_at TIMESTAMP DEFAULT now()
@@ -87,16 +87,12 @@ func TestPGRepository(t *testing.T) {
 	newRepoTestRunner(repo)(t)
 }
 
-func randAge() int {
-	return rand.Intn(30-18) + 18
-}
-
 func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 	return func(t *testing.T) {
 		var err error
 		ctx := context.Background()
 
-		uids := []uuid.UUID{}
+		uids := []ksuid.KSUID{}
 		kv := example.Map{"asdf": "jklm"}
 		t.Run("Create", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
@@ -115,7 +111,7 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 					name := fmt.Sprintf("%s_%d", group, i)
 					age := randAge()
 
-					uid := uuid.New()
+					uid := ksuid.New()
 					uids = append(uids, uid)
 
 					cr := userr.NewCreator().
@@ -162,11 +158,11 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 					name := fmt.Sprintf("%s_%d_mm", group, i)
 					age := randAge()
 					now := time.Now()
-					uid := uuid.New()
+					uid := ksuid.New()
 					uids = append(uids, uid)
 
 					cr := userr.NewCreator().
-						UID(uuid.New()).
+						UID(uid).
 						Email(&email).
 						Name(&name).
 						Age(age).
@@ -199,7 +195,7 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 				users, err := repo.Query(ctx,
 					userr.NewQueryer())
 				assert.NoError(t, err)
-				assert.Len(t, users, 100)
+				require.Len(t, users, 100)
 				for _, u := range users {
 					require.NotNil(t, u.Email)
 					require.NotNil(t, u.Name)
@@ -253,11 +249,11 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 					),
 				)
 				assert.NoError(t, err)
+				require.NotZero(t, len(users))
 				assert.Equal(t, "charr_100_mm", *users[0].Name)
 
 				// with limit and offset
-				users, err = repo.Query(ctx, userr.NewQueryer().
-					Limit(1).Offset(1))
+				users, err = repo.Query(ctx, userr.NewQueryer().Limit(1).Offset(1))
 				assert.NoError(t, err)
 				assert.Len(t, users, 1)
 			})
@@ -277,8 +273,7 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 				assert.NotNil(t, usr)
 				assert.Equal(t, "1", usr.ID)
 
-				_, err = repo.QueryOne(ctx, userr.NewQueryer().
-					Where(userr.IDEq("9999")))
+				_, err = repo.QueryOne(ctx, userr.NewQueryer().Where(userr.IDEq("9999")))
 				assert.Error(t, err)
 				assert.Equal(t, sql.ErrNoRows, err)
 			})
@@ -346,6 +341,7 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 				age := 300
 				rowsAffected, err := repo.Update(ctx,
 					userr.NewUpdater().
+						UID(ksuid.New()).
 						Email(&email).
 						Name(&name).
 						Age(age).
@@ -410,4 +406,8 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 			})
 		})
 	}
+}
+
+func randAge() int {
+	return rand.Intn(30-18) + 18
 }

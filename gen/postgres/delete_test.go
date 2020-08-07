@@ -44,35 +44,24 @@ func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Del
 		pf(pb)
 	}
 
-	qb := squirrel.Delete(d.collection).
+	table := fmt.Sprintf("%q", d.collection)
+	qb := squirrel.Delete(table).
 		PlaceholderFormat(squirrel.Dollar).
 		RunWith(txx)
 	for _, p := range pb.All() {
 		switch p.Op {
 		case predicate.Eq:
-			qb = qb.Where(squirrel.Eq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
 		case predicate.NotEq:
-			qb = qb.Where(squirrel.NotEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
 		case predicate.Gt:
-			qb = qb.Where(squirrel.Gt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
 		case predicate.GtOrEq:
-			qb = qb.Where(squirrel.GtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
 		case predicate.Lt:
-			qb = qb.Where(squirrel.Lt{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
 		case predicate.LtOrEq:
-			qb = qb.Where(squirrel.LtOrEq{
-				p.Col: p.Val,
-			})
+			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
 		}
 	}
 	if log := pg.log; log != nil {
