@@ -3,8 +3,11 @@ package user
 
 import (
 	"context"
+	uuid "github.com/google/uuid"
 	nero "github.com/sf9v/nero"
+	example "github.com/sf9v/nero/example"
 	user "github.com/sf9v/nero/test/integration/basic/user"
+	"time"
 )
 
 // Repository is the contract for storing User
@@ -24,4 +27,206 @@ type Repository interface {
 	DeleteTx(context.Context, nero.Tx, *Deleter) (rowsAffected int64, err error)
 	Aggregate(context.Context, *Aggregator) error
 	AggregateTx(context.Context, nero.Tx, *Aggregator) error
+}
+
+type Creator struct {
+	collection string
+	columns    []string
+	uID        uuid.UUID
+	email      *string
+	name       *string
+	age        int
+	group      user.Group
+	kv         example.Map
+	updatedAt  *time.Time
+}
+
+func NewCreator() *Creator {
+	return &Creator{
+		collection: collection,
+		columns:    []string{"uid", "email", "name", "age", "group_res", "kv", "updated_at"},
+	}
+}
+
+func (c *Creator) UID(uID uuid.UUID) *Creator {
+	c.uID = uID
+	return c
+}
+
+func (c *Creator) Email(email *string) *Creator {
+	c.email = email
+	return c
+}
+
+func (c *Creator) Name(name *string) *Creator {
+	c.name = name
+	return c
+}
+
+func (c *Creator) Age(age int) *Creator {
+	c.age = age
+	return c
+}
+
+func (c *Creator) Group(group user.Group) *Creator {
+	c.group = group
+	return c
+}
+
+func (c *Creator) Kv(kv example.Map) *Creator {
+	c.kv = kv
+	return c
+}
+
+func (c *Creator) UpdatedAt(updatedAt *time.Time) *Creator {
+	c.updatedAt = updatedAt
+	return c
+}
+
+type Queryer struct {
+	collection string
+	columns    []string
+	limit      uint64
+	offset     uint64
+	pfs        []PredFunc
+	sfs        []SortFunc
+}
+
+func NewQueryer() *Queryer {
+	return &Queryer{
+		collection: collection,
+		columns:    []string{"id", "uid", "email", "name", "age", "group_res", "kv", "updated_at", "created_at"},
+	}
+}
+
+func (q *Queryer) Where(pfs ...PredFunc) *Queryer {
+	q.pfs = append(q.pfs, pfs...)
+	return q
+}
+
+func (q *Queryer) Sort(sfs ...SortFunc) *Queryer {
+	q.sfs = append(q.sfs, sfs...)
+	return q
+}
+
+func (q *Queryer) Limit(limit uint64) *Queryer {
+	q.limit = limit
+	return q
+}
+
+func (q *Queryer) Offset(offset uint64) *Queryer {
+	q.offset = offset
+	return q
+}
+
+type Updater struct {
+	collection string
+	columns    []string
+	uID        uuid.UUID
+	email      *string
+	name       *string
+	age        int
+	group      user.Group
+	kv         example.Map
+	updatedAt  *time.Time
+	pfs        []PredFunc
+}
+
+func NewUpdater() *Updater {
+	return &Updater{
+		collection: collection,
+		columns:    []string{"uid", "email", "name", "age", "group_res", "kv", "updated_at"},
+	}
+}
+
+func (u *Updater) UID(uID uuid.UUID) *Updater {
+	u.uID = uID
+	return u
+}
+
+func (u *Updater) Email(email *string) *Updater {
+	u.email = email
+	return u
+}
+
+func (u *Updater) Name(name *string) *Updater {
+	u.name = name
+	return u
+}
+
+func (u *Updater) Age(age int) *Updater {
+	u.age = age
+	return u
+}
+
+func (u *Updater) Group(group user.Group) *Updater {
+	u.group = group
+	return u
+}
+
+func (u *Updater) Kv(kv example.Map) *Updater {
+	u.kv = kv
+	return u
+}
+
+func (u *Updater) UpdatedAt(updatedAt *time.Time) *Updater {
+	u.updatedAt = updatedAt
+	return u
+}
+
+func (u *Updater) Where(pfs ...PredFunc) *Updater {
+	u.pfs = append(u.pfs, pfs...)
+	return u
+}
+
+type Deleter struct {
+	collection string
+	pfs        []PredFunc
+}
+
+func NewDeleter() *Deleter {
+	return &Deleter{
+		collection: collection,
+	}
+}
+
+func (d *Deleter) Where(pfs ...PredFunc) *Deleter {
+	d.pfs = append(d.pfs, pfs...)
+	return d
+}
+
+type Aggregator struct {
+	collection string
+	dest       interface{}
+	aggfs      []AggFunc
+	pfs        []PredFunc
+	sfs        []SortFunc
+	groups     []Column
+}
+
+func NewAggregator(dest interface{}) *Aggregator {
+	return &Aggregator{
+		collection: collection,
+		dest:       dest,
+	}
+}
+
+func (a *Aggregator) Aggregate(aggfs ...AggFunc) *Aggregator {
+	a.aggfs = append(a.aggfs, aggfs...)
+	return a
+}
+
+func (a *Aggregator) Where(pfs ...PredFunc) *Aggregator {
+	a.pfs = append(a.pfs, pfs...)
+	return a
+}
+
+func (a *Aggregator) Sort(sfs ...SortFunc) *Aggregator {
+	a.sfs = append(a.sfs, sfs...)
+	return a
+}
+
+func (a *Aggregator) Group(cols ...Column) *Aggregator {
+	a.groups = append(a.groups, cols...)
+	return a
 }

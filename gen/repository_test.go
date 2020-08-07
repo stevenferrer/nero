@@ -36,6 +36,6 @@ type Repository interface {
 	AggregateTx(context.Context, nero.Tx, *Aggregator) error
 }
 `)
-	got := fmt.Sprintf("%#v", stmt)
+	got := strings.TrimSpace(fmt.Sprintf("%#v", stmt))
 	assert.Equal(t, expect, got)
 }

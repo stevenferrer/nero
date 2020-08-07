@@ -55,45 +55,50 @@ func Generate(schemaer nero.Schemaer) (Files, error) {
 
 	repoFile := jen.NewFile(pkgName)
 	repoFile.Add(newRepository(schema))
+	repoFile.Add(newCreator(schema))
+	repoFile.Add(newQueryer(schema))
+	repoFile.Add(newUpdater(schema))
+	repoFile.Add(newDeleter())
+	repoFile.Add(newAggregator(schema))
 	fls = append(fls, &File{
 		name: "repository.go",
 		jf:   repoFile,
 	})
 
-	aggtrFile := jen.NewFile(pkgName)
-	aggtrFile.Add(newAggregator(schema))
-	fls = append(fls, &File{
-		name: "aggregator.go",
-		jf:   aggtrFile,
-	})
+	// creatorFile := jen.NewFile(pkgName)
+	// creatorFile.Add(newCreator(schema))
+	// fls = append(fls, &File{
+	// 	name: "creator.go",
+	// 	jf:   creatorFile,
+	// })
 
-	creatorFile := jen.NewFile(pkgName)
-	creatorFile.Add(newCreator(schema))
-	fls = append(fls, &File{
-		name: "creator.go",
-		jf:   creatorFile,
-	})
+	// queryerFile := jen.NewFile(pkgName)
+	// queryerFile.Add(newQueryer(schema))
+	// fls = append(fls, &File{
+	// 	name: "queryer.go",
+	// 	jf:   queryerFile,
+	// })
 
-	queryerFile := jen.NewFile(pkgName)
-	queryerFile.Add(newQueryer(schema))
-	fls = append(fls, &File{
-		name: "queryer.go",
-		jf:   queryerFile,
-	})
+	// updaterFile := jen.NewFile(pkgName)
+	// updaterFile.Add(newUpdater(schema))
+	// fls = append(fls, &File{
+	// 	name: "updater.go",
+	// 	jf:   updaterFile,
+	// })
 
-	updaterFile := jen.NewFile(pkgName)
-	updaterFile.Add(newUpdater(schema))
-	fls = append(fls, &File{
-		name: "updater.go",
-		jf:   updaterFile,
-	})
+	// deleterFile := jen.NewFile(pkgName)
+	// deleterFile.Add(newDeleter())
+	// fls = append(fls, &File{
+	// 	name: "deleter.go",
+	// 	jf:   deleterFile,
+	// })
 
-	deleterFile := jen.NewFile(pkgName)
-	deleterFile.Add(newDeleter())
-	fls = append(fls, &File{
-		name: "deleter.go",
-		jf:   deleterFile,
-	})
+	// aggtrFile := jen.NewFile(pkgName)
+	// aggtrFile.Add(newAggregator(schema))
+	// fls = append(fls, &File{
+	// 	name: "aggregator.go",
+	// 	jf:   aggtrFile,
+	// })
 
 	// postgres repository implementation
 	postgresFile := jen.NewFile(pkgName)

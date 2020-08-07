@@ -14,6 +14,7 @@ import (
 func TestCustomTypes(t *testing.T) {
 	files, err := gen.Generate(new(customtypes.Custom))
 	require.NoError(t, err)
+	assert.Len(t, files, 7)
 
 	// create base directory
 	basePath := path.Join("gen", "user")

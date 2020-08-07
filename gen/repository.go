@@ -62,5 +62,5 @@ func newRepository(schema *gen.Schema) *jen.Statement {
 		jen.Id("AggregateTx").
 			Params(ctxC, txC, jen.Op("*").Id("Aggregator")).
 			Params(jen.Error()),
-	)
+	).Line().Line()
 }
