@@ -3,488 +3,506 @@ package user
 
 import (
 	ksuid "github.com/segmentio/ksuid"
-	predicate "github.com/sf9v/nero/predicate"
+	comparison "github.com/sf9v/nero/comparison"
 	user "github.com/sf9v/nero/test/integration/basic/user"
 	"time"
 )
 
-type PredFunc func(*predicate.Predicates)
+type PredFunc func(*comparison.Predicates)
 
 func IDEq(id string) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "id",
-			Op:  predicate.Eq,
+			Op:  comparison.Eq,
 			Val: id,
 		})
 	}
 }
 
 func IDNotEq(id string) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "id",
-			Op:  predicate.NotEq,
+			Op:  comparison.NotEq,
 			Val: id,
 		})
 	}
 }
 
 func IDGt(id string) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "id",
-			Op:  predicate.Gt,
+			Op:  comparison.Gt,
 			Val: id,
 		})
 	}
 }
 
 func IDGtOrEq(id string) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "id",
-			Op:  predicate.GtOrEq,
+			Op:  comparison.GtOrEq,
 			Val: id,
 		})
 	}
 }
 
 func IDLt(id string) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "id",
-			Op:  predicate.Lt,
+			Op:  comparison.Lt,
 			Val: id,
 		})
 	}
 }
 
 func IDLtOrEq(id string) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "id",
-			Op:  predicate.LtOrEq,
+			Op:  comparison.LtOrEq,
 			Val: id,
 		})
 	}
 }
 
 func UIDEq(uID ksuid.KSUID) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "uid",
-			Op:  predicate.Eq,
+			Op:  comparison.Eq,
 			Val: uID,
 		})
 	}
 }
 
 func UIDNotEq(uID ksuid.KSUID) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "uid",
-			Op:  predicate.NotEq,
+			Op:  comparison.NotEq,
 			Val: uID,
 		})
 	}
 }
 
 func UIDGt(uID ksuid.KSUID) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "uid",
-			Op:  predicate.Gt,
+			Op:  comparison.Gt,
 			Val: uID,
 		})
 	}
 }
 
 func UIDGtOrEq(uID ksuid.KSUID) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "uid",
-			Op:  predicate.GtOrEq,
+			Op:  comparison.GtOrEq,
 			Val: uID,
 		})
 	}
 }
 
 func UIDLt(uID ksuid.KSUID) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "uid",
-			Op:  predicate.Lt,
+			Op:  comparison.Lt,
 			Val: uID,
 		})
 	}
 }
 
 func UIDLtOrEq(uID ksuid.KSUID) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "uid",
-			Op:  predicate.LtOrEq,
+			Op:  comparison.LtOrEq,
 			Val: uID,
 		})
 	}
 }
 
-func EmailEq(email *string) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+func EmailEq(email string) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "email",
-			Op:  predicate.Eq,
+			Op:  comparison.Eq,
 			Val: email,
 		})
 	}
 }
 
-func EmailNotEq(email *string) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+func EmailNotEq(email string) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "email",
-			Op:  predicate.NotEq,
+			Op:  comparison.NotEq,
 			Val: email,
 		})
 	}
 }
 
-func EmailGt(email *string) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+func EmailGt(email string) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "email",
-			Op:  predicate.Gt,
+			Op:  comparison.Gt,
 			Val: email,
 		})
 	}
 }
 
-func EmailGtOrEq(email *string) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+func EmailGtOrEq(email string) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "email",
-			Op:  predicate.GtOrEq,
+			Op:  comparison.GtOrEq,
 			Val: email,
 		})
 	}
 }
 
-func EmailLt(email *string) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+func EmailLt(email string) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "email",
-			Op:  predicate.Lt,
+			Op:  comparison.Lt,
 			Val: email,
 		})
 	}
 }
 
-func EmailLtOrEq(email *string) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+func EmailLtOrEq(email string) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "email",
-			Op:  predicate.LtOrEq,
+			Op:  comparison.LtOrEq,
 			Val: email,
 		})
 	}
 }
 
-func NameEq(name *string) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+func NameEq(name string) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "name",
-			Op:  predicate.Eq,
+			Op:  comparison.Eq,
 			Val: name,
 		})
 	}
 }
 
-func NameNotEq(name *string) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+func NameNotEq(name string) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "name",
-			Op:  predicate.NotEq,
+			Op:  comparison.NotEq,
 			Val: name,
 		})
 	}
 }
 
-func NameGt(name *string) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+func NameGt(name string) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "name",
-			Op:  predicate.Gt,
+			Op:  comparison.Gt,
 			Val: name,
 		})
 	}
 }
 
-func NameGtOrEq(name *string) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+func NameGtOrEq(name string) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "name",
-			Op:  predicate.GtOrEq,
+			Op:  comparison.GtOrEq,
 			Val: name,
 		})
 	}
 }
 
-func NameLt(name *string) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+func NameLt(name string) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "name",
-			Op:  predicate.Lt,
+			Op:  comparison.Lt,
 			Val: name,
 		})
 	}
 }
 
-func NameLtOrEq(name *string) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+func NameLtOrEq(name string) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "name",
-			Op:  predicate.LtOrEq,
+			Op:  comparison.LtOrEq,
 			Val: name,
 		})
 	}
 }
 
 func AgeEq(age int) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "age",
-			Op:  predicate.Eq,
+			Op:  comparison.Eq,
 			Val: age,
 		})
 	}
 }
 
 func AgeNotEq(age int) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "age",
-			Op:  predicate.NotEq,
+			Op:  comparison.NotEq,
 			Val: age,
 		})
 	}
 }
 
 func AgeGt(age int) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "age",
-			Op:  predicate.Gt,
+			Op:  comparison.Gt,
 			Val: age,
 		})
 	}
 }
 
 func AgeGtOrEq(age int) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "age",
-			Op:  predicate.GtOrEq,
+			Op:  comparison.GtOrEq,
 			Val: age,
 		})
 	}
 }
 
 func AgeLt(age int) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "age",
-			Op:  predicate.Lt,
+			Op:  comparison.Lt,
 			Val: age,
 		})
 	}
 }
 
 func AgeLtOrEq(age int) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "age",
-			Op:  predicate.LtOrEq,
+			Op:  comparison.LtOrEq,
 			Val: age,
 		})
 	}
 }
 
 func GroupEq(group user.Group) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "group",
-			Op:  predicate.Eq,
+			Op:  comparison.Eq,
 			Val: group,
 		})
 	}
 }
 
 func GroupNotEq(group user.Group) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "group",
-			Op:  predicate.NotEq,
+			Op:  comparison.NotEq,
 			Val: group,
 		})
 	}
 }
 
 func GroupGt(group user.Group) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "group",
-			Op:  predicate.Gt,
+			Op:  comparison.Gt,
 			Val: group,
 		})
 	}
 }
 
 func GroupGtOrEq(group user.Group) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "group",
-			Op:  predicate.GtOrEq,
+			Op:  comparison.GtOrEq,
 			Val: group,
 		})
 	}
 }
 
 func GroupLt(group user.Group) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "group",
-			Op:  predicate.Lt,
+			Op:  comparison.Lt,
 			Val: group,
 		})
 	}
 }
 
 func GroupLtOrEq(group user.Group) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "group",
-			Op:  predicate.LtOrEq,
+			Op:  comparison.LtOrEq,
 			Val: group,
 		})
 	}
 }
 
 func UpdatedAtEq(updatedAt *time.Time) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "updated_at",
-			Op:  predicate.Eq,
+			Op:  comparison.Eq,
 			Val: updatedAt,
 		})
 	}
 }
 
 func UpdatedAtNotEq(updatedAt *time.Time) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "updated_at",
-			Op:  predicate.NotEq,
+			Op:  comparison.NotEq,
 			Val: updatedAt,
 		})
 	}
 }
 
 func UpdatedAtGt(updatedAt *time.Time) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "updated_at",
-			Op:  predicate.Gt,
+			Op:  comparison.Gt,
 			Val: updatedAt,
 		})
 	}
 }
 
 func UpdatedAtGtOrEq(updatedAt *time.Time) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "updated_at",
-			Op:  predicate.GtOrEq,
+			Op:  comparison.GtOrEq,
 			Val: updatedAt,
 		})
 	}
 }
 
 func UpdatedAtLt(updatedAt *time.Time) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "updated_at",
-			Op:  predicate.Lt,
+			Op:  comparison.Lt,
 			Val: updatedAt,
 		})
 	}
 }
 
 func UpdatedAtLtOrEq(updatedAt *time.Time) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "updated_at",
-			Op:  predicate.LtOrEq,
+			Op:  comparison.LtOrEq,
 			Val: updatedAt,
 		})
 	}
 }
 
+func UpdatedAtIsNull() PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "updated_at",
+			Op:  comparison.IsNull,
+		})
+	}
+}
+
+func UpdatedAtIsNotNull() PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "updated_at",
+			Op:  comparison.IsNotNull,
+		})
+	}
+}
+
 func CreatedAtEq(createdAt *time.Time) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "created_at",
-			Op:  predicate.Eq,
+			Op:  comparison.Eq,
 			Val: createdAt,
 		})
 	}
 }
 
 func CreatedAtNotEq(createdAt *time.Time) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "created_at",
-			Op:  predicate.NotEq,
+			Op:  comparison.NotEq,
 			Val: createdAt,
 		})
 	}
 }
 
 func CreatedAtGt(createdAt *time.Time) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "created_at",
-			Op:  predicate.Gt,
+			Op:  comparison.Gt,
 			Val: createdAt,
 		})
 	}
 }
 
 func CreatedAtGtOrEq(createdAt *time.Time) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "created_at",
-			Op:  predicate.GtOrEq,
+			Op:  comparison.GtOrEq,
 			Val: createdAt,
 		})
 	}
 }
 
 func CreatedAtLt(createdAt *time.Time) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "created_at",
-			Op:  predicate.Lt,
+			Op:  comparison.Lt,
 			Val: createdAt,
 		})
 	}
 }
 
 func CreatedAtLtOrEq(createdAt *time.Time) PredFunc {
-	return func(pb *predicate.Predicates) {
-		pb.Add(&predicate.Predicate{
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
 			Col: "created_at",
-			Op:  predicate.LtOrEq,
+			Op:  comparison.LtOrEq,
 			Val: createdAt,
 		})
 	}

@@ -25,8 +25,9 @@ type ColumnConfig struct {
 	Name        string
 	T           interface{}
 	StructField string
-	Auto        bool
-	Ident       bool
+	Auto,
+	Ident,
+	Nullable bool
 }
 
 // NewColumn creates a new column
@@ -57,9 +58,14 @@ func (c *Column) Ident() *Column {
 	return c
 }
 
-// StructField is the struct field name.
-// Use this when the generated struct field is wrong.
-// e.g. The struct field from generated repository is "Id" intead of "ID".
+func (c *Column) Nullable() *Column {
+	c.cfg.Nullable = true
+	return c
+}
+
+// StructField is the struct field name. Use this when the
+// inferred struct field is wrong. e.g. The struct field
+// is "ID" but being referred to as "Id" in the generated code.
 func (c *Column) StructField(structField string) *Column {
 	c.cfg.StructField = structField
 	return c

@@ -46,37 +46,42 @@ func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Del
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	pb := &predicate.Predicates{}
-	for _, pf := range d.pfs {
+	qb := squirrel.Delete("\"users\"").
+		PlaceholderFormat(squirrel.Dollar)
+
+	pfs := d.pfs
+	pb := &comparison.Predicates{}
+	for _, pf := range pfs {
 		pf(pb)
 	}
-
-	qb := squirrel.Delete("\"users\"").
-		PlaceholderFormat(squirrel.Dollar).
-		RunWith(txx)
 	for _, p := range pb.All() {
 		switch p.Op {
-		case predicate.Eq:
+		case comparison.Eq:
 			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
-		case predicate.NotEq:
+		case comparison.NotEq:
 			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
-		case predicate.Gt:
+		case comparison.Gt:
 			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
-		case predicate.GtOrEq:
+		case comparison.GtOrEq:
 			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
-		case predicate.Lt:
+		case comparison.Lt:
 			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
-		case predicate.LtOrEq:
+		case comparison.LtOrEq:
 			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
+		case comparison.IsNull:
+			qb = qb.Where(fmt.Sprintf("%q IS NULL", p.Col))
+		case comparison.IsNotNull:
+			qb = qb.Where(fmt.Sprintf("%q IS NOT NULL", p.Col))
 		}
 	}
+
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("op", "Delete").Str("stmnt", sql).
+		log.Debug().Str("method", "Delete").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 
-	res, err := qb.ExecContext(ctx)
+	res, err := qb.RunWith(txx).ExecContext(ctx)
 	if err != nil {
 		return 0, err
 	}

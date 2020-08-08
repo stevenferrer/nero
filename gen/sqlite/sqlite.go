@@ -4,14 +4,14 @@ import (
 	"github.com/dave/jennifer/jen"
 
 	"github.com/sf9v/nero/aggregate"
+	"github.com/sf9v/nero/comparison"
 	gen "github.com/sf9v/nero/gen/internal"
-	"github.com/sf9v/nero/predicate"
 )
 
 const (
 	pkgPath = "github.com/sf9v/nero"
 	aggPkg  = "github.com/sf9v/nero/aggregate"
-	predPkg = "github.com/sf9v/nero/predicate"
+	compPkg = "github.com/sf9v/nero/comparison"
 	sortPkg = "github.com/sf9v/nero/sort"
 
 	sqPkg  = "github.com/Masterminds/squirrel"
@@ -31,8 +31,8 @@ var (
 	txCommitC   = jen.Id("tx").Dot("Commit").Call()
 	txRollbackC = jen.Id("rollback").Call(jen.Id("tx"), jen.Err())
 
-	predOps = []predicate.Operator{predicate.Eq, predicate.NotEq,
-		predicate.Gt, predicate.GtOrEq, predicate.Lt, predicate.LtOrEq}
+	predOps = []comparison.Operator{comparison.Eq, comparison.NotEq,
+		comparison.Gt, comparison.GtOrEq, comparison.Lt, comparison.LtOrEq}
 	aggFns = []aggregate.Function{aggregate.Avg, aggregate.Count,
 		aggregate.Max, aggregate.Min, aggregate.Sum, aggregate.None}
 )

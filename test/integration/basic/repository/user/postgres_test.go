@@ -116,8 +116,8 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 
 					cr := userr.NewCreator().
 						UID(uid).
-						Email(&email).
-						Name(&name).
+						Email(email).
+						Name(name).
 						Age(age).
 						Group(group).
 						Kv(kv).
@@ -157,17 +157,15 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 					email := fmt.Sprintf("%s_%d_mm@gg.io", group, i)
 					name := fmt.Sprintf("%s_%d_mm", group, i)
 					age := randAge()
-					now := time.Now()
 					uid := ksuid.New()
 					uids = append(uids, uid)
 
 					cr := userr.NewCreator().
 						UID(uid).
-						Email(&email).
-						Name(&name).
+						Email(email).
+						Name(name).
 						Age(age).
-						Kv(kv).
-						UpdatedAt(&now)
+						Kv(kv)
 					crs = append(crs, cr)
 				}
 
@@ -191,16 +189,26 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 
 		t.Run("Query", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
-				// all users
-				users, err := repo.Query(ctx,
-					userr.NewQueryer())
+				users, err := repo.Query(ctx, userr.NewQueryer().
+					Where(userr.UpdatedAtIsNotNull()))
 				assert.NoError(t, err)
-				require.Len(t, users, 100)
+				require.Len(t, users, 50)
 				for _, u := range users {
-					require.NotNil(t, u.Email)
-					require.NotNil(t, u.Name)
-					require.NotNil(t, u.UpdatedAt)
-					require.NotNil(t, u.CreatedAt)
+					assert.NotNil(t, u.Email)
+					assert.NotNil(t, u.Name)
+					assert.NotNil(t, u.UpdatedAt)
+					assert.NotNil(t, u.CreatedAt)
+				}
+
+				users, err = repo.Query(ctx, userr.NewQueryer().
+					Where(userr.UpdatedAtIsNull()))
+				assert.NoError(t, err)
+				require.Len(t, users, 50)
+				for _, u := range users {
+					assert.NotNil(t, u.Email)
+					assert.NotNil(t, u.Name)
+					assert.Nil(t, u.UpdatedAt)
+					assert.NotNil(t, u.CreatedAt)
 				}
 
 				// with predicates
@@ -240,6 +248,16 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 				assert.NoError(t, err)
 				assert.NotZero(t, len(users))
 
+				users, err = repo.Query(ctx, userr.NewQueryer().
+					Where(userr.UpdatedAtIsNull()))
+				assert.NoError(t, err)
+				assert.Len(t, users, 50)
+
+				users, err = repo.Query(ctx, userr.NewQueryer().
+					Where(userr.UpdatedAtIsNotNull()))
+				assert.NoError(t, err)
+				assert.Len(t, users, 50)
+
 				// with sort
 				// get last user
 				users, err = repo.Query(ctx, userr.NewQueryer().
@@ -250,7 +268,7 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 				)
 				assert.NoError(t, err)
 				require.NotZero(t, len(users))
-				assert.Equal(t, "charr_100_mm", *users[0].Name)
+				assert.Equal(t, "charr_100_mm", users[0].Name)
 
 				// with limit and offset
 				users, err = repo.Query(ctx, userr.NewQueryer().Limit(1).Offset(1))
@@ -342,8 +360,8 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 				rowsAffected, err := repo.Update(ctx,
 					userr.NewUpdater().
 						UID(ksuid.New()).
-						Email(&email).
-						Name(&name).
+						Email(email).
+						Name(name).
 						Age(age).
 						Group(user.Outcast).
 						UpdatedAt(&now).
@@ -352,16 +370,14 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), rowsAffected)
 
-				users, err := repo.Query(ctx, userr.NewQueryer().
+				usr, err := repo.QueryOne(ctx, userr.NewQueryer().
 					Where(preds...))
 				assert.NoError(t, err)
-				assert.Len(t, users, 1)
 
-				u := users[0]
-				assert.Equal(t, email, *u.Email)
-				assert.Equal(t, name, *u.Name)
-				assert.Equal(t, age, u.Age)
-				assert.NotNil(t, u.UpdatedAt)
+				assert.Equal(t, email, usr.Email)
+				assert.Equal(t, name, usr.Name)
+				assert.Equal(t, age, usr.Age)
+				assert.NotNil(t, usr.UpdatedAt)
 			})
 
 			t.Run("Error", func(t *testing.T) {
@@ -382,6 +398,7 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 					userr.IDGt("0"), userr.IDGtOrEq("1"),
 					userr.IDLt("2"), userr.IDLtOrEq("1"),
 				}
+				// delete one
 				rowsAffected, err := repo.Delete(ctx,
 					userr.NewDeleter().Where(preds...))
 				assert.NoError(t, err)

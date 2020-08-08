@@ -7,8 +7,6 @@ import (
 	"github.com/dave/jennifer/jen"
 	"github.com/sf9v/nero/aggregate"
 	gen "github.com/sf9v/nero/gen/internal"
-	"github.com/sf9v/nero/predicate"
-	"github.com/sf9v/nero/sort"
 )
 
 func newAggregateBlock() *jen.Statement {
@@ -93,7 +91,7 @@ func newAggregateTxBlock(schema *gen.Schema) *jen.Statement {
 			// query builder
 			g.Id("qb").Op(":=").Qual(sqPkg, "Select").
 				Call(jen.Id("cols").Op("...")).
-				Dot("From").Call(jen.Lit(fmt.Sprintf("%q", schema.Coln))).
+				Dot("From").Call(jen.Lit(fmt.Sprintf("%q", schema.Collection))).
 				Op(".").Line().Id("PlaceholderFormat").
 				Call(jen.Qual(sqPkg, "Dollar")).Line()
 
@@ -111,69 +109,11 @@ func newAggregateTxBlock(schema *gen.Schema) *jen.Statement {
 			g.Id("qb").Op("=").Id("qb").Dot("GroupBy").
 				Call(jen.Id("groups").Op("...")).Line()
 
-			// predicates
-			g.Id("preds").Op(":=").Op("&").
-				Qual(predPkg, "Predicates").Block()
-			g.For(jen.List(jen.Id("_"), jen.Id("pf")).
-				Op(":=").Range().Id("a").Dot("pfs")).
-				Block(jen.Id("pf").Call(jen.Id("preds")))
-			g.For(jen.List(jen.Id("_"), jen.Id("p").Op(":=").
-				Range().Id("preds").Dot("All").Call())).
-				Block(
-					// switch block
-					jen.Switch(jen.Id("p").Dot("Op")).
-						BlockFunc(func(g *jen.Group) {
-							for _, op := range predOps {
-								var oprtr = "="
-								switch op {
-								case predicate.Eq:
-									oprtr = "="
-								case predicate.NotEq:
-									oprtr = "<>"
-								case predicate.Gt:
-									oprtr = ">"
-								case predicate.GtOrEq:
-									oprtr = ">="
-								case predicate.Lt:
-									oprtr = "<"
-								case predicate.LtOrEq:
-									oprtr = "<="
-								}
+			g.Id("pfs").Op(":=").Id("a").Dot("pfs")
+			g.Add(newPredicatesBlock()).Line()
 
-								g.Case(jen.Qual(pkgPath+"/predicate", op.String())).
-									Block(jen.Id("qb").Op("=").Id("qb").Dot("Where").
-										Call(
-											jen.Qual("fmt", "Sprintf").Call(
-												jen.Lit("%q "+oprtr+" ?"),
-												jen.Id("p").Dot("Col"),
-											),
-											jen.Id("p").Dot("Val"),
-										))
-							}
-						})).Line()
-
-			// sorts
-			g.Id("sorts").Op(":=").Op("&").
-				Qual(sortPkg, "Sorts").Block()
-			g.For(jen.List(jen.Id("_"), jen.Id("sf")).
-				Op(":=").Range().Id("a").Dot("sfs")).
-				Block(jen.Id("sf").Call(jen.Id("sorts")))
-			g.For(jen.List(jen.Id("_"), jen.Id("s").Op(":=").
-				Range().Id("sorts").Dot("All").Call())).
-				Block(
-					jen.Id("col").Op(":=").Qual("fmt", "Sprintf").
-						Call(jen.Lit("%q"), jen.Id("s").Dot("Col")),
-					jen.Switch(jen.Id("s").Dot("Direction")).
-						BlockFunc(func(g *jen.Group) {
-							// ascending
-							g.Case(jen.Qual(sortPkg, sort.Asc.String())).
-								Block(jen.Id("qb").Op("=").Id("qb").Dot("OrderBy").
-									Call(jen.Id("col").Op("+").Lit(" ASC")))
-							// descending
-							g.Case(jen.Qual(sortPkg, sort.Desc.String())).
-								Block(jen.Id("qb").Op("=").Id("qb").Dot("OrderBy").
-									Call(jen.Id("col").Op("+").Lit(" DESC")))
-						})).Line()
+			g.Id("sfs").Op(":=").Id("a").Dot("sfs")
+			g.Add(newSortsBlock()).Line()
 
 			// debug
 			g.Add(newDebugLogBlock("Aggregate")).Line().Line()

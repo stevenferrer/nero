@@ -5,8 +5,6 @@ import (
 
 	"github.com/dave/jennifer/jen"
 	gen "github.com/sf9v/nero/gen/internal"
-	"github.com/sf9v/nero/predicate"
-	"github.com/sf9v/nero/sort"
 )
 
 func newQueryBlock(schema *gen.Schema) *jen.Statement {
@@ -162,11 +160,12 @@ func newQueryOneTxBlock(schema *gen.Schema) *jen.Statement {
 		})
 }
 
-func newSelectBuilderBlock(schema *gen.Schema) *jen.Statement {
+func newBuildSelectBlock(schema *gen.Schema) *jen.Statement {
 	return jen.Func().Params(rcvrParamC).Id("buildSelect").
 		Params(jen.Id("q").Op("*").Id("Queryer")).
 		Params(jen.Qual(sqPkg, "SelectBuilder")).
 		BlockFunc(func(g *jen.Group) {
+
 			g.Id("columns").Op(":=").Index().String().
 				ValuesFunc(func(g *jen.Group) {
 					for _, col := range schema.Cols {
@@ -178,73 +177,15 @@ func newSelectBuilderBlock(schema *gen.Schema) *jen.Statement {
 			g.Id("qb").Op(":=").Qual(sqPkg, "Select").
 				Call(jen.Id("columns").Op("...")).
 				Op(".").Line().Id("From").
-				Call(jen.Lit(fmt.Sprintf("%q", schema.Coln))).
+				Call(jen.Lit(fmt.Sprintf("%q", schema.Collection))).
 				Op(".").Line().Id("PlaceholderFormat").
 				Call(jen.Qual(sqPkg, "Dollar")).Line()
 
-			// predicates
-			g.Id("pb").Op(":=").Op("&").
-				Qual(pkgPath+"/predicate", "Predicates").Block()
-			g.For(jen.List(jen.Id("_"), jen.Id("pf")).
-				Op(":=").Range().Id("q").Dot("pfs")).
-				Block(jen.Id("pf").Call(jen.Id("pb")))
-			g.For(jen.List(jen.Id("_"), jen.Id("p").Op(":=").
-				Range().Id("pb").Dot("All").Call())).
-				Block(
-					// switch block
-					jen.Switch(jen.Id("p").Dot("Op")).
-						BlockFunc(func(g *jen.Group) {
-							for _, op := range predOps {
-								var oprtr = "="
-								switch op {
-								case predicate.Eq:
-									oprtr = "="
-								case predicate.NotEq:
-									oprtr = "<>"
-								case predicate.Gt:
-									oprtr = ">"
-								case predicate.GtOrEq:
-									oprtr = ">="
-								case predicate.Lt:
-									oprtr = "<"
-								case predicate.LtOrEq:
-									oprtr = "<="
-								}
+			g.Id("pfs").Op(":=").Id("q").Dot("pfs")
+			g.Add(newPredicatesBlock()).Line()
 
-								g.Case(jen.Qual(pkgPath+"/predicate", op.String())).
-									Block(jen.Id("qb").Op("=").Id("qb").Dot("Where").
-										Call(
-											jen.Qual("fmt", "Sprintf").Call(
-												jen.Lit("%q "+oprtr+" ?"),
-												jen.Id("p").Dot("Col"),
-											),
-											jen.Id("p").Dot("Val"),
-										))
-							}
-						})).Line()
-
-			// sorts
-			g.Id("sorts").Op(":=").Op("&").
-				Qual(sortPkg, "Sorts").Block()
-			g.For(jen.List(jen.Id("_"), jen.Id("sf")).
-				Op(":=").Range().Id("q").Dot("sfs")).
-				Block(jen.Id("sf").Call(jen.Id("sorts")))
-			g.For(jen.List(jen.Id("_"), jen.Id("s").Op(":=").
-				Range().Id("sorts").Dot("All").Call())).
-				Block(
-					jen.Id("col").Op(":=").Qual("fmt", "Sprintf").
-						Call(jen.Lit("%q"), jen.Id("s").Dot("Col")),
-					jen.Switch(jen.Id("s").Dot("Direction")).
-						BlockFunc(func(g *jen.Group) {
-							// ascending
-							g.Case(jen.Qual(sortPkg, sort.Asc.String())).
-								Block(jen.Id("qb").Op("=").Id("qb").Dot("OrderBy").
-									Call(jen.Id("col").Op("+").Lit(" ASC")))
-							// descending
-							g.Case(jen.Qual(sortPkg, sort.Desc.String())).
-								Block(jen.Id("qb").Op("=").Id("qb").Dot("OrderBy").
-									Call(jen.Id("col").Op("+").Lit(" DESC")))
-						})).Line()
+			g.Id("sfs").Op(":=").Id("q").Dot("sfs")
+			g.Add(newSortsBlock()).Line()
 
 			// limit
 			g.If(jen.Id("q").Dot("limit").Op(">").Lit(0)).Block(

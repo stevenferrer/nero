@@ -1,6 +1,6 @@
-package predicate
+package comparison
 
-// Operator is predicate operator
+// Operator is comparison operator
 type Operator int
 
 func (op Operator) String() string {
@@ -17,11 +17,16 @@ func (op Operator) String() string {
 		return "Lt"
 	case LtOrEq:
 		return "LtOrEq"
+	case IsNull:
+		return "IsNull"
+	case IsNotNull:
+		return "IsNotNull"
 	}
 
 	return "Invalid"
 }
 
+// List of predicate operators
 const (
 	// Eq is an equal operator
 	Eq Operator = iota
@@ -35,4 +40,8 @@ const (
 	Lt
 	// LtOrEq is a less than or equal operator
 	LtOrEq
+	// IsNull is an "is null" operator
+	IsNull
+	// IsNotNull is an "is not null" operator
+	IsNotNull
 )

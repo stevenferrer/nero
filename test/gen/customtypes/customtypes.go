@@ -18,6 +18,7 @@ type Custom struct {
 	Items          []Item
 	PtrItems       []*Item
 	KSID           ksuid.KSUID
+	NullColumn     *string
 }
 
 type Item struct {
@@ -43,6 +44,7 @@ func (c *Custom) Schema() *nero.Schema {
 			nero.NewColumn("ptr_item", c.PtrItem),
 			nero.NewColumn("items", c.Items),
 			nero.NewColumn("ptr_items", c.PtrItems),
+			nero.NewColumn("null_column", c.NullColumn).Nullable(),
 		},
 	}
 }

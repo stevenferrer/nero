@@ -11,7 +11,7 @@ import (
 	zerolog "github.com/rs/zerolog"
 	nero "github.com/sf9v/nero"
 	aggregate "github.com/sf9v/nero/aggregate"
-	predicate "github.com/sf9v/nero/predicate"
+	comparison "github.com/sf9v/nero/comparison"
 	sort "github.com/sf9v/nero/sort"
 	user "github.com/sf9v/nero/test/integration/basic/user"
 	"io"
@@ -83,11 +83,11 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		columns = append(columns, "\"uid\"")
 		values = append(values, c.uID)
 	}
-	if c.email != nil {
+	if c.email != "" {
 		columns = append(columns, "\"email\"")
 		values = append(values, c.email)
 	}
-	if c.name != nil {
+	if c.name != "" {
 		columns = append(columns, "\"name\"")
 		values = append(values, c.name)
 	}
@@ -116,7 +116,7 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		RunWith(txx)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("op", "Create").Str("stmnt", sql).
+		log.Debug().Str("method", "Create").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 
@@ -149,7 +149,7 @@ func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs
 		PlaceholderFormat(sq.Dollar)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("op", "CreateMany").Str("stmnt", sql).
+		log.Debug().Str("method", "CreateMany").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 
@@ -198,7 +198,7 @@ func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Quer
 	qb := pg.buildSelect(q)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("op", "Query").Str("stmnt", sql).
+		log.Debug().Str("method", "Query").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 
@@ -241,7 +241,7 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 	qb := pg.buildSelect(q)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("op", "QueryOne").Str("stmnt", sql).
+		log.Debug().Str("method", "QueryOne").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 
@@ -272,29 +272,35 @@ func (pg *PostgreSQLRepository) buildSelect(q *Queryer) sq.SelectBuilder {
 		From("\"users\"").
 		PlaceholderFormat(sq.Dollar)
 
-	pb := &predicate.Predicates{}
-	for _, pf := range q.pfs {
+	pfs := q.pfs
+	pb := &comparison.Predicates{}
+	for _, pf := range pfs {
 		pf(pb)
 	}
 	for _, p := range pb.All() {
 		switch p.Op {
-		case predicate.Eq:
+		case comparison.Eq:
 			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
-		case predicate.NotEq:
+		case comparison.NotEq:
 			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
-		case predicate.Gt:
+		case comparison.Gt:
 			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
-		case predicate.GtOrEq:
+		case comparison.GtOrEq:
 			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
-		case predicate.Lt:
+		case comparison.Lt:
 			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
-		case predicate.LtOrEq:
+		case comparison.LtOrEq:
 			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
+		case comparison.IsNull:
+			qb = qb.Where(fmt.Sprintf("%q IS NULL", p.Col))
+		case comparison.IsNotNull:
+			qb = qb.Where(fmt.Sprintf("%q IS NOT NULL", p.Col))
 		}
 	}
 
+	sfs := q.sfs
 	sorts := &sort.Sorts{}
-	for _, sf := range q.sfs {
+	for _, sf := range sfs {
 		sf(sorts)
 	}
 	for _, s := range sorts.All() {
@@ -338,19 +344,14 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	pb := &predicate.Predicates{}
-	for _, pf := range u.pfs {
-		pf(pb)
-	}
-
 	qb := sq.Update("\"users\"").PlaceholderFormat(sq.Dollar)
 	if u.uID != [20]uint8{} {
 		qb = qb.Set("\"uid\"", u.uID)
 	}
-	if u.email != nil {
+	if u.email != "" {
 		qb = qb.Set("\"email\"", u.email)
 	}
-	if u.name != nil {
+	if u.name != "" {
 		qb = qb.Set("\"name\"", u.name)
 	}
 	if u.age != 0 {
@@ -366,25 +367,35 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 		qb = qb.Set("\"updated_at\"", u.updatedAt)
 	}
 
+	pfs := u.pfs
+	pb := &comparison.Predicates{}
+	for _, pf := range pfs {
+		pf(pb)
+	}
 	for _, p := range pb.All() {
 		switch p.Op {
-		case predicate.Eq:
+		case comparison.Eq:
 			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
-		case predicate.NotEq:
+		case comparison.NotEq:
 			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
-		case predicate.Gt:
+		case comparison.Gt:
 			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
-		case predicate.GtOrEq:
+		case comparison.GtOrEq:
 			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
-		case predicate.Lt:
+		case comparison.Lt:
 			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
-		case predicate.LtOrEq:
+		case comparison.LtOrEq:
 			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
+		case comparison.IsNull:
+			qb = qb.Where(fmt.Sprintf("%q IS NULL", p.Col))
+		case comparison.IsNotNull:
+			qb = qb.Where(fmt.Sprintf("%q IS NOT NULL", p.Col))
 		}
 	}
+
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("op", "Update").Str("stmnt", sql).
+		log.Debug().Str("method", "Update").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 
@@ -421,37 +432,42 @@ func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Del
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	pb := &predicate.Predicates{}
-	for _, pf := range d.pfs {
+	qb := sq.Delete("\"users\"").
+		PlaceholderFormat(sq.Dollar)
+
+	pfs := d.pfs
+	pb := &comparison.Predicates{}
+	for _, pf := range pfs {
 		pf(pb)
 	}
-
-	qb := sq.Delete("\"users\"").
-		PlaceholderFormat(sq.Dollar).
-		RunWith(txx)
 	for _, p := range pb.All() {
 		switch p.Op {
-		case predicate.Eq:
+		case comparison.Eq:
 			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
-		case predicate.NotEq:
+		case comparison.NotEq:
 			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
-		case predicate.Gt:
+		case comparison.Gt:
 			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
-		case predicate.GtOrEq:
+		case comparison.GtOrEq:
 			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
-		case predicate.Lt:
+		case comparison.Lt:
 			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
-		case predicate.LtOrEq:
+		case comparison.LtOrEq:
 			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
+		case comparison.IsNull:
+			qb = qb.Where(fmt.Sprintf("%q IS NULL", p.Col))
+		case comparison.IsNotNull:
+			qb = qb.Where(fmt.Sprintf("%q IS NOT NULL", p.Col))
 		}
 	}
+
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("op", "Delete").Str("stmnt", sql).
+		log.Debug().Str("method", "Delete").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 
-	res, err := qb.ExecContext(ctx)
+	res, err := qb.RunWith(txx).ExecContext(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -517,29 +533,35 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 	}
 	qb = qb.GroupBy(groups...)
 
-	preds := &predicate.Predicates{}
-	for _, pf := range a.pfs {
-		pf(preds)
+	pfs := a.pfs
+	pb := &comparison.Predicates{}
+	for _, pf := range pfs {
+		pf(pb)
 	}
-	for _, p := range preds.All() {
+	for _, p := range pb.All() {
 		switch p.Op {
-		case predicate.Eq:
+		case comparison.Eq:
 			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
-		case predicate.NotEq:
+		case comparison.NotEq:
 			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
-		case predicate.Gt:
+		case comparison.Gt:
 			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
-		case predicate.GtOrEq:
+		case comparison.GtOrEq:
 			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
-		case predicate.Lt:
+		case comparison.Lt:
 			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
-		case predicate.LtOrEq:
+		case comparison.LtOrEq:
 			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
+		case comparison.IsNull:
+			qb = qb.Where(fmt.Sprintf("%q IS NULL", p.Col))
+		case comparison.IsNotNull:
+			qb = qb.Where(fmt.Sprintf("%q IS NOT NULL", p.Col))
 		}
 	}
 
+	sfs := a.sfs
 	sorts := &sort.Sorts{}
-	for _, sf := range a.sfs {
+	for _, sf := range sfs {
 		sf(sorts)
 	}
 	for _, s := range sorts.All() {
@@ -554,7 +576,7 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("op", "Aggregate").Str("stmnt", sql).
+		log.Debug().Str("method", "Aggregate").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 

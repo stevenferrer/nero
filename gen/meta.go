@@ -7,7 +7,7 @@ import (
 
 func newMeta(schema *gen.Schema) *jen.Statement {
 	stmnt := jen.Const().Defs(
-		jen.Id("collection").Op("=").Lit(schema.Coln),
+		jen.Id("collection").Op("=").Lit(schema.Collection),
 	).Line()
 
 	stmnt = stmnt.Type().Id("Column").Int().Line()

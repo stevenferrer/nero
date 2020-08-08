@@ -13,10 +13,12 @@ type Col struct {
 	StructField string
 	// Type is the type info of column
 	Type *mira.Type
-	// Auto is an auto-filled column
-	Auto bool
 	// Ident is an identity column .i.e. id
-	Ident bool
+	Ident,
+	// Auto is an auto-filled column
+	Auto,
+	// Nullable is a nullable column
+	Nullable bool
 }
 
 // CamelName returns a camelized version of name

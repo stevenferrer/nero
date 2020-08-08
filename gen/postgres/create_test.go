@@ -97,7 +97,7 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		RunWith(txx)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("op", "Create").Str("stmnt", sql).
+		log.Debug().Str("method", "Create").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 
@@ -147,7 +147,7 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		RunWith(txx)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("op", "Create").Str("stmnt", sql).
+		log.Debug().Str("method", "Create").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 
@@ -193,7 +193,7 @@ func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs
 		PlaceholderFormat(squirrel.Dollar)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("op", "CreateMany").Str("stmnt", sql).
+		log.Debug().Str("method", "CreateMany").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 
