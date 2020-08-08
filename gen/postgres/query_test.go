@@ -80,7 +80,7 @@ func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Quer
 	qb := pg.buildSelect(q)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("op", "Query").Str("stmnt", sql).
+		log.Debug().Str("method", "Query").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 
@@ -131,7 +131,7 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 	qb := pg.buildSelect(q)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("op", "QueryOne").Str("stmnt", sql).
+		log.Debug().Str("method", "QueryOne").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 
@@ -157,12 +157,12 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 	assert.Equal(t, expect, got)
 }
 
-func Test_newSelectBuilderBlock(t *testing.T) {
+func Test_newBuildSelectBlock(t *testing.T) {
 	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
-	block := newSelectBuilderBlock(schema)
+	block := newBuildSelectBlock(schema)
 	expect := strings.TrimSpace(`
 func (pg *PostgreSQLRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	columns := []string{"\"id\"", "\"name\"", "\"group_res\"", "\"updated_at\"", "\"created_at\""}
@@ -170,29 +170,35 @@ func (pg *PostgreSQLRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 		From("\"users\"").
 		PlaceholderFormat(squirrel.Dollar)
 
-	pb := &predicate.Predicates{}
-	for _, pf := range q.pfs {
+	pfs := q.pfs
+	pb := &comparison.Predicates{}
+	for _, pf := range pfs {
 		pf(pb)
 	}
 	for _, p := range pb.All() {
 		switch p.Op {
-		case predicate.Eq:
+		case comparison.Eq:
 			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
-		case predicate.NotEq:
+		case comparison.NotEq:
 			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
-		case predicate.Gt:
+		case comparison.Gt:
 			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
-		case predicate.GtOrEq:
+		case comparison.GtOrEq:
 			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
-		case predicate.Lt:
+		case comparison.Lt:
 			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
-		case predicate.LtOrEq:
+		case comparison.LtOrEq:
 			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
+		case comparison.IsNull:
+			qb = qb.Where(fmt.Sprintf("%q IS NULL", p.Col))
+		case comparison.IsNotNull:
+			qb = qb.Where(fmt.Sprintf("%q IS NOT NULL", p.Col))
 		}
 	}
 
+	sfs := q.sfs
 	sorts := &sort.Sorts{}
-	for _, sf := range q.sfs {
+	for _, sf := range sfs {
 		sf(sorts)
 	}
 	for _, s := range sorts.All() {

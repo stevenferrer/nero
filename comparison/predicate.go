@@ -1,4 +1,4 @@
-package predicate
+package comparison
 
 // Predicate is a predicate
 type Predicate struct {

@@ -47,11 +47,6 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	pb := &predicate.Predicates{}
-	for _, pf := range u.pfs {
-		pf(pb)
-	}
-
 	qb := squirrel.Update("\"users\"").PlaceholderFormat(squirrel.Dollar)
 	if u.name != "" {
 		qb = qb.Set("\"name\"", u.name)
@@ -63,25 +58,35 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 		qb = qb.Set("\"updated_at\"", u.updatedAt)
 	}
 
+	pfs := u.pfs
+	pb := &comparison.Predicates{}
+	for _, pf := range pfs {
+		pf(pb)
+	}
 	for _, p := range pb.All() {
 		switch p.Op {
-		case predicate.Eq:
+		case comparison.Eq:
 			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
-		case predicate.NotEq:
+		case comparison.NotEq:
 			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
-		case predicate.Gt:
+		case comparison.Gt:
 			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
-		case predicate.GtOrEq:
+		case comparison.GtOrEq:
 			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
-		case predicate.Lt:
+		case comparison.Lt:
 			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
-		case predicate.LtOrEq:
+		case comparison.LtOrEq:
 			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
+		case comparison.IsNull:
+			qb = qb.Where(fmt.Sprintf("%q IS NULL", p.Col))
+		case comparison.IsNotNull:
+			qb = qb.Where(fmt.Sprintf("%q IS NOT NULL", p.Col))
 		}
 	}
+
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("op", "Update").Str("stmnt", sql).
+		log.Debug().Str("method", "Update").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 

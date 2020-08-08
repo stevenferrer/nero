@@ -4,14 +4,14 @@ import (
 	"github.com/dave/jennifer/jen"
 
 	"github.com/sf9v/nero/aggregate"
+	"github.com/sf9v/nero/comparison"
 	gen "github.com/sf9v/nero/gen/internal"
-	"github.com/sf9v/nero/predicate"
 )
 
 const (
 	pkgPath = "github.com/sf9v/nero"
 	aggPkg  = "github.com/sf9v/nero/aggregate"
-	predPkg = "github.com/sf9v/nero/predicate"
+	compPkg = "github.com/sf9v/nero/comparison"
 	sortPkg = "github.com/sf9v/nero/sort"
 
 	sqPkg  = "github.com/Masterminds/squirrel"
@@ -31,8 +31,9 @@ var (
 	txCommitC   = jen.Id("tx").Dot("Commit").Call()
 	txRollbackC = jen.Id("rollback").Call(jen.Id("tx"), jen.Err())
 
-	predOps = []predicate.Operator{predicate.Eq, predicate.NotEq,
-		predicate.Gt, predicate.GtOrEq, predicate.Lt, predicate.LtOrEq}
+	predOps = []comparison.Operator{comparison.Eq, comparison.NotEq,
+		comparison.Gt, comparison.GtOrEq, comparison.Lt, comparison.LtOrEq,
+		comparison.IsNull, comparison.IsNotNull}
 	aggFns = []aggregate.Function{aggregate.Avg, aggregate.Count,
 		aggregate.Max, aggregate.Min, aggregate.Sum, aggregate.None}
 )
@@ -67,7 +68,7 @@ func NewPostgreSQLRepo(schema *gen.Schema) *jen.Statement {
 		// query one tx
 		Add(newQueryOneTxBlock(schema)).Add(ll).
 		// select builder
-		Add(newSelectBuilderBlock(schema)).Add(ll).
+		Add(newBuildSelectBlock(schema)).Add(ll).
 		// update
 		Add(newUpdateBlock()).Add(ll).
 		// update tx
@@ -102,7 +103,7 @@ func newDebugLogBlock(operation string) *jen.Statement {
 		jen.List(jen.Id("sql"), jen.Id("args"), jen.Id("err")).
 			Op(":=").Id("qb").Dot("ToSql").Call(),
 		jen.Id("log").Dot("Debug").Call().
-			Dot("Str").Call(jen.Lit("op"), jen.Lit(operation)).
+			Dot("Str").Call(jen.Lit("method"), jen.Lit(operation)).
 			Dot("Str").Call(jen.Lit("stmnt"), jen.Id("sql")).Op(".").Line().
 			Id("Interface").Call(jen.Lit("args"), jen.Id("args")).
 			Dot("Err").Call(jen.Id("err")).

@@ -79,33 +79,33 @@ func (sl *SQLiteRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggr
 	qb := squirrel.Select(cols...).
 		From(a.collection).GroupBy(groups...)
 
-	preds := &predicate.Predicates{}
+	preds := &comparison.Predicates{}
 	for _, pf := range a.pfs {
 		pf(preds)
 	}
 	for _, p := range preds.All() {
 		switch p.Op {
-		case predicate.Eq:
+		case comparison.Eq:
 			qb = qb.Where(squirrel.Eq{
 				p.Col: p.Val,
 			})
-		case predicate.NotEq:
+		case comparison.NotEq:
 			qb = qb.Where(squirrel.NotEq{
 				p.Col: p.Val,
 			})
-		case predicate.Gt:
+		case comparison.Gt:
 			qb = qb.Where(squirrel.Gt{
 				p.Col: p.Val,
 			})
-		case predicate.GtOrEq:
+		case comparison.GtOrEq:
 			qb = qb.Where(squirrel.GtOrEq{
 				p.Col: p.Val,
 			})
-		case predicate.Lt:
+		case comparison.Lt:
 			qb = qb.Where(squirrel.Lt{
 				p.Col: p.Val,
 			})
-		case predicate.LtOrEq:
+		case comparison.LtOrEq:
 			qb = qb.Where(squirrel.LtOrEq{
 				p.Col: p.Val,
 			})

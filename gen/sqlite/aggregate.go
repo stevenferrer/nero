@@ -100,7 +100,7 @@ func newAggregateTxBlock() *jen.Statement {
 
 			// predicates
 			g.Id("preds").Op(":=").Op("&").
-				Qual(predPkg, "Predicates").Block()
+				Qual(compPkg, "Predicates").Block()
 			g.For(jen.List(jen.Id("_"), jen.Id("pf")).
 				Op(":=").Range().Id("a").Dot("pfs")).
 				Block(jen.Id("pf").Call(jen.Id("preds")))
@@ -110,7 +110,7 @@ func newAggregateTxBlock() *jen.Statement {
 					BlockFunc(func(g *jen.Group) {
 						for _, op := range predOps {
 							opStr := op.String()
-							g.Case(jen.Qual(predPkg, opStr)).
+							g.Case(jen.Qual(compPkg, opStr)).
 								Block(jen.Id("qb").Op("=").Id("qb").Dot("Where").
 									Call(jen.Qual(sqPkg, opStr).
 										Block(

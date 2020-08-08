@@ -32,8 +32,8 @@ type Repository interface {
 
 type Creator struct {
 	uID       ksuid.KSUID
-	email     *string
-	name      *string
+	email     string
+	name      string
 	age       int
 	group     user.Group
 	kv        example.Map
@@ -49,12 +49,12 @@ func (c *Creator) UID(uID ksuid.KSUID) *Creator {
 	return c
 }
 
-func (c *Creator) Email(email *string) *Creator {
+func (c *Creator) Email(email string) *Creator {
 	c.email = email
 	return c
 }
 
-func (c *Creator) Name(name *string) *Creator {
+func (c *Creator) Name(name string) *Creator {
 	c.name = name
 	return c
 }
@@ -112,8 +112,8 @@ func (q *Queryer) Offset(offset uint64) *Queryer {
 
 type Updater struct {
 	uID       ksuid.KSUID
-	email     *string
-	name      *string
+	email     string
+	name      string
 	age       int
 	group     user.Group
 	kv        example.Map
@@ -130,12 +130,12 @@ func (u *Updater) UID(uID ksuid.KSUID) *Updater {
 	return u
 }
 
-func (u *Updater) Email(email *string) *Updater {
+func (u *Updater) Email(email string) *Updater {
 	u.email = email
 	return u
 }
 
-func (u *Updater) Name(name *string) *Updater {
+func (u *Updater) Name(name string) *Updater {
 	u.name = name
 	return u
 }
