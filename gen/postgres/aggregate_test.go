@@ -39,7 +39,7 @@ func Test_newAggregateTxBlock(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
-	aggBlocks := newAggregateTxBlock()
+	aggBlocks := newAggregateTxBlock(schema)
 	expect := strings.TrimSpace(`
 func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
 	txx, ok := tx.(*sql.Tx)
@@ -71,8 +71,7 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 		}
 	}
 
-	table := fmt.Sprintf("%q", a.collection)
-	qb := squirrel.Select(cols...).From(table).
+	qb := squirrel.Select(cols...).From("\"users\"").
 		PlaceholderFormat(squirrel.Dollar)
 
 	groups := []string{}
@@ -128,17 +127,17 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 	}
 	defer rows.Close()
 
-	dv := reflect.ValueOf(a.dest).Elem()
-	dt := reflect.TypeOf(dv.Interface()).Elem()
-	if dt.NumField() != len(cols) {
+	v := reflect.ValueOf(a.v).Elem()
+	t := reflect.TypeOf(v.Interface()).Elem()
+	if t.NumField() != len(cols) {
 		return errors.New("aggregate columns and destination struct field count should match")
 	}
 
 	for rows.Next() {
-		de := reflect.New(dt).Elem()
-		dest := make([]interface{}, de.NumField())
-		for i := 0; i < de.NumField(); i++ {
-			dest[i] = de.Field(i).Addr().Interface()
+		ve := reflect.New(t).Elem()
+		dest := make([]interface{}, ve.NumField())
+		for i := 0; i < ve.NumField(); i++ {
+			dest[i] = ve.Field(i).Addr().Interface()
 		}
 
 		err = rows.Scan(dest...)
@@ -146,7 +145,7 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 			return err
 		}
 
-		dv.Set(reflect.Append(dv, de))
+		v.Set(reflect.Append(v, ve))
 	}
 
 	return nil

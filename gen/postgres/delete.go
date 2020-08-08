@@ -1,7 +1,10 @@
 package postgres
 
 import (
+	"fmt"
+
 	"github.com/dave/jennifer/jen"
+	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/sf9v/nero/predicate"
 )
 
@@ -30,7 +33,7 @@ func newDeleteBlock() *jen.Statement {
 
 }
 
-func newDeleteTxBlock() *jen.Statement {
+func newDeleteTxBlock(schema *gen.Schema) *jen.Statement {
 	return jen.Func().Params(rcvrParamC).Id("DeleteTx").
 		Params(
 			jen.Id("ctx").Add(ctxC),
@@ -56,13 +59,9 @@ func newDeleteTxBlock() *jen.Statement {
 				Op(":=").Range().Id("d").Dot("pfs")).
 				Block(jen.Id("pf").Call(jen.Id("pb"))).Line()
 
-			// quote table name
-			g.Id("table").Op(":=").Qual("fmt", "Sprintf").
-				Call(jen.Lit("%q"), jen.Id("d").Dot("collection"))
-
 			// query builder
 			g.Id("qb").Op(":=").Qual(sqPkg, "Delete").
-				Call(jen.Id("table")).
+				Call(jen.Lit(fmt.Sprintf("%q", schema.Coln))).
 				Op(".").Line().Id("PlaceholderFormat").
 				Call(jen.Qual(sqPkg, "Dollar")).
 				Op(".").Line().Id("RunWith").

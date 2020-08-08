@@ -12,14 +12,11 @@ func Test_newDeleter(t *testing.T) {
 	deleter := newDeleter()
 	expect := strings.TrimSpace(`
 type Deleter struct {
-	collection string
-	pfs        []PredFunc
+	pfs []PredFunc
 }
 
 func NewDeleter() *Deleter {
-	return &Deleter{
-		collection: collection,
-	}
+	return &Deleter{}
 }
 
 func (d *Deleter) Where(pfs ...PredFunc) *Deleter {

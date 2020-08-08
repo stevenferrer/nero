@@ -82,10 +82,6 @@ func newCreateTxBlock(schema *gen.Schema) *jen.Statement {
 					jen.Qual(errPkg, "New").Call(jen.Lit("expecting tx to be *sql.Tx")),
 				)).Line()
 
-			// quote table name
-			g.Id("table").Op(":=").Qual("fmt", "Sprintf").
-				Call(jen.Lit("%q"), jen.Id("c").Dot("collection"))
-
 			// quote column names
 			g.Id("columns").Op(":=").Index().String().Values()
 			g.Id("values").Op(":=").Index().Interface().Values()
@@ -115,12 +111,18 @@ func newCreateTxBlock(schema *gen.Schema) *jen.Statement {
 			g.Line()
 
 			// query builder
-			g.Id("qb").Op(":=").Qual(sqPkg, "Insert").Call(jen.Id("table")).
-				Add(jenx.Dotln("Columns")).Call(jen.Id("columns").Op("...")).
-				Add(jenx.Dotln("Values")).Call(jen.Id("values").Op("...")).
-				Add(jenx.Dotln("Suffix")).Call(jen.Lit(fmt.Sprintf("RETURNING %q", ident.Name))).
-				Add(jenx.Dotln("PlaceholderFormat")).Call(jen.Qual(sqPkg, "Dollar")).
-				Add(jenx.Dotln("RunWith")).Call(jen.Id("txx"))
+			g.Id("qb").Op(":=").Qual(sqPkg, "Insert").
+				Call(jen.Lit(fmt.Sprintf("%q", schema.Coln))).
+				Add(jenx.Dotln("Columns")).
+				Call(jen.Id("columns").Op("...")).
+				Add(jenx.Dotln("Values")).
+				Call(jen.Id("values").Op("...")).
+				Add(jenx.Dotln("Suffix")).
+				Call(jen.Lit(fmt.Sprintf("RETURNING %q", ident.Name))).
+				Add(jenx.Dotln("PlaceholderFormat")).
+				Call(jen.Qual(sqPkg, "Dollar")).
+				Add(jenx.Dotln("RunWith")).
+				Call(jen.Id("txx"))
 			// debug
 			g.Add(newDebugLogBlock("Create")).Line().Line()
 
@@ -156,30 +158,20 @@ func newCreateManyTxBlock(schema *gen.Schema) *jen.Statement {
 				jen.Qual(errPkg, "New").Call(jen.Lit("expecting tx to be *sql.Tx")),
 			)).Line()
 
-			// quote table name
-			g.Id("table").Op(":=").Qual("fmt", "Sprintf").
-				Call(
-					jen.Lit("%q"),
-					jen.Id("cs").Index(jen.Lit(0)).Dot("collection"),
-				)
-
-			// quote column names
-			g.Id("columns").Op(":=").Index().String().Values()
-			g.For(jen.List(jen.Id("_"), jen.Id("col")).Op(":=").
-				Range().Id("cs").Index(jen.Lit(0)).Dot("columns")).
-				Block(
-					jen.Id("columns").Op("=").Append(
-						jen.Id("columns"),
-						jen.Qual("fmt", "Sprintf").Call(
-							jen.Lit("%q"), jen.Id("col"),
-						),
-					),
-				)
+			g.Id("columns").Op(":=").Index().String().
+				ValuesFunc(func(g *jen.Group) {
+					for _, col := range schema.Cols {
+						if col.Auto {
+							continue
+						}
+						g.Lit(fmt.Sprintf("%q", col.Name))
+					}
+				})
 
 			// query builder
 			g.Id("qb").Op(":=").Qual(sqPkg, "Insert").
-				Call(jen.Id("table")).Dot("Columns").
-				Call(jen.Id("columns").Op("..."))
+				Call(jen.Lit(fmt.Sprintf("%q", schema.Coln))).
+				Dot("Columns").Call(jen.Id("columns").Op("..."))
 
 			g.For(jen.List(jen.Id("_"), jen.Id("c")).
 				Op(":=").Range().Id("cs"),

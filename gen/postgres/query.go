@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	"fmt"
+
 	"github.com/dave/jennifer/jen"
 	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/sf9v/nero/predicate"
@@ -138,7 +140,7 @@ func newQueryOneTxBlock(schema *gen.Schema) *jen.Statement {
 			g.Id("qb").Op(":=").Add(rcvrIDC).Dot("buildSelect").Call(jen.Id("q"))
 
 			// debug
-			g.Add(newDebugLogBlock("One")).Line().Line()
+			g.Add(newDebugLogBlock("QueryOne")).Line().Line()
 
 			g.Var().Id("item").Qual(schema.Type.PkgPath(), schema.Type.Name())
 			g.Err().Op(":=").Id("qb").Dot("RunWith").
@@ -160,32 +162,23 @@ func newQueryOneTxBlock(schema *gen.Schema) *jen.Statement {
 		})
 }
 
-func newSelectBuilderBlock() *jen.Statement {
+func newSelectBuilderBlock(schema *gen.Schema) *jen.Statement {
 	return jen.Func().Params(rcvrParamC).Id("buildSelect").
 		Params(jen.Id("q").Op("*").Id("Queryer")).
 		Params(jen.Qual(sqPkg, "SelectBuilder")).
 		BlockFunc(func(g *jen.Group) {
-			// quote table name
-			g.Id("table").Op(":=").Qual("fmt", "Sprintf").
-				Call(jen.Lit("%q"), jen.Id("q").Dot("collection"))
-
-			// quote column names
-			g.Id("columns").Op(":=").Index().String().Values()
-			g.For(jen.List(jen.Id("_"), jen.Id("col")).Op(":=").
-				Range().Id("q").Dot("columns")).Block(
-				jen.Id("columns").Op("=").Append(
-					jen.Id("columns"),
-					jen.Qual("fmt", "Sprintf").Call(
-						jen.Lit("%q"), jen.Id("col"),
-					),
-				),
-			)
+			g.Id("columns").Op(":=").Index().String().
+				ValuesFunc(func(g *jen.Group) {
+					for _, col := range schema.Cols {
+						g.Lit(fmt.Sprintf("%q", col.Name))
+					}
+				})
 
 			// query builder
 			g.Id("qb").Op(":=").Qual(sqPkg, "Select").
 				Call(jen.Id("columns").Op("...")).
 				Op(".").Line().Id("From").
-				Call(jen.Id("table")).
+				Call(jen.Lit(fmt.Sprintf("%q", schema.Coln))).
 				Op(".").Line().Id("PlaceholderFormat").
 				Call(jen.Qual(sqPkg, "Dollar")).Line()
 

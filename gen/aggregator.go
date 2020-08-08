@@ -10,8 +10,7 @@ func newAggregator(schema *gen.Schema) *jen.Statement {
 	typeID := "Aggregator"
 	stmnt := jen.Type().Id(typeID).
 		StructFunc(func(g *jen.Group) {
-			g.Id("collection").String()
-			g.Id("dest").Interface()
+			g.Id("v").Interface()
 			g.Id("aggfs").Op("[]").Id("AggFunc")
 			g.Id("pfs").Op("[]").Id("PredFunc")
 			g.Id("sfs").Op("[]").Id("SortFunc")
@@ -20,11 +19,10 @@ func newAggregator(schema *gen.Schema) *jen.Statement {
 
 	// factory
 	stmnt = stmnt.Func().Id("NewAggregator").
-		Params(jen.Id("dest").Interface()).
+		Params(jen.Id("v").Interface()).
 		Params(jen.Op("*").Id(typeID)).Block(
 		jen.Return(jen.Op("&").Id(typeID).Block(
-			jen.Id("collection").Op(":").Id("collection").Op(","),
-			jen.Id("dest").Op(":").Id("dest").Op(","),
+			jen.Id("v").Op(":").Id("v").Op(","),
 		))).Line().Line()
 
 	rcvrID := "a"

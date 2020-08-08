@@ -1,10 +1,12 @@
 package postgres
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/sf9v/nero/aggregate"
+	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/sf9v/nero/predicate"
 	"github.com/sf9v/nero/sort"
 )
@@ -32,7 +34,7 @@ func newAggregateBlock() *jen.Statement {
 		})
 }
 
-func newAggregateTxBlock() *jen.Statement {
+func newAggregateTxBlock(schema *gen.Schema) *jen.Statement {
 	return jen.Func().Params(rcvrParamC).Id("AggregateTx").
 		Params(
 			jen.Id("ctx").Add(ctxC),
@@ -88,14 +90,10 @@ func newAggregateTxBlock() *jen.Statement {
 						}
 					}))).Line()
 
-			// quote table name
-			g.Id("table").Op(":=").Qual("fmt", "Sprintf").
-				Call(jen.Lit("%q"), jen.Id("a").Dot("collection"))
-
 			// query builder
 			g.Id("qb").Op(":=").Qual(sqPkg, "Select").
 				Call(jen.Id("cols").Op("...")).
-				Dot("From").Call(jen.Id("table")).
+				Dot("From").Call(jen.Lit(fmt.Sprintf("%q", schema.Coln))).
 				Op(".").Line().Id("PlaceholderFormat").
 				Call(jen.Qual(sqPkg, "Dollar")).Line()
 
@@ -191,42 +189,43 @@ func newAggregateTxBlock() *jen.Statement {
 			g.Defer().Id("rows").Dot("Close").Call().Line()
 
 			// inspect aggregate destination
-			g.Id("dv").Op(":=").Qual("reflect", "ValueOf").
-				Call(jen.Id("a").Dot("dest")).Dot("Elem").Call()
-			g.Id("dt").Op(":=").Qual("reflect", "TypeOf").
-				Call(jen.Id("dv").Dot("Interface").Call()).
+			g.Id("v").Op(":=").Qual("reflect", "ValueOf").
+				Call(jen.Id("a").Dot("v")).Dot("Elem").Call()
+			g.Id("t").Op(":=").Qual("reflect", "TypeOf").
+				Call(jen.Id("v").Dot("Interface").Call()).
 				Dot("Elem").Call()
 			// TODO: add more details to error message
 			errMsg := "aggregate columns and destination struct field count should match"
-			g.If(jen.Id("dt").Dot("NumField").Call().
+			g.If(jen.Id("t").Dot("NumField").Call().
 				Op("!=").Len(jen.Id("cols"))).
 				Block(jen.Return(jen.Qual(errPkg, "New").
 					Call(jen.Lit(errMsg)))).Line()
 
-			g.For(jen.Id("rows").Dot("Next").Call()).BlockFunc(func(g *jen.Group) {
-				g.Id("de").Op(":=").Qual("reflect", "New").
-					Call(jen.Id("dt")).Dot("Elem").Call()
-				g.Id("dest").Op(":=").Make(
-					jen.Op("[]").Interface(),
-					jen.Id("de").Dot("NumField").Call(),
-				)
+			g.For(jen.Id("rows").Dot("Next").Call()).
+				BlockFunc(func(g *jen.Group) {
+					g.Id("ve").Op(":=").Qual("reflect", "New").
+						Call(jen.Id("t")).Dot("Elem").Call()
+					g.Id("dest").Op(":=").Make(
+						jen.Op("[]").Interface(),
+						jen.Id("ve").Dot("NumField").Call(),
+					)
 
-				g.For(jen.Id("i").Op(":=").Lit(0),
-					jen.Id("i").Op("<").Id("de").Dot("NumField").Call(),
-					jen.Id("i").Op("++"),
-				).Block(
-					jen.Id("dest").Index(jen.Id("i")).Op("=").
-						Id("de").Dot("Field").Call(jen.Id("i")).
-						Dot("Addr").Call().Dot("Interface").Call(),
-				).Line()
+					g.For(jen.Id("i").Op(":=").Lit(0),
+						jen.Id("i").Op("<").Id("ve").Dot("NumField").Call(),
+						jen.Id("i").Op("++"),
+					).Block(
+						jen.Id("dest").Index(jen.Id("i")).Op("=").
+							Id("ve").Dot("Field").Call(jen.Id("i")).
+							Dot("Addr").Call().Dot("Interface").Call(),
+					).Line()
 
-				g.Err().Op("=").Id("rows").Dot("Scan").
-					Call(jen.Id("dest").Op("..."))
-				g.Add(ifErr).Line()
+					g.Err().Op("=").Id("rows").Dot("Scan").
+						Call(jen.Id("dest").Op("..."))
+					g.Add(ifErr).Line()
 
-				g.Id("dv").Dot("Set").Call(jen.Qual("reflect", "Append").
-					Call(jen.Id("dv"), jen.Id("de")))
-			}).Line()
+					g.Id("v").Dot("Set").Call(jen.Qual("reflect", "Append").
+						Call(jen.Id("v"), jen.Id("ve")))
+				}).Line()
 
 			g.Return(jen.Nil())
 		})

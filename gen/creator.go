@@ -10,9 +10,6 @@ import (
 func newCreator(schema *gen.Schema) *jen.Statement {
 	stmnt := jen.Type().Id("Creator").
 		StructFunc(func(g *jen.Group) {
-			g.Id("collection").String()
-			g.Id("columns").Op("[]").String()
-
 			for _, col := range schema.Cols {
 				if col.Auto {
 					continue
@@ -29,18 +26,8 @@ func newCreator(schema *gen.Schema) *jen.Statement {
 	// factory
 	stmnt = stmnt.Func().Id("NewCreator").Params().
 		Params(jen.Op("*").Id("Creator")).Block(
-		jen.Return(jen.Op("&").Id("Creator").Block(
-			jen.Id("collection").Op(":").Id("collection").Op(","),
-			jen.Id("columns").Op(":").Op("[]").String().
-				ValuesFunc(func(g *jen.Group) {
-					for _, col := range schema.Cols {
-						if col.Auto {
-							continue
-						}
-						g.Lit(col.Name)
-					}
-				}).Op(","),
-		))).Line().Line()
+		jen.Return(jen.Op("&").Id("Creator").Block())).
+		Line().Line()
 
 	rcvrParamsC := jen.Id("c").Op("*").Id("Creator")
 

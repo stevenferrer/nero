@@ -20,18 +20,16 @@ func Test_newAggregator(t *testing.T) {
 	meta := newAggregator(schema)
 	expect := `
 type Aggregator struct {
-	collection string
-	dest       interface{}
-	aggfs      []AggFunc
-	pfs        []PredFunc
-	sfs        []SortFunc
-	groups     []Column
+	v      interface{}
+	aggfs  []AggFunc
+	pfs    []PredFunc
+	sfs    []SortFunc
+	groups []Column
 }
 
-func NewAggregator(dest interface{}) *Aggregator {
+func NewAggregator(v interface{}) *Aggregator {
 	return &Aggregator{
-		collection: collection,
-		dest:       dest,
+		v: v,
 	}
 }
 

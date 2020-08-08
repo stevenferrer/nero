@@ -20,18 +20,13 @@ func Test_newCreator(t *testing.T) {
 	creator := newCreator(schema)
 	expect := strings.TrimSpace(`
 type Creator struct {
-	collection string
-	columns    []string
-	name       string
-	group      string
-	updatedAt  *time.Time
+	name      string
+	group     string
+	updatedAt *time.Time
 }
 
 func NewCreator() *Creator {
-	return &Creator{
-		collection: collection,
-		columns:    []string{"name", "group_res", "updated_at"},
-	}
+	return &Creator{}
 }
 
 func (c *Creator) Name(name string) *Creator {

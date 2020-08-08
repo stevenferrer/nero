@@ -4,17 +4,14 @@ import "github.com/dave/jennifer/jen"
 
 func newDeleter() *jen.Statement {
 	stmnt := jen.Type().Id("Deleter").Struct(
-		jen.Id("collection").String(),
 		jen.Id("pfs").Op("[]").Id("PredFunc"),
 	).Line()
 
 	// factory
 	stmnt = stmnt.Func().Id("NewDeleter").Params().
 		Params(jen.Op("*").Id("Deleter")).Block(
-		jen.Return(jen.Op("&").Id("Deleter").Block(
-			jen.Id("collection").Op(":").
-				Id("collection").Op(","),
-		))).Line().Line()
+		jen.Return(jen.Op("&").Id("Deleter").Block())).
+		Line().Line()
 
 	// where
 	stmnt = stmnt.Func().Params(jen.Id("d").Op("*").Id("Deleter")).

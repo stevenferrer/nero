@@ -5,7 +5,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sf9v/nero/example"
+	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_newDeleteBlock(t *testing.T) {
@@ -31,7 +34,11 @@ func (pg *PostgreSQLRepository) Delete(ctx context.Context, d *Deleter) (int64, 
 }
 
 func Test_newDeleteTxBlock(t *testing.T) {
-	block := newDeleteTxBlock()
+	schema, err := gen.BuildSchema(new(example.User))
+	require.NoError(t, err)
+	require.NotNil(t, schema)
+
+	block := newDeleteTxBlock(schema)
 	expect := strings.TrimSpace(`
 func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
@@ -44,8 +51,7 @@ func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Del
 		pf(pb)
 	}
 
-	table := fmt.Sprintf("%q", d.collection)
-	qb := squirrel.Delete(table).
+	qb := squirrel.Delete("\"users\"").
 		PlaceholderFormat(squirrel.Dollar).
 		RunWith(txx)
 	for _, p := range pb.All() {

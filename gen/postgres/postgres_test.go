@@ -111,7 +111,6 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	table := fmt.Sprintf("%q", c.collection)
 	columns := []string{}
 	values := []interface{}{}
 	if c.name != "" {
@@ -127,7 +126,7 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		values = append(values, c.updatedAt)
 	}
 
-	qb := squirrel.Insert(table).
+	qb := squirrel.Insert("\"users\"").
 		Columns(columns...).
 		Values(values...).
 		Suffix("RETURNING \"id\"").
@@ -158,12 +157,8 @@ func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs
 		return errors.New("expecting tx to be *sql.Tx")
 	}
 
-	table := fmt.Sprintf("%q", cs[0].collection)
-	columns := []string{}
-	for _, col := range cs[0].columns {
-		columns = append(columns, fmt.Sprintf("%q", col))
-	}
-	qb := squirrel.Insert(table).Columns(columns...)
+	columns := []string{"\"name\"", "\"group_res\"", "\"updated_at\""}
+	qb := squirrel.Insert("\"users\"").Columns(columns...)
 	for _, c := range cs {
 		qb = qb.Values(c.name, c.group, c.updatedAt)
 	}
@@ -260,7 +255,7 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 	qb := pg.buildSelect(q)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("op", "One").Str("stmnt", sql).
+		log.Debug().Str("op", "QueryOne").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 
@@ -282,13 +277,9 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 }
 
 func (pg *PostgreSQLRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
-	table := fmt.Sprintf("%q", q.collection)
-	columns := []string{}
-	for _, col := range q.columns {
-		columns = append(columns, fmt.Sprintf("%q", col))
-	}
+	columns := []string{"\"id\"", "\"name\"", "\"group_res\"", "\"updated_at\"", "\"created_at\""}
 	qb := squirrel.Select(columns...).
-		From(table).
+		From("\"users\"").
 		PlaceholderFormat(squirrel.Dollar)
 
 	pb := &predicate.Predicates{}
@@ -362,9 +353,7 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 		pf(pb)
 	}
 
-	table := fmt.Sprintf("%q", u.collection)
-	qb := squirrel.Update(table).
-		PlaceholderFormat(squirrel.Dollar)
+	qb := squirrel.Update("\"users\"").PlaceholderFormat(squirrel.Dollar)
 	if u.name != "" {
 		qb = qb.Set("\"name\"", u.name)
 	}
@@ -435,8 +424,7 @@ func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Del
 		pf(pb)
 	}
 
-	table := fmt.Sprintf("%q", d.collection)
-	qb := squirrel.Delete(table).
+	qb := squirrel.Delete("\"users\"").
 		PlaceholderFormat(squirrel.Dollar).
 		RunWith(txx)
 	for _, p := range pb.All() {
@@ -518,8 +506,7 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 		}
 	}
 
-	table := fmt.Sprintf("%q", a.collection)
-	qb := squirrel.Select(cols...).From(table).
+	qb := squirrel.Select(cols...).From("\"users\"").
 		PlaceholderFormat(squirrel.Dollar)
 
 	groups := []string{}
@@ -575,17 +562,17 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 	}
 	defer rows.Close()
 
-	dv := reflect.ValueOf(a.dest).Elem()
-	dt := reflect.TypeOf(dv.Interface()).Elem()
-	if dt.NumField() != len(cols) {
+	v := reflect.ValueOf(a.v).Elem()
+	t := reflect.TypeOf(v.Interface()).Elem()
+	if t.NumField() != len(cols) {
 		return errors.New("aggregate columns and destination struct field count should match")
 	}
 
 	for rows.Next() {
-		de := reflect.New(dt).Elem()
-		dest := make([]interface{}, de.NumField())
-		for i := 0; i < de.NumField(); i++ {
-			dest[i] = de.Field(i).Addr().Interface()
+		ve := reflect.New(t).Elem()
+		dest := make([]interface{}, ve.NumField())
+		for i := 0; i < ve.NumField(); i++ {
+			dest[i] = ve.Field(i).Addr().Interface()
 		}
 
 		err = rows.Scan(dest...)
@@ -593,7 +580,7 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 			return err
 		}
 
-		dv.Set(reflect.Append(dv, de))
+		v.Set(reflect.Append(v, ve))
 	}
 
 	return nil

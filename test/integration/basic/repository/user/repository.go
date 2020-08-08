@@ -31,22 +31,17 @@ type Repository interface {
 }
 
 type Creator struct {
-	collection string
-	columns    []string
-	uID        ksuid.KSUID
-	email      *string
-	name       *string
-	age        int
-	group      user.Group
-	kv         example.Map
-	updatedAt  *time.Time
+	uID       ksuid.KSUID
+	email     *string
+	name      *string
+	age       int
+	group     user.Group
+	kv        example.Map
+	updatedAt *time.Time
 }
 
 func NewCreator() *Creator {
-	return &Creator{
-		collection: collection,
-		columns:    []string{"uid", "email", "name", "age", "group", "kv", "updated_at"},
-	}
+	return &Creator{}
 }
 
 func (c *Creator) UID(uID ksuid.KSUID) *Creator {
@@ -85,19 +80,14 @@ func (c *Creator) UpdatedAt(updatedAt *time.Time) *Creator {
 }
 
 type Queryer struct {
-	collection string
-	columns    []string
-	limit      uint64
-	offset     uint64
-	pfs        []PredFunc
-	sfs        []SortFunc
+	limit  uint64
+	offset uint64
+	pfs    []PredFunc
+	sfs    []SortFunc
 }
 
 func NewQueryer() *Queryer {
-	return &Queryer{
-		collection: collection,
-		columns:    []string{"id", "uid", "email", "name", "age", "group", "kv", "updated_at", "created_at"},
-	}
+	return &Queryer{}
 }
 
 func (q *Queryer) Where(pfs ...PredFunc) *Queryer {
@@ -121,23 +111,18 @@ func (q *Queryer) Offset(offset uint64) *Queryer {
 }
 
 type Updater struct {
-	collection string
-	columns    []string
-	uID        ksuid.KSUID
-	email      *string
-	name       *string
-	age        int
-	group      user.Group
-	kv         example.Map
-	updatedAt  *time.Time
-	pfs        []PredFunc
+	uID       ksuid.KSUID
+	email     *string
+	name      *string
+	age       int
+	group     user.Group
+	kv        example.Map
+	updatedAt *time.Time
+	pfs       []PredFunc
 }
 
 func NewUpdater() *Updater {
-	return &Updater{
-		collection: collection,
-		columns:    []string{"uid", "email", "name", "age", "group", "kv", "updated_at"},
-	}
+	return &Updater{}
 }
 
 func (u *Updater) UID(uID ksuid.KSUID) *Updater {
@@ -181,14 +166,11 @@ func (u *Updater) Where(pfs ...PredFunc) *Updater {
 }
 
 type Deleter struct {
-	collection string
-	pfs        []PredFunc
+	pfs []PredFunc
 }
 
 func NewDeleter() *Deleter {
-	return &Deleter{
-		collection: collection,
-	}
+	return &Deleter{}
 }
 
 func (d *Deleter) Where(pfs ...PredFunc) *Deleter {
@@ -197,18 +179,16 @@ func (d *Deleter) Where(pfs ...PredFunc) *Deleter {
 }
 
 type Aggregator struct {
-	collection string
-	dest       interface{}
-	aggfs      []AggFunc
-	pfs        []PredFunc
-	sfs        []SortFunc
-	groups     []Column
+	v      interface{}
+	aggfs  []AggFunc
+	pfs    []PredFunc
+	sfs    []SortFunc
+	groups []Column
 }
 
-func NewAggregator(dest interface{}) *Aggregator {
+func NewAggregator(v interface{}) *Aggregator {
 	return &Aggregator{
-		collection: collection,
-		dest:       dest,
+		v: v,
 	}
 }
 

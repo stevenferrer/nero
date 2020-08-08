@@ -77,7 +77,6 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		return "", errors.New("expecting tx to be *sql.Tx")
 	}
 
-	table := fmt.Sprintf("%q", c.collection)
 	columns := []string{}
 	values := []interface{}{}
 	if c.uID != [20]uint8{} {
@@ -109,7 +108,7 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		values = append(values, c.updatedAt)
 	}
 
-	qb := sq.Insert(table).
+	qb := sq.Insert("\"users\"").
 		Columns(columns...).
 		Values(values...).
 		Suffix("RETURNING \"id\"").
@@ -140,12 +139,8 @@ func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs
 		return errors.New("expecting tx to be *sql.Tx")
 	}
 
-	table := fmt.Sprintf("%q", cs[0].collection)
-	columns := []string{}
-	for _, col := range cs[0].columns {
-		columns = append(columns, fmt.Sprintf("%q", col))
-	}
-	qb := sq.Insert(table).Columns(columns...)
+	columns := []string{"\"uid\"", "\"email\"", "\"name\"", "\"age\"", "\"group\"", "\"kv\"", "\"updated_at\""}
+	qb := sq.Insert("\"users\"").Columns(columns...)
 	for _, c := range cs {
 		qb = qb.Values(c.uID, c.email, c.name, c.age, c.group, c.kv, c.updatedAt)
 	}
@@ -246,7 +241,7 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 	qb := pg.buildSelect(q)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("op", "One").Str("stmnt", sql).
+		log.Debug().Str("op", "QueryOne").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 
@@ -272,13 +267,9 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 }
 
 func (pg *PostgreSQLRepository) buildSelect(q *Queryer) sq.SelectBuilder {
-	table := fmt.Sprintf("%q", q.collection)
-	columns := []string{}
-	for _, col := range q.columns {
-		columns = append(columns, fmt.Sprintf("%q", col))
-	}
+	columns := []string{"\"id\"", "\"uid\"", "\"email\"", "\"name\"", "\"age\"", "\"group\"", "\"kv\"", "\"updated_at\"", "\"created_at\""}
 	qb := sq.Select(columns...).
-		From(table).
+		From("\"users\"").
 		PlaceholderFormat(sq.Dollar)
 
 	pb := &predicate.Predicates{}
@@ -352,9 +343,7 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 		pf(pb)
 	}
 
-	table := fmt.Sprintf("%q", u.collection)
-	qb := sq.Update(table).
-		PlaceholderFormat(sq.Dollar)
+	qb := sq.Update("\"users\"").PlaceholderFormat(sq.Dollar)
 	if u.uID != [20]uint8{} {
 		qb = qb.Set("\"uid\"", u.uID)
 	}
@@ -437,8 +426,7 @@ func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Del
 		pf(pb)
 	}
 
-	table := fmt.Sprintf("%q", d.collection)
-	qb := sq.Delete(table).
+	qb := sq.Delete("\"users\"").
 		PlaceholderFormat(sq.Dollar).
 		RunWith(txx)
 	for _, p := range pb.All() {
@@ -520,8 +508,7 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 		}
 	}
 
-	table := fmt.Sprintf("%q", a.collection)
-	qb := sq.Select(cols...).From(table).
+	qb := sq.Select(cols...).From("\"users\"").
 		PlaceholderFormat(sq.Dollar)
 
 	groups := []string{}
@@ -577,17 +564,17 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 	}
 	defer rows.Close()
 
-	dv := reflect.ValueOf(a.dest).Elem()
-	dt := reflect.TypeOf(dv.Interface()).Elem()
-	if dt.NumField() != len(cols) {
+	v := reflect.ValueOf(a.v).Elem()
+	t := reflect.TypeOf(v.Interface()).Elem()
+	if t.NumField() != len(cols) {
 		return errors.New("aggregate columns and destination struct field count should match")
 	}
 
 	for rows.Next() {
-		de := reflect.New(dt).Elem()
-		dest := make([]interface{}, de.NumField())
-		for i := 0; i < de.NumField(); i++ {
-			dest[i] = de.Field(i).Addr().Interface()
+		ve := reflect.New(t).Elem()
+		dest := make([]interface{}, ve.NumField())
+		for i := 0; i < ve.NumField(); i++ {
+			dest[i] = ve.Field(i).Addr().Interface()
 		}
 
 		err = rows.Scan(dest...)
@@ -595,7 +582,7 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 			return err
 		}
 
-		dv.Set(reflect.Append(dv, de))
+		v.Set(reflect.Append(v, ve))
 	}
 
 	return nil

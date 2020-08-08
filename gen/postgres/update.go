@@ -63,14 +63,10 @@ func newUpdateTxBlock(schema *gen.Schema) *jen.Statement {
 				Op(":=").Range().Id("u").Dot("pfs")).
 				Block(jen.Id("pf").Call(jen.Id("pb"))).Line()
 
-			// quote table name
-			g.Id("table").Op(":=").Qual("fmt", "Sprintf").
-				Call(jen.Lit("%q"), jen.Id("u").Dot("collection"))
 			// query builder
 			g.Id("qb").Op(":=").Qual(sqPkg, "Update").
-				Call(jen.Id("table")).
-				Op(".").Line().Id("PlaceholderFormat").
-				Call(jen.Qual(sqPkg, "Dollar"))
+				Call(jen.Lit(fmt.Sprintf("%q", schema.Coln))).
+				Dot("PlaceholderFormat").Call(jen.Qual(sqPkg, "Dollar"))
 
 			for _, col := range schema.Cols {
 				if col.Auto {

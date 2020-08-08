@@ -20,19 +20,14 @@ func Test_newUpdater(t *testing.T) {
 	updater := newUpdater(schema)
 	expect := strings.TrimSpace(`
 type Updater struct {
-	collection string
-	columns    []string
-	name       string
-	group      string
-	updatedAt  *time.Time
-	pfs        []PredFunc
+	name      string
+	group     string
+	updatedAt *time.Time
+	pfs       []PredFunc
 }
 
 func NewUpdater() *Updater {
-	return &Updater{
-		collection: collection,
-		columns:    []string{"name", "group_res", "updated_at"},
-	}
+	return &Updater{}
 }
 
 func (u *Updater) Name(name string) *Updater {

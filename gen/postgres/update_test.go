@@ -52,9 +52,7 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 		pf(pb)
 	}
 
-	table := fmt.Sprintf("%q", u.collection)
-	qb := squirrel.Update(table).
-		PlaceholderFormat(squirrel.Dollar)
+	qb := squirrel.Update("\"users\"").PlaceholderFormat(squirrel.Dollar)
 	if u.name != "" {
 		qb = qb.Set("\"name\"", u.name)
 	}

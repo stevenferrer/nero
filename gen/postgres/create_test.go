@@ -74,7 +74,6 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	table := fmt.Sprintf("%q", c.collection)
 	columns := []string{}
 	values := []interface{}{}
 	if c.name != "" {
@@ -90,7 +89,7 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		values = append(values, c.updatedAt)
 	}
 
-	qb := squirrel.Insert(table).
+	qb := squirrel.Insert("\"users\"").
 		Columns(columns...).
 		Values(values...).
 		Suffix("RETURNING \"id\"").
@@ -129,7 +128,6 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		return "", errors.New("expecting tx to be *sql.Tx")
 	}
 
-	table := fmt.Sprintf("%q", c.collection)
 	columns := []string{}
 	values := []interface{}{}
 	if c.name != "" {
@@ -141,7 +139,7 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		values = append(values, c.updatedAt)
 	}
 
-	qb := squirrel.Insert(table).
+	qb := squirrel.Insert("\"users\"").
 		Columns(columns...).
 		Values(values...).
 		Suffix("RETURNING \"id\"").
@@ -185,12 +183,8 @@ func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs
 		return errors.New("expecting tx to be *sql.Tx")
 	}
 
-	table := fmt.Sprintf("%q", cs[0].collection)
-	columns := []string{}
-	for _, col := range cs[0].columns {
-		columns = append(columns, fmt.Sprintf("%q", col))
-	}
-	qb := squirrel.Insert(table).Columns(columns...)
+	columns := []string{"\"name\"", "\"group_res\"", "\"updated_at\""}
+	qb := squirrel.Insert("\"users\"").Columns(columns...)
 	for _, c := range cs {
 		qb = qb.Values(c.name, c.group, c.updatedAt)
 	}

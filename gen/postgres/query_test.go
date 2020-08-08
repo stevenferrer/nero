@@ -131,7 +131,7 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 	qb := pg.buildSelect(q)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("op", "One").Str("stmnt", sql).
+		log.Debug().Str("op", "QueryOne").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 
@@ -158,16 +158,16 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 }
 
 func Test_newSelectBuilderBlock(t *testing.T) {
-	block := newSelectBuilderBlock()
+	schema, err := gen.BuildSchema(new(example.User))
+	require.NoError(t, err)
+	require.NotNil(t, schema)
+
+	block := newSelectBuilderBlock(schema)
 	expect := strings.TrimSpace(`
 func (pg *PostgreSQLRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
-	table := fmt.Sprintf("%q", q.collection)
-	columns := []string{}
-	for _, col := range q.columns {
-		columns = append(columns, fmt.Sprintf("%q", col))
-	}
+	columns := []string{"\"id\"", "\"name\"", "\"group_res\"", "\"updated_at\"", "\"created_at\""}
 	qb := squirrel.Select(columns...).
-		From(table).
+		From("\"users\"").
 		PlaceholderFormat(squirrel.Dollar)
 
 	pb := &predicate.Predicates{}

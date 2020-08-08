@@ -67,7 +67,7 @@ func NewPostgreSQLRepo(schema *gen.Schema) *jen.Statement {
 		// query one tx
 		Add(newQueryOneTxBlock(schema)).Add(ll).
 		// select builder
-		Add(newSelectBuilderBlock()).Add(ll).
+		Add(newSelectBuilderBlock(schema)).Add(ll).
 		// update
 		Add(newUpdateBlock()).Add(ll).
 		// update tx
@@ -75,11 +75,11 @@ func NewPostgreSQLRepo(schema *gen.Schema) *jen.Statement {
 		// delete
 		Add(newDeleteBlock()).Add(ll).
 		// delete tx
-		Add(newDeleteTxBlock()).Add(ll).
+		Add(newDeleteTxBlock(schema)).Add(ll).
 		// aggregate
 		Add(newAggregateBlock()).Add(ll).
 		// aggregate tx
-		Add(newAggregateTxBlock()).Add(ll)
+		Add(newAggregateTxBlock(schema)).Add(ll)
 }
 
 func newTypeDefBlock() *jen.Statement {

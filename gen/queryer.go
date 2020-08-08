@@ -7,8 +7,6 @@ import (
 
 func newQueryer(schema *gen.Schema) *jen.Statement {
 	stmnt := jen.Type().Id("Queryer").Struct(
-		jen.Id("collection").String(),
-		jen.Id("columns").Op("[]").String(),
 		jen.Id("limit").Uint64(),
 		jen.Id("offset").Uint64(),
 		jen.Id("pfs").Op("[]").Id("PredFunc"),
@@ -18,15 +16,8 @@ func newQueryer(schema *gen.Schema) *jen.Statement {
 	// factory
 	stmnt = stmnt.Func().Id("NewQueryer").Params().
 		Params(jen.Op("*").Id("Queryer")).Block(
-		jen.Return(jen.Op("&").Id("Queryer").Block(
-			jen.Id("collection").Op(":").Id("collection").Op(","),
-			jen.Id("columns").Op(":").Op("[]").String().
-				ValuesFunc(func(g *jen.Group) {
-					for _, col := range schema.Cols {
-						g.Lit(col.Name)
-					}
-				}).Op(","),
-		))).Line().Line()
+		jen.Return(jen.Op("&").Id("Queryer").Block())).
+		Line().Line()
 
 	rcvrParamsC := jen.Id("q").Op("*").Id("Queryer")
 	retParamsC := jen.Op("*").Id("Queryer")

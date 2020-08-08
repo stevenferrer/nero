@@ -20,19 +20,14 @@ func Test_newQueryer(t *testing.T) {
 	queryer := newQueryer(schema)
 	expect := strings.TrimSpace(`
 type Queryer struct {
-	collection string
-	columns    []string
-	limit      uint64
-	offset     uint64
-	pfs        []PredFunc
-	sfs        []SortFunc
+	limit  uint64
+	offset uint64
+	pfs    []PredFunc
+	sfs    []SortFunc
 }
 
 func NewQueryer() *Queryer {
-	return &Queryer{
-		collection: collection,
-		columns:    []string{"id", "name", "group_res", "updated_at", "created_at"},
-	}
+	return &Queryer{}
 }
 
 func (q *Queryer) Where(pfs ...PredFunc) *Queryer {
