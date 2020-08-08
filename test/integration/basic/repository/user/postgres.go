@@ -79,12 +79,39 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 
 	table := fmt.Sprintf("%q", c.collection)
 	columns := []string{}
-	for _, col := range c.columns {
-		columns = append(columns, fmt.Sprintf("%q", col))
+	values := []interface{}{}
+	if c.uID != [20]uint8{} {
+		columns = append(columns, "\"uid\"")
+		values = append(values, c.uID)
 	}
+	if c.email != nil {
+		columns = append(columns, "\"email\"")
+		values = append(values, c.email)
+	}
+	if c.name != nil {
+		columns = append(columns, "\"name\"")
+		values = append(values, c.name)
+	}
+	if c.age != 0 {
+		columns = append(columns, "\"age\"")
+		values = append(values, c.age)
+	}
+	if c.group != "" {
+		columns = append(columns, "\"group\"")
+		values = append(values, c.group)
+	}
+	if c.kv != nil {
+		columns = append(columns, "\"kv\"")
+		values = append(values, c.kv)
+	}
+	if c.updatedAt != nil {
+		columns = append(columns, "\"updated_at\"")
+		values = append(values, c.updatedAt)
+	}
+
 	qb := sq.Insert(table).
 		Columns(columns...).
-		Values(c.uID, c.email, c.name, c.age, c.group, c.kv, c.updatedAt).
+		Values(values...).
 		Suffix("RETURNING \"id\"").
 		PlaceholderFormat(sq.Dollar).
 		RunWith(txx)

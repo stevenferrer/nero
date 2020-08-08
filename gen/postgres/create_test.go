@@ -76,12 +76,23 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 
 	table := fmt.Sprintf("%q", c.collection)
 	columns := []string{}
-	for _, col := range c.columns {
-		columns = append(columns, fmt.Sprintf("%q", col))
+	values := []interface{}{}
+	if c.name != "" {
+		columns = append(columns, "\"name\"")
+		values = append(values, c.name)
 	}
+	if c.group != "" {
+		columns = append(columns, "\"group_res\"")
+		values = append(values, c.group)
+	}
+	if c.updatedAt != nil {
+		columns = append(columns, "\"updated_at\"")
+		values = append(values, c.updatedAt)
+	}
+
 	qb := squirrel.Insert(table).
 		Columns(columns...).
-		Values(c.name, c.group, c.updatedAt).
+		Values(values...).
 		Suffix("RETURNING \"id\"").
 		PlaceholderFormat(squirrel.Dollar).
 		RunWith(txx)
@@ -120,12 +131,19 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 
 	table := fmt.Sprintf("%q", c.collection)
 	columns := []string{}
-	for _, col := range c.columns {
-		columns = append(columns, fmt.Sprintf("%q", col))
+	values := []interface{}{}
+	if c.name != "" {
+		columns = append(columns, "\"name\"")
+		values = append(values, c.name)
 	}
+	if c.updatedAt != nil {
+		columns = append(columns, "\"updated_at\"")
+		values = append(values, c.updatedAt)
+	}
+
 	qb := squirrel.Insert(table).
 		Columns(columns...).
-		Values(c.name, c.updatedAt).
+		Values(values...).
 		Suffix("RETURNING \"id\"").
 		PlaceholderFormat(squirrel.Dollar).
 		RunWith(txx)

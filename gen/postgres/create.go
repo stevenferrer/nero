@@ -88,37 +88,39 @@ func newCreateTxBlock(schema *gen.Schema) *jen.Statement {
 
 			// quote column names
 			g.Id("columns").Op(":=").Index().String().Values()
-			g.For(jen.List(jen.Id("_"), jen.Id("col")).Op(":=").
-				Range().Id("c").Dot("columns")).Block(
-				jen.Id("columns").Op("=").Append(
-					jen.Id("columns"),
-					jen.Qual("fmt", "Sprintf").Call(
-						jen.Lit("%q"), jen.Id("col"),
-					),
-				),
-			)
+			g.Id("values").Op(":=").Index().Interface().Values()
+			for _, col := range schema.Cols {
+				if col.Auto {
+					continue
+				}
+				field := col.LowerCamelName()
+				if len(col.StructField) > 0 {
+					field = strcase.ToLowerCamel(col.StructField)
+				}
+				colv := col.Type.V()
+				g.If(jen.Id("c").Dot(field).
+					Op("!=").Add(jenx.Zero(colv))).
+					Block(
+						jen.Id("columns").Op("=").Append(
+							jen.Id("columns"),
+							jen.Lit(fmt.Sprintf("%q", col.Name)),
+						),
+						jen.Id("values").Op("=").Append(
+							jen.Id("values"),
+							jen.Id("c").Dot(field),
+						),
+					)
+			}
+
+			g.Line()
 
 			// query builder
-			g.Id("qb").Op(":=").Qual(sqPkg, "Insert").
-				Call(jen.Id("table")).Op(".").Line().
-				Id("Columns").Call(jen.Id("columns").
-				Op("...")).Op(".").Line().Id("Values").
-				CallFunc(func(g *jen.Group) {
-					for _, col := range schema.Cols {
-						if col.Auto {
-							continue
-						}
-						field := col.LowerCamelName()
-						if len(col.StructField) > 0 {
-							field = strcase.ToLowerCamel(col.StructField)
-						}
-						g.Id("c").Dot(field)
-					}
-				}).Op(".").Line().Id("Suffix").
-				Call(jen.Lit(fmt.Sprintf("RETURNING %q", ident.Name))).
-				Op(".").Line().Id("PlaceholderFormat").
-				Call(jen.Qual(sqPkg, "Dollar")).
-				Op(".").Line().Id("RunWith").Call(jen.Id("txx"))
+			g.Id("qb").Op(":=").Qual(sqPkg, "Insert").Call(jen.Id("table")).
+				Add(jenx.Dotln("Columns")).Call(jen.Id("columns").Op("...")).
+				Add(jenx.Dotln("Values")).Call(jen.Id("values").Op("...")).
+				Add(jenx.Dotln("Suffix")).Call(jen.Lit(fmt.Sprintf("RETURNING %q", ident.Name))).
+				Add(jenx.Dotln("PlaceholderFormat")).Call(jen.Qual(sqPkg, "Dollar")).
+				Add(jenx.Dotln("RunWith")).Call(jen.Id("txx"))
 			// debug
 			g.Add(newDebugLogBlock("Create")).Line().Line()
 

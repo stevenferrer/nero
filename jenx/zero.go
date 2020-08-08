@@ -7,6 +7,7 @@ import (
 	"github.com/sf9v/mira"
 )
 
+// Zero zero value statement
 func Zero(v interface{}) *jen.Statement {
 	mt := mira.NewType(v)
 	if mt.Kind() == mira.Numeric {
