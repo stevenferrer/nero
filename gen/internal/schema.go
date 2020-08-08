@@ -10,22 +10,21 @@ import (
 
 // Schema is an internal schema
 type Schema struct {
-	// Coln is the collection
-	Coln  string
-	Type  *mira.Type
-	Ident *Col
-	Cols  []*Col
-	Pkg   string
+	Collection string
+	Type       *mira.Type
+	Ident      *Col
+	Cols       []*Col
+	Pkg        string
 }
 
 // BuildSchema builds schema from a nero.Schemaer to Schema
 func BuildSchema(s nero.Schemaer) (*Schema, error) {
 	ns := s.Schema()
 	schema := &Schema{
-		Coln: ns.Collection,
-		Type: mira.NewType(s),
-		Cols: []*Col{},
-		Pkg:  ns.Pkg,
+		Collection: ns.Collection,
+		Type:       mira.NewType(s),
+		Cols:       []*Col{},
+		Pkg:        ns.Pkg,
 	}
 
 	identCnt := 0
@@ -37,6 +36,7 @@ func BuildSchema(s nero.Schemaer) (*Schema, error) {
 			Type:        mira.NewType(cfg.T),
 			Ident:       cfg.Ident,
 			Auto:        cfg.Auto,
+			Nullable:    cfg.Nullable,
 		}
 
 		if len(cfg.StructField) > 0 {
@@ -52,11 +52,11 @@ func BuildSchema(s nero.Schemaer) (*Schema, error) {
 	}
 
 	if identCnt == 0 {
-		return nil, errors.New("an ident column is required")
+		return nil, errors.New("an identity column is required")
 	}
 
 	if identCnt > 1 {
-		return nil, errors.New("only one ident column is allowed")
+		return nil, errors.New("only one identity column is allowed")
 	}
 
 	return schema, nil

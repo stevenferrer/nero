@@ -112,7 +112,7 @@ func newCreateTxBlock(schema *gen.Schema) *jen.Statement {
 
 			// query builder
 			g.Id("qb").Op(":=").Qual(sqPkg, "Insert").
-				Call(jen.Lit(fmt.Sprintf("%q", schema.Coln))).
+				Call(jen.Lit(fmt.Sprintf("%q", schema.Collection))).
 				Add(jenx.Dotln("Columns")).
 				Call(jen.Id("columns").Op("...")).
 				Add(jenx.Dotln("Values")).
@@ -170,7 +170,7 @@ func newCreateManyTxBlock(schema *gen.Schema) *jen.Statement {
 
 			// query builder
 			g.Id("qb").Op(":=").Qual(sqPkg, "Insert").
-				Call(jen.Lit(fmt.Sprintf("%q", schema.Coln))).
+				Call(jen.Lit(fmt.Sprintf("%q", schema.Collection))).
 				Dot("Columns").Call(jen.Id("columns").Op("..."))
 
 			g.For(jen.List(jen.Id("_"), jen.Id("c")).

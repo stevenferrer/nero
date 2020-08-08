@@ -65,7 +65,7 @@ func newUpdateTxBlock(schema *gen.Schema) *jen.Statement {
 
 			// query builder
 			g.Id("qb").Op(":=").Qual(sqPkg, "Update").
-				Call(jen.Lit(fmt.Sprintf("%q", schema.Coln))).
+				Call(jen.Lit(fmt.Sprintf("%q", schema.Collection))).
 				Dot("PlaceholderFormat").Call(jen.Qual(sqPkg, "Dollar"))
 
 			for _, col := range schema.Cols {

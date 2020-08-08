@@ -178,7 +178,7 @@ func newSelectBuilderBlock(schema *gen.Schema) *jen.Statement {
 			g.Id("qb").Op(":=").Qual(sqPkg, "Select").
 				Call(jen.Id("columns").Op("...")).
 				Op(".").Line().Id("From").
-				Call(jen.Lit(fmt.Sprintf("%q", schema.Coln))).
+				Call(jen.Lit(fmt.Sprintf("%q", schema.Collection))).
 				Op(".").Line().Id("PlaceholderFormat").
 				Call(jen.Qual(sqPkg, "Dollar")).Line()
 

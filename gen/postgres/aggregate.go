@@ -93,7 +93,7 @@ func newAggregateTxBlock(schema *gen.Schema) *jen.Statement {
 			// query builder
 			g.Id("qb").Op(":=").Qual(sqPkg, "Select").
 				Call(jen.Id("cols").Op("...")).
-				Dot("From").Call(jen.Lit(fmt.Sprintf("%q", schema.Coln))).
+				Dot("From").Call(jen.Lit(fmt.Sprintf("%q", schema.Collection))).
 				Op(".").Line().Id("PlaceholderFormat").
 				Call(jen.Qual(sqPkg, "Dollar")).Line()
 

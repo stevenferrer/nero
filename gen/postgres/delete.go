@@ -61,7 +61,7 @@ func newDeleteTxBlock(schema *gen.Schema) *jen.Statement {
 
 			// query builder
 			g.Id("qb").Op(":=").Qual(sqPkg, "Delete").
-				Call(jen.Lit(fmt.Sprintf("%q", schema.Coln))).
+				Call(jen.Lit(fmt.Sprintf("%q", schema.Collection))).
 				Op(".").Line().Id("PlaceholderFormat").
 				Call(jen.Qual(sqPkg, "Dollar")).
 				Op(".").Line().Id("RunWith").

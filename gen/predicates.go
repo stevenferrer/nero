@@ -15,8 +15,9 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 		jen.Op("*").Qual(pkgPath+"/predicate", "Predicates"),
 	).Line()
 
-	ops := []predicate.Operator{predicate.Eq, predicate.NotEq, predicate.Gt,
-		predicate.GtOrEq, predicate.Lt, predicate.LtOrEq}
+	ops := []predicate.Operator{predicate.Eq, predicate.NotEq,
+		predicate.Gt, predicate.GtOrEq, predicate.Lt, predicate.LtOrEq,
+		predicate.IsNull, predicate.IsNotNull}
 	predPkg := pkgPath + "/predicate"
 	for _, col := range schema.Cols {
 		if !hasPreds(col.Type.T()) {
