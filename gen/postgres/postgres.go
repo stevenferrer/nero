@@ -11,7 +11,6 @@ import (
 const (
 	pkgPath = "github.com/sf9v/nero"
 	aggPkg  = "github.com/sf9v/nero/aggregate"
-	compPkg = "github.com/sf9v/nero/comparison"
 	sortPkg = "github.com/sf9v/nero/sort"
 
 	sqPkg  = "github.com/Masterminds/squirrel"
