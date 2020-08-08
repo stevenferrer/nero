@@ -60,6 +60,7 @@ func Generate(schemaer nero.Schemaer) (Files, error) {
 	repoFile.Add(newUpdater(schema))
 	repoFile.Add(newDeleter())
 	repoFile.Add(newAggregator(schema))
+	repoFile.Add(newTx())
 	fls = append(fls, &File{
 		name: "repository.go",
 		jf:   repoFile,
@@ -72,13 +73,6 @@ func Generate(schemaer nero.Schemaer) (Files, error) {
 	fls = append(fls, &File{
 		name: "postgres.go",
 		jf:   postgresFile,
-	})
-
-	txFile := jen.NewFile(pkgName)
-	txFile.Add(newTx())
-	fls = append(fls, &File{
-		name: "tx.go",
-		jf:   txFile,
 	})
 
 	for i, fl := range fls {

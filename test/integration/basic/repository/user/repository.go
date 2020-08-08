@@ -3,6 +3,7 @@ package user
 
 import (
 	"context"
+	errors "github.com/pkg/errors"
 	ksuid "github.com/segmentio/ksuid"
 	nero "github.com/sf9v/nero"
 	example "github.com/sf9v/nero/example"
@@ -229,4 +230,12 @@ func (a *Aggregator) Sort(sfs ...SortFunc) *Aggregator {
 func (a *Aggregator) Group(cols ...Column) *Aggregator {
 	a.groups = append(a.groups, cols...)
 	return a
+}
+
+func rollback(tx nero.Tx, err error) error {
+	rerr := tx.Rollback()
+	if rerr != nil {
+		err = errors.Wrapf(err, "rollback error: %v", rerr)
+	}
+	return err
 }

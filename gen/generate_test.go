@@ -21,7 +21,7 @@ func (*example1) Schema() *nero.Schema {
 func TestGenerate(t *testing.T) {
 	files, err := Generate(new(example.User))
 	assert.NoError(t, err)
-	assert.Len(t, files, 7)
+	assert.Len(t, files, 6)
 
 	for _, file := range files {
 		require.NotEmpty(t, file.Name())
