@@ -22,14 +22,12 @@ const (
 )
 
 var (
-	rcvrIDC     = jen.Id(rcvrID)
-	rcvrParamC  = jen.Add(rcvrIDC).Op("*").Id(typeName)
-	ctxC        = jen.Qual("context", "Context")
-	ctxIDC      = jen.Id("ctx")
-	txC         = jen.Qual(pkgPath, "Tx")
-	txCommitC   = jen.Id("tx").Dot("Commit").Call()
-	txRollbackC = jen.Id("rollback").Call(jen.Id("tx"), jen.Err())
-	runnerC     = jen.Qual(pkgPath, "SqlRunner")
+	rcvrIDC    = jen.Id(rcvrID)
+	rcvrParamC = jen.Add(rcvrIDC).Op("*").Id(typeName)
+	ctxC       = jen.Qual("context", "Context")
+	ctxIDC     = jen.Id("ctx")
+	txC        = jen.Qual(pkgPath, "Tx")
+	runnerC    = jen.Qual(pkgPath, "SqlRunner")
 
 	predOps = []comparison.Operator{comparison.Eq, comparison.NotEq,
 		comparison.Gt, comparison.GtOrEq, comparison.Lt, comparison.LtOrEq,
