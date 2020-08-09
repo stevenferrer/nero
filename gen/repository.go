@@ -23,24 +23,24 @@ func newRepository(schema *gen.Schema) *jen.Statement {
 		jen.Id("Tx").Params(ctxC).Params(txC, jen.Error()),
 		jen.Id("Create").Params(ctxC, jen.Op("*").Id("Creator")).
 			Params(identParamC, jen.Err().Error()),
-		jen.Id("CreateMany").
-			Params(ctxC, jen.Op("...").Op("*").Id("Creator")).
-			Params(jen.Error()),
 		jen.Id("CreateTx").
 			Params(ctxC, txC, jen.Op("*").Id("Creator")).
 			Params(identParamC, jen.Err().Error()),
+		jen.Id("CreateMany").
+			Params(ctxC, jen.Op("...").Op("*").Id("Creator")).
+			Params(jen.Error()),
 		jen.Id("CreateManyTx").
 			Params(ctxC, txC, jen.Op("...").Op("*").Id("Creator")).
 			Params(jen.Error()),
 		jen.Id("Query").
 			Params(ctxC, jen.Op("*").Id("Queryer")).
 			Params(jen.Op("[]").Add(schemaTypeC), jen.Error()),
-		jen.Id("QueryOne").
-			Params(ctxC, jen.Op("*").Id("Queryer")).
-			Params(jen.Add(schemaTypeC), jen.Error()),
 		jen.Id("QueryTx").
 			Params(ctxC, txC, jen.Op("*").Id("Queryer")).
 			Params(jen.Op("[]").Add(schemaTypeC), jen.Error()),
+		jen.Id("QueryOne").
+			Params(ctxC, jen.Op("*").Id("Queryer")).
+			Params(jen.Add(schemaTypeC), jen.Error()),
 		jen.Id("QueryOneTx").
 			Params(ctxC, txC, jen.Op("*").Id("Queryer")).
 			Params(jen.Add(schemaTypeC), jen.Error()),

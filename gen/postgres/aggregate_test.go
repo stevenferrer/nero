@@ -16,17 +16,7 @@ func Test_newAggregateBlock(t *testing.T) {
 	aggBlocks := newAggregateBlock()
 	expect := strings.TrimSpace(`
 func (pg *PostgreSQLRepository) Aggregate(ctx context.Context, a *Aggregator) error {
-	tx, err := pg.Tx(ctx)
-	if err != nil {
-		return err
-	}
-
-	err = pg.AggregateTx(ctx, tx, a)
-	if err != nil {
-		return rollback(tx, err)
-	}
-
-	return tx.Commit()
+	return pg.aggregate(ctx, pg.db, a)
 }
 `)
 
@@ -35,11 +25,7 @@ func (pg *PostgreSQLRepository) Aggregate(ctx context.Context, a *Aggregator) er
 }
 
 func Test_newAggregateTxBlock(t *testing.T) {
-	schema, err := gen.BuildSchema(new(example.User))
-	require.NoError(t, err)
-	require.NotNil(t, schema)
-
-	aggBlocks := newAggregateTxBlock(schema)
+	aggBlocks := newAggregateTxBlock()
 	expect := strings.TrimSpace(`
 func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
 	txx, ok := tx.(*sql.Tx)
@@ -47,6 +33,22 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 		return errors.New("expecting tx to be *sql.Tx")
 	}
 
+	return pg.aggregate(ctx, txx, a)
+}
+`)
+
+	got := strings.TrimSpace(fmt.Sprintf("%#v", aggBlocks))
+	assert.Equal(t, expect, got)
+}
+
+func Test_newAggregateRunnerBlock(t *testing.T) {
+	schema, err := gen.BuildSchema(new(example.User))
+	require.NoError(t, err)
+	require.NotNil(t, schema)
+
+	aggBlocks := newAggregateRunnerBlock(schema)
+	expect := strings.TrimSpace(`
+func (pg *PostgreSQLRepository) aggregate(ctx context.Context, runner nero.SqlRunner, a *Aggregator) error {
 	aggs := &aggregate.Aggregates{}
 	for _, aggf := range a.aggfs {
 		aggf(aggs)
@@ -127,7 +129,7 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 			Interface("args", args).Err(err).Msg("")
 	}
 
-	rows, err := qb.RunWith(txx).QueryContext(ctx)
+	rows, err := qb.RunWith(runner).QueryContext(ctx)
 	if err != nil {
 		return err
 	}

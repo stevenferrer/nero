@@ -29,6 +29,7 @@ var (
 	txC         = jen.Qual(pkgPath, "Tx")
 	txCommitC   = jen.Id("tx").Dot("Commit").Call()
 	txRollbackC = jen.Id("rollback").Call(jen.Id("tx"), jen.Err())
+	runnerC     = jen.Qual(pkgPath, "SqlRunner")
 
 	predOps = []comparison.Operator{comparison.Eq, comparison.NotEq,
 		comparison.Gt, comparison.GtOrEq, comparison.Lt, comparison.LtOrEq,
@@ -52,34 +53,48 @@ func NewPostgreSQLRepo(schema *gen.Schema) *jen.Statement {
 		Add(newTxBlock()).Add(ll).
 		// create
 		Add(newCreateBlock(schema)).Add(ll).
-		// create many
-		Add(newCreateManyBlock()).Add(ll).
 		// create tx
 		Add(newCreateTxBlock(schema)).Add(ll).
+		// create runner
+		Add(newCreateRunnerBlock(schema)).Add(ll).
+		// create many
+		Add(newCreateManyBlock()).Add(ll).
 		// create many tx
-		Add(newCreateManyTxBlock(schema)).Add(ll).
+		Add(newCreateManyTxBlock()).Add(ll).
+		// create many runner
+		Add(newCreateManyRunnerBlock(schema)).Add(ll).
 		// query
 		Add(newQueryBlock(schema)).Add(ll).
-		// query one
-		Add(newQueryOneBlock(schema)).Add(ll).
 		// query tx
 		Add(newQueryTxBlock(schema)).Add(ll).
+		// query runner block
+		Add(newQueryRunnerBlock(schema)).Add(ll).
+		// query one
+		Add(newQueryOneBlock(schema)).Add(ll).
 		// query one tx
 		Add(newQueryOneTxBlock(schema)).Add(ll).
+		// query one runner
+		Add(newQueryOneRunnerBlock(schema)).Add(ll).
 		// select builder
 		Add(newBuildSelectBlock(schema)).Add(ll).
 		// update
 		Add(newUpdateBlock()).Add(ll).
 		// update tx
-		Add(newUpdateTxBlock(schema)).Add(ll).
+		Add(newUpdateTxBlock()).Add(ll).
+		// update runner block
+		Add(newUpdateRunnerBlock(schema)).Add(ll).
 		// delete
 		Add(newDeleteBlock()).Add(ll).
 		// delete tx
-		Add(newDeleteTxBlock(schema)).Add(ll).
+		Add(newDeleteTxBlock()).Add(ll).
+		// delete runner
+		Add(newDeleteRunnerBlock(schema)).Add(ll).
 		// aggregate
 		Add(newAggregateBlock()).Add(ll).
 		// aggregate tx
-		Add(newAggregateTxBlock(schema)).Add(ll)
+		Add(newAggregateTxBlock()).Add(ll).
+		// aggregate runner
+		Add(newAggregateRunnerBlock(schema))
 }
 
 func newTypeDefBlock() *jen.Statement {

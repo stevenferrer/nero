@@ -78,31 +78,7 @@ func (pg *PostgreSQLRepository) Tx(ctx context.Context) (nero.Tx, error) {
 }
 
 func (pg *PostgreSQLRepository) Create(ctx context.Context, c *Creator) (int64, error) {
-	tx, err := pg.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-
-	id, err := pg.CreateTx(ctx, tx, c)
-	if err != nil {
-		return 0, rollback(tx, err)
-	}
-
-	return id, tx.Commit()
-}
-
-func (pg *PostgreSQLRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
-	tx, err := pg.Tx(ctx)
-	if err != nil {
-		return err
-	}
-
-	err = pg.CreateManyTx(ctx, tx, cs...)
-	if err != nil {
-		return rollback(tx, err)
-	}
-
-	return tx.Commit()
+	return pg.create(ctx, pg.db, c)
 }
 
 func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (int64, error) {
@@ -111,6 +87,10 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
+	return pg.create(ctx, txx, c)
+}
+
+func (pg *PostgreSQLRepository) create(ctx context.Context, runner nero.SqlRunner, c *Creator) (int64, error) {
 	columns := []string{}
 	values := []interface{}{}
 	if c.name != "" {
@@ -131,7 +111,7 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		Values(values...).
 		Suffix("RETURNING \"id\"").
 		PlaceholderFormat(squirrel.Dollar).
-		RunWith(txx)
+		RunWith(runner)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("method", "Create").Str("stmnt", sql).
@@ -147,14 +127,22 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 	return id, nil
 }
 
-func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
-	if len(cs) == 0 {
-		return nil
-	}
+func (pg *PostgreSQLRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
+	return pg.createMany(ctx, pg.db, cs...)
+}
 
+func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return errors.New("expecting tx to be *sql.Tx")
+	}
+
+	return pg.createMany(ctx, txx, cs...)
+}
+
+func (pg *PostgreSQLRepository) createMany(ctx context.Context, runner nero.SqlRunner, cs ...*Creator) error {
+	if len(cs) == 0 {
+		return nil
 	}
 
 	columns := []string{"\"name\"", "\"group_res\"", "\"updated_at\""}
@@ -171,7 +159,7 @@ func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs
 			Interface("args", args).Err(err).Msg("")
 	}
 
-	_, err := qb.RunWith(txx).ExecContext(ctx)
+	_, err := qb.RunWith(runner).ExecContext(ctx)
 	if err != nil {
 		return err
 	}
@@ -180,31 +168,7 @@ func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs
 }
 
 func (pg *PostgreSQLRepository) Query(ctx context.Context, q *Queryer) ([]*example.User, error) {
-	tx, err := pg.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	list, err := pg.QueryTx(ctx, tx, q)
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
-
-	return list, tx.Commit()
-}
-
-func (pg *PostgreSQLRepository) QueryOne(ctx context.Context, q *Queryer) (*example.User, error) {
-	tx, err := pg.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	item, err := pg.QueryOneTx(ctx, tx, q)
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
-
-	return item, tx.Commit()
+	return pg.query(ctx, pg.db, q)
 }
 
 func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*example.User, error) {
@@ -213,6 +177,10 @@ func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Quer
 		return nil, errors.New("expecting tx to be *sql.Tx")
 	}
 
+	return pg.query(ctx, txx, q)
+}
+
+func (pg *PostgreSQLRepository) query(ctx context.Context, runner nero.SqlRunner, q *Queryer) ([]*example.User, error) {
 	qb := pg.buildSelect(q)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
@@ -220,7 +188,7 @@ func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Quer
 			Interface("args", args).Err(err).Msg("")
 	}
 
-	rows, err := qb.RunWith(txx).QueryContext(ctx)
+	rows, err := qb.RunWith(runner).QueryContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -246,12 +214,20 @@ func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Quer
 	return list, nil
 }
 
+func (pg *PostgreSQLRepository) QueryOne(ctx context.Context, q *Queryer) (*example.User, error) {
+	return pg.queryOne(ctx, pg.db, q)
+}
+
 func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*example.User, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
 	}
 
+	return pg.queryOne(ctx, txx, q)
+}
+
+func (pg *PostgreSQLRepository) queryOne(ctx context.Context, runner nero.SqlRunner, q *Queryer) (*example.User, error) {
 	qb := pg.buildSelect(q)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
@@ -260,7 +236,7 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 	}
 
 	var item example.User
-	err := qb.RunWith(txx).
+	err := qb.RunWith(runner).
 		QueryRowContext(ctx).
 		Scan(
 			&item.ID,
@@ -335,17 +311,7 @@ func (pg *PostgreSQLRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 }
 
 func (pg *PostgreSQLRepository) Update(ctx context.Context, u *Updater) (int64, error) {
-	tx, err := pg.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-
-	rowsAffected, err := pg.UpdateTx(ctx, tx, u)
-	if err != nil {
-		return 0, rollback(tx, err)
-	}
-
-	return rowsAffected, tx.Commit()
+	return pg.update(ctx, pg.db, u)
 }
 
 func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
@@ -354,6 +320,10 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
+	return pg.update(ctx, txx, u)
+}
+
+func (pg *PostgreSQLRepository) update(ctx context.Context, runner nero.SqlRunner, u *Updater) (int64, error) {
 	qb := squirrel.Update("\"users\"").PlaceholderFormat(squirrel.Dollar)
 	if u.name != "" {
 		qb = qb.Set("\"name\"", u.name)
@@ -397,7 +367,7 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 			Interface("args", args).Err(err).Msg("")
 	}
 
-	res, err := qb.RunWith(txx).ExecContext(ctx)
+	res, err := qb.RunWith(runner).ExecContext(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -411,17 +381,7 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 }
 
 func (pg *PostgreSQLRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
-	tx, err := pg.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-
-	rowsAffected, err := pg.DeleteTx(ctx, tx, d)
-	if err != nil {
-		return 0, rollback(tx, err)
-	}
-
-	return rowsAffected, tx.Commit()
+	return pg.delete(ctx, pg.db, d)
 }
 
 func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
@@ -430,6 +390,10 @@ func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Del
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
+	return pg.delete(ctx, txx, d)
+}
+
+func (pg *PostgreSQLRepository) delete(ctx context.Context, runner nero.SqlRunner, d *Deleter) (int64, error) {
 	qb := squirrel.Delete("\"users\"").
 		PlaceholderFormat(squirrel.Dollar)
 
@@ -465,7 +429,7 @@ func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Del
 			Interface("args", args).Err(err).Msg("")
 	}
 
-	res, err := qb.RunWith(txx).ExecContext(ctx)
+	res, err := qb.RunWith(runner).ExecContext(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -479,17 +443,7 @@ func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Del
 }
 
 func (pg *PostgreSQLRepository) Aggregate(ctx context.Context, a *Aggregator) error {
-	tx, err := pg.Tx(ctx)
-	if err != nil {
-		return err
-	}
-
-	err = pg.AggregateTx(ctx, tx, a)
-	if err != nil {
-		return rollback(tx, err)
-	}
-
-	return tx.Commit()
+	return pg.aggregate(ctx, pg.db, a)
 }
 
 func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
@@ -498,6 +452,10 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 		return errors.New("expecting tx to be *sql.Tx")
 	}
 
+	return pg.aggregate(ctx, txx, a)
+}
+
+func (pg *PostgreSQLRepository) aggregate(ctx context.Context, runner nero.SqlRunner, a *Aggregator) error {
 	aggs := &aggregate.Aggregates{}
 	for _, aggf := range a.aggfs {
 		aggf(aggs)
@@ -578,7 +536,7 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 			Interface("args", args).Err(err).Msg("")
 	}
 
-	rows, err := qb.RunWith(txx).QueryContext(ctx)
+	rows, err := qb.RunWith(runner).QueryContext(ctx)
 	if err != nil {
 		return err
 	}

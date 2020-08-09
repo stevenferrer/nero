@@ -35,6 +35,28 @@ func TestSorts(t *testing.T) {
 		assert.Equal(t, expect, got)
 	})
 
+	t.Run("UID", func(t *testing.T) {
+		sfs := []user.SortFunc{
+			user.Asc(user.ColumnUID),
+			user.Desc(user.ColumnUID),
+		}
+
+		sb := &sort.Sorts{}
+		for _, sf := range sfs {
+			sf(sb)
+		}
+
+		qb := sq.Select("uid").From("users")
+		for _, s := range sb.All() {
+			qb = addSorts(qb, s)
+		}
+
+		got, _, err := qb.ToSql()
+		require.NoError(t, err)
+		expect := "SELECT uid FROM users ORDER BY uid ASC, uid DESC"
+		assert.Equal(t, expect, got)
+	})
+
 	t.Run("Email", func(t *testing.T) {
 		sfs := []user.SortFunc{
 			user.Asc(user.ColumnEmail),

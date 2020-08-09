@@ -16,17 +16,7 @@ func Test_newUpdateBlock(t *testing.T) {
 	block := newUpdateBlock()
 	expect := strings.TrimSpace(`
 func (pg *PostgreSQLRepository) Update(ctx context.Context, u *Updater) (int64, error) {
-	tx, err := pg.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-
-	rowsAffected, err := pg.UpdateTx(ctx, tx, u)
-	if err != nil {
-		return 0, rollback(tx, err)
-	}
-
-	return rowsAffected, tx.Commit()
+	return pg.update(ctx, pg.db, u)
 }
 `)
 
@@ -35,11 +25,7 @@ func (pg *PostgreSQLRepository) Update(ctx context.Context, u *Updater) (int64, 
 }
 
 func Test_newUpdateTxBlock(t *testing.T) {
-	schema, err := gen.BuildSchema(new(example.User))
-	require.NoError(t, err)
-	require.NotNil(t, schema)
-
-	block := newUpdateTxBlock(schema)
+	block := newUpdateTxBlock()
 	expect := strings.TrimSpace(`
 func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
@@ -47,6 +33,22 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
+	return pg.update(ctx, txx, u)
+}
+`)
+
+	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
+	assert.Equal(t, expect, got)
+}
+
+func Test_newUpdateRunnerBlock(t *testing.T) {
+	schema, err := gen.BuildSchema(new(example.User))
+	require.NoError(t, err)
+	require.NotNil(t, schema)
+
+	block := newUpdateRunnerBlock(schema)
+	expect := strings.TrimSpace(`
+func (pg *PostgreSQLRepository) update(ctx context.Context, runner nero.SqlRunner, u *Updater) (int64, error) {
 	qb := squirrel.Update("\"users\"").PlaceholderFormat(squirrel.Dollar)
 	if u.name != "" {
 		qb = qb.Set("\"name\"", u.name)
@@ -90,7 +92,7 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 			Interface("args", args).Err(err).Msg("")
 	}
 
-	res, err := qb.RunWith(txx).ExecContext(ctx)
+	res, err := qb.RunWith(runner).ExecContext(ctx)
 	if err != nil {
 		return 0, err
 	}

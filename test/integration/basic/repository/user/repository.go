@@ -15,12 +15,12 @@ import (
 type Repository interface {
 	Tx(context.Context) (nero.Tx, error)
 	Create(context.Context, *Creator) (id string, err error)
-	CreateMany(context.Context, ...*Creator) error
 	CreateTx(context.Context, nero.Tx, *Creator) (id string, err error)
+	CreateMany(context.Context, ...*Creator) error
 	CreateManyTx(context.Context, nero.Tx, ...*Creator) error
 	Query(context.Context, *Queryer) ([]*user.User, error)
-	QueryOne(context.Context, *Queryer) (*user.User, error)
 	QueryTx(context.Context, nero.Tx, *Queryer) ([]*user.User, error)
+	QueryOne(context.Context, *Queryer) (*user.User, error)
 	QueryOneTx(context.Context, nero.Tx, *Queryer) (*user.User, error)
 	Update(context.Context, *Updater) (rowsAffected int64, err error)
 	UpdateTx(context.Context, nero.Tx, *Updater) (rowsAffected int64, err error)

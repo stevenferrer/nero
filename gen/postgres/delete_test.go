@@ -15,17 +15,7 @@ func Test_newDeleteBlock(t *testing.T) {
 	block := newDeleteBlock()
 	expect := strings.TrimSpace(`
 func (pg *PostgreSQLRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
-	tx, err := pg.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-
-	rowsAffected, err := pg.DeleteTx(ctx, tx, d)
-	if err != nil {
-		return 0, rollback(tx, err)
-	}
-
-	return rowsAffected, tx.Commit()
+	return pg.delete(ctx, pg.db, d)
 }
 `)
 
@@ -34,11 +24,7 @@ func (pg *PostgreSQLRepository) Delete(ctx context.Context, d *Deleter) (int64, 
 }
 
 func Test_newDeleteTxBlock(t *testing.T) {
-	schema, err := gen.BuildSchema(new(example.User))
-	require.NoError(t, err)
-	require.NotNil(t, schema)
-
-	block := newDeleteTxBlock(schema)
+	block := newDeleteTxBlock()
 	expect := strings.TrimSpace(`
 func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
@@ -46,6 +32,22 @@ func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Del
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
+	return pg.delete(ctx, txx, d)
+}
+`)
+
+	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
+	assert.Equal(t, expect, got)
+}
+
+func Test_newDeleteRunnerBlock(t *testing.T) {
+	schema, err := gen.BuildSchema(new(example.User))
+	require.NoError(t, err)
+	require.NotNil(t, schema)
+
+	block := newDeleteRunnerBlock(schema)
+	expect := strings.TrimSpace(`
+func (pg *PostgreSQLRepository) delete(ctx context.Context, runner nero.SqlRunner, d *Deleter) (int64, error) {
 	qb := squirrel.Delete("\"users\"").
 		PlaceholderFormat(squirrel.Dollar)
 
@@ -81,7 +83,7 @@ func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Del
 			Interface("args", args).Err(err).Msg("")
 	}
 
-	res, err := qb.RunWith(txx).ExecContext(ctx)
+	res, err := qb.RunWith(runner).ExecContext(ctx)
 	if err != nil {
 		return 0, err
 	}

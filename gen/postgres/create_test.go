@@ -20,39 +20,7 @@ func Test_newCreateBlock(t *testing.T) {
 	block := newCreateBlock(schema)
 	expect := strings.TrimSpace(`
 func (pg *PostgreSQLRepository) Create(ctx context.Context, c *Creator) (int64, error) {
-	tx, err := pg.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-
-	id, err := pg.CreateTx(ctx, tx, c)
-	if err != nil {
-		return 0, rollback(tx, err)
-	}
-
-	return id, tx.Commit()
-}
-`)
-
-	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
-	assert.Equal(t, expect, got)
-}
-
-func Test_newCreateManyBlock(t *testing.T) {
-	block := newCreateManyBlock()
-	expect := strings.TrimSpace(`
-func (pg *PostgreSQLRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
-	tx, err := pg.Tx(ctx)
-	if err != nil {
-		return err
-	}
-
-	err = pg.CreateManyTx(ctx, tx, cs...)
-	if err != nil {
-		return rollback(tx, err)
-	}
-
-	return tx.Commit()
+	return pg.create(ctx, pg.db, c)
 }
 `)
 
@@ -74,40 +42,7 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	columns := []string{}
-	values := []interface{}{}
-	if c.name != "" {
-		columns = append(columns, "\"name\"")
-		values = append(values, c.name)
-	}
-	if c.group != "" {
-		columns = append(columns, "\"group_res\"")
-		values = append(values, c.group)
-	}
-	if c.updatedAt != nil {
-		columns = append(columns, "\"updated_at\"")
-		values = append(values, c.updatedAt)
-	}
-
-	qb := squirrel.Insert("\"users\"").
-		Columns(columns...).
-		Values(values...).
-		Suffix("RETURNING \"id\"").
-		PlaceholderFormat(squirrel.Dollar).
-		RunWith(txx)
-	if log := pg.log; log != nil {
-		sql, args, err := qb.ToSql()
-		log.Debug().Str("method", "Create").Str("stmnt", sql).
-			Interface("args", args).Err(err).Msg("")
-	}
-
-	var id int64
-	err := qb.QueryRowContext(ctx).Scan(&id)
-	if err != nil {
-		return 0, err
-	}
-
-	return id, nil
+	return pg.create(ctx, txx, c)
 }
 `)
 
@@ -128,11 +63,32 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		return "", errors.New("expecting tx to be *sql.Tx")
 	}
 
+	return pg.create(ctx, txx, c)
+}
+`)
+
+		got := strings.TrimSpace(fmt.Sprintf("%#v", block))
+		assert.Equal(t, expect, got)
+	})
+}
+
+func Test_newCreateRunnerBlock(t *testing.T) {
+	schema, err := gen.BuildSchema(new(example.User))
+	require.NoError(t, err)
+	require.NotNil(t, schema)
+
+	block := newCreateRunnerBlock(schema)
+	expect := strings.TrimSpace(`
+func (pg *PostgreSQLRepository) create(ctx context.Context, runner nero.SqlRunner, c *Creator) (int64, error) {
 	columns := []string{}
 	values := []interface{}{}
 	if c.name != "" {
 		columns = append(columns, "\"name\"")
 		values = append(values, c.name)
+	}
+	if c.group != "" {
+		columns = append(columns, "\"group_res\"")
+		values = append(values, c.group)
 	}
 	if c.updatedAt != nil {
 		columns = append(columns, "\"updated_at\"")
@@ -144,26 +100,37 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 		Values(values...).
 		Suffix("RETURNING \"id\"").
 		PlaceholderFormat(squirrel.Dollar).
-		RunWith(txx)
+		RunWith(runner)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("method", "Create").Str("stmnt", sql).
 			Interface("args", args).Err(err).Msg("")
 	}
 
-	var id string
+	var id int64
 	err := qb.QueryRowContext(ctx).Scan(&id)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
 	return id, nil
 }
 `)
 
-		got := strings.TrimSpace(fmt.Sprintf("%#v", block))
-		assert.Equal(t, expect, got)
-	})
+	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
+	assert.Equal(t, expect, got)
+}
+
+func Test_newCreateManyBlock(t *testing.T) {
+	block := newCreateManyBlock()
+	expect := strings.TrimSpace(`
+func (pg *PostgreSQLRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
+	return pg.createMany(ctx, pg.db, cs...)
+}
+`)
+
+	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
+	assert.Equal(t, expect, got)
 }
 
 func Test_newCreateManyTxBlock(t *testing.T) {
@@ -171,16 +138,32 @@ func Test_newCreateManyTxBlock(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
-	block := newCreateManyTxBlock(schema)
+	block := newCreateManyTxBlock()
 	expect := strings.TrimSpace(`
 func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
-	if len(cs) == 0 {
-		return nil
-	}
-
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return errors.New("expecting tx to be *sql.Tx")
+	}
+
+	return pg.createMany(ctx, txx, cs...)
+}
+`)
+
+	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
+	assert.Equal(t, expect, got)
+}
+
+func Test_newCreateManyRunnerBlock(t *testing.T) {
+	schema, err := gen.BuildSchema(new(example.User))
+	require.NoError(t, err)
+	require.NotNil(t, schema)
+
+	block := newCreateManyRunnerBlock(schema)
+	expect := strings.TrimSpace(`
+func (pg *PostgreSQLRepository) createMany(ctx context.Context, runner nero.SqlRunner, cs ...*Creator) error {
+	if len(cs) == 0 {
+		return nil
 	}
 
 	columns := []string{"\"name\"", "\"group_res\"", "\"updated_at\""}
@@ -197,7 +180,7 @@ func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs
 			Interface("args", args).Err(err).Msg("")
 	}
 
-	_, err := qb.RunWith(txx).ExecContext(ctx)
+	_, err := qb.RunWith(runner).ExecContext(ctx)
 	if err != nil {
 		return err
 	}

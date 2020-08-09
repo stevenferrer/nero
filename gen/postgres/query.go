@@ -20,49 +20,11 @@ func newQueryBlock(schema *gen.Schema) *jen.Statement {
 			),
 			jen.Error(),
 		).
-		BlockFunc(func(g *jen.Group) {
-			g.List(jen.Id("tx"), jen.Err()).Op(":=").
-				Add(rcvrIDC).Dot("Tx").Call(ctxIDC)
-			g.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Nil(), jen.Err())).Line()
-
-			g.List(jen.Id("list"), jen.Err()).Op(":=").
-				Add(rcvrIDC).Dot("QueryTx").Call(ctxIDC, jen.Id("tx"), jen.Id("q"))
-			g.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Nil(), txRollbackC),
-			).Line()
-
-			g.Return(
-				jen.Id("list"),
-				txCommitC,
-			)
-		})
-}
-
-func newQueryOneBlock(schema *gen.Schema) *jen.Statement {
-	return jen.Func().Params(rcvrParamC).Id("QueryOne").
-		Params(
-			jen.Id("ctx").Add(ctxC),
-			jen.Id("q").Op("*").Id("Queryer"),
-		).
-		Params(
-			jen.Op("*").Qual(schema.Type.PkgPath(), schema.Type.Name()),
-			jen.Error(),
-		).
-		BlockFunc(func(g *jen.Group) {
-			g.List(jen.Id("tx"), jen.Err()).Op(":=").
-				Add(rcvrIDC).Dot("Tx").Call(ctxIDC)
-			g.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Nil(), jen.Err())).Line()
-
-			g.List(jen.Id("item"), jen.Err()).Op(":=").
-				Add(rcvrIDC).Dot("QueryOneTx").Call(ctxIDC, jen.Id("tx"), jen.Id("q"))
-			g.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Nil(), txRollbackC),
-			).Line()
-
-			g.Return(jen.Id("item"), txCommitC)
-		})
+		Block(jen.Return(jen.Id(rcvrID).Dot("query").Call(
+			jen.Id("ctx"),
+			jen.Id(rcvrID).Dot("db"),
+			jen.Id("q"),
+		)))
 }
 
 func newQueryTxBlock(schema *gen.Schema) *jen.Statement {
@@ -83,6 +45,26 @@ func newQueryTxBlock(schema *gen.Schema) *jen.Statement {
 				jen.Qual(errPkg, "New").Call(jen.Lit("expecting tx to be *sql.Tx")))).
 				Line()
 
+			g.Return(jen.Id(rcvrID).Dot("query").Call(
+				jen.Id("ctx"),
+				jen.Id("txx"),
+				jen.Id("q"),
+			))
+		})
+
+}
+
+func newQueryRunnerBlock(schema *gen.Schema) *jen.Statement {
+	retTypeC := jen.Op("[]").Op("*").
+		Qual(schema.Type.PkgPath(), schema.Type.Name())
+	return jen.Func().Params(rcvrParamC).Id("query").
+		Params(
+			jen.Id("ctx").Add(ctxC),
+			jen.Id("runner").Add(runnerC),
+			jen.Id("q").Op("*").Id("Queryer"),
+		).
+		Params(retTypeC, jen.Error()).
+		BlockFunc(func(g *jen.Group) {
 			g.Id("qb").Op(":=").Add(rcvrIDC).Dot("buildSelect").Call(jen.Id("q"))
 
 			// debug
@@ -92,7 +74,7 @@ func newQueryTxBlock(schema *gen.Schema) *jen.Statement {
 				jen.Return(jen.Nil(), jen.Err()))
 
 			g.List(jen.Id("rows"), jen.Err()).Op(":=").
-				Id("qb").Dot("RunWith").Call(jen.Id("txx")).
+				Id("qb").Dot("RunWith").Call(jen.Id("runner")).
 				Dot("QueryContext").Call(ctxIDC)
 			g.Add(ifErr)
 			g.Defer().Id("rows").Dot("Close").Call().Line()
@@ -113,7 +95,23 @@ func newQueryTxBlock(schema *gen.Schema) *jen.Statement {
 
 			g.Return(jen.Id("list"), jen.Nil())
 		})
+}
 
+func newQueryOneBlock(schema *gen.Schema) *jen.Statement {
+	return jen.Func().Params(rcvrParamC).Id("QueryOne").
+		Params(
+			jen.Id("ctx").Add(ctxC),
+			jen.Id("q").Op("*").Id("Queryer"),
+		).
+		Params(
+			jen.Op("*").Qual(schema.Type.PkgPath(), schema.Type.Name()),
+			jen.Error(),
+		).
+		Block(jen.Return(jen.Id(rcvrID).Dot("queryOne").Call(
+			jen.Id("ctx"),
+			jen.Id(rcvrID).Dot("db"),
+			jen.Id("q"),
+		)))
 }
 
 func newQueryOneTxBlock(schema *gen.Schema) *jen.Statement {
@@ -135,14 +133,37 @@ func newQueryOneTxBlock(schema *gen.Schema) *jen.Statement {
 				jen.Return(jen.Nil(), jen.Qual(errPkg, "New").
 					Call(jen.Lit("expecting tx to be *sql.Tx")))).Line()
 
-			g.Id("qb").Op(":=").Add(rcvrIDC).Dot("buildSelect").Call(jen.Id("q"))
+			g.Return(
+				jen.Id(rcvrID).Dot("queryOne").Call(
+					jen.Id("ctx"),
+					jen.Id("txx"),
+					jen.Id("q"),
+				),
+			)
+		})
+}
+
+func newQueryOneRunnerBlock(schema *gen.Schema) *jen.Statement {
+	return jen.Func().Params(rcvrParamC).Id("queryOne").
+		Params(
+			jen.Id("ctx").Add(ctxC),
+			jen.Id("runner").Add(runnerC),
+			jen.Id("q").Op("*").Id("Queryer"),
+		).
+		Params(
+			jen.Op("*").Qual(schema.Type.PkgPath(), schema.Type.Name()),
+			jen.Error(),
+		).
+		BlockFunc(func(g *jen.Group) {
+			g.Id("qb").Op(":=").Add(rcvrIDC).
+				Dot("buildSelect").Call(jen.Id("q"))
 
 			// debug
 			g.Add(newDebugLogBlock("QueryOne")).Line().Line()
 
 			g.Var().Id("item").Qual(schema.Type.PkgPath(), schema.Type.Name())
 			g.Err().Op(":=").Id("qb").Dot("RunWith").
-				Call(jen.Id("txx")).Op(".").Line().Id("QueryRowContext").
+				Call(jen.Id("runner")).Op(".").Line().Id("QueryRowContext").
 				Call(ctxIDC).Op(".").Line().
 				Id("Scan").CallFunc(func(g *jen.Group) {
 				for _, col := range schema.Cols {

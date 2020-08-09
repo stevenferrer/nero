@@ -16,23 +16,14 @@ func newAggregateBlock() *jen.Statement {
 			jen.Id("a").Op("*").Id("Aggregator"),
 		).
 		Params(jen.Error()).
-		BlockFunc(func(g *jen.Group) {
-			g.List(jen.Id("tx"), jen.Err()).Op(":=").
-				Add(rcvrIDC).Dot("Tx").Call(ctxIDC)
-			g.If(jen.Err().Op("!=").Nil()).
-				Block(jen.Return(jen.Err())).Line()
-
-			g.Err().Op("=").Add(rcvrIDC).Dot("AggregateTx").
-				Call(ctxIDC, jen.Id("tx"), jen.Id("a"))
-			g.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(txRollbackC),
-			).Line()
-
-			g.Return(txCommitC)
-		})
+		Block(jen.Return(jen.Id(rcvrID).Dot("aggregate").Call(
+			jen.Id("ctx"),
+			jen.Id(rcvrID).Dot("db"),
+			jen.Id("a"),
+		)))
 }
 
-func newAggregateTxBlock(schema *gen.Schema) *jen.Statement {
+func newAggregateTxBlock() *jen.Statement {
 	return jen.Func().Params(rcvrParamC).Id("AggregateTx").
 		Params(
 			jen.Id("ctx").Add(ctxC),
@@ -47,7 +38,23 @@ func newAggregateTxBlock(schema *gen.Schema) *jen.Statement {
 			g.If(jen.Op("!").Id("ok")).Block(jen.Return(
 				jen.Qual(errPkg, "New").Call(jen.Lit("expecting tx to be *sql.Tx")),
 			)).Line()
+			g.Return(jen.Id(rcvrID).Dot("aggregate").Call(
+				jen.Id("ctx"),
+				jen.Id("txx"),
+				jen.Id("a"),
+			))
+		})
+}
 
+func newAggregateRunnerBlock(schema *gen.Schema) *jen.Statement {
+	return jen.Func().Params(rcvrParamC).Id("aggregate").
+		Params(
+			jen.Id("ctx").Add(ctxC),
+			jen.Id("runner").Add(runnerC),
+			jen.Id("a").Op("*").Id("Aggregator"),
+		).
+		Params(jen.Error()).
+		BlockFunc(func(g *jen.Group) {
 			g.Id("aggs").Op(":=").Op("&").Qual(aggPkg, "Aggregates").Block()
 			g.For(jen.List(jen.Id("_"), jen.Id("aggf")).
 				Op(":=").Range().Id("a").Dot("aggfs"),
@@ -123,7 +130,7 @@ func newAggregateTxBlock(schema *gen.Schema) *jen.Statement {
 
 			// run query
 			g.List(jen.Id("rows"), jen.Err()).Op(":=").Id("qb").
-				Dot("RunWith").Call(jen.Id("txx")).
+				Dot("RunWith").Call(jen.Id("runner")).
 				Dot("QueryContext").Call(ctxIDC)
 			g.Add(ifErr)
 			g.Defer().Id("rows").Dot("Close").Call().Line()

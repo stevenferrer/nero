@@ -18,48 +18,11 @@ func newCreateBlock(schema *gen.Schema) *jen.Statement {
 			jen.Id("c").Op("*").Id("Creator"),
 		).
 		Params(jenx.Type(identv), jen.Error()).
-		BlockFunc(func(g *jen.Group) {
-			g.List(jen.Id("tx"), jen.Err()).Op(":=").
-				Add(rcvrIDC).Dot("Tx").Call(ctxIDC)
-			g.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jenx.Zero(identv), jen.Err())).
-				Line()
-
-			g.List(jen.Id(ident.LowerCamelName()), jen.Err()).Op(":=").
-				Add(rcvrIDC).Dot("CreateTx").Call(
-				ctxIDC,
-				jen.Id("tx"),
-				jen.Id("c"),
-			)
-			g.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jenx.Zero(identv), txRollbackC),
-			).Line()
-
-			g.Return(
-				jen.Id(ident.LowerCamelName()),
-				txCommitC,
-			)
-		})
-}
-
-func newCreateManyBlock() *jen.Statement {
-	return jen.Func().Params(rcvrParamC).Id("CreateMany").
-		Params(
-			jen.Id("ctx").Add(ctxC),
-			jen.Id("cs").Op("...").Op("*").Id("Creator"),
-		).
-		Params(jen.Error()).
-		BlockFunc(func(g *jen.Group) {
-			g.List(jen.Id("tx"), jen.Err()).Op(":=").
-				Add(rcvrIDC).Dot("Tx").Call(ctxIDC)
-			g.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Err())).Line()
-			g.List(jen.Err()).Op("=").Add(rcvrIDC).Dot("CreateManyTx").
-				Call(ctxIDC, jen.Id("tx"), jen.Id("cs").Op("..."))
-			g.If(jen.Err().Op("!=").Nil()).
-				Block(jen.Return(txRollbackC)).Line()
-			g.Return(txCommitC)
-		})
+		Block(jen.Return(jen.Id(rcvrID).Dot("create").Call(
+			jen.Id("ctx"),
+			jen.Id(rcvrID).Dot("db"),
+			jen.Id("c"),
+		)))
 }
 
 func newCreateTxBlock(schema *gen.Schema) *jen.Statement {
@@ -81,7 +44,25 @@ func newCreateTxBlock(schema *gen.Schema) *jen.Statement {
 					jenx.Zero(identv),
 					jen.Qual(errPkg, "New").Call(jen.Lit("expecting tx to be *sql.Tx")),
 				)).Line()
+			g.Return(jen.Id(rcvrID).Dot("create").Call(
+				jen.Id("ctx"),
+				jen.Id("txx"),
+				jen.Id("c"),
+			))
+		})
+}
 
+func newCreateRunnerBlock(schema *gen.Schema) *jen.Statement {
+	ident := schema.Ident
+	identv := ident.Type.V()
+	return jen.Func().Params(rcvrParamC).Id("create").
+		Params(
+			jen.Id("ctx").Add(ctxC),
+			jen.Id("runner").Add(runnerC),
+			jen.Id("c").Op("*").Id("Creator"),
+		).
+		Params(jenx.Type(identv), jen.Error()).
+		BlockFunc(func(g *jen.Group) {
 			// quote column names
 			g.Id("columns").Op(":=").Index().String().Values()
 			g.Id("values").Op(":=").Index().Interface().Values()
@@ -122,7 +103,7 @@ func newCreateTxBlock(schema *gen.Schema) *jen.Statement {
 				Add(jenx.Dotln("PlaceholderFormat")).
 				Call(jen.Qual(sqPkg, "Dollar")).
 				Add(jenx.Dotln("RunWith")).
-				Call(jen.Id("txx"))
+				Call(jen.Id("runner"))
 			// debug
 			g.Add(newDebugLogBlock("Create")).Line().Line()
 
@@ -137,8 +118,21 @@ func newCreateTxBlock(schema *gen.Schema) *jen.Statement {
 		})
 }
 
-func newCreateManyTxBlock(schema *gen.Schema) *jen.Statement {
-	ident := schema.Ident
+func newCreateManyBlock() *jen.Statement {
+	return jen.Func().Params(rcvrParamC).Id("CreateMany").
+		Params(
+			jen.Id("ctx").Add(ctxC),
+			jen.Id("cs").Op("...").Op("*").Id("Creator"),
+		).
+		Params(jen.Error()).
+		Block(jen.Return(jen.Id(rcvrID).Dot("createMany").Call(
+			jen.Id("ctx"),
+			jen.Id(rcvrID).Dot("db"),
+			jen.Id("cs").Op("..."),
+		)))
+}
+
+func newCreateManyTxBlock() *jen.Statement {
 	return jen.Func().Params(rcvrParamC).Id("CreateManyTx").
 		Params(
 			jen.Id("ctx").Add(ctxC),
@@ -147,16 +141,34 @@ func newCreateManyTxBlock(schema *gen.Schema) *jen.Statement {
 		).
 		Params(jen.Error()).
 		BlockFunc(func(g *jen.Group) {
-			g.If(jen.Len(jen.Id("cs")).Op("==").Lit(0)).Block(
-				jen.Return(jen.Nil()),
-			).Line()
-
 			// assert tx type
 			g.List(jen.Id("txx"), jen.Id("ok")).Op(":=").
 				Id("tx").Assert(jen.Op("*").Qual("database/sql", "Tx"))
 			g.If(jen.Op("!").Id("ok")).Block(jen.Return(
 				jen.Qual(errPkg, "New").Call(jen.Lit("expecting tx to be *sql.Tx")),
 			)).Line()
+
+			g.Return(jen.Id(rcvrID).Dot("createMany").Call(
+				jen.Id("ctx"),
+				jen.Id("txx"),
+				jen.Id("cs").Op("..."),
+			))
+		})
+}
+
+func newCreateManyRunnerBlock(schema *gen.Schema) *jen.Statement {
+	ident := schema.Ident
+	return jen.Func().Params(rcvrParamC).Id("createMany").
+		Params(
+			jen.Id("ctx").Add(ctxC),
+			jen.Id("runner").Add(runnerC),
+			jen.Id("cs").Op("...").Op("*").Id("Creator"),
+		).
+		Params(jen.Error()).
+		BlockFunc(func(g *jen.Group) {
+			g.If(jen.Len(jen.Id("cs")).Op("==").Lit(0)).Block(
+				jen.Return(jen.Nil()),
+			).Line()
 
 			g.Id("columns").Op(":=").Index().String().
 				ValuesFunc(func(g *jen.Group) {
@@ -200,7 +212,7 @@ func newCreateManyTxBlock(schema *gen.Schema) *jen.Statement {
 			g.Add(newDebugLogBlock("CreateMany")).Line().Line()
 
 			g.List(jen.Id("_"), jen.Err()).Op(":=").Id("qb").
-				Dot("RunWith").Call(jen.Id("txx")).
+				Dot("RunWith").Call(jen.Id("runner")).
 				Dot("ExecContext").Call(ctxIDC)
 			g.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Err())).Line()

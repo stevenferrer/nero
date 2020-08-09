@@ -20,43 +20,7 @@ func Test_newQueryBlock(t *testing.T) {
 	block := newQueryBlock(schema)
 	expect := strings.TrimSpace(`
 func (pg *PostgreSQLRepository) Query(ctx context.Context, q *Queryer) ([]*example.User, error) {
-	tx, err := pg.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	list, err := pg.QueryTx(ctx, tx, q)
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
-
-	return list, tx.Commit()
-}
-`)
-
-	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
-	assert.Equal(t, expect, got)
-}
-
-func Test_newQueryOneBlock(t *testing.T) {
-	schema, err := gen.BuildSchema(new(example.User))
-	require.NoError(t, err)
-	require.NotNil(t, schema)
-
-	block := newQueryOneBlock(schema)
-	expect := strings.TrimSpace(`
-func (pg *PostgreSQLRepository) QueryOne(ctx context.Context, q *Queryer) (*example.User, error) {
-	tx, err := pg.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	item, err := pg.QueryOneTx(ctx, tx, q)
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
-
-	return item, tx.Commit()
+	return pg.query(ctx, pg.db, q)
 }
 `)
 
@@ -77,6 +41,22 @@ func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Quer
 		return nil, errors.New("expecting tx to be *sql.Tx")
 	}
 
+	return pg.query(ctx, txx, q)
+}
+`)
+
+	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
+	assert.Equal(t, expect, got)
+}
+
+func Test_newQueryRunnerBlock(t *testing.T) {
+	schema, err := gen.BuildSchema(new(example.User))
+	require.NoError(t, err)
+	require.NotNil(t, schema)
+
+	block := newQueryRunnerBlock(schema)
+	expect := strings.TrimSpace(`
+func (pg *PostgreSQLRepository) query(ctx context.Context, runner nero.SqlRunner, q *Queryer) ([]*example.User, error) {
 	qb := pg.buildSelect(q)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
@@ -84,7 +64,7 @@ func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Quer
 			Interface("args", args).Err(err).Msg("")
 	}
 
-	rows, err := qb.RunWith(txx).QueryContext(ctx)
+	rows, err := qb.RunWith(runner).QueryContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -115,6 +95,22 @@ func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Quer
 	assert.Equal(t, expect, got)
 }
 
+func Test_newQueryOneBlock(t *testing.T) {
+	schema, err := gen.BuildSchema(new(example.User))
+	require.NoError(t, err)
+	require.NotNil(t, schema)
+
+	block := newQueryOneBlock(schema)
+	expect := strings.TrimSpace(`
+func (pg *PostgreSQLRepository) QueryOne(ctx context.Context, q *Queryer) (*example.User, error) {
+	return pg.queryOne(ctx, pg.db, q)
+}
+`)
+
+	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
+	assert.Equal(t, expect, got)
+}
+
 func Test_newQueryOneTxBlock(t *testing.T) {
 	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
@@ -128,6 +124,22 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 		return nil, errors.New("expecting tx to be *sql.Tx")
 	}
 
+	return pg.queryOne(ctx, txx, q)
+}
+`)
+
+	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
+	assert.Equal(t, expect, got)
+}
+
+func Test_newQueryOneRunnerBlock(t *testing.T) {
+	schema, err := gen.BuildSchema(new(example.User))
+	require.NoError(t, err)
+	require.NotNil(t, schema)
+
+	block := newQueryOneRunnerBlock(schema)
+	expect := strings.TrimSpace(`
+func (pg *PostgreSQLRepository) queryOne(ctx context.Context, runner nero.SqlRunner, q *Queryer) (*example.User, error) {
 	qb := pg.buildSelect(q)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
@@ -136,7 +148,7 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 	}
 
 	var item example.User
-	err := qb.RunWith(txx).
+	err := qb.RunWith(runner).
 		QueryRowContext(ctx).
 		Scan(
 			&item.ID,

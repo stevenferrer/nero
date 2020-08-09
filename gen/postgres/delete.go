@@ -14,25 +14,14 @@ func newDeleteBlock() *jen.Statement {
 			jen.Id("d").Op("*").Id("Deleter"),
 		).
 		Params(jen.Int64(), jen.Error()).
-		BlockFunc(func(g *jen.Group) {
-			g.List(jen.Id("tx"), jen.Err()).Op(":=").
-				Add(rcvrIDC).Dot("Tx").Call(ctxIDC)
-			g.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Lit(0), jen.Err())).Line()
-
-			g.List(jen.Id("rowsAffected"), jen.Err()).Op(":=").
-				Add(rcvrIDC).Dot("DeleteTx").
-				Call(ctxIDC, jen.Id("tx"), jen.Id("d"))
-			g.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Lit(0), txRollbackC),
-			).Line()
-
-			g.Return(jen.Id("rowsAffected"), txCommitC)
-		})
-
+		Block(jen.Return(jen.Id(rcvrID).Dot("delete").Call(
+			jen.Id("ctx"),
+			jen.Id(rcvrID).Dot("db"),
+			jen.Id("d"),
+		)))
 }
 
-func newDeleteTxBlock(schema *gen.Schema) *jen.Statement {
+func newDeleteTxBlock() *jen.Statement {
 	return jen.Func().Params(rcvrParamC).Id("DeleteTx").
 		Params(
 			jen.Id("ctx").Add(ctxC),
@@ -51,6 +40,23 @@ func newDeleteTxBlock(schema *gen.Schema) *jen.Statement {
 				),
 			).Line()
 
+			g.Return(jen.Id(rcvrID).Dot("delete").Call(
+				jen.Id("ctx"),
+				jen.Id("txx"),
+				jen.Id("d"),
+			))
+		})
+}
+
+func newDeleteRunnerBlock(schema *gen.Schema) *jen.Statement {
+	return jen.Func().Params(rcvrParamC).Id("delete").
+		Params(
+			jen.Id("ctx").Add(ctxC),
+			jen.Id("runner").Add(runnerC),
+			jen.Id("d").Op("*").Id("Deleter"),
+		).
+		Params(jen.Int64(), jen.Error()).
+		BlockFunc(func(g *jen.Group) {
 			// query builder
 			g.Id("qb").Op(":=").Qual(sqPkg, "Delete").
 				Call(jen.Lit(fmt.Sprintf("%q", schema.Collection))).
@@ -67,7 +73,7 @@ func newDeleteTxBlock(schema *gen.Schema) *jen.Statement {
 				jen.Return(jen.Lit(0), jen.Err()))
 
 			g.List(jen.Id("res"), jen.Err()).Op(":=").
-				Id("qb").Dot("RunWith").Call(jen.Id("txx")).
+				Id("qb").Dot("RunWith").Call(jen.Id("runner")).
 				Dot("ExecContext").Call(ctxIDC)
 			g.Add(ifErr).Line()
 

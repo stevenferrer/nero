@@ -16,24 +16,14 @@ func newUpdateBlock() *jen.Statement {
 			jen.Id("u").Op("*").Id("Updater"),
 		).
 		Params(jen.Int64(), jen.Error()).
-		BlockFunc(func(g *jen.Group) {
-			g.List(jen.Id("tx"), jen.Err()).Op(":=").
-				Add(rcvrIDC).Dot("Tx").Call(ctxIDC)
-			g.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Lit(0), jen.Err())).Line()
-
-			g.List(jen.Id("rowsAffected"), jen.Err()).Op(":=").
-				Add(rcvrIDC).Dot("UpdateTx").Call(
-				ctxIDC, jen.Id("tx"), jen.Id("u"))
-			g.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Lit(0), txRollbackC),
-			).Line()
-
-			g.Return(jen.Id("rowsAffected"), txCommitC)
-		})
+		Block(jen.Return(jen.Id(rcvrID).Dot("update").Call(
+			jen.Id("ctx"),
+			jen.Id(rcvrID).Dot("db"),
+			jen.Id("u"),
+		)))
 }
 
-func newUpdateTxBlock(schema *gen.Schema) *jen.Statement {
+func newUpdateTxBlock() *jen.Statement {
 	return jen.Func().Params(rcvrParamC).Id("UpdateTx").
 		Params(
 			jen.Id("ctx").Add(ctxC),
@@ -52,9 +42,23 @@ func newUpdateTxBlock(schema *gen.Schema) *jen.Statement {
 						Call(jen.Lit("expecting tx to be *sql.Tx")),
 				)).Line()
 
-			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Lit(0), jen.Err()))
+			g.Return(jen.Id(rcvrID).Dot("update").Call(
+				jen.Id("ctx"),
+				jen.Id("txx"),
+				jen.Id("u"),
+			))
+		})
+}
 
+func newUpdateRunnerBlock(schema *gen.Schema) *jen.Statement {
+	return jen.Func().Params(rcvrParamC).Id("update").
+		Params(
+			jen.Id("ctx").Add(ctxC),
+			jen.Id("runner").Add(runnerC),
+			jen.Id("u").Op("*").Id("Updater"),
+		).
+		Params(jen.Int64(), jen.Error()).
+		BlockFunc(func(g *jen.Group) {
 			// query builder
 			g.Id("qb").Op(":=").Qual(sqPkg, "Update").
 				Call(jen.Lit(fmt.Sprintf("%q", schema.Collection))).
@@ -88,8 +92,11 @@ func newUpdateTxBlock(schema *gen.Schema) *jen.Statement {
 			// debug
 			g.Add(newDebugLogBlock("Update")).Line().Line()
 
+			ifErr := jen.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jen.Lit(0), jen.Err()))
+
 			g.List(jen.Id("res"), jen.Err()).Op(":=").Id("qb").
-				Dot("RunWith").Call(jen.Id("txx")).
+				Dot("RunWith").Call(jen.Id("runner")).
 				Dot("ExecContext").Call(ctxIDC)
 			g.Add(ifErr).Line()
 

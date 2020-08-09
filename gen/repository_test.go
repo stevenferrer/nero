@@ -21,12 +21,12 @@ func Test_newRepository(t *testing.T) {
 type Repository interface {
 	Tx(context.Context) (nero.Tx, error)
 	Create(context.Context, *Creator) (id int64, err error)
-	CreateMany(context.Context, ...*Creator) error
 	CreateTx(context.Context, nero.Tx, *Creator) (id int64, err error)
+	CreateMany(context.Context, ...*Creator) error
 	CreateManyTx(context.Context, nero.Tx, ...*Creator) error
 	Query(context.Context, *Queryer) ([]*example.User, error)
-	QueryOne(context.Context, *Queryer) (*example.User, error)
 	QueryTx(context.Context, nero.Tx, *Queryer) ([]*example.User, error)
+	QueryOne(context.Context, *Queryer) (*example.User, error)
 	QueryOneTx(context.Context, nero.Tx, *Queryer) (*example.User, error)
 	Update(context.Context, *Updater) (rowsAffected int64, err error)
 	UpdateTx(context.Context, nero.Tx, *Updater) (rowsAffected int64, err error)
