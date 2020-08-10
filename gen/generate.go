@@ -5,12 +5,12 @@ import (
 	"strings"
 
 	"github.com/dave/jennifer/jen"
-	"github.com/iancoleman/strcase"
 	"github.com/pkg/errors"
 
 	"github.com/sf9v/nero"
 	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/sf9v/nero/gen/postgres"
+	nstrings "github.com/sf9v/nero/x/strings"
 )
 
 const (
@@ -92,9 +92,9 @@ func Generate(schemaer nero.Schemaer) (Files, error) {
 }
 
 func camel(s string) string {
-	return strcase.ToCamel(s)
+	return nstrings.ToCamel(s)
 }
 
 func lowCamel(s string) string {
-	return strcase.ToLowerCamel(s)
+	return nstrings.ToLowerCamel(s)
 }

@@ -1,8 +1,8 @@
 package internal
 
 import (
-	"github.com/iancoleman/strcase"
 	"github.com/sf9v/mira"
+	"github.com/sf9v/nero/x/strings"
 )
 
 // Col is a column
@@ -23,10 +23,10 @@ type Col struct {
 
 // CamelName returns a camelized version of name
 func (c *Col) CamelName() string {
-	return strcase.ToCamel(c.Name)
+	return strings.ToCamel(c.Name)
 }
 
 // LowerCamelName returns a lower-camelized version of name
 func (c *Col) LowerCamelName() string {
-	return strcase.ToLowerCamel(c.Name)
+	return strings.ToLowerCamel(c.Name)
 }

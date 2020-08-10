@@ -2,9 +2,9 @@ package sqlite
 
 import (
 	"github.com/dave/jennifer/jen"
-	"github.com/iancoleman/strcase"
 	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/sf9v/nero/jenx"
+	"github.com/sf9v/nero/x/strings"
 )
 
 func newUpdateBlock() *jen.Statement {
@@ -68,7 +68,7 @@ func newUpdateTxBlock(schema *gen.Schema) *jen.Statement {
 
 				field := col.LowerCamelName()
 				if len(col.StructField) > 0 {
-					field = strcase.ToLowerCamel(col.StructField)
+					field = strings.ToLowerCamel(col.StructField)
 				}
 
 				colv := col.Type.V()

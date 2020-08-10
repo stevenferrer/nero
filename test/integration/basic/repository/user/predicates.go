@@ -70,62 +70,62 @@ func IDLtOrEq(id string) PredFunc {
 	}
 }
 
-func UIDEq(uID ksuid.KSUID) PredFunc {
+func UIDEq(uid ksuid.KSUID) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "uid",
 			Op:  comparison.Eq,
-			Val: uID,
+			Val: uid,
 		})
 	}
 }
 
-func UIDNotEq(uID ksuid.KSUID) PredFunc {
+func UIDNotEq(uid ksuid.KSUID) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "uid",
 			Op:  comparison.NotEq,
-			Val: uID,
+			Val: uid,
 		})
 	}
 }
 
-func UIDGt(uID ksuid.KSUID) PredFunc {
+func UIDGt(uid ksuid.KSUID) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "uid",
 			Op:  comparison.Gt,
-			Val: uID,
+			Val: uid,
 		})
 	}
 }
 
-func UIDGtOrEq(uID ksuid.KSUID) PredFunc {
+func UIDGtOrEq(uid ksuid.KSUID) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "uid",
 			Op:  comparison.GtOrEq,
-			Val: uID,
+			Val: uid,
 		})
 	}
 }
 
-func UIDLt(uID ksuid.KSUID) PredFunc {
+func UIDLt(uid ksuid.KSUID) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "uid",
 			Op:  comparison.Lt,
-			Val: uID,
+			Val: uid,
 		})
 	}
 }
 
-func UIDLtOrEq(uID ksuid.KSUID) PredFunc {
+func UIDLtOrEq(uid ksuid.KSUID) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "uid",
 			Op:  comparison.LtOrEq,
-			Val: uID,
+			Val: uid,
 		})
 	}
 }

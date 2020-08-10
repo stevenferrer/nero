@@ -1,9 +1,9 @@
 package internal
 
 import (
-	"github.com/iancoleman/strcase"
 	"github.com/pkg/errors"
 	"github.com/sf9v/mira"
+	"github.com/sf9v/nero/x/strings"
 
 	"github.com/sf9v/nero"
 )
@@ -32,7 +32,7 @@ func BuildSchema(s nero.Schemaer) (*Schema, error) {
 		cfg := column.Cfg()
 		col := &Col{
 			Name:        cfg.Name,
-			StructField: strcase.ToCamel(cfg.Name),
+			StructField: strings.ToCamel(cfg.Name),
 			Type:        mira.NewType(cfg.T),
 			Ident:       cfg.Ident,
 			Auto:        cfg.Auto,

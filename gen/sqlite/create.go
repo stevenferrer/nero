@@ -4,9 +4,9 @@ import (
 	"reflect"
 
 	"github.com/dave/jennifer/jen"
-	"github.com/iancoleman/strcase"
 	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/sf9v/nero/jenx"
+	"github.com/sf9v/nero/x/strings"
 )
 
 func newCreateBlock(schema *gen.Schema) *jen.Statement {
@@ -95,7 +95,7 @@ func newCreateTxBlock(schema *gen.Schema) *jen.Statement {
 
 						field := col.LowerCamelName()
 						if len(col.StructField) > 0 {
-							field = strcase.ToLowerCamel(col.StructField)
+							field = strings.ToLowerCamel(col.StructField)
 						}
 						g.Id("c").Dot(field)
 					}
@@ -166,7 +166,7 @@ func newCreateManyTxBlock(schema *gen.Schema) *jen.Statement {
 							}
 							field := col.LowerCamelName()
 							if len(col.StructField) > 0 {
-								field = strcase.ToLowerCamel(col.StructField)
+								field = strings.ToLowerCamel(col.StructField)
 							}
 							g.Id("c").Dot(field)
 						}

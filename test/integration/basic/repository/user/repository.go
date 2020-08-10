@@ -31,7 +31,7 @@ type Repository interface {
 }
 
 type Creator struct {
-	uID       ksuid.KSUID
+	uid       ksuid.KSUID
 	email     string
 	name      string
 	age       int
@@ -44,8 +44,8 @@ func NewCreator() *Creator {
 	return &Creator{}
 }
 
-func (c *Creator) UID(uID ksuid.KSUID) *Creator {
-	c.uID = uID
+func (c *Creator) UID(uid ksuid.KSUID) *Creator {
+	c.uid = uid
 	return c
 }
 
@@ -111,7 +111,7 @@ func (q *Queryer) Offset(offset uint64) *Queryer {
 }
 
 type Updater struct {
-	uID       ksuid.KSUID
+	uid       ksuid.KSUID
 	email     string
 	name      string
 	age       int
@@ -125,8 +125,8 @@ func NewUpdater() *Updater {
 	return &Updater{}
 }
 
-func (u *Updater) UID(uID ksuid.KSUID) *Updater {
-	u.uID = uID
+func (u *Updater) Uid(uid ksuid.KSUID) *Updater {
+	u.uid = uid
 	return u
 }
 

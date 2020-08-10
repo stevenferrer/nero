@@ -384,7 +384,7 @@ func newRepoTestRunner(repo userr.Repository) func(t *testing.T) {
 				age := 300
 				rowsAffected, err := repo.Update(ctx,
 					userr.NewUpdater().
-						UID(ksuid.New()).
+						Uid(ksuid.New()).
 						Email(email).
 						Name(name).
 						Age(age).
@@ -766,7 +766,7 @@ func newRepoTestRunnerTx(repo userr.Repository) func(t *testing.T) {
 				tx := newTx(ctx, t)
 				rowsAffected, err := repo.UpdateTx(ctx, tx,
 					userr.NewUpdater().
-						UID(ksuid.New()).
+						Uid(ksuid.New()).
 						Email(email).
 						Name(name).
 						Age(age).

@@ -59,9 +59,9 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 func (pg *PostgreSQLRepository) create(ctx context.Context, runner nero.SqlRunner, c *Creator) (string, error) {
 	columns := []string{}
 	values := []interface{}{}
-	if c.uID != [20]uint8{} {
+	if c.uid != [20]uint8{} {
 		columns = append(columns, "\"uid\"")
-		values = append(values, c.uID)
+		values = append(values, c.uid)
 	}
 	if c.email != "" {
 		columns = append(columns, "\"email\"")
@@ -130,7 +130,7 @@ func (pg *PostgreSQLRepository) createMany(ctx context.Context, runner nero.SqlR
 	columns := []string{"\"uid\"", "\"email\"", "\"name\"", "\"age\"", "\"group\"", "\"kv\"", "\"updated_at\""}
 	qb := sq.Insert("\"users\"").Columns(columns...)
 	for _, c := range cs {
-		qb = qb.Values(c.uID, c.email, c.name, c.age, c.group, c.kv, c.updatedAt)
+		qb = qb.Values(c.uid, c.email, c.name, c.age, c.group, c.kv, c.updatedAt)
 	}
 
 	qb = qb.Suffix("RETURNING \"id\"").
@@ -315,8 +315,8 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 
 func (pg *PostgreSQLRepository) update(ctx context.Context, runner nero.SqlRunner, u *Updater) (int64, error) {
 	qb := sq.Update("\"users\"").PlaceholderFormat(sq.Dollar)
-	if u.uID != [20]uint8{} {
-		qb = qb.Set("\"uid\"", u.uID)
+	if u.uid != [20]uint8{} {
+		qb = qb.Set("\"uid\"", u.uid)
 	}
 	if u.email != "" {
 		qb = qb.Set("\"email\"", u.email)
