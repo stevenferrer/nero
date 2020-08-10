@@ -2,6 +2,7 @@ package nero
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -15,4 +16,8 @@ func TestColumn(t *testing.T) {
 	assert.True(t, cfg.Ident)
 	assert.True(t, cfg.Auto)
 	assert.Equal(t, "ID", cfg.StructField)
+
+	now := time.Now()
+	cfg = NewColumn("updated_at", &now).Nullable().Cfg()
+	assert.True(t, cfg.Nullable)
 }
