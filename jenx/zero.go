@@ -37,7 +37,7 @@ func Zero(v interface{}) *jen.Statement {
 	case reflect.Bool:
 		return jen.False()
 	case reflect.Struct:
-		return jen.Qual(mt.PkgPath(), mt.Name()).Values()
+		return jen.Parens(jen.Qual(mt.PkgPath(), mt.Name()).Values())
 	}
 
 	return jen.Nil()

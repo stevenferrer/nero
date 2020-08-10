@@ -167,7 +167,7 @@ func TestZero(t *testing.T) {
 			args: args{
 				v: big.Int{},
 			},
-			want: jen.Qual("math/big", "Int").Op("{").Op("}"),
+			want: jen.Parens(jen.Qual("math/big", "Int").Op("{").Op("}")),
 		},
 		{
 			name: "*big.Int",

@@ -14,6 +14,7 @@ type Custom struct {
 	MapInt64PtrStr map[int64]*string
 	MapStrItem     map[string]Item
 	MapStrPtrItem  map[string]*Item
+	Item           Item
 	PtrItem        *Item
 	Items          []Item
 	PtrItems       []*Item
@@ -41,6 +42,7 @@ func (c *Custom) Schema() *nero.Schema {
 			nero.NewColumn("map_int64_ptr_str", c.MapInt64PtrStr),
 			nero.NewColumn("map_str_item", c.MapStrItem),
 			nero.NewColumn("map_str_ptr_item", c.MapStrPtrItem),
+			nero.NewColumn("item", c.Item),
 			nero.NewColumn("ptr_item", c.PtrItem),
 			nero.NewColumn("items", c.Items),
 			nero.NewColumn("ptr_items", c.PtrItems),
