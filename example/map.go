@@ -7,8 +7,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Map is a serializeable map
 type Map map[string]string
 
+// Value implements driver.Valuer
 func (m Map) Value() (driver.Value, error) {
 	b, err := json.Marshal(m)
 	if err != nil {
@@ -18,6 +20,7 @@ func (m Map) Value() (driver.Value, error) {
 	return b, nil
 }
 
+// Scan implements sql.Scanner
 func (m *Map) Scan(v interface{}) error {
 	if v == nil {
 		*m = Map{}

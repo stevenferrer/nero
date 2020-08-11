@@ -58,6 +58,7 @@ func (c *Column) Ident() *Column {
 	return c
 }
 
+// Nullable is a nullable column
 func (c *Column) Nullable() *Column {
 	c.cfg.Nullable = true
 	return c

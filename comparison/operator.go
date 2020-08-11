@@ -26,7 +26,7 @@ func (op Operator) String() string {
 	return "Invalid"
 }
 
-// List of predicate operators
+// List of comparison operators
 const (
 	// Eq is an equal operator
 	Eq Operator = iota

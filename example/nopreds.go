@@ -2,6 +2,7 @@ package example
 
 import "github.com/sf9v/nero"
 
+// NoPreds is an example struct which has fields that don't have predicates
 type NoPreds struct {
 	ID       int64
 	M        map[string]string
@@ -10,6 +11,7 @@ type NoPreds struct {
 	MyStruct *MyStruct
 }
 
+// MyStruct is an example struct
 type MyStruct struct {
 	S string
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/sf9v/nero"
 )
 
+// Custom demonstrates the use of many different field types
 type Custom struct {
 	ID             int64
 	S              string
@@ -22,6 +23,7 @@ type Custom struct {
 	NullColumn     *string
 }
 
+// Item is an example struct embedded in Custom struct
 type Item struct {
 	Name string
 }
