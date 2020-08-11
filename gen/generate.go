@@ -10,7 +10,7 @@ import (
 	"github.com/sf9v/nero"
 	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/sf9v/nero/gen/postgres"
-	nstrings "github.com/sf9v/nero/x/strings"
+	stringsx "github.com/sf9v/nero/x/strings"
 )
 
 const (
@@ -92,9 +92,9 @@ func Generate(schemaer nero.Schemaer) (Files, error) {
 }
 
 func camel(s string) string {
-	return nstrings.ToCamel(s)
+	return stringsx.ToCamel(s)
 }
 
 func lowCamel(s string) string {
-	return nstrings.ToLowerCamel(s)
+	return stringsx.ToLowerCamel(s)
 }

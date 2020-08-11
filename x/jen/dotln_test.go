@@ -1,11 +1,11 @@
-package jenx_test
+package jen_test
 
 import (
 	"fmt"
 	"testing"
 
 	"github.com/dave/jennifer/jen"
-	"github.com/sf9v/nero/jenx"
+	jenx "github.com/sf9v/nero/x/jen"
 	"github.com/stretchr/testify/assert"
 )
 

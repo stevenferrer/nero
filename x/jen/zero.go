@@ -1,4 +1,4 @@
-package jenx
+package jen
 
 import (
 	"reflect"

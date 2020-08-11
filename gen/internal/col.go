@@ -2,7 +2,7 @@ package internal
 
 import (
 	"github.com/sf9v/mira"
-	"github.com/sf9v/nero/x/strings"
+	stringsx "github.com/sf9v/nero/x/strings"
 )
 
 // Col is a column
@@ -23,10 +23,10 @@ type Col struct {
 
 // CamelName returns a camelized version of name
 func (c *Col) CamelName() string {
-	return strings.ToCamel(c.Name)
+	return stringsx.ToCamel(c.Name)
 }
 
 // LowerCamelName returns a lower-camelized version of name
 func (c *Col) LowerCamelName() string {
-	return strings.ToLowerCamel(c.Name)
+	return stringsx.ToLowerCamel(c.Name)
 }

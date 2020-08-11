@@ -3,8 +3,8 @@ package sqlite
 import (
 	"github.com/dave/jennifer/jen"
 	gen "github.com/sf9v/nero/gen/internal"
-	"github.com/sf9v/nero/jenx"
-	"github.com/sf9v/nero/x/strings"
+	jenx "github.com/sf9v/nero/x/jen"
+	stringsx "github.com/sf9v/nero/x/strings"
 )
 
 func newUpdateBlock() *jen.Statement {
@@ -68,7 +68,7 @@ func newUpdateTxBlock(schema *gen.Schema) *jen.Statement {
 
 				field := col.LowerCamelName()
 				if len(col.StructField) > 0 {
-					field = strings.ToLowerCamel(col.StructField)
+					field = stringsx.ToLowerCamel(col.StructField)
 				}
 
 				colv := col.Type.V()

@@ -4,7 +4,7 @@ import (
 	"reflect"
 
 	"github.com/dave/jennifer/jen"
-	"github.com/sf9v/nero/jenx"
+	jenx "github.com/sf9v/nero/x/jen"
 
 	"github.com/sf9v/nero/comparison"
 	gen "github.com/sf9v/nero/gen/internal"

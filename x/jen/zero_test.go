@@ -1,4 +1,4 @@
-package jenx
+package jen
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"github.com/sf9v/mira"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/sf9v/nero/jenx/internal"
+	"github.com/sf9v/nero/x/jen/internal"
 )
 
 func TestZero(t *testing.T) {

@@ -2,7 +2,7 @@ package gen
 
 import (
 	"github.com/dave/jennifer/jen"
-	"github.com/sf9v/nero/jenx"
+	jenx "github.com/sf9v/nero/x/jen"
 
 	gen "github.com/sf9v/nero/gen/internal"
 )

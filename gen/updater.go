@@ -4,7 +4,7 @@ import (
 	"github.com/dave/jennifer/jen"
 
 	gen "github.com/sf9v/nero/gen/internal"
-	"github.com/sf9v/nero/jenx"
+	jenx "github.com/sf9v/nero/x/jen"
 )
 
 func newUpdater(schema *gen.Schema) *jen.Statement {
