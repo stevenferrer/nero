@@ -58,7 +58,7 @@ func Generate(schemaer nero.Schemaer) (Files, error) {
 	repoFile.Add(newCreator(schema))
 	repoFile.Add(newQueryer(schema))
 	repoFile.Add(newUpdater(schema))
-	repoFile.Add(newDeleter())
+	repoFile.Add(newDeleter(schema))
 	repoFile.Add(newAggregator(schema))
 	repoFile.Add(newTx())
 	fls = append(fls, &File{

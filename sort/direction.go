@@ -14,6 +14,17 @@ func (d Direction) String() string {
 	return "Invalid"
 }
 
+func (d Direction) Description() string {
+	switch d {
+	case Asc:
+		return "Asc is the ascending sort direction"
+	case Desc:
+		return "Desc is the descending sort direction"
+	}
+
+	return ""
+}
+
 const (
 	// Asc is an ascending sort direction
 	Asc Direction = iota

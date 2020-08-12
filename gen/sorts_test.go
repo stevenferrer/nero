@@ -11,8 +11,10 @@ import (
 func Test_newSorts(t *testing.T) {
 	predicates := newSorts()
 	expect := strings.TrimSpace(`
+// SortFunc is the sort function type
 type SortFunc func(*sort.Sorts)
 
+// Asc is the ascending sort direction
 func Asc(col Column) SortFunc {
 	return func(srts *sort.Sorts) {
 		srts.Add(&sort.Sort{
@@ -22,6 +24,7 @@ func Asc(col Column) SortFunc {
 	}
 }
 
+// Desc is the descending sort direction
 func Desc(col Column) SortFunc {
 	return func(srts *sort.Sorts) {
 		srts.Add(&sort.Sort{

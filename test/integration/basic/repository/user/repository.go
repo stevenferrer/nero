@@ -11,25 +11,41 @@ import (
 	"time"
 )
 
-// Repository is the contract for storing User
+// Repository is a User repository
 type Repository interface {
+	// Tx returns a new transaction
 	Tx(context.Context) (nero.Tx, error)
+	// Create creates a User
 	Create(context.Context, *Creator) (id string, err error)
+	// CreateTx creates a User inside transaction
 	CreateTx(context.Context, nero.Tx, *Creator) (id string, err error)
+	// CreateMany is a batch-create for User
 	CreateMany(context.Context, ...*Creator) error
+	// CreateManyTx is a batch-create for User inside transaction
 	CreateManyTx(context.Context, nero.Tx, ...*Creator) error
+	// Query is used for querying many User
 	Query(context.Context, *Queryer) ([]*user.User, error)
+	// QueryTx is used for querying many User inside transaction
 	QueryTx(context.Context, nero.Tx, *Queryer) ([]*user.User, error)
+	// QueryOne is used for querying a single User
 	QueryOne(context.Context, *Queryer) (*user.User, error)
+	// QueryOneTx is used for querying a single User inside transaction
 	QueryOneTx(context.Context, nero.Tx, *Queryer) (*user.User, error)
+	// Update updates User
 	Update(context.Context, *Updater) (rowsAffected int64, err error)
+	// UpdateTx updates User inside transaction
 	UpdateTx(context.Context, nero.Tx, *Updater) (rowsAffected int64, err error)
+	// Delete deletes User
 	Delete(context.Context, *Deleter) (rowsAffected int64, err error)
+	// Delete deletes User inside transaction
 	DeleteTx(context.Context, nero.Tx, *Deleter) (rowsAffected int64, err error)
+	// Aggregate is used for doing aggregation
 	Aggregate(context.Context, *Aggregator) error
+	// Aggregate is used for doing aggregation inside transaction
 	AggregateTx(context.Context, nero.Tx, *Aggregator) error
 }
 
+// Creator is the create builder for User
 type Creator struct {
 	uid       ksuid.KSUID
 	email     string
@@ -40,45 +56,54 @@ type Creator struct {
 	updatedAt *time.Time
 }
 
+// NewCreator returns a create builder
 func NewCreator() *Creator {
 	return &Creator{}
 }
 
+// UID sets the uid
 func (c *Creator) UID(uid ksuid.KSUID) *Creator {
 	c.uid = uid
 	return c
 }
 
+// Email sets the email
 func (c *Creator) Email(email string) *Creator {
 	c.email = email
 	return c
 }
 
+// Name sets the name
 func (c *Creator) Name(name string) *Creator {
 	c.name = name
 	return c
 }
 
+// Age sets the age
 func (c *Creator) Age(age int) *Creator {
 	c.age = age
 	return c
 }
 
+// Group sets the group
 func (c *Creator) Group(group user.Group) *Creator {
 	c.group = group
 	return c
 }
 
+// Kv sets the kv
 func (c *Creator) Kv(kv example.Map) *Creator {
 	c.kv = kv
 	return c
 }
 
+// UpdatedAt sets the updatedAt
 func (c *Creator) UpdatedAt(updatedAt *time.Time) *Creator {
 	c.updatedAt = updatedAt
 	return c
 }
 
+// Query is the query builder for User
 type Queryer struct {
 	limit  uint64
 	offset uint64
@@ -86,30 +111,36 @@ type Queryer struct {
 	sfs    []SortFunc
 }
 
+// NewQueryer returns a query builder
 func NewQueryer() *Queryer {
 	return &Queryer{}
 }
 
+// Where adds predicates to the query
 func (q *Queryer) Where(pfs ...PredFunc) *Queryer {
 	q.pfs = append(q.pfs, pfs...)
 	return q
 }
 
+// Sort adds sort/order to the query
 func (q *Queryer) Sort(sfs ...SortFunc) *Queryer {
 	q.sfs = append(q.sfs, sfs...)
 	return q
 }
 
+// Limit adds limit to the query
 func (q *Queryer) Limit(limit uint64) *Queryer {
 	q.limit = limit
 	return q
 }
 
+// Offset adds offset to the query
 func (q *Queryer) Offset(offset uint64) *Queryer {
 	q.offset = offset
 	return q
 }
 
+// Updater is the update builder for User
 type Updater struct {
 	uid       ksuid.KSUID
 	email     string
@@ -121,63 +152,76 @@ type Updater struct {
 	pfs       []PredFunc
 }
 
+// NewUpdater returns an update builder
 func NewUpdater() *Updater {
 	return &Updater{}
 }
 
+// UID sets the uid
 func (u *Updater) Uid(uid ksuid.KSUID) *Updater {
 	u.uid = uid
 	return u
 }
 
+// Email sets the email
 func (u *Updater) Email(email string) *Updater {
 	u.email = email
 	return u
 }
 
+// Name sets the name
 func (u *Updater) Name(name string) *Updater {
 	u.name = name
 	return u
 }
 
+// Age sets the age
 func (u *Updater) Age(age int) *Updater {
 	u.age = age
 	return u
 }
 
+// Group sets the group
 func (u *Updater) Group(group user.Group) *Updater {
 	u.group = group
 	return u
 }
 
+// Kv sets the kv
 func (u *Updater) Kv(kv example.Map) *Updater {
 	u.kv = kv
 	return u
 }
 
+// UpdatedAt sets the updatedAt
 func (u *Updater) UpdatedAt(updatedAt *time.Time) *Updater {
 	u.updatedAt = updatedAt
 	return u
 }
 
+// Where adds predicates to the query
 func (u *Updater) Where(pfs ...PredFunc) *Updater {
 	u.pfs = append(u.pfs, pfs...)
 	return u
 }
 
+// Deleter is the delete builder for User
 type Deleter struct {
 	pfs []PredFunc
 }
 
+// NewDeleter returns a delete builder
 func NewDeleter() *Deleter {
 	return &Deleter{}
 }
 
+// Where adds predicates to the query
 func (d *Deleter) Where(pfs ...PredFunc) *Deleter {
 	d.pfs = append(d.pfs, pfs...)
 	return d
 }
 
+// Aggregator is the aggregate builder for User
 type Aggregator struct {
 	v      interface{}
 	aggfs  []AggFunc
@@ -186,27 +230,35 @@ type Aggregator struct {
 	groups []Column
 }
 
+/*
+NewAggregator takes a destination value (must be pointer
+to slice of structs) and returns an aggregate builder
+*/
 func NewAggregator(v interface{}) *Aggregator {
 	return &Aggregator{
 		v: v,
 	}
 }
 
+// Aggregate adds aggregate statements to the query
 func (a *Aggregator) Aggregate(aggfs ...AggFunc) *Aggregator {
 	a.aggfs = append(a.aggfs, aggfs...)
 	return a
 }
 
+// Where adds predicates to the query
 func (a *Aggregator) Where(pfs ...PredFunc) *Aggregator {
 	a.pfs = append(a.pfs, pfs...)
 	return a
 }
 
+// Sort adds sort/order to the query
 func (a *Aggregator) Sort(sfs ...SortFunc) *Aggregator {
 	a.sfs = append(a.sfs, sfs...)
 	return a
 }
 
+// Group adds a grouping to the query
 func (a *Aggregator) Group(cols ...Column) *Aggregator {
 	a.groups = append(a.groups, cols...)
 	return a

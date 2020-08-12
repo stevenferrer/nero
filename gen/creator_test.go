@@ -19,26 +19,31 @@ func Test_newCreator(t *testing.T) {
 
 	creator := newCreator(schema)
 	expect := strings.TrimSpace(`
+// Creator is the create builder for User
 type Creator struct {
 	name      string
 	group     string
 	updatedAt *time.Time
 }
 
+// NewCreator returns a create builder
 func NewCreator() *Creator {
 	return &Creator{}
 }
 
+// Name sets the name
 func (c *Creator) Name(name string) *Creator {
 	c.name = name
 	return c
 }
 
+// Group sets the group
 func (c *Creator) Group(group string) *Creator {
 	c.group = group
 	return c
 }
 
+// UpdatedAt sets the updatedAt
 func (c *Creator) UpdatedAt(updatedAt *time.Time) *Creator {
 	c.updatedAt = updatedAt
 	return c

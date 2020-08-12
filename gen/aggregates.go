@@ -7,10 +7,13 @@ import (
 
 func newAggregates() *jen.Statement {
 	aggPkg := pkgPath + "/aggregate"
-	stmnt := jen.Type().Id("AggFunc").Func().Params(
+	aggDoc := "AggFunc is an aggregate function type"
+	stmnt := jen.Comment(aggDoc).Line().
+		Type().Id("AggFunc").Func().Params(
 		jen.Op("*").Qual(aggPkg, "Aggregates"),
 	).Line()
 
+	// supported aggregate functions
 	aggFns := []aggregate.Function{
 		aggregate.Avg, aggregate.Count,
 		aggregate.Max, aggregate.Min,
@@ -18,7 +21,8 @@ func newAggregates() *jen.Statement {
 	}
 
 	for _, aggFn := range aggFns {
-		stmnt = stmnt.Func().Id(aggFn.String()).
+		stmnt = stmnt.Comment(aggFn.Description()).Line().
+			Func().Id(aggFn.String()).
 			Params(jen.Id("col").Id("Column")).
 			Params(jen.Id("AggFunc")).
 			Block(jen.Return(jen.Func().

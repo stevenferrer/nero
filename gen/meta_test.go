@@ -19,10 +19,10 @@ func Test_newMeta(t *testing.T) {
 
 	meta := newMeta(schema)
 	expect := `
-const (
-	collection = "users"
-)
+// Collection is the User collection
+const Collection = "users"
 
+// Column is a User column
 type Column int
 
 func (c Column) String() string {

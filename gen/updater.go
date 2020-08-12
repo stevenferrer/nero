@@ -1,6 +1,8 @@
 package gen
 
 import (
+	"fmt"
+
 	"github.com/dave/jennifer/jen"
 
 	gen "github.com/sf9v/nero/gen/internal"
@@ -8,7 +10,9 @@ import (
 )
 
 func newUpdater(schema *gen.Schema) *jen.Statement {
-	stmnt := jen.Type().Id("Updater").StructFunc(func(g *jen.Group) {
+	updaterDoc := fmt.Sprintf("Updater is the update builder for %s", schema.Type.Name())
+	stmnt := jen.Comment(updaterDoc).Line().
+		Type().Id("Updater").StructFunc(func(g *jen.Group) {
 		for _, col := range schema.Cols {
 			if col.Auto {
 				continue
@@ -24,8 +28,9 @@ func newUpdater(schema *gen.Schema) *jen.Statement {
 		g.Id("pfs").Op("[]").Id("PredFunc")
 	}).Line()
 
-	// factory
-	stmnt = stmnt.Func().Id("NewUpdater").Params().
+	factoryDoc := "NewUpdater returns an update builder"
+	stmnt = stmnt.Comment(factoryDoc).Line().
+		Func().Id("NewUpdater").Params().
 		Params(jen.Op("*").Id("Updater")).Block(
 		jen.Return(jen.Op("&").Id("Updater").Block())).
 		Line().Line()
@@ -42,14 +47,14 @@ func newUpdater(schema *gen.Schema) *jen.Statement {
 
 		methodID := col.CamelName()
 		if len(col.StructField) > 0 {
-			methodID = lowCamel(col.StructField)
+			methodID = col.StructField
 		}
 
 		paramID := lowCamel(methodID)
-
-		colv := col.Type.V()
-		stmnt = stmnt.Func().Params(rcvrParamsC).Id(camel(methodID)).
-			Params(jen.Id(paramID).Add(jenx.Type(colv))).
+		methodDoc := fmt.Sprintf("%s sets the %s", methodID, paramID)
+		stmnt = stmnt.Comment(methodDoc).Line().
+			Func().Params(rcvrParamsC).Id(camel(methodID)).
+			Params(jen.Id(paramID).Add(jenx.Type(col.Type.V()))).
 			Params(retParamsC).
 			Block(
 				jen.Id("u").Dot(paramID).Op("=").Id(paramID),
@@ -58,7 +63,9 @@ func newUpdater(schema *gen.Schema) *jen.Statement {
 	}
 
 	// where
-	stmnt = stmnt.Func().Params(rcvrParamsC).Id("Where").
+	whereDoc := "Where adds predicates to the query"
+	stmnt = stmnt.Comment(whereDoc).Line().
+		Func().Params(rcvrParamsC).Id("Where").
 		Params(jen.Id("pfs").Op("...").Id("PredFunc")).
 		Params(retParamsC).
 		Block(

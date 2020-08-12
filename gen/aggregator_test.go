@@ -19,6 +19,7 @@ func Test_newAggregator(t *testing.T) {
 
 	meta := newAggregator(schema)
 	expect := `
+// Aggregator is the aggregate builder for User
 type Aggregator struct {
 	v      interface{}
 	aggfs  []AggFunc
@@ -27,27 +28,35 @@ type Aggregator struct {
 	groups []Column
 }
 
+/*
+NewAggregator takes a destination value (must be pointer
+to slice of structs) and returns an aggregate builder
+*/
 func NewAggregator(v interface{}) *Aggregator {
 	return &Aggregator{
 		v: v,
 	}
 }
 
+// Aggregate adds aggregate statements to the query
 func (a *Aggregator) Aggregate(aggfs ...AggFunc) *Aggregator {
 	a.aggfs = append(a.aggfs, aggfs...)
 	return a
 }
 
+// Where adds predicates to the query
 func (a *Aggregator) Where(pfs ...PredFunc) *Aggregator {
 	a.pfs = append(a.pfs, pfs...)
 	return a
 }
 
+// Sort adds sort/order to the query
 func (a *Aggregator) Sort(sfs ...SortFunc) *Aggregator {
 	a.sfs = append(a.sfs, sfs...)
 	return a
 }
 
+// Group adds a grouping to the query
 func (a *Aggregator) Group(cols ...Column) *Aggregator {
 	a.groups = append(a.groups, cols...)
 	return a

@@ -8,13 +8,15 @@ import (
 
 func newSorts() *jen.Statement {
 	sortPkg := pkgPath + "/sort"
-	stmnt := jen.Type().Id("SortFunc").Func().Params(
+	stmnt := jen.Comment("SortFunc is the sort function type").Line().
+		Type().Id("SortFunc").Func().Params(
 		jen.Op("*").Qual(sortPkg, "Sorts"),
 	).Line()
 
 	directns := []sort.Direction{sort.Asc, sort.Desc}
 	for _, directn := range directns {
-		stmnt = stmnt.Func().Id(directn.String()).
+		stmnt = stmnt.Comment(directn.Description()).Line().
+			Func().Id(directn.String()).
 			Params(jen.Id("col").Id("Column")).
 			Params(jen.Id("SortFunc")).
 			Block(jen.Return(jen.Func().

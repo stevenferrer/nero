@@ -1,20 +1,25 @@
 package gen
 
 import (
+	"fmt"
+
 	"github.com/dave/jennifer/jen"
 	gen "github.com/sf9v/nero/gen/internal"
 )
 
 func newQueryer(schema *gen.Schema) *jen.Statement {
-	stmnt := jen.Type().Id("Queryer").Struct(
+	queryerDoc := fmt.Sprintf("Query is the query builder for %s", schema.Type.Name())
+	stmnt := jen.Comment(queryerDoc).Line().
+		Type().Id("Queryer").Struct(
 		jen.Id("limit").Uint64(),
 		jen.Id("offset").Uint64(),
 		jen.Id("pfs").Op("[]").Id("PredFunc"),
 		jen.Id("sfs").Op("[]").Id("SortFunc"),
 	).Line()
 
-	// factory
-	stmnt = stmnt.Func().Id("NewQueryer").Params().
+	factoryDoc := "NewQueryer returns a query builder"
+	stmnt = stmnt.Comment(factoryDoc).Line().
+		Func().Id("NewQueryer").Params().
 		Params(jen.Op("*").Id("Queryer")).Block(
 		jen.Return(jen.Op("&").Id("Queryer").Block())).
 		Line().Line()
@@ -24,7 +29,9 @@ func newQueryer(schema *gen.Schema) *jen.Statement {
 	retC := jen.Return(jen.Id("q"))
 
 	// where
-	stmnt = stmnt.Func().Params(rcvrParamsC).Id("Where").
+	whereDoc := "Where adds predicates to the query"
+	stmnt = stmnt.Comment(whereDoc).Line().
+		Func().Params(rcvrParamsC).Id("Where").
 		Params(jen.Id("pfs").Op("...").Id("PredFunc")).
 		Params(retParamsC).
 		Block(jen.Id("q").Dot("pfs").Op("=").
@@ -33,8 +40,9 @@ func newQueryer(schema *gen.Schema) *jen.Statement {
 				jen.Id("pfs").Op("..."),
 			), retC).Line().Line()
 
-	// sort
-	stmnt = stmnt.Func().Params(rcvrParamsC).Id("Sort").
+	sortDoc := "Sort adds sort/order to the query"
+	stmnt = stmnt.Comment(sortDoc).Line().
+		Func().Params(rcvrParamsC).Id("Sort").
 		Params(jen.Id("sfs").Op("...").Id("SortFunc")).
 		Params(retParamsC).
 		Block(jen.Id("q").Dot("sfs").Op("=").
@@ -43,8 +51,9 @@ func newQueryer(schema *gen.Schema) *jen.Statement {
 				jen.Id("sfs").Op("..."),
 			), retC).Line().Line()
 
-	// limit
-	stmnt = stmnt.Func().Params(rcvrParamsC).
+	limitDoc := "Limit adds limit to the query"
+	stmnt = stmnt.Comment(limitDoc).Line().
+		Func().Params(rcvrParamsC).
 		Id("Limit").Params(jen.Id("limit").Uint64()).
 		Params(retParamsC).
 		Block(
@@ -52,8 +61,9 @@ func newQueryer(schema *gen.Schema) *jen.Statement {
 			retC,
 		).Line().Line()
 
-	// offset
-	stmnt = stmnt.Func().Params(rcvrParamsC).
+	offsetDoc := "Offset adds offset to the query"
+	stmnt = stmnt.Comment(offsetDoc).Line().
+		Func().Params(rcvrParamsC).
 		Id("Offset").Params(jen.Id("offset").Uint64()).
 		Params(retParamsC).
 		Block(

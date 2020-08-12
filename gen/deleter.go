@@ -1,20 +1,29 @@
 package gen
 
-import "github.com/dave/jennifer/jen"
+import (
+	"fmt"
 
-func newDeleter() *jen.Statement {
-	stmnt := jen.Type().Id("Deleter").Struct(
+	"github.com/dave/jennifer/jen"
+	gen "github.com/sf9v/nero/gen/internal"
+)
+
+func newDeleter(schema *gen.Schema) *jen.Statement {
+	deleterDoc := fmt.Sprintf("Deleter is the delete builder for %s", schema.Type.Name())
+	stmnt := jen.Comment(deleterDoc).Line().
+		Type().Id("Deleter").Struct(
 		jen.Id("pfs").Op("[]").Id("PredFunc"),
 	).Line()
 
-	// factory
-	stmnt = stmnt.Func().Id("NewDeleter").Params().
+	factoryDoc := "NewDeleter returns a delete builder"
+	stmnt = stmnt.Comment(factoryDoc).Line().
+		Func().Id("NewDeleter").Params().
 		Params(jen.Op("*").Id("Deleter")).Block(
 		jen.Return(jen.Op("&").Id("Deleter").Block())).
 		Line().Line()
 
-	// where
-	stmnt = stmnt.Func().Params(jen.Id("d").Op("*").Id("Deleter")).
+	whereDoc := "Where adds predicates to the query"
+	stmnt = stmnt.Comment(whereDoc).Line().
+		Func().Params(jen.Id("d").Op("*").Id("Deleter")).
 		Id("Where").Params(jen.Id("pfs").Op("...").Id("PredFunc")).
 		Params(jen.Op("*").Id("Deleter")).
 		Block(

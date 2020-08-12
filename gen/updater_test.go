@@ -19,6 +19,7 @@ func Test_newUpdater(t *testing.T) {
 
 	updater := newUpdater(schema)
 	expect := strings.TrimSpace(`
+// Updater is the update builder for User
 type Updater struct {
 	name      string
 	group     string
@@ -26,25 +27,30 @@ type Updater struct {
 	pfs       []PredFunc
 }
 
+// NewUpdater returns an update builder
 func NewUpdater() *Updater {
 	return &Updater{}
 }
 
+// Name sets the name
 func (u *Updater) Name(name string) *Updater {
 	u.name = name
 	return u
 }
 
+// Group sets the group
 func (u *Updater) Group(group string) *Updater {
 	u.group = group
 	return u
 }
 
+// UpdatedAt sets the updatedAt
 func (u *Updater) UpdatedAt(updatedAt *time.Time) *Updater {
 	u.updatedAt = updatedAt
 	return u
 }
 
+// Where adds predicates to the query
 func (u *Updater) Where(pfs ...PredFunc) *Updater {
 	u.pfs = append(u.pfs, pfs...)
 	return u

@@ -1,16 +1,22 @@
 package gen
 
 import (
+	"fmt"
+
 	"github.com/dave/jennifer/jen"
 	gen "github.com/sf9v/nero/gen/internal"
 )
 
 func newMeta(schema *gen.Schema) *jen.Statement {
-	stmnt := jen.Const().Defs(
-		jen.Id("collection").Op("=").Lit(schema.Collection),
-	).Line()
+	name := schema.Type.Name()
+	collectDoc := fmt.Sprintf("Collection is the %s collection", name)
+	stmnt := jen.Comment(collectDoc).Line().Const().
+		Id("Collection").Op("=").Lit(schema.Collection).
+		Line()
 
-	stmnt = stmnt.Type().Id("Column").Int().Line()
+	columnDoc := fmt.Sprintf("Column is a %s column", name)
+	stmnt = stmnt.Comment(columnDoc).Line().
+		Type().Id("Column").Int().Line()
 	// column stringer
 	stmnt = stmnt.Func().Params(jen.Id("c").Id("Column")).
 		Id("String").Params().Params(jen.String()).Block(

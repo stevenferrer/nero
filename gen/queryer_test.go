@@ -19,6 +19,7 @@ func Test_newQueryer(t *testing.T) {
 
 	queryer := newQueryer(schema)
 	expect := strings.TrimSpace(`
+// Query is the query builder for User
 type Queryer struct {
 	limit  uint64
 	offset uint64
@@ -26,25 +27,30 @@ type Queryer struct {
 	sfs    []SortFunc
 }
 
+// NewQueryer returns a query builder
 func NewQueryer() *Queryer {
 	return &Queryer{}
 }
 
+// Where adds predicates to the query
 func (q *Queryer) Where(pfs ...PredFunc) *Queryer {
 	q.pfs = append(q.pfs, pfs...)
 	return q
 }
 
+// Sort adds sort/order to the query
 func (q *Queryer) Sort(sfs ...SortFunc) *Queryer {
 	q.sfs = append(q.sfs, sfs...)
 	return q
 }
 
+// Limit adds limit to the query
 func (q *Queryer) Limit(limit uint64) *Queryer {
 	q.limit = limit
 	return q
 }
 
+// Offset adds offset to the query
 func (q *Queryer) Offset(offset uint64) *Queryer {
 	q.offset = offset
 	return q

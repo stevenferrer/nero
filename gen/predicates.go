@@ -1,7 +1,9 @@
 package gen
 
 import (
+	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/dave/jennifer/jen"
 	jenx "github.com/sf9v/nero/x/jen"
@@ -11,7 +13,8 @@ import (
 )
 
 func newPredicates(schema *gen.Schema) *jen.Statement {
-	stmnt := jen.Type().Id("PredFunc").Func().Params(
+	stmnt := jen.Comment("PredFunc is the predicate function type").
+		Line().Type().Id("PredFunc").Func().Params(
 		jen.Op("*").Qual(pkgPath+"/comparison", "Predicates"),
 	).Line()
 
@@ -60,7 +63,9 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 			}
 
 			paramID := lowCamel(field)
-			stmnt = stmnt.Func().Id(fnName).
+			fnDoc := fmt.Sprintf("%s applies a %s operator to %s", fnName, strings.ToLower(op.Description()), paramID)
+			stmnt = stmnt.Comment(fnDoc).Line().
+				Func().Id(fnName).
 				Params(jen.Id(paramID).
 					Add(jenx.Type(col.Type.V()))).
 				Params(jen.Id("PredFunc")).

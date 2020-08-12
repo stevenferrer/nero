@@ -26,6 +26,29 @@ func (op Operator) String() string {
 	return "Invalid"
 }
 
+func (op Operator) Description() string {
+	switch op {
+	case Eq:
+		return "Equal"
+	case NotEq:
+		return "Not equal"
+	case Gt:
+		return "Greater than"
+	case GtOrEq:
+		return "Greater than or equal"
+	case Lt:
+		return "Less than"
+	case LtOrEq:
+		return "Less than or equal"
+	case IsNull:
+		return "Is null"
+	case IsNotNull:
+		return "Is not null"
+	}
+
+	return "Invalid"
+}
+
 // List of comparison operators
 const (
 	// Eq is an equal operator

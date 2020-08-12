@@ -1,6 +1,8 @@
 package gen
 
 import (
+	"fmt"
+
 	"github.com/dave/jennifer/jen"
 	jenx "github.com/sf9v/nero/x/jen"
 
@@ -8,7 +10,9 @@ import (
 )
 
 func newCreator(schema *gen.Schema) *jen.Statement {
-	stmnt := jen.Type().Id("Creator").
+	creatorDoc := fmt.Sprintf("Creator is the create builder for %s", schema.Type.Name())
+	stmnt := jen.Comment(creatorDoc).Line().
+		Type().Id("Creator").
 		StructFunc(func(g *jen.Group) {
 			for _, col := range schema.Cols {
 				if col.Auto {
@@ -23,8 +27,9 @@ func newCreator(schema *gen.Schema) *jen.Statement {
 			}
 		}).Line()
 
-	// factory
-	stmnt = stmnt.Func().Id("NewCreator").Params().
+	factoryDoc := "NewCreator returns a create builder"
+	stmnt = stmnt.Comment(factoryDoc).Line().
+		Func().Id("NewCreator").Params().
 		Params(jen.Op("*").Id("Creator")).Block(
 		jen.Return(jen.Op("&").Id("Creator").Block())).
 		Line().Line()
@@ -42,7 +47,9 @@ func newCreator(schema *gen.Schema) *jen.Statement {
 		}
 
 		paramID := lowCamel(methodID)
-		stmnt = stmnt.Func().Params(rcvrParamsC).Id(methodID).
+		methodDoc := fmt.Sprintf("%s sets the %s", methodID, paramID)
+		stmnt = stmnt.Comment(methodDoc).Line().
+			Func().Params(rcvrParamsC).Id(methodID).
 			Params(jen.Id(paramID).Add(jenx.Type(col.Type.V()))).
 			Params(jen.Op("*").Id("Creator")).
 			Block(
