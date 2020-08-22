@@ -31,19 +31,19 @@ func NewCreator() *Creator {
 	return &Creator{}
 }
 
-// Name sets the name
+// Name is the setter for name
 func (c *Creator) Name(name string) *Creator {
 	c.name = name
 	return c
 }
 
-// Group sets the group
+// Group is the setter for group
 func (c *Creator) Group(group string) *Creator {
 	c.group = group
 	return c
 }
 
-// UpdatedAt sets the updatedAt
+// UpdatedAt is the setter for updatedAt
 func (c *Creator) UpdatedAt(updatedAt *time.Time) *Creator {
 	c.updatedAt = updatedAt
 	return c

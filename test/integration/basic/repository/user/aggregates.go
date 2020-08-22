@@ -3,7 +3,7 @@ package user
 
 import aggregate "github.com/sf9v/nero/aggregate"
 
-// AggFunc is an aggregate function type
+// AggFunc is the aggregate function type
 type AggFunc func(*aggregate.Aggregates)
 
 // Avg is the average aggregate function

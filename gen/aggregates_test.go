@@ -11,7 +11,7 @@ import (
 func Test_newAggregates(t *testing.T) {
 	meta := newAggregates()
 	expect := `
-// AggFunc is an aggregate function type
+// AggFunc is the aggregate function type
 type AggFunc func(*aggregate.Aggregates)
 
 // Avg is the average aggregate function

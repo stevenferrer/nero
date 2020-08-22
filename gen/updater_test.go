@@ -32,19 +32,19 @@ func NewUpdater() *Updater {
 	return &Updater{}
 }
 
-// Name sets the name
+// Name is the setter for name
 func (u *Updater) Name(name string) *Updater {
 	u.name = name
 	return u
 }
 
-// Group sets the group
+// Group is the setter for group
 func (u *Updater) Group(group string) *Updater {
 	u.group = group
 	return u
 }
 
-// UpdatedAt sets the updatedAt
+// UpdatedAt is the setter for updatedAt
 func (u *Updater) UpdatedAt(updatedAt *time.Time) *Updater {
 	u.updatedAt = updatedAt
 	return u

@@ -22,7 +22,7 @@ func Test_newPredicates(t *testing.T) {
 // PredFunc is the predicate function type
 type PredFunc func(*comparison.Predicates)
 
-// IDEq applies a equal operator to id
+// IDEq returns a/an equal predicate on id
 func IDEq(id int64) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -33,7 +33,7 @@ func IDEq(id int64) PredFunc {
 	}
 }
 
-// IDNotEq applies a not equal operator to id
+// IDNotEq returns a/an not equal predicate on id
 func IDNotEq(id int64) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -44,7 +44,7 @@ func IDNotEq(id int64) PredFunc {
 	}
 }
 
-// IDGt applies a greater than operator to id
+// IDGt returns a/an greater than predicate on id
 func IDGt(id int64) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -55,7 +55,7 @@ func IDGt(id int64) PredFunc {
 	}
 }
 
-// IDGtOrEq applies a greater than or equal operator to id
+// IDGtOrEq returns a/an greater than or equal predicate on id
 func IDGtOrEq(id int64) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -66,7 +66,7 @@ func IDGtOrEq(id int64) PredFunc {
 	}
 }
 
-// IDLt applies a less than operator to id
+// IDLt returns a/an less than predicate on id
 func IDLt(id int64) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -77,7 +77,7 @@ func IDLt(id int64) PredFunc {
 	}
 }
 
-// IDLtOrEq applies a less than or equal operator to id
+// IDLtOrEq returns a/an less than or equal predicate on id
 func IDLtOrEq(id int64) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -88,7 +88,7 @@ func IDLtOrEq(id int64) PredFunc {
 	}
 }
 
-// NameEq applies a equal operator to name
+// NameEq returns a/an equal predicate on name
 func NameEq(name string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -99,7 +99,7 @@ func NameEq(name string) PredFunc {
 	}
 }
 
-// NameNotEq applies a not equal operator to name
+// NameNotEq returns a/an not equal predicate on name
 func NameNotEq(name string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -110,7 +110,7 @@ func NameNotEq(name string) PredFunc {
 	}
 }
 
-// NameGt applies a greater than operator to name
+// NameGt returns a/an greater than predicate on name
 func NameGt(name string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -121,7 +121,7 @@ func NameGt(name string) PredFunc {
 	}
 }
 
-// NameGtOrEq applies a greater than or equal operator to name
+// NameGtOrEq returns a/an greater than or equal predicate on name
 func NameGtOrEq(name string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -132,7 +132,7 @@ func NameGtOrEq(name string) PredFunc {
 	}
 }
 
-// NameLt applies a less than operator to name
+// NameLt returns a/an less than predicate on name
 func NameLt(name string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -143,7 +143,7 @@ func NameLt(name string) PredFunc {
 	}
 }
 
-// NameLtOrEq applies a less than or equal operator to name
+// NameLtOrEq returns a/an less than or equal predicate on name
 func NameLtOrEq(name string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -154,7 +154,7 @@ func NameLtOrEq(name string) PredFunc {
 	}
 }
 
-// GroupEq applies a equal operator to group
+// GroupEq returns a/an equal predicate on group
 func GroupEq(group string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -165,7 +165,7 @@ func GroupEq(group string) PredFunc {
 	}
 }
 
-// GroupNotEq applies a not equal operator to group
+// GroupNotEq returns a/an not equal predicate on group
 func GroupNotEq(group string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -176,7 +176,7 @@ func GroupNotEq(group string) PredFunc {
 	}
 }
 
-// GroupGt applies a greater than operator to group
+// GroupGt returns a/an greater than predicate on group
 func GroupGt(group string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -187,7 +187,7 @@ func GroupGt(group string) PredFunc {
 	}
 }
 
-// GroupGtOrEq applies a greater than or equal operator to group
+// GroupGtOrEq returns a/an greater than or equal predicate on group
 func GroupGtOrEq(group string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -198,7 +198,7 @@ func GroupGtOrEq(group string) PredFunc {
 	}
 }
 
-// GroupLt applies a less than operator to group
+// GroupLt returns a/an less than predicate on group
 func GroupLt(group string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -209,7 +209,7 @@ func GroupLt(group string) PredFunc {
 	}
 }
 
-// GroupLtOrEq applies a less than or equal operator to group
+// GroupLtOrEq returns a/an less than or equal predicate on group
 func GroupLtOrEq(group string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -220,7 +220,7 @@ func GroupLtOrEq(group string) PredFunc {
 	}
 }
 
-// UpdatedAtEq applies a equal operator to updatedAt
+// UpdatedAtEq returns a/an equal predicate on updatedAt
 func UpdatedAtEq(updatedAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -231,7 +231,7 @@ func UpdatedAtEq(updatedAt *time.Time) PredFunc {
 	}
 }
 
-// UpdatedAtNotEq applies a not equal operator to updatedAt
+// UpdatedAtNotEq returns a/an not equal predicate on updatedAt
 func UpdatedAtNotEq(updatedAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -242,7 +242,7 @@ func UpdatedAtNotEq(updatedAt *time.Time) PredFunc {
 	}
 }
 
-// UpdatedAtGt applies a greater than operator to updatedAt
+// UpdatedAtGt returns a/an greater than predicate on updatedAt
 func UpdatedAtGt(updatedAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -253,7 +253,7 @@ func UpdatedAtGt(updatedAt *time.Time) PredFunc {
 	}
 }
 
-// UpdatedAtGtOrEq applies a greater than or equal operator to updatedAt
+// UpdatedAtGtOrEq returns a/an greater than or equal predicate on updatedAt
 func UpdatedAtGtOrEq(updatedAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -264,7 +264,7 @@ func UpdatedAtGtOrEq(updatedAt *time.Time) PredFunc {
 	}
 }
 
-// UpdatedAtLt applies a less than operator to updatedAt
+// UpdatedAtLt returns a/an less than predicate on updatedAt
 func UpdatedAtLt(updatedAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -275,7 +275,7 @@ func UpdatedAtLt(updatedAt *time.Time) PredFunc {
 	}
 }
 
-// UpdatedAtLtOrEq applies a less than or equal operator to updatedAt
+// UpdatedAtLtOrEq returns a/an less than or equal predicate on updatedAt
 func UpdatedAtLtOrEq(updatedAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -286,7 +286,7 @@ func UpdatedAtLtOrEq(updatedAt *time.Time) PredFunc {
 	}
 }
 
-// CreatedAtEq applies a equal operator to createdAt
+// CreatedAtEq returns a/an equal predicate on createdAt
 func CreatedAtEq(createdAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -297,7 +297,7 @@ func CreatedAtEq(createdAt *time.Time) PredFunc {
 	}
 }
 
-// CreatedAtNotEq applies a not equal operator to createdAt
+// CreatedAtNotEq returns a/an not equal predicate on createdAt
 func CreatedAtNotEq(createdAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -308,7 +308,7 @@ func CreatedAtNotEq(createdAt *time.Time) PredFunc {
 	}
 }
 
-// CreatedAtGt applies a greater than operator to createdAt
+// CreatedAtGt returns a/an greater than predicate on createdAt
 func CreatedAtGt(createdAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -319,7 +319,7 @@ func CreatedAtGt(createdAt *time.Time) PredFunc {
 	}
 }
 
-// CreatedAtGtOrEq applies a greater than or equal operator to createdAt
+// CreatedAtGtOrEq returns a/an greater than or equal predicate on createdAt
 func CreatedAtGtOrEq(createdAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -330,7 +330,7 @@ func CreatedAtGtOrEq(createdAt *time.Time) PredFunc {
 	}
 }
 
-// CreatedAtLt applies a less than operator to createdAt
+// CreatedAtLt returns a/an less than predicate on createdAt
 func CreatedAtLt(createdAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -341,7 +341,7 @@ func CreatedAtLt(createdAt *time.Time) PredFunc {
 	}
 }
 
-// CreatedAtLtOrEq applies a less than or equal operator to createdAt
+// CreatedAtLtOrEq returns a/an less than or equal predicate on createdAt
 func CreatedAtLtOrEq(createdAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -367,7 +367,7 @@ func CreatedAtLtOrEq(createdAt *time.Time) PredFunc {
 // PredFunc is the predicate function type
 type PredFunc func(*comparison.Predicates)
 
-// IDEq applies a equal operator to id
+// IDEq returns a/an equal predicate on id
 func IDEq(id int64) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -378,7 +378,7 @@ func IDEq(id int64) PredFunc {
 	}
 }
 
-// IDNotEq applies a not equal operator to id
+// IDNotEq returns a/an not equal predicate on id
 func IDNotEq(id int64) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -389,7 +389,7 @@ func IDNotEq(id int64) PredFunc {
 	}
 }
 
-// IDGt applies a greater than operator to id
+// IDGt returns a/an greater than predicate on id
 func IDGt(id int64) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -400,7 +400,7 @@ func IDGt(id int64) PredFunc {
 	}
 }
 
-// IDGtOrEq applies a greater than or equal operator to id
+// IDGtOrEq returns a/an greater than or equal predicate on id
 func IDGtOrEq(id int64) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -411,7 +411,7 @@ func IDGtOrEq(id int64) PredFunc {
 	}
 }
 
-// IDLt applies a less than operator to id
+// IDLt returns a/an less than predicate on id
 func IDLt(id int64) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -422,7 +422,7 @@ func IDLt(id int64) PredFunc {
 	}
 }
 
-// IDLtOrEq applies a less than or equal operator to id
+// IDLtOrEq returns a/an less than or equal predicate on id
 func IDLtOrEq(id int64) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -433,7 +433,7 @@ func IDLtOrEq(id int64) PredFunc {
 	}
 }
 
-// AEq applies a equal operator to a
+// AEq returns a/an equal predicate on a
 func AEq(a [1]string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -444,7 +444,7 @@ func AEq(a [1]string) PredFunc {
 	}
 }
 
-// ANotEq applies a not equal operator to a
+// ANotEq returns a/an not equal predicate on a
 func ANotEq(a [1]string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -455,7 +455,7 @@ func ANotEq(a [1]string) PredFunc {
 	}
 }
 
-// AGt applies a greater than operator to a
+// AGt returns a/an greater than predicate on a
 func AGt(a [1]string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -466,7 +466,7 @@ func AGt(a [1]string) PredFunc {
 	}
 }
 
-// AGtOrEq applies a greater than or equal operator to a
+// AGtOrEq returns a/an greater than or equal predicate on a
 func AGtOrEq(a [1]string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -477,7 +477,7 @@ func AGtOrEq(a [1]string) PredFunc {
 	}
 }
 
-// ALt applies a less than operator to a
+// ALt returns a/an less than predicate on a
 func ALt(a [1]string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -488,7 +488,7 @@ func ALt(a [1]string) PredFunc {
 	}
 }
 
-// ALtOrEq applies a less than or equal operator to a
+// ALtOrEq returns a/an less than or equal predicate on a
 func ALtOrEq(a [1]string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{

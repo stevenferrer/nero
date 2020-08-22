@@ -19,35 +19,35 @@ func Test_newRepository(t *testing.T) {
 	expect := strings.TrimSpace(`
 // Repository is a User repository
 type Repository interface {
-	// Tx returns a new transaction
+	// Tx returns a transaction
 	Tx(context.Context) (nero.Tx, error)
 	// Create creates a User
 	Create(context.Context, *Creator) (id int64, err error)
-	// CreateTx creates a User inside transaction
+	// CreateTx creates a User in a transaction
 	CreateTx(context.Context, nero.Tx, *Creator) (id int64, err error)
-	// CreateMany is a batch-create for User
+	// CreateMany creates Users
 	CreateMany(context.Context, ...*Creator) error
-	// CreateManyTx is a batch-create for User inside transaction
+	// CreateManyTx creates Users in a transaction
 	CreateManyTx(context.Context, nero.Tx, ...*Creator) error
-	// Query is used for querying many User
+	// Query queries Users
 	Query(context.Context, *Queryer) ([]*example.User, error)
-	// QueryTx is used for querying many User inside transaction
+	// QueryTx queries Users in a transaction
 	QueryTx(context.Context, nero.Tx, *Queryer) ([]*example.User, error)
-	// QueryOne is used for querying a single User
+	// QueryOne queries a User
 	QueryOne(context.Context, *Queryer) (*example.User, error)
-	// QueryOneTx is used for querying a single User inside transaction
+	// QueryOneTx queries a User in a transaction
 	QueryOneTx(context.Context, nero.Tx, *Queryer) (*example.User, error)
-	// Update updates User
+	// Update updates Users
 	Update(context.Context, *Updater) (rowsAffected int64, err error)
-	// UpdateTx updates User inside transaction
+	// UpdateTx updates Users in a transaction
 	UpdateTx(context.Context, nero.Tx, *Updater) (rowsAffected int64, err error)
-	// Delete deletes User
+	// Delete deletes Users
 	Delete(context.Context, *Deleter) (rowsAffected int64, err error)
-	// Delete deletes User inside transaction
+	// Delete deletes User in a transaction
 	DeleteTx(context.Context, nero.Tx, *Deleter) (rowsAffected int64, err error)
-	// Aggregate is used for doing aggregation
+	// Aggregate aggregates Users
 	Aggregate(context.Context, *Aggregator) error
-	// Aggregate is used for doing aggregation inside transaction
+	// Aggregate aggregates Users in a transaction
 	AggregateTx(context.Context, nero.Tx, *Aggregator) error
 }
 `)

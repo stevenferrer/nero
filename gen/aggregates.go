@@ -7,7 +7,7 @@ import (
 
 func newAggregates() *jen.Statement {
 	aggPkg := pkgPath + "/aggregate"
-	aggDoc := "AggFunc is an aggregate function type"
+	aggDoc := "AggFunc is the aggregate function type"
 	stmnt := jen.Comment(aggDoc).Line().
 		Type().Id("AggFunc").Func().Params(
 		jen.Op("*").Qual(aggPkg, "Aggregates"),

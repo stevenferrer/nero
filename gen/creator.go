@@ -47,7 +47,7 @@ func newCreator(schema *gen.Schema) *jen.Statement {
 		}
 
 		paramID := lowCamel(methodID)
-		methodDoc := fmt.Sprintf("%s sets the %s", methodID, paramID)
+		methodDoc := fmt.Sprintf("%s is the setter for %s", methodID, paramID)
 		stmnt = stmnt.Comment(methodDoc).Line().
 			Func().Params(rcvrParamsC).Id(methodID).
 			Params(jen.Id(paramID).Add(jenx.Type(col.Type.V()))).

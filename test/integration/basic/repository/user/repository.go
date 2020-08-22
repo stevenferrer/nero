@@ -13,35 +13,35 @@ import (
 
 // Repository is a User repository
 type Repository interface {
-	// Tx returns a new transaction
+	// Tx returns a transaction
 	Tx(context.Context) (nero.Tx, error)
 	// Create creates a User
 	Create(context.Context, *Creator) (id string, err error)
-	// CreateTx creates a User inside transaction
+	// CreateTx creates a User in a transaction
 	CreateTx(context.Context, nero.Tx, *Creator) (id string, err error)
-	// CreateMany is a batch-create for User
+	// CreateMany creates Users
 	CreateMany(context.Context, ...*Creator) error
-	// CreateManyTx is a batch-create for User inside transaction
+	// CreateManyTx creates Users in a transaction
 	CreateManyTx(context.Context, nero.Tx, ...*Creator) error
-	// Query is used for querying many User
+	// Query queries Users
 	Query(context.Context, *Queryer) ([]*user.User, error)
-	// QueryTx is used for querying many User inside transaction
+	// QueryTx queries Users in a transaction
 	QueryTx(context.Context, nero.Tx, *Queryer) ([]*user.User, error)
-	// QueryOne is used for querying a single User
+	// QueryOne queries a User
 	QueryOne(context.Context, *Queryer) (*user.User, error)
-	// QueryOneTx is used for querying a single User inside transaction
+	// QueryOneTx queries a User in a transaction
 	QueryOneTx(context.Context, nero.Tx, *Queryer) (*user.User, error)
-	// Update updates User
+	// Update updates Users
 	Update(context.Context, *Updater) (rowsAffected int64, err error)
-	// UpdateTx updates User inside transaction
+	// UpdateTx updates Users in a transaction
 	UpdateTx(context.Context, nero.Tx, *Updater) (rowsAffected int64, err error)
-	// Delete deletes User
+	// Delete deletes Users
 	Delete(context.Context, *Deleter) (rowsAffected int64, err error)
-	// Delete deletes User inside transaction
+	// Delete deletes User in a transaction
 	DeleteTx(context.Context, nero.Tx, *Deleter) (rowsAffected int64, err error)
-	// Aggregate is used for doing aggregation
+	// Aggregate aggregates Users
 	Aggregate(context.Context, *Aggregator) error
-	// Aggregate is used for doing aggregation inside transaction
+	// Aggregate aggregates Users in a transaction
 	AggregateTx(context.Context, nero.Tx, *Aggregator) error
 }
 
@@ -61,43 +61,43 @@ func NewCreator() *Creator {
 	return &Creator{}
 }
 
-// UID sets the uid
+// UID is the setter for uid
 func (c *Creator) UID(uid ksuid.KSUID) *Creator {
 	c.uid = uid
 	return c
 }
 
-// Email sets the email
+// Email is the setter for email
 func (c *Creator) Email(email string) *Creator {
 	c.email = email
 	return c
 }
 
-// Name sets the name
+// Name is the setter for name
 func (c *Creator) Name(name string) *Creator {
 	c.name = name
 	return c
 }
 
-// Age sets the age
+// Age is the setter for age
 func (c *Creator) Age(age int) *Creator {
 	c.age = age
 	return c
 }
 
-// Group sets the group
+// Group is the setter for group
 func (c *Creator) Group(group user.Group) *Creator {
 	c.group = group
 	return c
 }
 
-// Kv sets the kv
+// Kv is the setter for kv
 func (c *Creator) Kv(kv example.Map) *Creator {
 	c.kv = kv
 	return c
 }
 
-// UpdatedAt sets the updatedAt
+// UpdatedAt is the setter for updatedAt
 func (c *Creator) UpdatedAt(updatedAt *time.Time) *Creator {
 	c.updatedAt = updatedAt
 	return c
@@ -157,43 +157,43 @@ func NewUpdater() *Updater {
 	return &Updater{}
 }
 
-// UID sets the uid
+// UID is the setter for uid
 func (u *Updater) Uid(uid ksuid.KSUID) *Updater {
 	u.uid = uid
 	return u
 }
 
-// Email sets the email
+// Email is the setter for email
 func (u *Updater) Email(email string) *Updater {
 	u.email = email
 	return u
 }
 
-// Name sets the name
+// Name is the setter for name
 func (u *Updater) Name(name string) *Updater {
 	u.name = name
 	return u
 }
 
-// Age sets the age
+// Age is the setter for age
 func (u *Updater) Age(age int) *Updater {
 	u.age = age
 	return u
 }
 
-// Group sets the group
+// Group is the setter for group
 func (u *Updater) Group(group user.Group) *Updater {
 	u.group = group
 	return u
 }
 
-// Kv sets the kv
+// Kv is the setter for kv
 func (u *Updater) Kv(kv example.Map) *Updater {
 	u.kv = kv
 	return u
 }
 
-// UpdatedAt sets the updatedAt
+// UpdatedAt is the setter for updatedAt
 func (u *Updater) UpdatedAt(updatedAt *time.Time) *Updater {
 	u.updatedAt = updatedAt
 	return u

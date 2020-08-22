@@ -15,7 +15,15 @@ func newSorts() *jen.Statement {
 
 	directns := []sort.Direction{sort.Asc, sort.Desc}
 	for _, directn := range directns {
-		stmnt = stmnt.Comment(directn.Description()).Line().
+		var comment string
+		switch directn {
+		case sort.Asc:
+			comment = "Asc returns an ascending sort applied on column"
+		case sort.Desc:
+			comment = "Desc returns a descending sort applied on column"
+		}
+
+		stmnt = stmnt.Comment(comment).Line().
 			Func().Id(directn.String()).
 			Params(jen.Id("col").Id("Column")).
 			Params(jen.Id("SortFunc")).

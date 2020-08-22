@@ -63,7 +63,7 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 			}
 
 			paramID := lowCamel(field)
-			fnDoc := fmt.Sprintf("%s applies a %s operator to %s", fnName, strings.ToLower(op.Description()), paramID)
+			fnDoc := fmt.Sprintf("%s returns a/an %s predicate on %s", fnName, strings.ToLower(op.Description()), paramID)
 			stmnt = stmnt.Comment(fnDoc).Line().
 				Func().Id(fnName).
 				Params(jen.Id(paramID).
