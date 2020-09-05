@@ -23,7 +23,7 @@ type PostgreSQLRepository struct {
 	log *zerolog.Logger
 }
 
-var _ = Repository(&PostgreSQLRepository{})
+var _ Repository = (*PostgreSQLRepository)(nil)
 
 func NewPostgreSQLRepository(db *sql.DB) *PostgreSQLRepository {
 	return &PostgreSQLRepository{

@@ -42,7 +42,7 @@ func NewPostgreSQLRepo(schema *gen.Schema) *jen.Statement {
 	// // type definition
 	return newTypeDefBlock().Add(ll).
 		// assert repository
-		Add(newTypeAssertBlock()).Add(ll).
+		Add(newInterfaceGuardBlock()).Add(ll).
 		// factory
 		Add(newFactoryBlock()).Add(ll).
 		// debug
@@ -102,9 +102,9 @@ func newTypeDefBlock() *jen.Statement {
 	)
 }
 
-func newTypeAssertBlock() *jen.Statement {
-	return jen.Var().Id("_").Op("=").Id("Repository").
-		Call(jen.Op("&").Id(typeName).Block())
+func newInterfaceGuardBlock() *jen.Statement {
+	return jen.Var().Id("_").Id("Repository").Op("=").
+		Parens(jen.Op("*").Id(typeName)).Parens(jen.Nil())
 }
 
 func newDebugLogBlock(operation string) *jen.Statement {

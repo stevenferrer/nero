@@ -24,4 +24,4 @@ However, due to our heavy use of *repository pattern*, it is still very difficul
 
 ## Assumption
 
-The only assumption that we make is: Every *collection/table* will always have a surrogate key i.e. *id column*.
+The only assumption is every *collection/table* will always have a surrogate key i.e. *id column*.

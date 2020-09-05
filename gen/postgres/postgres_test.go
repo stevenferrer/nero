@@ -25,9 +25,9 @@ type PostgreSQLRepository struct {
 	assert.Equal(t, expect, got)
 }
 
-func Test_newTypeAssertBlock(t *testing.T) {
-	block := newTypeAssertBlock()
-	expect := `var _ = Repository(&PostgreSQLRepository{})`
+func Test_newInterfaceGuardBlock(t *testing.T) {
+	block := newInterfaceGuardBlock()
+	expect := `var _ Repository = (*PostgreSQLRepository)(nil)`
 	got := strings.TrimSpace(fmt.Sprintf("%#v", block))
 	assert.Equal(t, expect, got)
 }
@@ -57,7 +57,7 @@ type PostgreSQLRepository struct {
 	log *zerolog.Logger
 }
 
-var _ = Repository(&PostgreSQLRepository{})
+var _ Repository = (*PostgreSQLRepository)(nil)
 
 func NewPostgreSQLRepository(db *sql.DB) *PostgreSQLRepository {
 	return &PostgreSQLRepository{
