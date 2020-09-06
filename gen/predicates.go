@@ -2,14 +2,14 @@ package gen
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
-	jenx "github.com/sf9v/nero/x/jen"
+	"github.com/goccy/go-reflect"
 
 	"github.com/sf9v/nero/comparison"
 	gen "github.com/sf9v/nero/gen/internal"
+	jenx "github.com/sf9v/nero/x/jen"
 )
 
 func newPredicates(schema *gen.Schema) *jen.Statement {

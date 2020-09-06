@@ -1,9 +1,9 @@
 package sqlite
 
 import (
-	"reflect"
-
 	"github.com/dave/jennifer/jen"
+	"github.com/goccy/go-reflect"
+
 	gen "github.com/sf9v/nero/gen/internal"
 	jenx "github.com/sf9v/nero/x/jen"
 	stringsx "github.com/sf9v/nero/x/strings"

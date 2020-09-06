@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
+	reflect "github.com/goccy/go-reflect"
 	_ "github.com/lib/pq"
 	errors "github.com/pkg/errors"
 	zerolog "github.com/rs/zerolog"
@@ -15,7 +16,6 @@ import (
 	sort "github.com/sf9v/nero/sort"
 	user "github.com/sf9v/nero/test/integration/basic/user"
 	"io"
-	"reflect"
 )
 
 type PostgreSQLRepository struct {

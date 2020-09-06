@@ -542,14 +542,14 @@ func (pg *PostgreSQLRepository) aggregate(ctx context.Context, runner nero.SqlRu
 	}
 	defer rows.Close()
 
-	v := reflect.ValueOf(a.v).Elem()
-	t := reflect.TypeOf(v.Interface()).Elem()
+	v := goreflect.ValueOf(a.v).Elem()
+	t := goreflect.TypeOf(v.Interface()).Elem()
 	if t.NumField() != len(cols) {
 		return errors.New("aggregate columns and destination struct field count should match")
 	}
 
 	for rows.Next() {
-		ve := reflect.New(t).Elem()
+		ve := goreflect.New(t).Elem()
 		dest := make([]interface{}, ve.NumField())
 		for i := 0; i < ve.NumField(); i++ {
 			dest[i] = ve.Field(i).Addr().Interface()
@@ -560,7 +560,7 @@ func (pg *PostgreSQLRepository) aggregate(ctx context.Context, runner nero.SqlRu
 			return err
 		}
 
-		v.Set(reflect.Append(v, ve))
+		v.Set(goreflect.Append(v, ve))
 	}
 
 	return nil

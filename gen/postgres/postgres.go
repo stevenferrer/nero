@@ -13,9 +13,10 @@ const (
 	aggPkg  = "github.com/sf9v/nero/aggregate"
 	sortPkg = "github.com/sf9v/nero/sort"
 
-	sqPkg  = "github.com/Masterminds/squirrel"
-	logPkg = "github.com/rs/zerolog"
-	errPkg = "github.com/pkg/errors"
+	sqPkg      = "github.com/Masterminds/squirrel"
+	logPkg     = "github.com/rs/zerolog"
+	errPkg     = "github.com/pkg/errors"
+	reflectPkg = "github.com/goccy/go-reflect"
 
 	typeName = "PostgreSQLRepository"
 	rcvrID   = "pg"

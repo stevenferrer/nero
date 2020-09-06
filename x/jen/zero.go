@@ -1,9 +1,8 @@
 package jen
 
 import (
-	"reflect"
-
 	"github.com/dave/jennifer/jen"
+	"github.com/goccy/go-reflect"
 	"github.com/sf9v/mira"
 )
 

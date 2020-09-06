@@ -136,9 +136,9 @@ func newAggregateRunnerBlock(schema *gen.Schema) *jen.Statement {
 			g.Defer().Id("rows").Dot("Close").Call().Line()
 
 			// inspect aggregate destination
-			g.Id("v").Op(":=").Qual("reflect", "ValueOf").
+			g.Id("v").Op(":=").Qual(reflectPkg, "ValueOf").
 				Call(jen.Id("a").Dot("v")).Dot("Elem").Call()
-			g.Id("t").Op(":=").Qual("reflect", "TypeOf").
+			g.Id("t").Op(":=").Qual(reflectPkg, "TypeOf").
 				Call(jen.Id("v").Dot("Interface").Call()).
 				Dot("Elem").Call()
 			// TODO: add more details to error message
@@ -150,7 +150,7 @@ func newAggregateRunnerBlock(schema *gen.Schema) *jen.Statement {
 
 			g.For(jen.Id("rows").Dot("Next").Call()).
 				BlockFunc(func(g *jen.Group) {
-					g.Id("ve").Op(":=").Qual("reflect", "New").
+					g.Id("ve").Op(":=").Qual(reflectPkg, "New").
 						Call(jen.Id("t")).Dot("Elem").Call()
 					g.Id("dest").Op(":=").Make(
 						jen.Op("[]").Interface(),
@@ -170,7 +170,7 @@ func newAggregateRunnerBlock(schema *gen.Schema) *jen.Statement {
 						Call(jen.Id("dest").Op("..."))
 					g.Add(ifErr).Line()
 
-					g.Id("v").Dot("Set").Call(jen.Qual("reflect", "Append").
+					g.Id("v").Dot("Set").Call(jen.Qual(reflectPkg, "Append").
 						Call(jen.Id("v"), jen.Id("ve")))
 				}).Line()
 
