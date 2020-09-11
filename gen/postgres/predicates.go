@@ -18,8 +18,43 @@ func newPredicatesBlock() *jen.Statement {
 			// switch block
 			jen.Switch(jen.Id("p").Dot("Op")).
 				BlockFunc(func(g *jen.Group) {
+					inBlock := false
 					for _, op := range predOps {
 						var fmtExpr string
+						if op == comparison.In || op == comparison.NotIn {
+							if inBlock {
+								continue
+							}
+
+							g.Case(
+								jen.Qual(pkgPath+"/comparison", comparison.In.String()),
+								jen.Qual(pkgPath+"/comparison", comparison.NotIn.String()),
+							).BlockFunc(func(g *jen.Group) {
+								g.Id("args").Op(":=").Id("p").Dot("Val").Assert(jen.Op("[]").Interface())
+								g.If(jen.Len(jen.Id("args")).Op("==").Lit(0)).Block(jen.Continue())
+								g.Id("qms").Op(":=").Op("[]").String().Block()
+								g.For(jen.Range().Id("args")).Block(
+									jen.Id("qms").Op("=").Append(jen.Id("qms"), jen.Lit("?")),
+								)
+								g.Id("fmtStr").Op(":=").Lit("%q IN (%s)")
+								g.If(jen.Id("p").Dot("Op").Op("==").Qual(pkgPath+"/comparison", "NotIn")).Block(
+									jen.Id("fmtStr").Op("=").Lit("%q NOT IN (%s)"),
+								)
+								g.Id("plchldr").Op(":=").Qual("strings", "Join").Call(jen.Id("qms"), jen.Lit(","))
+								g.Id("qb").Op("=").Id("qb").Dot("Where").Call(
+									jen.Qual("fmt", "Sprintf").Call(
+										jen.Id("fmtStr"),
+										jen.Id("p").Dot("Col"),
+										jen.Id("plchldr"),
+									),
+									jen.Id("args").Op("..."),
+								)
+							})
+
+							inBlock = true
+							continue
+						}
+
 						switch op {
 						case comparison.Eq:
 							fmtExpr = "%q = ?"

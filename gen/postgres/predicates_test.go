@@ -33,6 +33,21 @@ for _, p := range pb.All() {
 		qb = qb.Where(fmt.Sprintf("%q IS NULL", p.Col))
 	case comparison.IsNotNull:
 		qb = qb.Where(fmt.Sprintf("%q IS NOT NULL", p.Col))
+	case comparison.In, comparison.NotIn:
+		args := p.Val.([]interface{})
+		if len(args) == 0 {
+			continue
+		}
+		qms := []string{}
+		for range args {
+			qms = append(qms, "?")
+		}
+		fmtStr := "%q IN (%s)"
+		if p.Op == comparison.NotIn {
+			fmtStr = "%q NOT IN (%s)"
+		}
+		plchldr := strings.Join(qms, ",")
+		qb = qb.Where(fmt.Sprintf(fmtStr, p.Col, plchldr), args...)
 	}
 }
 `)

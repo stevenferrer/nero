@@ -88,6 +88,34 @@ func IDLtOrEq(id int64) PredFunc {
 	}
 }
 
+func IDIn(ids ...int64) PredFunc {
+	vals := []interface{}{}
+	for _, v := range ids {
+		vals = append(vals, v)
+	}
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "id",
+			Op:  comparison.In,
+			Val: vals,
+		})
+	}
+}
+
+func IDNotIn(ids ...int64) PredFunc {
+	vals := []interface{}{}
+	for _, v := range ids {
+		vals = append(vals, v)
+	}
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "id",
+			Op:  comparison.NotIn,
+			Val: vals,
+		})
+	}
+}
+
 // NameEq returns a/an equal predicate on name
 func NameEq(name string) PredFunc {
 	return func(pb *comparison.Predicates) {
@@ -150,6 +178,34 @@ func NameLtOrEq(name string) PredFunc {
 			Col: "name",
 			Op:  comparison.LtOrEq,
 			Val: name,
+		})
+	}
+}
+
+func NameIn(names ...string) PredFunc {
+	vals := []interface{}{}
+	for _, v := range names {
+		vals = append(vals, v)
+	}
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "name",
+			Op:  comparison.In,
+			Val: vals,
+		})
+	}
+}
+
+func NameNotIn(names ...string) PredFunc {
+	vals := []interface{}{}
+	for _, v := range names {
+		vals = append(vals, v)
+	}
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "name",
+			Op:  comparison.NotIn,
+			Val: vals,
 		})
 	}
 }
@@ -220,6 +276,34 @@ func GroupLtOrEq(group string) PredFunc {
 	}
 }
 
+func GroupIn(groups ...string) PredFunc {
+	vals := []interface{}{}
+	for _, v := range groups {
+		vals = append(vals, v)
+	}
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "group_res",
+			Op:  comparison.In,
+			Val: vals,
+		})
+	}
+}
+
+func GroupNotIn(groups ...string) PredFunc {
+	vals := []interface{}{}
+	for _, v := range groups {
+		vals = append(vals, v)
+	}
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "group_res",
+			Op:  comparison.NotIn,
+			Val: vals,
+		})
+	}
+}
+
 // UpdatedAtEq returns a/an equal predicate on updatedAt
 func UpdatedAtEq(updatedAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
@@ -286,6 +370,34 @@ func UpdatedAtLtOrEq(updatedAt *time.Time) PredFunc {
 	}
 }
 
+func UpdatedAtIn(updatedAts ...*time.Time) PredFunc {
+	vals := []interface{}{}
+	for _, v := range updatedAts {
+		vals = append(vals, v)
+	}
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "updated_at",
+			Op:  comparison.In,
+			Val: vals,
+		})
+	}
+}
+
+func UpdatedAtNotIn(updatedAts ...*time.Time) PredFunc {
+	vals := []interface{}{}
+	for _, v := range updatedAts {
+		vals = append(vals, v)
+	}
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "updated_at",
+			Op:  comparison.NotIn,
+			Val: vals,
+		})
+	}
+}
+
 // CreatedAtEq returns a/an equal predicate on createdAt
 func CreatedAtEq(createdAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
@@ -348,6 +460,34 @@ func CreatedAtLtOrEq(createdAt *time.Time) PredFunc {
 			Col: "created_at",
 			Op:  comparison.LtOrEq,
 			Val: createdAt,
+		})
+	}
+}
+
+func CreatedAtIn(createdAts ...*time.Time) PredFunc {
+	vals := []interface{}{}
+	for _, v := range createdAts {
+		vals = append(vals, v)
+	}
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "created_at",
+			Op:  comparison.In,
+			Val: vals,
+		})
+	}
+}
+
+func CreatedAtNotIn(createdAts ...*time.Time) PredFunc {
+	vals := []interface{}{}
+	for _, v := range createdAts {
+		vals = append(vals, v)
+	}
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "created_at",
+			Op:  comparison.NotIn,
+			Val: vals,
 		})
 	}
 }
@@ -433,6 +573,34 @@ func IDLtOrEq(id int64) PredFunc {
 	}
 }
 
+func IDIn(ids ...int64) PredFunc {
+	vals := []interface{}{}
+	for _, v := range ids {
+		vals = append(vals, v)
+	}
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "id",
+			Op:  comparison.In,
+			Val: vals,
+		})
+	}
+}
+
+func IDNotIn(ids ...int64) PredFunc {
+	vals := []interface{}{}
+	for _, v := range ids {
+		vals = append(vals, v)
+	}
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "id",
+			Op:  comparison.NotIn,
+			Val: vals,
+		})
+	}
+}
+
 // AEq returns a/an equal predicate on a
 func AEq(a [1]string) PredFunc {
 	return func(pb *comparison.Predicates) {
@@ -495,6 +663,34 @@ func ALtOrEq(a [1]string) PredFunc {
 			Col: "a",
 			Op:  comparison.LtOrEq,
 			Val: a,
+		})
+	}
+}
+
+func AIn(as ...[1]string) PredFunc {
+	vals := []interface{}{}
+	for _, v := range as {
+		vals = append(vals, v)
+	}
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "a",
+			Op:  comparison.In,
+			Val: vals,
+		})
+	}
+}
+
+func ANotIn(as ...[1]string) PredFunc {
+	vals := []interface{}{}
+	for _, v := range as {
+		vals = append(vals, v)
+	}
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "a",
+			Op:  comparison.NotIn,
+			Val: vals,
 		})
 	}
 }

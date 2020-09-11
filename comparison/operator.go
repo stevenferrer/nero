@@ -21,6 +21,10 @@ func (op Operator) String() string {
 		return "IsNull"
 	case IsNotNull:
 		return "IsNotNull"
+	case In:
+		return "In"
+	case NotIn:
+		return "NotIn"
 	}
 
 	return "Invalid"
@@ -44,6 +48,10 @@ func (op Operator) Description() string {
 		return "Is null"
 	case IsNotNull:
 		return "Is not null"
+	case In:
+		return "In"
+	case NotIn:
+		return "NotIn"
 	}
 
 	return "Invalid"
@@ -67,4 +75,8 @@ const (
 	IsNull
 	// IsNotNull is an "is not null" operator
 	IsNotNull
+	// In is used to check if a value is in the list
+	In
+	// In is used to check if a value is not in the list
+	NotIn
 )

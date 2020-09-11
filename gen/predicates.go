@@ -6,6 +6,7 @@ import (
 
 	"github.com/dave/jennifer/jen"
 	"github.com/goccy/go-reflect"
+	"github.com/jinzhu/inflection"
 
 	"github.com/sf9v/nero/comparison"
 	gen "github.com/sf9v/nero/gen/internal"
@@ -18,9 +19,13 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 		jen.Op("*").Qual(pkgPath+"/comparison", "Predicates"),
 	).Line()
 
-	ops := []comparison.Operator{comparison.Eq, comparison.NotEq,
-		comparison.Gt, comparison.GtOrEq, comparison.Lt, comparison.LtOrEq,
-		comparison.IsNull, comparison.IsNotNull}
+	ops := []comparison.Operator{
+		comparison.Eq, comparison.NotEq,
+		comparison.Gt, comparison.GtOrEq,
+		comparison.Lt, comparison.LtOrEq,
+		comparison.IsNull, comparison.IsNotNull,
+		comparison.In, comparison.NotIn,
+	}
 	compPkg := pkgPath + "/comparison"
 	for _, col := range schema.Cols {
 		kind := col.Type.T().Kind()
@@ -37,8 +42,7 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 			opStr := op.String()
 			fnName := camel(field + "_" + opStr)
 
-			if op == comparison.IsNull ||
-				op == comparison.IsNotNull {
+			if op == comparison.IsNull || op == comparison.IsNotNull {
 				if !col.Nullable {
 					continue
 				}
@@ -58,7 +62,31 @@ func newPredicates(schema *gen.Schema) *jen.Statement {
 								),
 						)),
 					)).Line().Line()
+				continue
+			}
 
+			if op == comparison.In || op == comparison.NotIn {
+				paramID := inflection.Plural(lowCamel(field))
+				stmnt = stmnt.Func().Id(fnName).
+					Params(jen.Id(paramID).Op("...").
+						Add(jenx.Type(col.Type.V()))).
+					Params(jen.Id("PredFunc")).
+					Block(
+						jen.Id("vals").Op(":=").Op("[]").Interface().Block(),
+						jen.For(jen.List(jen.Id("_"), jen.Id("v")).Op(":=").Range().Id(paramID)).Block(
+							jen.Id("vals").Op("=").Append(jen.Id("vals"), jen.Id("v")),
+						),
+						jen.Return(jen.Func().Params(jen.Id("pb").Op("*").
+							Qual(compPkg, "Predicates")).
+							Block(jen.Id("pb").Dot("Add").Call(
+								jen.Op("&").Qual(compPkg, "Predicate").
+									Block(
+										jen.Id("Col").Op(":").Lit(col.Name).Op(","),
+										jen.Id("Op").Op(":").Qual(compPkg, opStr).Op(","),
+										jen.Id("Val").Op(":").Id("vals").Op(","),
+									),
+							)),
+						)).Line().Line()
 				continue
 			}
 

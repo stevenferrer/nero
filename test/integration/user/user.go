@@ -36,7 +36,7 @@ const (
 // Schema implements nero.Schemaer
 func (u *User) Schema() *nero.Schema {
 	return &nero.Schema{
-		Pkg:        "user",
+		Pkg:        "repository",
 		Collection: "users",
 		Columns: []*nero.Column{
 			nero.NewColumn("id", u.ID).

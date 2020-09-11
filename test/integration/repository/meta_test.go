@@ -1,14 +1,14 @@
-package user_test
+package repository_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/sf9v/nero/test/integration/basic/repository/user"
+	"github.com/sf9v/nero/test/integration/repository"
 )
 
 func TestColumnStringer(t *testing.T) {
-	c := user.Column(99)
+	c := repository.Column(99)
 	assert.Equal(t, "invalid", c.String())
 }

@@ -32,7 +32,7 @@ var (
 
 	predOps = []comparison.Operator{comparison.Eq, comparison.NotEq,
 		comparison.Gt, comparison.GtOrEq, comparison.Lt, comparison.LtOrEq,
-		comparison.IsNull, comparison.IsNotNull}
+		comparison.IsNull, comparison.IsNotNull, comparison.In, comparison.NotIn}
 	aggFns = []aggregate.Function{aggregate.Avg, aggregate.Count,
 		aggregate.Max, aggregate.Min, aggregate.Sum, aggregate.None}
 )

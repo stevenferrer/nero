@@ -1,4 +1,4 @@
-package user_test
+package repository_test
 
 import (
 	"fmt"
@@ -9,14 +9,14 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/sf9v/nero/sort"
-	"github.com/sf9v/nero/test/integration/basic/repository/user"
+	"github.com/sf9v/nero/test/integration/repository"
 )
 
 func TestSorts(t *testing.T) {
 	t.Run("ID", func(t *testing.T) {
-		sfs := []user.SortFunc{
-			user.Asc(user.ColumnID),
-			user.Desc(user.ColumnID),
+		sfs := []repository.SortFunc{
+			repository.Asc(repository.ColumnID),
+			repository.Desc(repository.ColumnID),
 		}
 
 		sb := &sort.Sorts{}
@@ -36,9 +36,9 @@ func TestSorts(t *testing.T) {
 	})
 
 	t.Run("UID", func(t *testing.T) {
-		sfs := []user.SortFunc{
-			user.Asc(user.ColumnUID),
-			user.Desc(user.ColumnUID),
+		sfs := []repository.SortFunc{
+			repository.Asc(repository.ColumnUID),
+			repository.Desc(repository.ColumnUID),
 		}
 
 		sb := &sort.Sorts{}
@@ -58,9 +58,9 @@ func TestSorts(t *testing.T) {
 	})
 
 	t.Run("Email", func(t *testing.T) {
-		sfs := []user.SortFunc{
-			user.Asc(user.ColumnEmail),
-			user.Desc(user.ColumnEmail),
+		sfs := []repository.SortFunc{
+			repository.Asc(repository.ColumnEmail),
+			repository.Desc(repository.ColumnEmail),
 		}
 
 		sb := &sort.Sorts{}
@@ -80,9 +80,9 @@ func TestSorts(t *testing.T) {
 	})
 
 	t.Run("Name", func(t *testing.T) {
-		sfs := []user.SortFunc{
-			user.Asc(user.ColumnName),
-			user.Desc(user.ColumnName),
+		sfs := []repository.SortFunc{
+			repository.Asc(repository.ColumnName),
+			repository.Desc(repository.ColumnName),
 		}
 
 		sb := &sort.Sorts{}
@@ -102,9 +102,9 @@ func TestSorts(t *testing.T) {
 	})
 
 	t.Run("UpdatedAt", func(t *testing.T) {
-		sfs := []user.SortFunc{
-			user.Asc(user.ColumnUpdatedAt),
-			user.Desc(user.ColumnUpdatedAt),
+		sfs := []repository.SortFunc{
+			repository.Asc(repository.ColumnUpdatedAt),
+			repository.Desc(repository.ColumnUpdatedAt),
 		}
 
 		sb := &sort.Sorts{}
@@ -124,10 +124,10 @@ func TestSorts(t *testing.T) {
 	})
 
 	t.Run("CreatedAt", func(t *testing.T) {
-		sfs := []user.SortFunc{
+		sfs := []repository.SortFunc{
 			// user.CreatedAtAsc(), user.CreatedAtDesc(),
-			user.Asc(user.ColumnCreatedAt),
-			user.Desc(user.ColumnCreatedAt),
+			repository.Asc(repository.ColumnCreatedAt),
+			repository.Desc(repository.ColumnCreatedAt),
 		}
 
 		sb := &sort.Sorts{}

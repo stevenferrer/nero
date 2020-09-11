@@ -1,4 +1,4 @@
-package user
+package repository
 
 import (
 	"errors"
