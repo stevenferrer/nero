@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"strings"
+
 	"github.com/pkg/errors"
 	"github.com/sf9v/mira"
 	stringsx "github.com/sf9v/nero/x/strings"
@@ -15,17 +17,24 @@ type Schema struct {
 	Ident      *Col
 	Cols       []*Col
 	Pkg        string
+
+	SchemaImports []string
+	ColumnImports []string
 }
 
 // BuildSchema builds schema from a nero.Schemaer to Schema
 func BuildSchema(s nero.Schemaer) (*Schema, error) {
 	ns := s.Schema()
+	schemaType := mira.NewType(s)
 	schema := &Schema{
-		Collection: ns.Collection,
-		Type:       mira.NewType(s),
-		Cols:       []*Col{},
-		Pkg:        ns.Pkg,
+		Pkg:           strings.ToLower(ns.Pkg),
+		Collection:    ns.Collection,
+		Type:          schemaType,
+		Cols:          []*Col{},
+		SchemaImports: []string{schemaType.PkgPath()},
 	}
+
+	colImportMap := map[string]int{}
 
 	identCnt := 0
 	for _, column := range ns.Columns {
@@ -48,8 +57,19 @@ func BuildSchema(s nero.Schemaer) (*Schema, error) {
 			identCnt++
 		}
 
+		if col.Type.PkgPath() != "" {
+			colImportMap[col.Type.PkgPath()] = 1
+		}
+
 		schema.Cols = append(schema.Cols, col)
 	}
+
+	columnImports := []string{}
+	for k := range colImportMap {
+		columnImports = append(columnImports, k)
+	}
+
+	schema.ColumnImports = columnImports
 
 	if identCnt == 0 {
 		return nil, errors.New("an identity column is required")

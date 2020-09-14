@@ -1,118 +1,111 @@
 package gen
 
 import (
-	"fmt"
-	"strings"
-
-	"github.com/dave/jennifer/jen"
-	"github.com/goccy/go-reflect"
-	"github.com/jinzhu/inflection"
+	"bytes"
+	"html/template"
 
 	"github.com/sf9v/nero/comparison"
 	gen "github.com/sf9v/nero/gen/internal"
-	jenx "github.com/sf9v/nero/x/jen"
 )
 
-func newPredicates(schema *gen.Schema) *jen.Statement {
-	stmnt := jen.Comment("PredFunc is the predicate function type").
-		Line().Type().Id("PredFunc").Func().Params(
-		jen.Op("*").Qual(pkgPath+"/comparison", "Predicates"),
-	).Line()
-
-	ops := []comparison.Operator{
-		comparison.Eq, comparison.NotEq,
-		comparison.Gt, comparison.GtOrEq,
-		comparison.Lt, comparison.LtOrEq,
-		comparison.IsNull, comparison.IsNotNull,
-		comparison.In, comparison.NotIn,
-	}
-	compPkg := pkgPath + "/comparison"
-	for _, col := range schema.Cols {
-		kind := col.Type.T().Kind()
-		if kind == reflect.Map ||
-			kind == reflect.Slice {
-			continue
-		}
-
-		for _, op := range ops {
-			field := col.CamelName()
-			if len(col.StructField) > 0 {
-				field = col.StructField
-			}
-			opStr := op.String()
-			fnName := camel(field + "_" + opStr)
-
-			if op == comparison.IsNull || op == comparison.IsNotNull {
-				if !col.Nullable {
-					continue
-				}
-
-				stmnt = stmnt.Func().Id(fnName).
-					Params().
-					Params(jen.Id("PredFunc")).
-					Block(jen.Return(jen.Func().Params(jen.Id("pb").Op("*").
-						Qual(compPkg, "Predicates")).
-						Block(jen.Id("pb").Dot("Add").Call(
-							jen.Op("&").Qual(compPkg, "Predicate").
-								Block(
-									jen.Id("Col").Op(":").
-										Lit(col.Name).Op(","),
-									jen.Id("Op").Op(":").
-										Qual(compPkg, opStr).Op(","),
-								),
-						)),
-					)).Line().Line()
-				continue
-			}
-
-			if op == comparison.In || op == comparison.NotIn {
-				paramID := inflection.Plural(lowCamel(field))
-				stmnt = stmnt.Func().Id(fnName).
-					Params(jen.Id(paramID).Op("...").
-						Add(jenx.Type(col.Type.V()))).
-					Params(jen.Id("PredFunc")).
-					Block(
-						jen.Id("vals").Op(":=").Op("[]").Interface().Block(),
-						jen.For(jen.List(jen.Id("_"), jen.Id("v")).Op(":=").Range().Id(paramID)).Block(
-							jen.Id("vals").Op("=").Append(jen.Id("vals"), jen.Id("v")),
-						),
-						jen.Return(jen.Func().Params(jen.Id("pb").Op("*").
-							Qual(compPkg, "Predicates")).
-							Block(jen.Id("pb").Dot("Add").Call(
-								jen.Op("&").Qual(compPkg, "Predicate").
-									Block(
-										jen.Id("Col").Op(":").Lit(col.Name).Op(","),
-										jen.Id("Op").Op(":").Qual(compPkg, opStr).Op(","),
-										jen.Id("Val").Op(":").Id("vals").Op(","),
-									),
-							)),
-						)).Line().Line()
-				continue
-			}
-
-			paramID := lowCamel(field)
-			fnDoc := fmt.Sprintf("%s returns a/an %s predicate on %s", fnName, strings.ToLower(op.Description()), paramID)
-			stmnt = stmnt.Comment(fnDoc).Line().
-				Func().Id(fnName).
-				Params(jen.Id(paramID).
-					Add(jenx.Type(col.Type.V()))).
-				Params(jen.Id("PredFunc")).
-				Block(jen.Return(jen.Func().Params(jen.Id("pb").Op("*").
-					Qual(compPkg, "Predicates")).
-					Block(jen.Id("pb").Dot("Add").Call(
-						jen.Op("&").Qual(compPkg, "Predicate").
-							Block(
-								jen.Id("Col").Op(":").
-									Lit(col.Name).Op(","),
-								jen.Id("Op").Op(":").
-									Qual(compPkg, opStr).Op(","),
-								jen.Id("Val").Op(":").
-									Id(paramID).Op(","),
-							),
-					)),
-				)).Line().Line()
-		}
+func newPredicatesFile(schema *gen.Schema) (*bytes.Buffer, error) {
+	buf := new(bytes.Buffer)
+	v := struct {
+		Ops    []comparison.Operator
+		Schema *gen.Schema
+	}{
+		Ops: []comparison.Operator{
+			comparison.Eq,
+			comparison.NotEq,
+			comparison.Gt,
+			comparison.GtOrEq,
+			comparison.Lt,
+			comparison.LtOrEq,
+			comparison.IsNull,
+			comparison.IsNotNull,
+			comparison.In,
+			comparison.NotIn,
+		},
+		Schema: schema,
 	}
 
-	return stmnt
+	tmpl, err := template.New("predicates.tmpl").Funcs(template.FuncMap{
+		"isNullOrNotOp": func(op comparison.Operator) bool {
+			return op == comparison.IsNull ||
+				op == comparison.IsNotNull
+		},
+		"isInOrNotOp": func(op comparison.Operator) bool {
+			return op == comparison.In ||
+				op == comparison.NotIn
+		},
+	}).Parse(predicatesTmpl)
+	if err != nil {
+		return nil, err
+	}
+
+	err = tmpl.Execute(buf, v)
+	if err != nil {
+		return nil, err
+	}
+
+	return buf, nil
 }
+
+const predicatesTmpl = `
+package {{.Schema.Pkg}}
+
+import (
+	"github.com/sf9v/nero/comparison"
+
+	{{range $import := .Schema.SchemaImports -}}
+		"{{$import}}"
+	{{end -}}
+	{{range $import := .Schema.ColumnImports -}}
+		"{{$import}}"
+	{{end -}}
+)
+
+type PredFunc func(*comparison.Predicates) 
+
+{{range $col := .Schema.Cols -}}
+	{{if $col.HasPreds -}}
+		{{range $op := $.Ops -}}
+			{{if isNullOrNotOp $op }}
+				func {{$col.Field}}{{$op.String}} () PredFunc {
+					return func(pb *comparison.Predicates) {
+						pb.Add(&comparison.Predicate{
+							Col: "{{$col.Name}}",
+							Op: comparison.{{$op.String}},
+						})
+					}
+				}
+			{{else if isInOrNotOp $op }}
+				func {{$col.Field}}{{$op.String}} ({{$col.IdentifierPlural}} {{printf "...%T" $col.Type.V}}) PredFunc {
+					vals := []interface{}{}
+					for _, v := range {{$col.IdentifierPlural}} {
+						vals = append(vals, v)
+					}
+
+					return func(pb *comparison.Predicates) {
+						pb.Add(&comparison.Predicate{
+							Col: "{{$col.Identifier}}",
+							Op: comparison.{{$op.String}},
+							Val: vals,
+						})
+					}
+				}
+			{{else}}
+				func {{$col.Field}}{{$op.String}} ({{$col.Identifier}} {{printf "%T" $col.Type.V}}) PredFunc {
+					return func(pb *comparison.Predicates) {
+						pb.Add(&comparison.Predicate{
+							Col: "{{$col.Name}}",
+							Op: comparison.{{$op.String}},
+							Val: {{$col.Identifier}},
+						})
+					}
+				}
+			{{end}}
+		{{end -}}
+	{{end}}
+{{end -}}
+`

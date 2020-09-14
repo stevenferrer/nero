@@ -1,6 +1,7 @@
 package gen
 
 import (
+	"fmt"
 	"go/format"
 	"testing"
 
@@ -10,14 +11,16 @@ import (
 	gen "github.com/sf9v/nero/gen/internal"
 )
 
-func Test_newSortsFile(t *testing.T) {
+func Test_newPostgresFile(t *testing.T) {
 	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
-	buf, err := newSortsFile(schema)
+	buf, err := newPostgresFile(schema)
 	require.NoError(t, err)
 
-	_, err = format.Source(buf.Bytes())
+	src, err := format.Source(buf.Bytes())
 	require.NoError(t, err)
+
+	fmt.Printf("%v\n", string(src))
 }

@@ -21,6 +21,8 @@ func TestCustomTypes(t *testing.T) {
 	err = os.MkdirAll(basePath, os.ModePerm)
 	require.NoError(t, err)
 
-	err = files.Render(basePath)
-	assert.NoError(t, err)
+	for _, f := range files {
+		err = f.Render(basePath)
+		require.NoError(t, err)
+	}
 }

@@ -1,55 +1,23 @@
 package gen
 
 import (
-	"fmt"
-	"strings"
+	"go/format"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/sf9v/nero/example"
 	gen "github.com/sf9v/nero/gen/internal"
 )
 
-func Test_newMeta(t *testing.T) {
+func Test_newMetaFile(t *testing.T) {
 	schema, err := gen.BuildSchema(new(example.User))
 	require.NoError(t, err)
 	require.NotNil(t, schema)
 
-	meta := newMeta(schema)
-	expect := `
-// Collection is the User collection
-const Collection = "users"
+	buf, err := newMetaFile(schema)
+	require.NoError(t, err)
 
-// Column is a User column
-type Column int
-
-func (c Column) String() string {
-	switch c {
-	case ColumnID:
-		return "id"
-	case ColumnName:
-		return "name"
-	case ColumnGroup:
-		return "group_res"
-	case ColumnUpdatedAt:
-		return "updated_at"
-	case ColumnCreatedAt:
-		return "created_at"
-	}
-	return "invalid"
-}
-
-const (
-	ColumnID Column = iota
-	ColumnName
-	ColumnGroup
-	ColumnUpdatedAt
-	ColumnCreatedAt
-)
-`
-	expect = strings.TrimSpace(expect)
-	got := strings.TrimSpace(fmt.Sprintf("%#v", meta))
-	assert.Equal(t, expect, got)
+	_, err = format.Source(buf.Bytes())
+	require.NoError(t, err)
 }
