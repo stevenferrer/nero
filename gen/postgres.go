@@ -3,11 +3,10 @@ package gen
 import (
 	"bytes"
 	"fmt"
+	"reflect"
 	"text/template"
 
 	"github.com/jinzhu/inflection"
-
-	"github.com/goccy/go-reflect"
 
 	"github.com/sf9v/mira"
 	gen "github.com/sf9v/nero/gen/internal"
