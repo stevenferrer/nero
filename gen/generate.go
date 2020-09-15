@@ -1,11 +1,6 @@
 package gen
 
 import (
-	"bytes"
-	"go/format"
-	"os"
-	"path"
-
 	"github.com/pkg/errors"
 	"github.com/sf9v/nero"
 	gen "github.com/sf9v/nero/gen/internal"
@@ -73,32 +68,4 @@ func Generate(schemaer nero.Schemaer) ([]*File, error) {
 	})
 
 	return files, nil
-}
-
-type File struct {
-	name string
-	buf  *bytes.Buffer
-}
-
-func (fl *File) Render(basePath string) error {
-	f, err := os.Create(path.Join(basePath, fl.name))
-	if err != nil {
-		return errors.Wrap(err, "create base path")
-	}
-	defer f.Close()
-	src, err := format.Source(fl.buf.Bytes())
-	if err != nil {
-		return errors.Wrap(err, "format source")
-	}
-
-	_, err = f.Write(src)
-	return errors.Wrap(err, "write file")
-}
-
-func (fl *File) FileName() string {
-	return fl.name
-}
-
-func (fl *File) Bytes() []byte {
-	return fl.buf.Bytes()
 }

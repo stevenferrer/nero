@@ -1,7 +1,6 @@
 package gen
 
 import (
-	"fmt"
 	"go/format"
 	"testing"
 
@@ -17,8 +16,6 @@ func Test_newRepositoryFile(t *testing.T) {
 	buf, err := newRepositoryFile(schema)
 	require.NoError(t, err)
 
-	src, err := format.Source(buf.Bytes())
+	_, err = format.Source(buf.Bytes())
 	require.NoError(t, err)
-
-	fmt.Printf("%v\n", string(src))
 }

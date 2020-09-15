@@ -34,7 +34,7 @@ func TestBuildSchema(t *testing.T) {
 	assert.Equal(t, "User", schema.Type.Name())
 	assert.Equal(t, "users", schema.Collection)
 	assert.Equal(t, "user", schema.Pkg)
-	assert.Len(t, schema.Cols, 5)
+	assert.Len(t, schema.Cols, 10)
 
 	ident := schema.Ident
 	assert.Equal(t, "id", ident.Name)

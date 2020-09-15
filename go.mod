@@ -15,4 +15,5 @@ require (
 	github.com/segmentio/ksuid v1.0.3
 	github.com/sf9v/mira v0.0.0-20200906104336-2156f82d33af
 	github.com/stretchr/testify v1.6.1
+	golang.org/x/tools v0.0.0-20190828213141-aed303cbaa74
 )

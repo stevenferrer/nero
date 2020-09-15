@@ -1,7 +1,6 @@
 package gen
 
 import (
-	"fmt"
 	"go/format"
 	"testing"
 
@@ -18,8 +17,6 @@ func Test_newAggregatesFile(t *testing.T) {
 	buf, err := newAggregatesFile(schema)
 	require.NoError(t, err)
 
-	src, err := format.Source(buf.Bytes())
+	_, err = format.Source(buf.Bytes())
 	require.NoError(t, err)
-
-	fmt.Printf("%v\n", string(src))
 }
