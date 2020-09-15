@@ -16,9 +16,6 @@ import (
 func newPostgresFile(schema *gen.Schema) (*bytes.Buffer, error) {
 	tmpl, err := template.New("postgres.tmpl").
 		Funcs(template.FuncMap{
-			// "type": func(v interface{}) string {
-			// 	return fmt.Sprintf("%T", v)
-			// },
 			"type": func(v interface{}) string {
 				t := reflect.TypeOf(v)
 				if t.Kind() != reflect.Ptr {
