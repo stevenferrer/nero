@@ -17,8 +17,17 @@ import (
 func newPostgresFile(schema *gen.Schema) (*bytes.Buffer, error) {
 	tmpl, err := template.New("postgres.tmpl").
 		Funcs(template.FuncMap{
+			// "type": func(v interface{}) string {
+			// 	return fmt.Sprintf("%T", v)
+			// },
 			"type": func(v interface{}) string {
-				return fmt.Sprintf("%T", v)
+				t := reflect.TypeOf(v)
+				if t.Kind() != reflect.Ptr {
+					return fmt.Sprintf("%T", v)
+				}
+
+				ev := reflect.New(resolveType(t)).Elem().Interface()
+				return fmt.Sprintf("%T", ev)
 			},
 			"zero": func(v interface{}) string {
 				mt := mira.NewType(v)
@@ -63,6 +72,14 @@ func newPostgresFile(schema *gen.Schema) (*bytes.Buffer, error) {
 	buf := new(bytes.Buffer)
 	err = tmpl.Execute(buf, schema)
 	return buf, err
+}
+
+func resolveType(t reflect.Type) reflect.Type {
+	switch t.Kind() {
+	case reflect.Ptr:
+		return resolveType(t.Elem())
+	}
+	return t
 }
 
 const postgresTmpl = `
@@ -215,11 +232,11 @@ func (pg *PostgreSQLRepository) createMany(ctx context.Context, runner nero.SqlR
 	return nil
 }
 
-func (pg *PostgreSQLRepository) Query(ctx context.Context, q *Queryer) ([]{{type .Type.V}}, error) {
+func (pg *PostgreSQLRepository) Query(ctx context.Context, q *Queryer) ([]*{{type .Type.V}}, error) {
 	return pg.query(ctx, pg.db, q)
 }
 
-func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]{{type .Type.V}}, error) {
+func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*{{type .Type.V}}, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
@@ -228,7 +245,7 @@ func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Quer
 	return pg.query(ctx, txx, q)
 }
 
-func (pg *PostgreSQLRepository) query(ctx context.Context, runner nero.SqlRunner, q *Queryer) ([]{{type .Type.V}}, error) {
+func (pg *PostgreSQLRepository) query(ctx context.Context, runner nero.SqlRunner, q *Queryer) ([]*{{type .Type.V}}, error) {
 	qb := pg.buildSelect(q)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
@@ -242,7 +259,7 @@ func (pg *PostgreSQLRepository) query(ctx context.Context, runner nero.SqlRunner
 	}
 	defer rows.Close()
 
-	{{plural (lowerCamel .Type.Name)}} := []{{type .Type.V}}{}
+	{{plural (lowerCamel .Type.Name)}} := []*{{type .Type.V}}{}
 	for rows.Next() {
 		var {{lowerCamel .Type.Name}} {{type .Type.V}}
 		err = rows.Scan(
@@ -254,17 +271,17 @@ func (pg *PostgreSQLRepository) query(ctx context.Context, runner nero.SqlRunner
 			return nil, err
 		}
 
-		{{plural (lowerCamel .Type.Name)}} = append({{plural (lowerCamel .Type.Name)}}, {{lowerCamel .Type.Name}})
+		{{plural (lowerCamel .Type.Name)}} = append({{plural (lowerCamel .Type.Name)}}, &{{lowerCamel .Type.Name}})
 	}
 
 	return {{plural (lowerCamel .Type.Name)}}, nil
 }
 
-func (pg *PostgreSQLRepository) QueryOne(ctx context.Context, q *Queryer) ({{type .Type.V}}, error) {
+func (pg *PostgreSQLRepository) QueryOne(ctx context.Context, q *Queryer) (*{{type .Type.V}}, error) {
 	return pg.queryOne(ctx, pg.db, q)
 }
 
-func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) ({{type .Type.V}}, error) {
+func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*{{type .Type.V}}, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
@@ -273,7 +290,7 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 	return pg.queryOne(ctx, txx, q)
 }
 
-func (pg *PostgreSQLRepository) queryOne(ctx context.Context, runner nero.SqlRunner, q *Queryer) ({{type .Type.V}}, error) {
+func (pg *PostgreSQLRepository) queryOne(ctx context.Context, runner nero.SqlRunner, q *Queryer) (*{{type .Type.V}}, error) {
 	qb := pg.buildSelect(q)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
@@ -293,7 +310,7 @@ func (pg *PostgreSQLRepository) queryOne(ctx context.Context, runner nero.SqlRun
 		return {{zero .Type.V}}, err
 	}
 
-	return {{lowerCamel .Type.Name}}, nil
+	return &{{lowerCamel .Type.Name}}, nil
 }
 
 func (pg *PostgreSQLRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {

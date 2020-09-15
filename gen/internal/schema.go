@@ -12,12 +12,11 @@ import (
 
 // Schema is an internal schema
 type Schema struct {
-	Collection string
-	Type       *mira.Type
-	Ident      *Col
-	Cols       []*Col
-	Pkg        string
-
+	Collection    string
+	Type          *mira.Type
+	Ident         *Col
+	Cols          []*Col
+	Pkg           string
 	SchemaImports []string
 	ColumnImports []string
 }
@@ -25,13 +24,13 @@ type Schema struct {
 // BuildSchema builds schema from a nero.Schemaer to Schema
 func BuildSchema(s nero.Schemaer) (*Schema, error) {
 	ns := s.Schema()
-	schemaType := mira.NewType(s)
+	st := mira.NewType(s)
 	schema := &Schema{
 		Pkg:           strings.ToLower(ns.Pkg),
 		Collection:    ns.Collection,
-		Type:          schemaType,
+		Type:          st,
 		Cols:          []*Col{},
-		SchemaImports: []string{schemaType.PkgPath()},
+		SchemaImports: []string{st.PkgPath()},
 	}
 
 	colImportMap := map[string]int{}

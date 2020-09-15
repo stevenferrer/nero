@@ -204,7 +204,7 @@ func (pg *PostgreSQLRepository) query(ctx context.Context, runner nero.SqlRunner
 
 	users := []*user.User{}
 	for rows.Next() {
-		var user *user.User
+		var user user.User
 		err = rows.Scan(
 			&user.ID,
 			&user.UID,
@@ -220,7 +220,7 @@ func (pg *PostgreSQLRepository) query(ctx context.Context, runner nero.SqlRunner
 			return nil, err
 		}
 
-		users = append(users, user)
+		users = append(users, &user)
 	}
 
 	return users, nil
@@ -247,7 +247,7 @@ func (pg *PostgreSQLRepository) queryOne(ctx context.Context, runner nero.SqlRun
 			Interface("args", args).Err(err).Msg("")
 	}
 
-	var user *user.User
+	var user user.User
 	err := qb.RunWith(runner).
 		QueryRowContext(ctx).
 		Scan(
@@ -265,7 +265,7 @@ func (pg *PostgreSQLRepository) queryOne(ctx context.Context, runner nero.SqlRun
 		return nil, err
 	}
 
-	return user, nil
+	return &user, nil
 }
 
 func (pg *PostgreSQLRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
