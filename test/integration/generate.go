@@ -19,8 +19,10 @@ func main() {
 	err = os.MkdirAll(basePath, os.ModePerm)
 	checkErr(err)
 
-	err = files.Render(basePath)
-	checkErr(err)
+	for _, f := range files {
+		err = f.Render(basePath)
+		checkErr(err)
+	}
 }
 
 func checkErr(err error) {

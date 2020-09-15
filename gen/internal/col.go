@@ -1,6 +1,9 @@
 package internal
 
 import (
+	"reflect"
+
+	"github.com/jinzhu/inflection"
 	"github.com/sf9v/mira"
 	stringsx "github.com/sf9v/nero/x/strings"
 )
@@ -29,4 +32,26 @@ func (c *Col) CamelName() string {
 // LowerCamelName returns a lower-camelized version of name
 func (c *Col) LowerCamelName() string {
 	return stringsx.ToLowerCamel(c.Name)
+}
+
+func (c *Col) Field() string {
+	field := c.CamelName()
+	if len(c.StructField) > 0 {
+		field = c.StructField
+	}
+	return field
+}
+
+func (c *Col) Identifier() string {
+	return stringsx.ToLowerCamel(c.Field())
+}
+
+func (c *Col) IdentifierPlural() string {
+	return inflection.Plural(c.Identifier())
+}
+
+func (c *Col) HasPreds() bool {
+	kind := c.Type.T().Kind()
+	return !(kind == reflect.Map ||
+		kind == reflect.Slice)
 }

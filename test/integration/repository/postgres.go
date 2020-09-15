@@ -5,18 +5,20 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	sq "github.com/Masterminds/squirrel"
-	reflect "github.com/goccy/go-reflect"
-	_ "github.com/lib/pq"
-	errors "github.com/pkg/errors"
-	zerolog "github.com/rs/zerolog"
-	nero "github.com/sf9v/nero"
-	aggregate "github.com/sf9v/nero/aggregate"
-	comparison "github.com/sf9v/nero/comparison"
-	sort "github.com/sf9v/nero/sort"
-	user "github.com/sf9v/nero/test/integration/user"
 	"io"
+	"reflect"
 	"strings"
+
+	"github.com/Masterminds/squirrel"
+	_ "github.com/lib/pq"
+	"github.com/pkg/errors"
+	"github.com/rs/zerolog"
+	"github.com/segmentio/ksuid"
+	"github.com/sf9v/nero"
+	"github.com/sf9v/nero/aggregate"
+	"github.com/sf9v/nero/comparison"
+	"github.com/sf9v/nero/sort"
+	"github.com/sf9v/nero/test/integration/user"
 )
 
 type PostgreSQLRepository struct {
@@ -60,40 +62,47 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 func (pg *PostgreSQLRepository) create(ctx context.Context, runner nero.SqlRunner, c *Creator) (string, error) {
 	columns := []string{}
 	values := []interface{}{}
-	if c.uid != [20]uint8{} {
+
+	if c.uid != (ksuid.KSUID{}) {
 		columns = append(columns, "\"uid\"")
 		values = append(values, c.uid)
 	}
+
 	if c.email != "" {
 		columns = append(columns, "\"email\"")
 		values = append(values, c.email)
 	}
+
 	if c.name != "" {
 		columns = append(columns, "\"name\"")
 		values = append(values, c.name)
 	}
+
 	if c.age != 0 {
 		columns = append(columns, "\"age\"")
 		values = append(values, c.age)
 	}
+
 	if c.group != "" {
 		columns = append(columns, "\"group\"")
 		values = append(values, c.group)
 	}
+
 	if c.kv != nil {
 		columns = append(columns, "\"kv\"")
 		values = append(values, c.kv)
 	}
+
 	if c.updatedAt != nil {
 		columns = append(columns, "\"updated_at\"")
 		values = append(values, c.updatedAt)
 	}
 
-	qb := sq.Insert("\"users\"").
+	qb := squirrel.Insert("\"users\"").
 		Columns(columns...).
 		Values(values...).
 		Suffix("RETURNING \"id\"").
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(squirrel.Dollar).
 		RunWith(runner)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
@@ -128,14 +137,30 @@ func (pg *PostgreSQLRepository) createMany(ctx context.Context, runner nero.SqlR
 		return nil
 	}
 
-	columns := []string{"\"uid\"", "\"email\"", "\"name\"", "\"age\"", "\"group\"", "\"kv\"", "\"updated_at\""}
-	qb := sq.Insert("\"users\"").Columns(columns...)
+	columns := []string{
+		"\"uid\"",
+		"\"email\"",
+		"\"name\"",
+		"\"age\"",
+		"\"group\"",
+		"\"kv\"",
+		"\"updated_at\"",
+	}
+	qb := squirrel.Insert("\"users\"").Columns(columns...)
 	for _, c := range cs {
-		qb = qb.Values(c.uid, c.email, c.name, c.age, c.group, c.kv, c.updatedAt)
+		qb = qb.Values(
+			c.uid,
+			c.email,
+			c.name,
+			c.age,
+			c.group,
+			c.kv,
+			c.updatedAt,
+		)
 	}
 
 	qb = qb.Suffix("RETURNING \"id\"").
-		PlaceholderFormat(sq.Dollar)
+		PlaceholderFormat(squirrel.Dollar)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
 		log.Debug().Str("method", "CreateMany").Str("stmnt", sql).
@@ -177,28 +202,28 @@ func (pg *PostgreSQLRepository) query(ctx context.Context, runner nero.SqlRunner
 	}
 	defer rows.Close()
 
-	list := []*user.User{}
+	users := []*user.User{}
 	for rows.Next() {
-		var item user.User
+		var user user.User
 		err = rows.Scan(
-			&item.ID,
-			&item.UID,
-			&item.Email,
-			&item.Name,
-			&item.Age,
-			&item.Group,
-			&item.Kv,
-			&item.UpdatedAt,
-			&item.CreatedAt,
+			&user.ID,
+			&user.UID,
+			&user.Email,
+			&user.Name,
+			&user.Age,
+			&user.Group,
+			&user.Kv,
+			&user.UpdatedAt,
+			&user.CreatedAt,
 		)
 		if err != nil {
 			return nil, err
 		}
 
-		list = append(list, &item)
+		users = append(users, &user)
 	}
 
-	return list, nil
+	return users, nil
 }
 
 func (pg *PostgreSQLRepository) QueryOne(ctx context.Context, q *Queryer) (*user.User, error) {
@@ -222,32 +247,42 @@ func (pg *PostgreSQLRepository) queryOne(ctx context.Context, runner nero.SqlRun
 			Interface("args", args).Err(err).Msg("")
 	}
 
-	var item user.User
+	var user user.User
 	err := qb.RunWith(runner).
 		QueryRowContext(ctx).
 		Scan(
-			&item.ID,
-			&item.UID,
-			&item.Email,
-			&item.Name,
-			&item.Age,
-			&item.Group,
-			&item.Kv,
-			&item.UpdatedAt,
-			&item.CreatedAt,
+			&user.ID,
+			&user.UID,
+			&user.Email,
+			&user.Name,
+			&user.Age,
+			&user.Group,
+			&user.Kv,
+			&user.UpdatedAt,
+			&user.CreatedAt,
 		)
 	if err != nil {
 		return nil, err
 	}
 
-	return &item, nil
+	return &user, nil
 }
 
-func (pg *PostgreSQLRepository) buildSelect(q *Queryer) sq.SelectBuilder {
-	columns := []string{"\"id\"", "\"uid\"", "\"email\"", "\"name\"", "\"age\"", "\"group\"", "\"kv\"", "\"updated_at\"", "\"created_at\""}
-	qb := sq.Select(columns...).
+func (pg *PostgreSQLRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
+	columns := []string{
+		"\"id\"",
+		"\"uid\"",
+		"\"email\"",
+		"\"name\"",
+		"\"age\"",
+		"\"group\"",
+		"\"kv\"",
+		"\"updated_at\"",
+		"\"created_at\"",
+	}
+	qb := squirrel.Select(columns...).
 		From("\"users\"").
-		PlaceholderFormat(sq.Dollar)
+		PlaceholderFormat(squirrel.Dollar)
 
 	pfs := q.pfs
 	pb := &comparison.Predicates{}
@@ -306,11 +341,11 @@ func (pg *PostgreSQLRepository) buildSelect(q *Queryer) sq.SelectBuilder {
 	}
 
 	if q.limit > 0 {
-		qb = qb.Limit(q.limit)
+		qb = qb.Limit(uint64(q.limit))
 	}
 
 	if q.offset > 0 {
-		qb = qb.Offset(q.offset)
+		qb = qb.Offset(uint64(q.offset))
 	}
 
 	return qb
@@ -330,25 +365,33 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 }
 
 func (pg *PostgreSQLRepository) update(ctx context.Context, runner nero.SqlRunner, u *Updater) (int64, error) {
-	qb := sq.Update("\"users\"").PlaceholderFormat(sq.Dollar)
-	if u.uid != [20]uint8{} {
+	qb := squirrel.Update("\"users\"").
+		PlaceholderFormat(squirrel.Dollar)
+
+	if u.uid != (ksuid.KSUID{}) {
 		qb = qb.Set("\"uid\"", u.uid)
 	}
+
 	if u.email != "" {
 		qb = qb.Set("\"email\"", u.email)
 	}
+
 	if u.name != "" {
 		qb = qb.Set("\"name\"", u.name)
 	}
+
 	if u.age != 0 {
 		qb = qb.Set("\"age\"", u.age)
 	}
+
 	if u.group != "" {
 		qb = qb.Set("\"group\"", u.group)
 	}
+
 	if u.kv != nil {
 		qb = qb.Set("\"kv\"", u.kv)
 	}
+
 	if u.updatedAt != nil {
 		qb = qb.Set("\"updated_at\"", u.updatedAt)
 	}
@@ -427,8 +470,8 @@ func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Del
 }
 
 func (pg *PostgreSQLRepository) delete(ctx context.Context, runner nero.SqlRunner, d *Deleter) (int64, error) {
-	qb := sq.Delete("\"users\"").
-		PlaceholderFormat(sq.Dollar)
+	qb := squirrel.Delete("\"users\"").
+		PlaceholderFormat(squirrel.Dollar)
 
 	pfs := d.pfs
 	pb := &comparison.Predicates{}
@@ -528,8 +571,8 @@ func (pg *PostgreSQLRepository) aggregate(ctx context.Context, runner nero.SqlRu
 		}
 	}
 
-	qb := sq.Select(cols...).From("\"users\"").
-		PlaceholderFormat(sq.Dollar)
+	qb := squirrel.Select(cols...).From("\"users\"").
+		PlaceholderFormat(squirrel.Dollar)
 
 	groups := []string{}
 	for _, group := range a.groups {

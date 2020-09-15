@@ -8,23 +8,16 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/sf9v/nero"
 	"github.com/sf9v/nero/example"
 )
 
-type example1 struct{}
-
-func (*example1) Schema() *nero.Schema {
-	return &nero.Schema{}
-}
-
-func TestGenerate(t *testing.T) {
+func TestGen(t *testing.T) {
 	files, err := Generate(new(example.User))
 	assert.NoError(t, err)
 	assert.Len(t, files, 6)
 
 	for _, file := range files {
-		require.NotEmpty(t, file.Name())
+		require.NotEmpty(t, file.FileName())
 		require.NotEmpty(t, file.Bytes())
 	}
 
@@ -33,10 +26,9 @@ func TestGenerate(t *testing.T) {
 	err = os.MkdirAll(basePath, os.ModePerm)
 	require.NoError(t, err)
 
-	// render files
-	err = files.Render(basePath)
 	assert.NoError(t, err)
-
-	_, err = Generate(new(example1))
-	assert.Error(t, err)
+	for _, file := range files {
+		err = file.Render(basePath)
+		require.NoError(t, err)
+	}
 }

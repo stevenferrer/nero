@@ -2,52 +2,101 @@ package gen
 
 import (
 	"bytes"
+	"fmt"
+	"go/ast"
+	"go/format"
+	"go/parser"
+	"go/scanner"
+	"go/token"
+	"io/ioutil"
 	"os"
 	"path"
+	"strings"
 
-	"github.com/dave/jennifer/jen"
+	"github.com/pkg/errors"
+	"golang.org/x/tools/go/ast/astutil"
+	"golang.org/x/tools/imports"
 )
 
-// File is a generated file
 type File struct {
 	name string
-	jf   *jen.File
-	buff *bytes.Buffer
+	buf  *bytes.Buffer
 }
 
-// Name returns the file name
-func (fl *File) Name() string {
+func (fl *File) Render(basePath string) error {
+	filePath := path.Join(basePath, fl.name)
+	f, err := os.Create(filePath)
+	if err != nil {
+		return errors.Wrap(err, "create base path")
+	}
+	defer f.Close()
+
+	_, err = f.Write(fl.Bytes())
+	if err != nil {
+		return errors.Wrap(err, "write file")
+	}
+
+	return errors.Wrap(formatSource(filePath), "format source")
+}
+
+func (fl *File) FileName() string {
 	return fl.name
 }
 
-// Bytes returns the []byte contents of file
 func (fl *File) Bytes() []byte {
-	return fl.buff.Bytes()
+	return fl.buf.Bytes()
 }
 
-// Render renders the file to the base path
-// TODO: auto create base path
-func (fl *File) Render(basePath string) error {
-	f, err := os.Create(path.Join(basePath, fl.name))
+// formatSource removes unneeded imports from the given Go source file and runs gofmt on it.
+// Copied from goa code base https://github.com/goadesign/goa/blob/v3/codegen/file.go#L136
+func formatSource(filePath string) error {
+	// Make sure file parses and print content if it does not.
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, filePath, nil, parser.ParseComments)
+	if err != nil {
+		content, _ := ioutil.ReadFile(filePath)
+		var buf bytes.Buffer
+		scanner.PrintError(&buf, err)
+		return fmt.Errorf("%s\n========\nContent:\n%s", buf.String(), content)
+	}
+
+	// Clean unused imports
+	imps := astutil.Imports(fset, file)
+	for _, group := range imps {
+		for _, imp := range group {
+			path := strings.Trim(imp.Path.Value, `"`)
+			if !astutil.UsesImport(file, path) {
+				if imp.Name != nil {
+					astutil.DeleteNamedImport(fset, file, imp.Name.Name, path)
+				} else {
+					astutil.DeleteImport(fset, file, path)
+				}
+			}
+		}
+	}
+	ast.SortImports(fset, file)
+	w, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
-	_, err = f.Write(fl.buff.Bytes())
-	return err
-}
+	if err := format.Node(w, fset, file); err != nil {
+		return err
+	}
+	w.Close()
 
-// Files is a collection of File
-type Files []*File
-
-// Render renders all files to the base path
-func (fls Files) Render(basePath string) error {
-	for _, f := range fls {
-		err := f.Render(basePath)
-		if err != nil {
-			return err
-		}
+	// Format code using goimport standard
+	bs, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+	opt := imports.Options{
+		Comments:   true,
+		FormatOnly: true,
+	}
+	bs, err = imports.Process(filePath, bs, &opt)
+	if err != nil {
+		return err
 	}
 
-	return nil
+	return ioutil.WriteFile(filePath, bs, os.ModePerm)
 }

@@ -1,83 +1,22 @@
 package gen
 
 import (
-	"fmt"
-	"strings"
+	"go/format"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/sf9v/nero/example"
+	gen "github.com/sf9v/nero/gen/internal"
+	"github.com/stretchr/testify/require"
 )
 
-func Test_newAggregates(t *testing.T) {
-	meta := newAggregates()
-	expect := `
-// AggFunc is the aggregate function type
-type AggFunc func(*aggregate.Aggregates)
+func Test_newAggregatesFile(t *testing.T) {
+	schema, err := gen.BuildSchema(new(example.User))
+	require.NoError(t, err)
+	require.NotNil(t, schema)
 
-// Avg is the average aggregate function
-func Avg(col Column) AggFunc {
-	return func(aggs *aggregate.Aggregates) {
-		aggs.Add(&aggregate.Aggregate{
-			Col: col.String(),
-			Fn:  aggregate.Avg,
-		})
-	}
-}
+	buf, err := newAggregatesFile(schema)
+	require.NoError(t, err)
 
-// Count is the count aggregate function
-func Count(col Column) AggFunc {
-	return func(aggs *aggregate.Aggregates) {
-		aggs.Add(&aggregate.Aggregate{
-			Col: col.String(),
-			Fn:  aggregate.Count,
-		})
-	}
-}
-
-// Max is the max aggregate function
-func Max(col Column) AggFunc {
-	return func(aggs *aggregate.Aggregates) {
-		aggs.Add(&aggregate.Aggregate{
-			Col: col.String(),
-			Fn:  aggregate.Max,
-		})
-	}
-}
-
-// Min is the min aggregate function
-func Min(col Column) AggFunc {
-	return func(aggs *aggregate.Aggregates) {
-		aggs.Add(&aggregate.Aggregate{
-			Col: col.String(),
-			Fn:  aggregate.Min,
-		})
-	}
-}
-
-// Sum is the sum aggregate function
-func Sum(col Column) AggFunc {
-	return func(aggs *aggregate.Aggregates) {
-		aggs.Add(&aggregate.Aggregate{
-			Col: col.String(),
-			Fn:  aggregate.Sum,
-		})
-	}
-}
-
-/*
-None is not an aggregate function and is only
-used when you want to include a column in the result
-*/
-func None(col Column) AggFunc {
-	return func(aggs *aggregate.Aggregates) {
-		aggs.Add(&aggregate.Aggregate{
-			Col: col.String(),
-			Fn:  aggregate.None,
-		})
-	}
-}
-`
-	expect = strings.TrimSpace(expect)
-	got := strings.TrimSpace(fmt.Sprintf("%#v", meta))
-	assert.Equal(t, expect, got)
+	_, err = format.Source(buf.Bytes())
+	require.NoError(t, err)
 }
