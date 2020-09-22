@@ -15,8 +15,9 @@ type User struct {
 	Email     string
 	Name      string
 	Age       int
-	Kv        example.Map
 	Group     Group
+	Kv        example.Map
+	Tags      []string
 	UpdatedAt *time.Time
 	CreatedAt *time.Time
 }
@@ -49,6 +50,7 @@ func (u *User) Schema() *nero.Schema {
 			nero.NewColumn("group", u.Group).
 				StructField("Group"),
 			nero.NewColumn("kv", u.Kv),
+			nero.NewColumn("tags", u.Tags),
 			nero.NewColumn("updated_at", u.UpdatedAt).Nullable(),
 			nero.NewColumn("created_at", u.CreatedAt).
 				Auto(),

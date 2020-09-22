@@ -14,4 +14,5 @@ require (
 	github.com/sf9v/mira v0.0.0-20200915071822-32044ca9f4d3
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/tools v0.0.0-20200915031644-64986481280e
+	gotest.tools/v3 v3.0.2
 )

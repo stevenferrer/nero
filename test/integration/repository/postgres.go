@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/Masterminds/squirrel"
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/segmentio/ksuid"
@@ -59,7 +59,7 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 	return pg.create(ctx, txx, c)
 }
 
-func (pg *PostgreSQLRepository) create(ctx context.Context, runner nero.SqlRunner, c *Creator) (string, error) {
+func (pg *PostgreSQLRepository) create(ctx context.Context, runner nero.SQLRunner, c *Creator) (string, error) {
 	columns := []string{}
 	values := []interface{}{}
 
@@ -91,6 +91,11 @@ func (pg *PostgreSQLRepository) create(ctx context.Context, runner nero.SqlRunne
 	if c.kv != nil {
 		columns = append(columns, "\"kv\"")
 		values = append(values, c.kv)
+	}
+
+	if c.tags != nil {
+		columns = append(columns, "\"tags\"")
+		values = append(values, pq.Array(c.tags))
 	}
 
 	if c.updatedAt != nil {
@@ -132,7 +137,7 @@ func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs
 	return pg.createMany(ctx, txx, cs...)
 }
 
-func (pg *PostgreSQLRepository) createMany(ctx context.Context, runner nero.SqlRunner, cs ...*Creator) error {
+func (pg *PostgreSQLRepository) createMany(ctx context.Context, runner nero.SQLRunner, cs ...*Creator) error {
 	if len(cs) == 0 {
 		return nil
 	}
@@ -144,6 +149,7 @@ func (pg *PostgreSQLRepository) createMany(ctx context.Context, runner nero.SqlR
 		"\"age\"",
 		"\"group\"",
 		"\"kv\"",
+		"\"tags\"",
 		"\"updated_at\"",
 	}
 	qb := squirrel.Insert("\"users\"").Columns(columns...)
@@ -155,6 +161,7 @@ func (pg *PostgreSQLRepository) createMany(ctx context.Context, runner nero.SqlR
 			c.age,
 			c.group,
 			c.kv,
+			pq.Array(c.tags),
 			c.updatedAt,
 		)
 	}
@@ -188,7 +195,7 @@ func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Quer
 	return pg.query(ctx, txx, q)
 }
 
-func (pg *PostgreSQLRepository) query(ctx context.Context, runner nero.SqlRunner, q *Queryer) ([]*user.User, error) {
+func (pg *PostgreSQLRepository) query(ctx context.Context, runner nero.SQLRunner, q *Queryer) ([]*user.User, error) {
 	qb := pg.buildSelect(q)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
@@ -213,6 +220,7 @@ func (pg *PostgreSQLRepository) query(ctx context.Context, runner nero.SqlRunner
 			&user.Age,
 			&user.Group,
 			&user.Kv,
+			pq.Array(&user.Tags),
 			&user.UpdatedAt,
 			&user.CreatedAt,
 		)
@@ -239,7 +247,7 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 	return pg.queryOne(ctx, txx, q)
 }
 
-func (pg *PostgreSQLRepository) queryOne(ctx context.Context, runner nero.SqlRunner, q *Queryer) (*user.User, error) {
+func (pg *PostgreSQLRepository) queryOne(ctx context.Context, runner nero.SQLRunner, q *Queryer) (*user.User, error) {
 	qb := pg.buildSelect(q)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
@@ -258,6 +266,7 @@ func (pg *PostgreSQLRepository) queryOne(ctx context.Context, runner nero.SqlRun
 			&user.Age,
 			&user.Group,
 			&user.Kv,
+			pq.Array(&user.Tags),
 			&user.UpdatedAt,
 			&user.CreatedAt,
 		)
@@ -277,6 +286,7 @@ func (pg *PostgreSQLRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 		"\"age\"",
 		"\"group\"",
 		"\"kv\"",
+		"\"tags\"",
 		"\"updated_at\"",
 		"\"created_at\"",
 	}
@@ -364,7 +374,7 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 	return pg.update(ctx, txx, u)
 }
 
-func (pg *PostgreSQLRepository) update(ctx context.Context, runner nero.SqlRunner, u *Updater) (int64, error) {
+func (pg *PostgreSQLRepository) update(ctx context.Context, runner nero.SQLRunner, u *Updater) (int64, error) {
 	qb := squirrel.Update("\"users\"").
 		PlaceholderFormat(squirrel.Dollar)
 
@@ -390,6 +400,10 @@ func (pg *PostgreSQLRepository) update(ctx context.Context, runner nero.SqlRunne
 
 	if u.kv != nil {
 		qb = qb.Set("\"kv\"", u.kv)
+	}
+
+	if u.tags != nil {
+		qb = qb.Set("\"tags\"", pq.Array(u.tags))
 	}
 
 	if u.updatedAt != nil {
@@ -469,7 +483,7 @@ func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Del
 	return pg.delete(ctx, txx, d)
 }
 
-func (pg *PostgreSQLRepository) delete(ctx context.Context, runner nero.SqlRunner, d *Deleter) (int64, error) {
+func (pg *PostgreSQLRepository) delete(ctx context.Context, runner nero.SQLRunner, d *Deleter) (int64, error) {
 	qb := squirrel.Delete("\"users\"").
 		PlaceholderFormat(squirrel.Dollar)
 
@@ -546,7 +560,7 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 	return pg.aggregate(ctx, txx, a)
 }
 
-func (pg *PostgreSQLRepository) aggregate(ctx context.Context, runner nero.SqlRunner, a *Aggregator) error {
+func (pg *PostgreSQLRepository) aggregate(ctx context.Context, runner nero.SQLRunner, a *Aggregator) error {
 	aggs := &aggregate.Aggregates{}
 	for _, aggf := range a.aggfs {
 		aggf(aggs)

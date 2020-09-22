@@ -6,6 +6,7 @@ import (
 	gen "github.com/sf9v/nero/gen/internal"
 )
 
+// Generate generates the repository code
 func Generate(schemaer nero.Schemaer) ([]*File, error) {
 	schema, err := gen.BuildSchema(schemaer)
 	if err != nil {

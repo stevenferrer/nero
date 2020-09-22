@@ -101,6 +101,7 @@ func createTable(db *sql.DB) error {
 		age INTEGER NOT NULL,
 		"group" VARCHAR(20) NOT NULL,
 		kv jsonb NULL,
+		tags varchar(64)[] NOT NULL,
 		updated_at TIMESTAMP,
 		created_at TIMESTAMP DEFAULT now()
 	)`)
@@ -119,6 +120,7 @@ func newRepoTestRunner(repo repository.Repository) func(t *testing.T) {
 
 		uids := []ksuid.KSUID{}
 		kv := example.Map{"asdf": "ghjk", "qwert": "yuio", "zxcv": "bnml"}
+		tags := []string{"one", "two", "three"}
 		t.Run("Create", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				now := time.Now()
@@ -146,6 +148,7 @@ func newRepoTestRunner(repo repository.Repository) func(t *testing.T) {
 						Age(age).
 						Group(group).
 						Kv(kv).
+						Tags(tags).
 						UpdatedAt(&now)
 
 					id, err := repo.Create(ctx, cr)
@@ -190,7 +193,8 @@ func newRepoTestRunner(repo repository.Repository) func(t *testing.T) {
 						Email(email).
 						Name(name).
 						Age(age).
-						Kv(kv)
+						Kv(kv).
+						Tags(tags)
 					crs = append(crs, cr)
 				}
 
@@ -223,6 +227,7 @@ func newRepoTestRunner(repo repository.Repository) func(t *testing.T) {
 					assert.NotNil(t, u.Name)
 					assert.NotNil(t, u.UpdatedAt)
 					assert.NotNil(t, u.CreatedAt)
+					assert.Len(t, u.Tags, 3)
 				}
 
 				users, err = repo.Query(ctx, repository.NewQueryer().
@@ -234,6 +239,7 @@ func newRepoTestRunner(repo repository.Repository) func(t *testing.T) {
 					assert.NotNil(t, u.Name)
 					assert.Nil(t, u.UpdatedAt)
 					assert.NotNil(t, u.CreatedAt)
+					assert.Len(t, u.Tags, 3)
 				}
 
 				// with predicates
@@ -321,6 +327,7 @@ func newRepoTestRunner(repo repository.Repository) func(t *testing.T) {
 				assert.NoError(t, err)
 				assert.NotNil(t, usr)
 				assert.Equal(t, "1", usr.ID)
+				assert.Len(t, usr.Tags, 3)
 
 				_, err = repo.QueryOne(ctx, repository.NewQueryer().Where(repository.IDEq("9999")))
 				assert.Error(t, err)
@@ -376,6 +383,8 @@ func newRepoTestRunner(repo repository.Repository) func(t *testing.T) {
 			})
 		})
 
+		newTags := []string{"five"}
+
 		t.Run("Update", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				now := time.Now()
@@ -395,6 +404,7 @@ func newRepoTestRunner(repo repository.Repository) func(t *testing.T) {
 						Name(name).
 						Age(age).
 						Group(user.Outcast).
+						Tags(newTags).
 						UpdatedAt(&now).
 						Where(preds...),
 				)
@@ -409,6 +419,7 @@ func newRepoTestRunner(repo repository.Repository) func(t *testing.T) {
 				assert.Equal(t, name, usr.Name)
 				assert.Equal(t, age, usr.Age)
 				assert.NotNil(t, usr.UpdatedAt)
+				assert.Len(t, usr.Tags, 1)
 			})
 
 			t.Run("Error", func(t *testing.T) {
@@ -467,6 +478,7 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 		}
 		uids := []ksuid.KSUID{}
 		kv := example.Map{"asdf": "ghjk", "qwert": "yuio", "zxcv": "bnml"}
+		tags := []string{"one", "two", "three"}
 		t.Run("Create", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				now := time.Now()
@@ -492,7 +504,9 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 						repository.NewCreator().UID(uid).
 							Email(email).Name(name).
 							Age(age).Group(group).
-							Kv(kv).UpdatedAt(&now))
+							Kv(kv).
+							Tags(tags).
+							UpdatedAt(&now))
 					assert.NoError(t, err)
 					assert.NotZero(t, id)
 					assert.NoError(t, tx.Commit())
@@ -539,7 +553,8 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 						Email(email).
 						Name(name).
 						Age(age).
-						Kv(kv)
+						Kv(kv).
+						Tags(tags)
 					crs = append(crs, cr)
 				}
 				tx := newTx(ctx, t)
@@ -580,6 +595,7 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 					assert.NotNil(t, u.Name)
 					assert.NotNil(t, u.UpdatedAt)
 					assert.NotNil(t, u.CreatedAt)
+					assert.Len(t, u.Tags, 3)
 				}
 				assert.NoError(t, tx.Commit())
 
@@ -593,6 +609,7 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 					assert.NotNil(t, u.Name)
 					assert.Nil(t, u.UpdatedAt)
 					assert.NotNil(t, u.CreatedAt)
+					assert.Len(t, u.Tags, 3)
 				}
 				assert.NoError(t, tx.Commit())
 
@@ -694,6 +711,7 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 				assert.NoError(t, err)
 				assert.NotNil(t, usr)
 				assert.Equal(t, "1", usr.ID)
+				assert.Len(t, usr.Tags, 3)
 				assert.NoError(t, tx.Commit())
 
 				tx = newTx(ctx, t)
@@ -756,6 +774,8 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 			})
 		})
 
+		newTags := []string{"five"}
+
 		t.Run("Update", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				now := time.Now()
@@ -777,6 +797,7 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 						Name(name).
 						Age(age).
 						Group(user.Outcast).
+						Tags(newTags).
 						UpdatedAt(&now).
 						Where(preds...),
 				)
@@ -794,6 +815,7 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 				assert.Equal(t, name, usr.Name)
 				assert.Equal(t, age, usr.Age)
 				assert.NotNil(t, usr.UpdatedAt)
+				assert.Len(t, usr.Tags, 1)
 			})
 
 			t.Run("Error", func(t *testing.T) {

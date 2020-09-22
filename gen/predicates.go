@@ -56,6 +56,7 @@ const predicatesTmpl = `
 package {{.Schema.Pkg}}
 
 import (
+	"github.com/lib/pq"
 	"github.com/sf9v/nero/comparison"
 	{{range $import := .Schema.SchemaImports -}}
 		"{{$import}}"
@@ -100,7 +101,11 @@ type PredFunc func(*comparison.Predicates)
 						pb.Add(&comparison.Predicate{
 							Col: "{{$col.Name}}",
 							Op: comparison.{{$op.String}},
-							Val: {{$col.Identifier}},
+							{{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
+								Val: pq.Array({{$col.Identifier}}),
+							{{else -}}
+								Val: {{$col.Identifier}},
+							{{end -}}
 						})
 					}
 				}

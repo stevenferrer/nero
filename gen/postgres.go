@@ -90,7 +90,7 @@ import (
 	"io"
 	"strings"
 	"github.com/Masterminds/squirrel"
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/sf9v/nero"
@@ -143,14 +143,18 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 	return pg.create(ctx, txx, c)
 }
 
-func (pg *PostgreSQLRepository) create(ctx context.Context, runner nero.SqlRunner, c *Creator) ({{type .Ident.Type.V}}, error) {
+func (pg *PostgreSQLRepository) create(ctx context.Context, runner nero.SQLRunner, c *Creator) ({{type .Ident.Type.V}}, error) {
 	columns := []string{}
 	values := []interface{}{}
 	{{range $col := .Cols }}
 		{{if ne $col.Auto true}}
 			if c.{{$col.Identifier}} != {{zero $col.Type.V}} {
 				columns = append(columns, "\"{{$col.Name}}\"")
-				values = append(values, c.{{$col.Identifier}})
+				{{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
+					values = append(values, pq.Array(c.{{$col.Identifier}}))
+				{{else -}}
+					values = append(values, c.{{$col.Identifier}})
+				{{end -}}
 			}
 		{{end}}
 	{{end}}
@@ -189,7 +193,7 @@ func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs
 	return pg.createMany(ctx, txx, cs...)
 }
 
-func (pg *PostgreSQLRepository) createMany(ctx context.Context, runner nero.SqlRunner, cs ...*Creator) error {
+func (pg *PostgreSQLRepository) createMany(ctx context.Context, runner nero.SQLRunner, cs ...*Creator) error {
 	if len(cs) == 0 {
 		return nil
 	}
@@ -206,7 +210,11 @@ func (pg *PostgreSQLRepository) createMany(ctx context.Context, runner nero.SqlR
 		qb = qb.Values(
 			{{range $col := .Cols -}}
 				{{if ne $col.Auto true -}}
-					c.{{$col.Identifier}},
+					{{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
+						pq.Array(c.{{$col.Identifier}}),
+					{{else -}}
+						c.{{$col.Identifier}},
+					{{end -}}
 				{{end -}}
 			{{end -}}
 		)
@@ -241,7 +249,7 @@ func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Quer
 	return pg.query(ctx, txx, q)
 }
 
-func (pg *PostgreSQLRepository) query(ctx context.Context, runner nero.SqlRunner, q *Queryer) ([]*{{type .Type.V}}, error) {
+func (pg *PostgreSQLRepository) query(ctx context.Context, runner nero.SQLRunner, q *Queryer) ([]*{{type .Type.V}}, error) {
 	qb := pg.buildSelect(q)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
@@ -260,7 +268,11 @@ func (pg *PostgreSQLRepository) query(ctx context.Context, runner nero.SqlRunner
 		var {{lowerCamel .Type.Name}} {{type .Type.V}}
 		err = rows.Scan(
 			{{range $col := .Cols -}}
-				&{{lowerCamel $.Type.Name}}.{{$col.Field}},
+				{{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
+					pq.Array(&{{lowerCamel $.Type.Name}}.{{$col.Field}}),
+				{{else -}}
+					&{{lowerCamel $.Type.Name}}.{{$col.Field}},
+				{{end -}}
 			{{end -}}
 		)
 		if err != nil {
@@ -286,7 +298,7 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 	return pg.queryOne(ctx, txx, q)
 }
 
-func (pg *PostgreSQLRepository) queryOne(ctx context.Context, runner nero.SqlRunner, q *Queryer) (*{{type .Type.V}}, error) {
+func (pg *PostgreSQLRepository) queryOne(ctx context.Context, runner nero.SQLRunner, q *Queryer) (*{{type .Type.V}}, error) {
 	qb := pg.buildSelect(q)
 	if log := pg.log; log != nil {
 		sql, args, err := qb.ToSql()
@@ -299,7 +311,11 @@ func (pg *PostgreSQLRepository) queryOne(ctx context.Context, runner nero.SqlRun
 		QueryRowContext(ctx).
 		Scan(
 			{{range $col := .Cols -}}
-				&{{lowerCamel $.Type.Name}}.{{$col.Field}},
+				{{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
+					pq.Array(&{{lowerCamel $.Type.Name}}.{{$col.Field}}),
+				{{else -}}
+					&{{lowerCamel $.Type.Name}}.{{$col.Field}},
+				{{end -}}	
 			{{end -}}
 		)
 	if err != nil {
@@ -399,13 +415,17 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 	return pg.update(ctx, txx, u)
 }
 
-func (pg *PostgreSQLRepository) update(ctx context.Context, runner nero.SqlRunner, u *Updater) (int64, error) {
+func (pg *PostgreSQLRepository) update(ctx context.Context, runner nero.SQLRunner, u *Updater) (int64, error) {
 	qb := squirrel.Update("\"{{.Collection}}\"").
 		PlaceholderFormat(squirrel.Dollar)	
 	{{range $col := .Cols}}
 		{{if ne $col.Auto true}}
 			if u.{{$col.Identifier}} != {{zero $col.Type.V}} {
-				qb = qb.Set("\"{{$col.Name}}\"", u.{{$col.Identifier}})
+				{{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
+					qb = qb.Set("\"{{$col.Name}}\"", pq.Array(u.{{$col.Identifier}}))
+				{{else -}}
+					qb = qb.Set("\"{{$col.Name}}\"", u.{{$col.Identifier}})
+				{{end -}}
 			}
 		{{end}}
 	{{end}}
@@ -483,7 +503,7 @@ func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Del
 	return pg.delete(ctx, txx, d)
 }
 
-func (pg *PostgreSQLRepository) delete(ctx context.Context, runner nero.SqlRunner, d *Deleter) (int64, error) {
+func (pg *PostgreSQLRepository) delete(ctx context.Context, runner nero.SQLRunner, d *Deleter) (int64, error) {
 	qb := squirrel.Delete("\"{{.Collection}}\"").
 		PlaceholderFormat(squirrel.Dollar)
 
@@ -560,7 +580,7 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 	return pg.aggregate(ctx, txx, a)
 }
 
-func (pg *PostgreSQLRepository) aggregate(ctx context.Context, runner nero.SqlRunner, a *Aggregator) error {
+func (pg *PostgreSQLRepository) aggregate(ctx context.Context, runner nero.SQLRunner, a *Aggregator) error {
 	aggs := &aggregate.Aggregates{}
 	for _, aggf := range a.aggfs {
 		aggf(aggs)

@@ -11,7 +11,7 @@ import (
 	"github.com/sf9v/nero/example"
 )
 
-func TestGen(t *testing.T) {
+func TestGenerate(t *testing.T) {
 	files, err := Generate(new(example.User))
 	assert.NoError(t, err)
 	assert.Len(t, files, 6)

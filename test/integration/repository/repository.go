@@ -37,6 +37,7 @@ type Creator struct {
 	age       int
 	group     user.Group
 	kv        example.Map
+	tags      []string
 	updatedAt *time.Time
 }
 
@@ -71,6 +72,11 @@ func (c *Creator) Group(group user.Group) *Creator {
 
 func (c *Creator) Kv(kv example.Map) *Creator {
 	c.kv = kv
+	return c
+}
+
+func (c *Creator) Tags(tags []string) *Creator {
+	c.tags = tags
 	return c
 }
 
@@ -117,6 +123,7 @@ type Updater struct {
 	age       int
 	group     user.Group
 	kv        example.Map
+	tags      []string
 	updatedAt *time.Time
 	pfs       []PredFunc
 }
@@ -152,6 +159,11 @@ func (c *Updater) Group(group user.Group) *Updater {
 
 func (c *Updater) Kv(kv example.Map) *Updater {
 	c.kv = kv
+	return c
+}
+
+func (c *Updater) Tags(tags []string) *Updater {
+	c.tags = tags
 	return c
 }
 
