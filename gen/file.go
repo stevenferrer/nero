@@ -18,11 +18,13 @@ import (
 	"golang.org/x/tools/imports"
 )
 
+// File is a generated file
 type File struct {
 	name string
 	buf  *bytes.Buffer
 }
 
+// Render renders the file to the specified path
 func (fl *File) Render(basePath string) error {
 	filePath := path.Join(basePath, fl.name)
 	f, err := os.Create(filePath)
@@ -39,16 +41,18 @@ func (fl *File) Render(basePath string) error {
 	return errors.Wrap(formatSource(filePath), "format source")
 }
 
+// FileName returns the filename
 func (fl *File) FileName() string {
 	return fl.name
 }
 
+// Bytes returns the bytes
 func (fl *File) Bytes() []byte {
 	return fl.buf.Bytes()
 }
 
 // formatSource removes unneeded imports from the given Go source file and runs gofmt on it.
-// Copied from goa code base https://github.com/goadesign/goa/blob/v3/codegen/file.go#L136
+// Copied from goa codebase https://github.com/goadesign/goa/blob/v3/codegen/file.go#L136
 func formatSource(filePath string) error {
 	// Make sure file parses and print content if it does not.
 	fset := token.NewFileSet()

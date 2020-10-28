@@ -4,12 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"math/rand"
 	"testing"
 	"time"
 
-	"github.com/ory/dockertest/v3"
 	"github.com/segmentio/ksuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -21,75 +19,22 @@ import (
 )
 
 func TestPostgreSQLRepository(t *testing.T) {
-	var dsnFmt = "postgres://postgres:postgres@localhost:%s?sslmode=disable"
+	const dsn = "postgres://postgres:postgres@localhost:5432?sslmode=disable"
 
-	// postgres setup
-	pool, err := dockertest.NewPool("")
-	if err != nil {
-		log.Fatalf("Could not connect to docker: %s", err)
-	}
+	// regular methods
+	db, err := sql.Open("postgres", dsn)
+	require.NoError(t, err)
+	require.NoError(t, db.Ping())
+	require.NoError(t, createTable(db))
+	repo := repository.NewPostgreSQLRepository(db)
+	newRepoTestRunner(repo)(t)
+	require.NoError(t, dropTable(db))
 
-	opts := dockertest.RunOptions{
-		Repository: "postgres",
-		Tag:        "12-alpine",
-		Env: []string{
-			"POSTGRES_USER=postgres",
-			"POSTGRES_PASSWORD=postgres",
-			"POSTGRES_DB=postgres",
-		},
-	}
-
-	t.Run("Non-Tx", func(t *testing.T) {
-		resource, err := pool.RunWithOptions(&opts)
-		if err != nil {
-			log.Fatalf("Could not start resource: %s", err)
-		}
-		defer func() {
-			require.NoError(t, pool.Purge(resource))
-		}()
-
-		var db *sql.DB
-		dsn := fmt.Sprintf(dsnFmt, resource.GetPort("5432/tcp"))
-		if err = pool.Retry(func() error {
-			db, err = sql.Open("postgres", dsn)
-			if err != nil {
-				return err
-			}
-			return db.Ping()
-		}); err != nil {
-			log.Fatalf("Could not connect to docker: %s", err)
-		}
-		require.NoError(t, createTable(db))
-		repo := repository.NewPostgreSQLRepository(db)
-		newRepoTestRunner(repo)(t)
-		require.NoError(t, dropTable(db))
-	})
-
-	t.Run("Tx", func(t *testing.T) {
-		resource, err := pool.RunWithOptions(&opts)
-		if err != nil {
-			log.Fatalf("Could not start resource: %s", err)
-		}
-		defer func() {
-			require.NoError(t, pool.Purge(resource))
-		}()
-
-		var db *sql.DB
-		dsn := fmt.Sprintf(dsnFmt, resource.GetPort("5432/tcp"))
-		if err = pool.Retry(func() error {
-			db, err = sql.Open("postgres", dsn)
-			if err != nil {
-				return err
-			}
-			return db.Ping()
-		}); err != nil {
-			log.Fatalf("Could not connect to docker: %s", err)
-		}
-		require.NoError(t, createTable(db))
-		repo := repository.NewPostgreSQLRepository(db)
-		newRepoTestRunnerTx(repo)(t)
-		require.NoError(t, dropTable(db))
-	})
+	// tx methods
+	require.NoError(t, createTable(db))
+	repo = repository.NewPostgreSQLRepository(db)
+	newRepoTestRunnerTx(repo)(t)
+	require.NoError(t, dropTable(db))
 }
 
 func createTable(db *sql.DB) error {
@@ -479,7 +424,7 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 		uids := []ksuid.KSUID{}
 		kv := example.Map{"asdf": "ghjk", "qwert": "yuio", "zxcv": "bnml"}
 		tags := []string{"one", "two", "three"}
-		t.Run("Create", func(t *testing.T) {
+		t.Run("CreateTx", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				now := time.Now()
 				for i := 1; i <= 50; i++ {
@@ -529,7 +474,7 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 			})
 		})
 
-		t.Run("CreateMany", func(t *testing.T) {
+		t.Run("CreateManyTx", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				crs := []*repository.Creator{}
 				for i := 51; i <= 100; i++ {
@@ -583,7 +528,7 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 			})
 		})
 
-		t.Run("Query", func(t *testing.T) {
+		t.Run("QueryTx", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				tx := newTx(ctx, t)
 				users, err := repo.QueryTx(ctx, tx, repository.NewQueryer().
@@ -704,7 +649,7 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 			})
 		})
 
-		t.Run("QueryOne", func(t *testing.T) {
+		t.Run("QueryOneTx", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				tx := newTx(ctx, t)
 				usr, err := repo.QueryOneTx(ctx, tx, repository.NewQueryer())
@@ -731,7 +676,7 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 			})
 		})
 
-		t.Run("Aggregate", func(t *testing.T) {
+		t.Run("AggregateTx", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				type aggt struct {
 					AvgAge   float64
@@ -776,7 +721,7 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 
 		newTags := []string{"five"}
 
-		t.Run("Update", func(t *testing.T) {
+		t.Run("UpdateTx", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				now := time.Now()
 				preds := []repository.PredFunc{
@@ -833,7 +778,7 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 			})
 		})
 
-		t.Run("Delete", func(t *testing.T) {
+		t.Run("DeleteTx", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				preds := []repository.PredFunc{
 					repository.IDEq("1"), repository.IDNotEq("2"),

@@ -3,8 +3,8 @@ package comparison
 // Predicate is a predicate
 type Predicate struct {
 	Col string
-	Val interface{}
 	Op  Operator
+	Arg interface{}
 }
 
 // Predicates is a predicate builder

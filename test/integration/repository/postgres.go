@@ -299,26 +299,57 @@ func (pg *PostgreSQLRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	for _, pf := range pfs {
 		pf(pb)
 	}
+
 	for _, p := range pb.All() {
 		switch p.Op {
 		case comparison.Eq:
-			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q = %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Arg)
+			}
 		case comparison.NotEq:
-			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q <> %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Arg)
+			}
 		case comparison.Gt:
-			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q > %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Arg)
+			}
 		case comparison.GtOrEq:
-			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q >= %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Arg)
+			}
 		case comparison.Lt:
-			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q < %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Arg)
+			}
 		case comparison.LtOrEq:
-			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q <= %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Arg)
+			}
 		case comparison.IsNull:
 			qb = qb.Where(fmt.Sprintf("%q IS NULL", p.Col))
 		case comparison.IsNotNull:
 			qb = qb.Where(fmt.Sprintf("%q IS NOT NULL", p.Col))
 		case comparison.In, comparison.NotIn:
-			args := p.Val.([]interface{})
+			args := p.Arg.([]interface{})
 			if len(args) == 0 {
 				continue
 			}
@@ -415,26 +446,57 @@ func (pg *PostgreSQLRepository) update(ctx context.Context, runner nero.SQLRunne
 	for _, pf := range pfs {
 		pf(pb)
 	}
+
 	for _, p := range pb.All() {
 		switch p.Op {
 		case comparison.Eq:
-			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q = %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Arg)
+			}
 		case comparison.NotEq:
-			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q <> %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Arg)
+			}
 		case comparison.Gt:
-			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q > %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Arg)
+			}
 		case comparison.GtOrEq:
-			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q >= %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Arg)
+			}
 		case comparison.Lt:
-			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q < %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Arg)
+			}
 		case comparison.LtOrEq:
-			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q <= %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Arg)
+			}
 		case comparison.IsNull:
 			qb = qb.Where(fmt.Sprintf("%q IS NULL", p.Col))
 		case comparison.IsNotNull:
 			qb = qb.Where(fmt.Sprintf("%q IS NOT NULL", p.Col))
 		case comparison.In, comparison.NotIn:
-			args := p.Val.([]interface{})
+			args := p.Arg.([]interface{})
 			if len(args) == 0 {
 				continue
 			}
@@ -492,26 +554,57 @@ func (pg *PostgreSQLRepository) delete(ctx context.Context, runner nero.SQLRunne
 	for _, pf := range pfs {
 		pf(pb)
 	}
+
 	for _, p := range pb.All() {
 		switch p.Op {
 		case comparison.Eq:
-			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q = %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Arg)
+			}
 		case comparison.NotEq:
-			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q <> %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Arg)
+			}
 		case comparison.Gt:
-			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q > %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Arg)
+			}
 		case comparison.GtOrEq:
-			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q >= %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Arg)
+			}
 		case comparison.Lt:
-			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q < %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Arg)
+			}
 		case comparison.LtOrEq:
-			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q <= %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Arg)
+			}
 		case comparison.IsNull:
 			qb = qb.Where(fmt.Sprintf("%q IS NULL", p.Col))
 		case comparison.IsNotNull:
 			qb = qb.Where(fmt.Sprintf("%q IS NOT NULL", p.Col))
 		case comparison.In, comparison.NotIn:
-			args := p.Val.([]interface{})
+			args := p.Arg.([]interface{})
 			if len(args) == 0 {
 				continue
 			}
@@ -599,26 +692,57 @@ func (pg *PostgreSQLRepository) aggregate(ctx context.Context, runner nero.SQLRu
 	for _, pf := range pfs {
 		pf(pb)
 	}
+
 	for _, p := range pb.All() {
 		switch p.Op {
 		case comparison.Eq:
-			qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q = %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Arg)
+			}
 		case comparison.NotEq:
-			qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q <> %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Arg)
+			}
 		case comparison.Gt:
-			qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q > %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Arg)
+			}
 		case comparison.GtOrEq:
-			qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q >= %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Arg)
+			}
 		case comparison.Lt:
-			qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q < %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Arg)
+			}
 		case comparison.LtOrEq:
-			qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
+			col, ok := p.Arg.(Column)
+			if ok {
+				qb = qb.Where(fmt.Sprintf("%q <= %q", p.Col, col.String()))
+			} else {
+				qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Arg)
+			}
 		case comparison.IsNull:
 			qb = qb.Where(fmt.Sprintf("%q IS NULL", p.Col))
 		case comparison.IsNotNull:
 			qb = qb.Where(fmt.Sprintf("%q IS NOT NULL", p.Col))
 		case comparison.In, comparison.NotIn:
-			args := p.Val.([]interface{})
+			args := p.Arg.([]interface{})
 			if len(args) == 0 {
 				continue
 			}

@@ -82,16 +82,16 @@ type PredFunc func(*comparison.Predicates)
 				}
 			{{else if isInOrNotOp $op }}
 				func {{$col.Field}}{{$op.String}} ({{$col.IdentifierPlural}} {{printf "...%T" $col.Type.V}}) PredFunc {
-					vals := []interface{}{}
+					args := []interface{}{}
 					for _, v := range {{$col.IdentifierPlural}} {
-						vals = append(vals, v)
+						args = append(args, v)
 					}
 
 					return func(pb *comparison.Predicates) {
 						pb.Add(&comparison.Predicate{
 							Col: "{{$col.Name}}",
 							Op: comparison.{{$op.String}},
-							Val: vals,
+							Arg: args,
 						})
 					}
 				}
@@ -102,10 +102,20 @@ type PredFunc func(*comparison.Predicates)
 							Col: "{{$col.Name}}",
 							Op: comparison.{{$op.String}},
 							{{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
-								Val: pq.Array({{$col.Identifier}}),
+								Arg: pq.Array({{$col.Identifier}}),
 							{{else -}}
-								Val: {{$col.Identifier}},
+								Arg: {{$col.Identifier}},
 							{{end -}}
+						})
+					}
+				}
+
+				func {{$col.Field}}{{$op.String}}Col (col Column) PredFunc {
+					return func(pb *comparison.Predicates) {
+						pb.Add(&comparison.Predicate{
+							Col: "{{$col.Name}}",
+							Op: comparison.{{$op.String}},
+							Arg: col,
 						})
 					}
 				}

@@ -16,7 +16,17 @@ func IDEq(id string) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "id",
 			Op:  comparison.Eq,
-			Val: id,
+			Arg: id,
+		})
+	}
+}
+
+func IDEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "id",
+			Op:  comparison.Eq,
+			Arg: col,
 		})
 	}
 }
@@ -26,7 +36,17 @@ func IDNotEq(id string) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "id",
 			Op:  comparison.NotEq,
-			Val: id,
+			Arg: id,
+		})
+	}
+}
+
+func IDNotEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "id",
+			Op:  comparison.NotEq,
+			Arg: col,
 		})
 	}
 }
@@ -36,7 +56,17 @@ func IDGt(id string) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "id",
 			Op:  comparison.Gt,
-			Val: id,
+			Arg: id,
+		})
+	}
+}
+
+func IDGtCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "id",
+			Op:  comparison.Gt,
+			Arg: col,
 		})
 	}
 }
@@ -46,7 +76,17 @@ func IDGtOrEq(id string) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "id",
 			Op:  comparison.GtOrEq,
-			Val: id,
+			Arg: id,
+		})
+	}
+}
+
+func IDGtOrEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "id",
+			Op:  comparison.GtOrEq,
+			Arg: col,
 		})
 	}
 }
@@ -56,7 +96,17 @@ func IDLt(id string) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "id",
 			Op:  comparison.Lt,
-			Val: id,
+			Arg: id,
+		})
+	}
+}
+
+func IDLtCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "id",
+			Op:  comparison.Lt,
+			Arg: col,
 		})
 	}
 }
@@ -66,7 +116,17 @@ func IDLtOrEq(id string) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "id",
 			Op:  comparison.LtOrEq,
-			Val: id,
+			Arg: id,
+		})
+	}
+}
+
+func IDLtOrEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "id",
+			Op:  comparison.LtOrEq,
+			Arg: col,
 		})
 	}
 }
@@ -90,31 +150,31 @@ func IDIsNotNull() PredFunc {
 }
 
 func IDIn(ids ...string) PredFunc {
-	vals := []interface{}{}
+	args := []interface{}{}
 	for _, v := range ids {
-		vals = append(vals, v)
+		args = append(args, v)
 	}
 
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "id",
 			Op:  comparison.In,
-			Val: vals,
+			Arg: args,
 		})
 	}
 }
 
 func IDNotIn(ids ...string) PredFunc {
-	vals := []interface{}{}
+	args := []interface{}{}
 	for _, v := range ids {
-		vals = append(vals, v)
+		args = append(args, v)
 	}
 
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "id",
 			Op:  comparison.NotIn,
-			Val: vals,
+			Arg: args,
 		})
 	}
 }
@@ -124,7 +184,17 @@ func UIDEq(uid ksuid.KSUID) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "uid",
 			Op:  comparison.Eq,
-			Val: uid,
+			Arg: uid,
+		})
+	}
+}
+
+func UIDEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "uid",
+			Op:  comparison.Eq,
+			Arg: col,
 		})
 	}
 }
@@ -134,7 +204,17 @@ func UIDNotEq(uid ksuid.KSUID) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "uid",
 			Op:  comparison.NotEq,
-			Val: uid,
+			Arg: uid,
+		})
+	}
+}
+
+func UIDNotEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "uid",
+			Op:  comparison.NotEq,
+			Arg: col,
 		})
 	}
 }
@@ -144,7 +224,17 @@ func UIDGt(uid ksuid.KSUID) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "uid",
 			Op:  comparison.Gt,
-			Val: uid,
+			Arg: uid,
+		})
+	}
+}
+
+func UIDGtCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "uid",
+			Op:  comparison.Gt,
+			Arg: col,
 		})
 	}
 }
@@ -154,7 +244,17 @@ func UIDGtOrEq(uid ksuid.KSUID) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "uid",
 			Op:  comparison.GtOrEq,
-			Val: uid,
+			Arg: uid,
+		})
+	}
+}
+
+func UIDGtOrEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "uid",
+			Op:  comparison.GtOrEq,
+			Arg: col,
 		})
 	}
 }
@@ -164,7 +264,17 @@ func UIDLt(uid ksuid.KSUID) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "uid",
 			Op:  comparison.Lt,
-			Val: uid,
+			Arg: uid,
+		})
+	}
+}
+
+func UIDLtCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "uid",
+			Op:  comparison.Lt,
+			Arg: col,
 		})
 	}
 }
@@ -174,7 +284,17 @@ func UIDLtOrEq(uid ksuid.KSUID) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "uid",
 			Op:  comparison.LtOrEq,
-			Val: uid,
+			Arg: uid,
+		})
+	}
+}
+
+func UIDLtOrEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "uid",
+			Op:  comparison.LtOrEq,
+			Arg: col,
 		})
 	}
 }
@@ -198,31 +318,31 @@ func UIDIsNotNull() PredFunc {
 }
 
 func UIDIn(uids ...ksuid.KSUID) PredFunc {
-	vals := []interface{}{}
+	args := []interface{}{}
 	for _, v := range uids {
-		vals = append(vals, v)
+		args = append(args, v)
 	}
 
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "uid",
 			Op:  comparison.In,
-			Val: vals,
+			Arg: args,
 		})
 	}
 }
 
 func UIDNotIn(uids ...ksuid.KSUID) PredFunc {
-	vals := []interface{}{}
+	args := []interface{}{}
 	for _, v := range uids {
-		vals = append(vals, v)
+		args = append(args, v)
 	}
 
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "uid",
 			Op:  comparison.NotIn,
-			Val: vals,
+			Arg: args,
 		})
 	}
 }
@@ -232,7 +352,17 @@ func EmailEq(email string) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "email",
 			Op:  comparison.Eq,
-			Val: email,
+			Arg: email,
+		})
+	}
+}
+
+func EmailEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "email",
+			Op:  comparison.Eq,
+			Arg: col,
 		})
 	}
 }
@@ -242,7 +372,17 @@ func EmailNotEq(email string) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "email",
 			Op:  comparison.NotEq,
-			Val: email,
+			Arg: email,
+		})
+	}
+}
+
+func EmailNotEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "email",
+			Op:  comparison.NotEq,
+			Arg: col,
 		})
 	}
 }
@@ -252,7 +392,17 @@ func EmailGt(email string) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "email",
 			Op:  comparison.Gt,
-			Val: email,
+			Arg: email,
+		})
+	}
+}
+
+func EmailGtCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "email",
+			Op:  comparison.Gt,
+			Arg: col,
 		})
 	}
 }
@@ -262,7 +412,17 @@ func EmailGtOrEq(email string) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "email",
 			Op:  comparison.GtOrEq,
-			Val: email,
+			Arg: email,
+		})
+	}
+}
+
+func EmailGtOrEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "email",
+			Op:  comparison.GtOrEq,
+			Arg: col,
 		})
 	}
 }
@@ -272,7 +432,17 @@ func EmailLt(email string) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "email",
 			Op:  comparison.Lt,
-			Val: email,
+			Arg: email,
+		})
+	}
+}
+
+func EmailLtCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "email",
+			Op:  comparison.Lt,
+			Arg: col,
 		})
 	}
 }
@@ -282,7 +452,17 @@ func EmailLtOrEq(email string) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "email",
 			Op:  comparison.LtOrEq,
-			Val: email,
+			Arg: email,
+		})
+	}
+}
+
+func EmailLtOrEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "email",
+			Op:  comparison.LtOrEq,
+			Arg: col,
 		})
 	}
 }
@@ -306,31 +486,31 @@ func EmailIsNotNull() PredFunc {
 }
 
 func EmailIn(emails ...string) PredFunc {
-	vals := []interface{}{}
+	args := []interface{}{}
 	for _, v := range emails {
-		vals = append(vals, v)
+		args = append(args, v)
 	}
 
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "email",
 			Op:  comparison.In,
-			Val: vals,
+			Arg: args,
 		})
 	}
 }
 
 func EmailNotIn(emails ...string) PredFunc {
-	vals := []interface{}{}
+	args := []interface{}{}
 	for _, v := range emails {
-		vals = append(vals, v)
+		args = append(args, v)
 	}
 
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "email",
 			Op:  comparison.NotIn,
-			Val: vals,
+			Arg: args,
 		})
 	}
 }
@@ -340,7 +520,17 @@ func NameEq(name string) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "name",
 			Op:  comparison.Eq,
-			Val: name,
+			Arg: name,
+		})
+	}
+}
+
+func NameEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "name",
+			Op:  comparison.Eq,
+			Arg: col,
 		})
 	}
 }
@@ -350,7 +540,17 @@ func NameNotEq(name string) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "name",
 			Op:  comparison.NotEq,
-			Val: name,
+			Arg: name,
+		})
+	}
+}
+
+func NameNotEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "name",
+			Op:  comparison.NotEq,
+			Arg: col,
 		})
 	}
 }
@@ -360,7 +560,17 @@ func NameGt(name string) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "name",
 			Op:  comparison.Gt,
-			Val: name,
+			Arg: name,
+		})
+	}
+}
+
+func NameGtCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "name",
+			Op:  comparison.Gt,
+			Arg: col,
 		})
 	}
 }
@@ -370,7 +580,17 @@ func NameGtOrEq(name string) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "name",
 			Op:  comparison.GtOrEq,
-			Val: name,
+			Arg: name,
+		})
+	}
+}
+
+func NameGtOrEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "name",
+			Op:  comparison.GtOrEq,
+			Arg: col,
 		})
 	}
 }
@@ -380,7 +600,17 @@ func NameLt(name string) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "name",
 			Op:  comparison.Lt,
-			Val: name,
+			Arg: name,
+		})
+	}
+}
+
+func NameLtCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "name",
+			Op:  comparison.Lt,
+			Arg: col,
 		})
 	}
 }
@@ -390,7 +620,17 @@ func NameLtOrEq(name string) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "name",
 			Op:  comparison.LtOrEq,
-			Val: name,
+			Arg: name,
+		})
+	}
+}
+
+func NameLtOrEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "name",
+			Op:  comparison.LtOrEq,
+			Arg: col,
 		})
 	}
 }
@@ -414,31 +654,31 @@ func NameIsNotNull() PredFunc {
 }
 
 func NameIn(names ...string) PredFunc {
-	vals := []interface{}{}
+	args := []interface{}{}
 	for _, v := range names {
-		vals = append(vals, v)
+		args = append(args, v)
 	}
 
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "name",
 			Op:  comparison.In,
-			Val: vals,
+			Arg: args,
 		})
 	}
 }
 
 func NameNotIn(names ...string) PredFunc {
-	vals := []interface{}{}
+	args := []interface{}{}
 	for _, v := range names {
-		vals = append(vals, v)
+		args = append(args, v)
 	}
 
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "name",
 			Op:  comparison.NotIn,
-			Val: vals,
+			Arg: args,
 		})
 	}
 }
@@ -448,7 +688,17 @@ func AgeEq(age int) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "age",
 			Op:  comparison.Eq,
-			Val: age,
+			Arg: age,
+		})
+	}
+}
+
+func AgeEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "age",
+			Op:  comparison.Eq,
+			Arg: col,
 		})
 	}
 }
@@ -458,7 +708,17 @@ func AgeNotEq(age int) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "age",
 			Op:  comparison.NotEq,
-			Val: age,
+			Arg: age,
+		})
+	}
+}
+
+func AgeNotEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "age",
+			Op:  comparison.NotEq,
+			Arg: col,
 		})
 	}
 }
@@ -468,7 +728,17 @@ func AgeGt(age int) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "age",
 			Op:  comparison.Gt,
-			Val: age,
+			Arg: age,
+		})
+	}
+}
+
+func AgeGtCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "age",
+			Op:  comparison.Gt,
+			Arg: col,
 		})
 	}
 }
@@ -478,7 +748,17 @@ func AgeGtOrEq(age int) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "age",
 			Op:  comparison.GtOrEq,
-			Val: age,
+			Arg: age,
+		})
+	}
+}
+
+func AgeGtOrEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "age",
+			Op:  comparison.GtOrEq,
+			Arg: col,
 		})
 	}
 }
@@ -488,7 +768,17 @@ func AgeLt(age int) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "age",
 			Op:  comparison.Lt,
-			Val: age,
+			Arg: age,
+		})
+	}
+}
+
+func AgeLtCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "age",
+			Op:  comparison.Lt,
+			Arg: col,
 		})
 	}
 }
@@ -498,7 +788,17 @@ func AgeLtOrEq(age int) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "age",
 			Op:  comparison.LtOrEq,
-			Val: age,
+			Arg: age,
+		})
+	}
+}
+
+func AgeLtOrEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "age",
+			Op:  comparison.LtOrEq,
+			Arg: col,
 		})
 	}
 }
@@ -522,31 +822,31 @@ func AgeIsNotNull() PredFunc {
 }
 
 func AgeIn(ages ...int) PredFunc {
-	vals := []interface{}{}
+	args := []interface{}{}
 	for _, v := range ages {
-		vals = append(vals, v)
+		args = append(args, v)
 	}
 
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "age",
 			Op:  comparison.In,
-			Val: vals,
+			Arg: args,
 		})
 	}
 }
 
 func AgeNotIn(ages ...int) PredFunc {
-	vals := []interface{}{}
+	args := []interface{}{}
 	for _, v := range ages {
-		vals = append(vals, v)
+		args = append(args, v)
 	}
 
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "age",
 			Op:  comparison.NotIn,
-			Val: vals,
+			Arg: args,
 		})
 	}
 }
@@ -556,7 +856,17 @@ func GroupEq(group user.Group) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "group",
 			Op:  comparison.Eq,
-			Val: group,
+			Arg: group,
+		})
+	}
+}
+
+func GroupEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "group",
+			Op:  comparison.Eq,
+			Arg: col,
 		})
 	}
 }
@@ -566,7 +876,17 @@ func GroupNotEq(group user.Group) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "group",
 			Op:  comparison.NotEq,
-			Val: group,
+			Arg: group,
+		})
+	}
+}
+
+func GroupNotEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "group",
+			Op:  comparison.NotEq,
+			Arg: col,
 		})
 	}
 }
@@ -576,7 +896,17 @@ func GroupGt(group user.Group) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "group",
 			Op:  comparison.Gt,
-			Val: group,
+			Arg: group,
+		})
+	}
+}
+
+func GroupGtCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "group",
+			Op:  comparison.Gt,
+			Arg: col,
 		})
 	}
 }
@@ -586,7 +916,17 @@ func GroupGtOrEq(group user.Group) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "group",
 			Op:  comparison.GtOrEq,
-			Val: group,
+			Arg: group,
+		})
+	}
+}
+
+func GroupGtOrEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "group",
+			Op:  comparison.GtOrEq,
+			Arg: col,
 		})
 	}
 }
@@ -596,7 +936,17 @@ func GroupLt(group user.Group) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "group",
 			Op:  comparison.Lt,
-			Val: group,
+			Arg: group,
+		})
+	}
+}
+
+func GroupLtCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "group",
+			Op:  comparison.Lt,
+			Arg: col,
 		})
 	}
 }
@@ -606,7 +956,17 @@ func GroupLtOrEq(group user.Group) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "group",
 			Op:  comparison.LtOrEq,
-			Val: group,
+			Arg: group,
+		})
+	}
+}
+
+func GroupLtOrEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "group",
+			Op:  comparison.LtOrEq,
+			Arg: col,
 		})
 	}
 }
@@ -630,31 +990,31 @@ func GroupIsNotNull() PredFunc {
 }
 
 func GroupIn(groups ...user.Group) PredFunc {
-	vals := []interface{}{}
+	args := []interface{}{}
 	for _, v := range groups {
-		vals = append(vals, v)
+		args = append(args, v)
 	}
 
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "group",
 			Op:  comparison.In,
-			Val: vals,
+			Arg: args,
 		})
 	}
 }
 
 func GroupNotIn(groups ...user.Group) PredFunc {
-	vals := []interface{}{}
+	args := []interface{}{}
 	for _, v := range groups {
-		vals = append(vals, v)
+		args = append(args, v)
 	}
 
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "group",
 			Op:  comparison.NotIn,
-			Val: vals,
+			Arg: args,
 		})
 	}
 }
@@ -664,7 +1024,17 @@ func UpdatedAtEq(updatedAt *time.Time) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "updated_at",
 			Op:  comparison.Eq,
-			Val: updatedAt,
+			Arg: updatedAt,
+		})
+	}
+}
+
+func UpdatedAtEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "updated_at",
+			Op:  comparison.Eq,
+			Arg: col,
 		})
 	}
 }
@@ -674,7 +1044,17 @@ func UpdatedAtNotEq(updatedAt *time.Time) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "updated_at",
 			Op:  comparison.NotEq,
-			Val: updatedAt,
+			Arg: updatedAt,
+		})
+	}
+}
+
+func UpdatedAtNotEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "updated_at",
+			Op:  comparison.NotEq,
+			Arg: col,
 		})
 	}
 }
@@ -684,7 +1064,17 @@ func UpdatedAtGt(updatedAt *time.Time) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "updated_at",
 			Op:  comparison.Gt,
-			Val: updatedAt,
+			Arg: updatedAt,
+		})
+	}
+}
+
+func UpdatedAtGtCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "updated_at",
+			Op:  comparison.Gt,
+			Arg: col,
 		})
 	}
 }
@@ -694,7 +1084,17 @@ func UpdatedAtGtOrEq(updatedAt *time.Time) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "updated_at",
 			Op:  comparison.GtOrEq,
-			Val: updatedAt,
+			Arg: updatedAt,
+		})
+	}
+}
+
+func UpdatedAtGtOrEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "updated_at",
+			Op:  comparison.GtOrEq,
+			Arg: col,
 		})
 	}
 }
@@ -704,7 +1104,17 @@ func UpdatedAtLt(updatedAt *time.Time) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "updated_at",
 			Op:  comparison.Lt,
-			Val: updatedAt,
+			Arg: updatedAt,
+		})
+	}
+}
+
+func UpdatedAtLtCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "updated_at",
+			Op:  comparison.Lt,
+			Arg: col,
 		})
 	}
 }
@@ -714,7 +1124,17 @@ func UpdatedAtLtOrEq(updatedAt *time.Time) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "updated_at",
 			Op:  comparison.LtOrEq,
-			Val: updatedAt,
+			Arg: updatedAt,
+		})
+	}
+}
+
+func UpdatedAtLtOrEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "updated_at",
+			Op:  comparison.LtOrEq,
+			Arg: col,
 		})
 	}
 }
@@ -738,31 +1158,31 @@ func UpdatedAtIsNotNull() PredFunc {
 }
 
 func UpdatedAtIn(updatedAts ...*time.Time) PredFunc {
-	vals := []interface{}{}
+	args := []interface{}{}
 	for _, v := range updatedAts {
-		vals = append(vals, v)
+		args = append(args, v)
 	}
 
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "updated_at",
 			Op:  comparison.In,
-			Val: vals,
+			Arg: args,
 		})
 	}
 }
 
 func UpdatedAtNotIn(updatedAts ...*time.Time) PredFunc {
-	vals := []interface{}{}
+	args := []interface{}{}
 	for _, v := range updatedAts {
-		vals = append(vals, v)
+		args = append(args, v)
 	}
 
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "updated_at",
 			Op:  comparison.NotIn,
-			Val: vals,
+			Arg: args,
 		})
 	}
 }
@@ -772,7 +1192,17 @@ func CreatedAtEq(createdAt *time.Time) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "created_at",
 			Op:  comparison.Eq,
-			Val: createdAt,
+			Arg: createdAt,
+		})
+	}
+}
+
+func CreatedAtEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "created_at",
+			Op:  comparison.Eq,
+			Arg: col,
 		})
 	}
 }
@@ -782,7 +1212,17 @@ func CreatedAtNotEq(createdAt *time.Time) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "created_at",
 			Op:  comparison.NotEq,
-			Val: createdAt,
+			Arg: createdAt,
+		})
+	}
+}
+
+func CreatedAtNotEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "created_at",
+			Op:  comparison.NotEq,
+			Arg: col,
 		})
 	}
 }
@@ -792,7 +1232,17 @@ func CreatedAtGt(createdAt *time.Time) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "created_at",
 			Op:  comparison.Gt,
-			Val: createdAt,
+			Arg: createdAt,
+		})
+	}
+}
+
+func CreatedAtGtCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "created_at",
+			Op:  comparison.Gt,
+			Arg: col,
 		})
 	}
 }
@@ -802,7 +1252,17 @@ func CreatedAtGtOrEq(createdAt *time.Time) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "created_at",
 			Op:  comparison.GtOrEq,
-			Val: createdAt,
+			Arg: createdAt,
+		})
+	}
+}
+
+func CreatedAtGtOrEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "created_at",
+			Op:  comparison.GtOrEq,
+			Arg: col,
 		})
 	}
 }
@@ -812,7 +1272,17 @@ func CreatedAtLt(createdAt *time.Time) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "created_at",
 			Op:  comparison.Lt,
-			Val: createdAt,
+			Arg: createdAt,
+		})
+	}
+}
+
+func CreatedAtLtCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "created_at",
+			Op:  comparison.Lt,
+			Arg: col,
 		})
 	}
 }
@@ -822,7 +1292,17 @@ func CreatedAtLtOrEq(createdAt *time.Time) PredFunc {
 		pb.Add(&comparison.Predicate{
 			Col: "created_at",
 			Op:  comparison.LtOrEq,
-			Val: createdAt,
+			Arg: createdAt,
+		})
+	}
+}
+
+func CreatedAtLtOrEqCol(col Column) PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "created_at",
+			Op:  comparison.LtOrEq,
+			Arg: col,
 		})
 	}
 }
@@ -846,31 +1326,31 @@ func CreatedAtIsNotNull() PredFunc {
 }
 
 func CreatedAtIn(createdAts ...*time.Time) PredFunc {
-	vals := []interface{}{}
+	args := []interface{}{}
 	for _, v := range createdAts {
-		vals = append(vals, v)
+		args = append(args, v)
 	}
 
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "created_at",
 			Op:  comparison.In,
-			Val: vals,
+			Arg: args,
 		})
 	}
 }
 
 func CreatedAtNotIn(createdAts ...*time.Time) PredFunc {
-	vals := []interface{}{}
+	args := []interface{}{}
 	for _, v := range createdAts {
-		vals = append(vals, v)
+		args = append(args, v)
 	}
 
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "created_at",
 			Op:  comparison.NotIn,
-			Val: vals,
+			Arg: args,
 		})
 	}
 }

@@ -210,7 +210,7 @@ func TestPredicates(t *testing.T) {
 		for _, p := range pb.All() {
 			if p.Op == comparison.IsNull ||
 				p.Op == comparison.IsNotNull {
-				assert.Nil(t, p.Val)
+				assert.Nil(t, p.Arg)
 			}
 
 			qb = addPred(qb, p)
@@ -227,17 +227,17 @@ func addPred(sb sq.SelectBuilder,
 	p *comparison.Predicate) sq.SelectBuilder {
 	switch p.Op {
 	case comparison.Eq:
-		return sb.Where(fmt.Sprintf("%q = ?", p.Col), p.Val)
+		return sb.Where(fmt.Sprintf("%q = ?", p.Col), p.Arg)
 	case comparison.NotEq:
-		return sb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Val)
+		return sb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Arg)
 	case comparison.Gt:
-		return sb.Where(fmt.Sprintf("%q > ?", p.Col), p.Val)
+		return sb.Where(fmt.Sprintf("%q > ?", p.Col), p.Arg)
 	case comparison.GtOrEq:
-		return sb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Val)
+		return sb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Arg)
 	case comparison.Lt:
-		return sb.Where(fmt.Sprintf("%q < ?", p.Col), p.Val)
+		return sb.Where(fmt.Sprintf("%q < ?", p.Col), p.Arg)
 	case comparison.LtOrEq:
-		return sb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Val)
+		return sb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Arg)
 	case comparison.IsNull:
 		return sb.Where(fmt.Sprintf("%q IS NULL", p.Col))
 	case comparison.IsNotNull:
@@ -247,7 +247,7 @@ func addPred(sb sq.SelectBuilder,
 		if p.Op == comparison.NotIn {
 			fmtStr = "%q NOT IN (%s)"
 		}
-		args := p.Val.([]interface{})
+		args := p.Arg.([]interface{})
 		qms := []string{}
 		for range args {
 			qms = append(qms, "?")
