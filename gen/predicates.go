@@ -110,15 +110,17 @@ type PredFunc func(*comparison.Predicates)
 					}
 				}
 
-				func {{$col.Field}}{{$op.String}}Col (col Column) PredFunc {
-					return func(pb *comparison.Predicates) {
-						pb.Add(&comparison.Predicate{
-							Col: "{{$col.Name}}",
-							Op: comparison.{{$op.String}},
-							Arg: col,
-						})
+				{{if $col.ColumnComparable -}}
+					func {{$col.Field}}{{$op.String}}Col (col Column) PredFunc {
+						return func(pb *comparison.Predicates) {
+							pb.Add(&comparison.Predicate{
+								Col: "{{$col.Name}}",
+								Op: comparison.{{$op.String}},
+								Arg: col,
+							})
+						}
 					}
-				}
+				{{end}}
 			{{end}}
 		{{end -}}
 	{{end}}

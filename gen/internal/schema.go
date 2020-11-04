@@ -39,12 +39,13 @@ func BuildSchema(s nero.Schemaer) (*Schema, error) {
 	for _, column := range ns.Columns {
 		cfg := column.Cfg()
 		col := &Col{
-			Name:        cfg.Name,
-			StructField: stringsx.ToCamel(cfg.Name),
-			Type:        mira.NewType(cfg.T),
-			Ident:       cfg.Ident,
-			Auto:        cfg.Auto,
-			Nullable:    cfg.Nullable,
+			Name:             cfg.Name,
+			StructField:      stringsx.ToCamel(cfg.Name),
+			Type:             mira.NewType(cfg.T),
+			Ident:            cfg.Ident,
+			Auto:             cfg.Auto,
+			Nullable:         cfg.Nullable,
+			ColumnComparable: cfg.ColumnComparable,
 		}
 
 		if len(cfg.StructField) > 0 {

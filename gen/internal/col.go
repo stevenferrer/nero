@@ -22,7 +22,9 @@ type Col struct {
 	// Auto is an auto-filled column
 	Auto,
 	// Nullable is a nullable column
-	Nullable bool
+	Nullable,
+	// ColumnComparable enables comparison with other column
+	ColumnComparable bool
 }
 
 // CamelName returns a camelized version of name

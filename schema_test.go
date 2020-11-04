@@ -9,7 +9,8 @@ import (
 
 func TestColumn(t *testing.T) {
 	cfg := NewColumn("id", int64(0)).
-		Auto().Ident().StructField("ID").Cfg()
+		Auto().Ident().StructField("ID").
+		Cfg()
 	assert.Equal(t, "id", cfg.Name)
 	_, ok := cfg.T.(int64)
 	assert.True(t, ok)
@@ -20,4 +21,7 @@ func TestColumn(t *testing.T) {
 	now := time.Now()
 	cfg = NewColumn("updated_at", &now).Nullable().Cfg()
 	assert.True(t, cfg.Nullable)
+
+	cfg = NewColumn("comparable", "").ColumnComparable().Cfg()
+	assert.True(t, cfg.ColumnComparable)
 }

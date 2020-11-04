@@ -21,32 +21,12 @@ func IDEq(id string) PredFunc {
 	}
 }
 
-func IDEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "id",
-			Op:  comparison.Eq,
-			Arg: col,
-		})
-	}
-}
-
 func IDNotEq(id string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "id",
 			Op:  comparison.NotEq,
 			Arg: id,
-		})
-	}
-}
-
-func IDNotEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "id",
-			Op:  comparison.NotEq,
-			Arg: col,
 		})
 	}
 }
@@ -61,32 +41,12 @@ func IDGt(id string) PredFunc {
 	}
 }
 
-func IDGtCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "id",
-			Op:  comparison.Gt,
-			Arg: col,
-		})
-	}
-}
-
 func IDGtOrEq(id string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "id",
 			Op:  comparison.GtOrEq,
 			Arg: id,
-		})
-	}
-}
-
-func IDGtOrEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "id",
-			Op:  comparison.GtOrEq,
-			Arg: col,
 		})
 	}
 }
@@ -101,32 +61,12 @@ func IDLt(id string) PredFunc {
 	}
 }
 
-func IDLtCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "id",
-			Op:  comparison.Lt,
-			Arg: col,
-		})
-	}
-}
-
 func IDLtOrEq(id string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "id",
 			Op:  comparison.LtOrEq,
 			Arg: id,
-		})
-	}
-}
-
-func IDLtOrEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "id",
-			Op:  comparison.LtOrEq,
-			Arg: col,
 		})
 	}
 }
@@ -189,32 +129,12 @@ func UIDEq(uid ksuid.KSUID) PredFunc {
 	}
 }
 
-func UIDEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "uid",
-			Op:  comparison.Eq,
-			Arg: col,
-		})
-	}
-}
-
 func UIDNotEq(uid ksuid.KSUID) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "uid",
 			Op:  comparison.NotEq,
 			Arg: uid,
-		})
-	}
-}
-
-func UIDNotEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "uid",
-			Op:  comparison.NotEq,
-			Arg: col,
 		})
 	}
 }
@@ -229,32 +149,12 @@ func UIDGt(uid ksuid.KSUID) PredFunc {
 	}
 }
 
-func UIDGtCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "uid",
-			Op:  comparison.Gt,
-			Arg: col,
-		})
-	}
-}
-
 func UIDGtOrEq(uid ksuid.KSUID) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "uid",
 			Op:  comparison.GtOrEq,
 			Arg: uid,
-		})
-	}
-}
-
-func UIDGtOrEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "uid",
-			Op:  comparison.GtOrEq,
-			Arg: col,
 		})
 	}
 }
@@ -269,32 +169,12 @@ func UIDLt(uid ksuid.KSUID) PredFunc {
 	}
 }
 
-func UIDLtCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "uid",
-			Op:  comparison.Lt,
-			Arg: col,
-		})
-	}
-}
-
 func UIDLtOrEq(uid ksuid.KSUID) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "uid",
 			Op:  comparison.LtOrEq,
 			Arg: uid,
-		})
-	}
-}
-
-func UIDLtOrEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "uid",
-			Op:  comparison.LtOrEq,
-			Arg: col,
 		})
 	}
 }
@@ -357,32 +237,12 @@ func EmailEq(email string) PredFunc {
 	}
 }
 
-func EmailEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "email",
-			Op:  comparison.Eq,
-			Arg: col,
-		})
-	}
-}
-
 func EmailNotEq(email string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "email",
 			Op:  comparison.NotEq,
 			Arg: email,
-		})
-	}
-}
-
-func EmailNotEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "email",
-			Op:  comparison.NotEq,
-			Arg: col,
 		})
 	}
 }
@@ -397,32 +257,12 @@ func EmailGt(email string) PredFunc {
 	}
 }
 
-func EmailGtCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "email",
-			Op:  comparison.Gt,
-			Arg: col,
-		})
-	}
-}
-
 func EmailGtOrEq(email string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "email",
 			Op:  comparison.GtOrEq,
 			Arg: email,
-		})
-	}
-}
-
-func EmailGtOrEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "email",
-			Op:  comparison.GtOrEq,
-			Arg: col,
 		})
 	}
 }
@@ -437,32 +277,12 @@ func EmailLt(email string) PredFunc {
 	}
 }
 
-func EmailLtCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "email",
-			Op:  comparison.Lt,
-			Arg: col,
-		})
-	}
-}
-
 func EmailLtOrEq(email string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "email",
 			Op:  comparison.LtOrEq,
 			Arg: email,
-		})
-	}
-}
-
-func EmailLtOrEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "email",
-			Op:  comparison.LtOrEq,
-			Arg: col,
 		})
 	}
 }
@@ -525,32 +345,12 @@ func NameEq(name string) PredFunc {
 	}
 }
 
-func NameEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "name",
-			Op:  comparison.Eq,
-			Arg: col,
-		})
-	}
-}
-
 func NameNotEq(name string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "name",
 			Op:  comparison.NotEq,
 			Arg: name,
-		})
-	}
-}
-
-func NameNotEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "name",
-			Op:  comparison.NotEq,
-			Arg: col,
 		})
 	}
 }
@@ -565,32 +365,12 @@ func NameGt(name string) PredFunc {
 	}
 }
 
-func NameGtCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "name",
-			Op:  comparison.Gt,
-			Arg: col,
-		})
-	}
-}
-
 func NameGtOrEq(name string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "name",
 			Op:  comparison.GtOrEq,
 			Arg: name,
-		})
-	}
-}
-
-func NameGtOrEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "name",
-			Op:  comparison.GtOrEq,
-			Arg: col,
 		})
 	}
 }
@@ -605,32 +385,12 @@ func NameLt(name string) PredFunc {
 	}
 }
 
-func NameLtCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "name",
-			Op:  comparison.Lt,
-			Arg: col,
-		})
-	}
-}
-
 func NameLtOrEq(name string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "name",
 			Op:  comparison.LtOrEq,
 			Arg: name,
-		})
-	}
-}
-
-func NameLtOrEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "name",
-			Op:  comparison.LtOrEq,
-			Arg: col,
 		})
 	}
 }
@@ -693,32 +453,12 @@ func AgeEq(age int) PredFunc {
 	}
 }
 
-func AgeEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "age",
-			Op:  comparison.Eq,
-			Arg: col,
-		})
-	}
-}
-
 func AgeNotEq(age int) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "age",
 			Op:  comparison.NotEq,
 			Arg: age,
-		})
-	}
-}
-
-func AgeNotEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "age",
-			Op:  comparison.NotEq,
-			Arg: col,
 		})
 	}
 }
@@ -733,32 +473,12 @@ func AgeGt(age int) PredFunc {
 	}
 }
 
-func AgeGtCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "age",
-			Op:  comparison.Gt,
-			Arg: col,
-		})
-	}
-}
-
 func AgeGtOrEq(age int) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "age",
 			Op:  comparison.GtOrEq,
 			Arg: age,
-		})
-	}
-}
-
-func AgeGtOrEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "age",
-			Op:  comparison.GtOrEq,
-			Arg: col,
 		})
 	}
 }
@@ -773,32 +493,12 @@ func AgeLt(age int) PredFunc {
 	}
 }
 
-func AgeLtCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "age",
-			Op:  comparison.Lt,
-			Arg: col,
-		})
-	}
-}
-
 func AgeLtOrEq(age int) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "age",
 			Op:  comparison.LtOrEq,
 			Arg: age,
-		})
-	}
-}
-
-func AgeLtOrEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "age",
-			Op:  comparison.LtOrEq,
-			Arg: col,
 		})
 	}
 }
@@ -861,32 +561,12 @@ func GroupEq(group user.Group) PredFunc {
 	}
 }
 
-func GroupEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "group",
-			Op:  comparison.Eq,
-			Arg: col,
-		})
-	}
-}
-
 func GroupNotEq(group user.Group) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "group",
 			Op:  comparison.NotEq,
 			Arg: group,
-		})
-	}
-}
-
-func GroupNotEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "group",
-			Op:  comparison.NotEq,
-			Arg: col,
 		})
 	}
 }
@@ -901,32 +581,12 @@ func GroupGt(group user.Group) PredFunc {
 	}
 }
 
-func GroupGtCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "group",
-			Op:  comparison.Gt,
-			Arg: col,
-		})
-	}
-}
-
 func GroupGtOrEq(group user.Group) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "group",
 			Op:  comparison.GtOrEq,
 			Arg: group,
-		})
-	}
-}
-
-func GroupGtOrEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "group",
-			Op:  comparison.GtOrEq,
-			Arg: col,
 		})
 	}
 }
@@ -941,32 +601,12 @@ func GroupLt(group user.Group) PredFunc {
 	}
 }
 
-func GroupLtCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "group",
-			Op:  comparison.Lt,
-			Arg: col,
-		})
-	}
-}
-
 func GroupLtOrEq(group user.Group) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "group",
 			Op:  comparison.LtOrEq,
 			Arg: group,
-		})
-	}
-}
-
-func GroupLtOrEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "group",
-			Op:  comparison.LtOrEq,
-			Arg: col,
 		})
 	}
 }
@@ -1029,32 +669,12 @@ func UpdatedAtEq(updatedAt *time.Time) PredFunc {
 	}
 }
 
-func UpdatedAtEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "updated_at",
-			Op:  comparison.Eq,
-			Arg: col,
-		})
-	}
-}
-
 func UpdatedAtNotEq(updatedAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "updated_at",
 			Op:  comparison.NotEq,
 			Arg: updatedAt,
-		})
-	}
-}
-
-func UpdatedAtNotEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "updated_at",
-			Op:  comparison.NotEq,
-			Arg: col,
 		})
 	}
 }
@@ -1069,32 +689,12 @@ func UpdatedAtGt(updatedAt *time.Time) PredFunc {
 	}
 }
 
-func UpdatedAtGtCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "updated_at",
-			Op:  comparison.Gt,
-			Arg: col,
-		})
-	}
-}
-
 func UpdatedAtGtOrEq(updatedAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "updated_at",
 			Op:  comparison.GtOrEq,
 			Arg: updatedAt,
-		})
-	}
-}
-
-func UpdatedAtGtOrEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "updated_at",
-			Op:  comparison.GtOrEq,
-			Arg: col,
 		})
 	}
 }
@@ -1109,32 +709,12 @@ func UpdatedAtLt(updatedAt *time.Time) PredFunc {
 	}
 }
 
-func UpdatedAtLtCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "updated_at",
-			Op:  comparison.Lt,
-			Arg: col,
-		})
-	}
-}
-
 func UpdatedAtLtOrEq(updatedAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "updated_at",
 			Op:  comparison.LtOrEq,
 			Arg: updatedAt,
-		})
-	}
-}
-
-func UpdatedAtLtOrEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "updated_at",
-			Op:  comparison.LtOrEq,
-			Arg: col,
 		})
 	}
 }
@@ -1197,32 +777,12 @@ func CreatedAtEq(createdAt *time.Time) PredFunc {
 	}
 }
 
-func CreatedAtEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "created_at",
-			Op:  comparison.Eq,
-			Arg: col,
-		})
-	}
-}
-
 func CreatedAtNotEq(createdAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "created_at",
 			Op:  comparison.NotEq,
 			Arg: createdAt,
-		})
-	}
-}
-
-func CreatedAtNotEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "created_at",
-			Op:  comparison.NotEq,
-			Arg: col,
 		})
 	}
 }
@@ -1237,32 +797,12 @@ func CreatedAtGt(createdAt *time.Time) PredFunc {
 	}
 }
 
-func CreatedAtGtCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "created_at",
-			Op:  comparison.Gt,
-			Arg: col,
-		})
-	}
-}
-
 func CreatedAtGtOrEq(createdAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "created_at",
 			Op:  comparison.GtOrEq,
 			Arg: createdAt,
-		})
-	}
-}
-
-func CreatedAtGtOrEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "created_at",
-			Op:  comparison.GtOrEq,
-			Arg: col,
 		})
 	}
 }
@@ -1277,32 +817,12 @@ func CreatedAtLt(createdAt *time.Time) PredFunc {
 	}
 }
 
-func CreatedAtLtCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "created_at",
-			Op:  comparison.Lt,
-			Arg: col,
-		})
-	}
-}
-
 func CreatedAtLtOrEq(createdAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
 			Col: "created_at",
 			Op:  comparison.LtOrEq,
 			Arg: createdAt,
-		})
-	}
-}
-
-func CreatedAtLtOrEqCol(col Column) PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "created_at",
-			Op:  comparison.LtOrEq,
-			Arg: col,
 		})
 	}
 }

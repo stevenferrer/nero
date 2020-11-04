@@ -37,7 +37,7 @@ func (u *User) Schema() *nero.Schema {
 			nero.NewColumn("is_registered", u.IsRegistered),
 			nero.NewColumn("tags", u.Tags),
 			nero.NewColumn("empty", u.Empty),
-			nero.NewColumn("updated_at", u.UpdatedAt),
+			nero.NewColumn("updated_at", u.UpdatedAt).ColumnComparable(),
 			nero.NewColumn("created_at", u.CreatedAt).Auto(),
 		},
 	}

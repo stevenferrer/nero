@@ -27,7 +27,8 @@ type ColumnConfig struct {
 	StructField string
 	Auto,
 	Ident,
-	Nullable bool
+	Nullable,
+	ColumnComparable bool
 }
 
 // NewColumn creates a new column
@@ -61,6 +62,12 @@ func (c *Column) Ident() *Column {
 // Nullable is a nullable column
 func (c *Column) Nullable() *Column {
 	c.cfg.Nullable = true
+	return c
+}
+
+// ColumnComparable enables comparison with other column
+func (c *Column) ColumnComparable() *Column {
+	c.cfg.ColumnComparable = true
 	return c
 }
 
