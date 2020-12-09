@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"math/rand"
+	"os"
 	"testing"
 	"time"
 
@@ -26,13 +27,13 @@ func TestPostgreSQLRepository(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, db.Ping())
 	require.NoError(t, createTable(db))
-	repo := repository.NewPostgreSQLRepository(db)
+	repo := repository.NewPostgreSQLRepository(db).Debug(os.Stderr)
 	newRepoTestRunner(repo)(t)
 	require.NoError(t, dropTable(db))
 
 	// tx methods
 	require.NoError(t, createTable(db))
-	repo = repository.NewPostgreSQLRepository(db)
+	repo = repository.NewPostgreSQLRepository(db).Debug(os.Stderr)
 	newRepoTestRunnerTx(repo)(t)
 	require.NoError(t, dropTable(db))
 }
@@ -351,6 +352,7 @@ func newRepoTestRunner(repo repository.Repository) func(t *testing.T) {
 						Group(user.Outcast).
 						Tags(newTags).
 						UpdatedAt(&now).
+						Kv(example.Map{"abc": "def"}).
 						Where(preds...),
 				)
 				assert.NoError(t, err)

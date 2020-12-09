@@ -72,17 +72,20 @@ type PredFunc func(*comparison.Predicates)
 {{range $col := .Schema.Cols -}}
 	{{if $col.HasPreds -}}
 		{{range $op := $.Ops -}}
-			// {{$col.Field}}{{$op.String}} is a "{{$op.Desc}}" operator on "{{$col.Name}}" column
-			{{- if isNullOrNotOp $op }}
-				func {{$col.Field}}{{$op.String}} () PredFunc {
-					return func(pb *comparison.Predicates) {
-						pb.Add(&comparison.Predicate{
-							Col: "{{$col.Name}}",
-							Op: comparison.{{$op.String}},
-						})
+			{{if isNullOrNotOp $op }}
+				{{if $col.Nullable}}
+					// {{$col.Field}}{{$op.String}} is a "{{$op.Desc}}" operator on "{{$col.Name}}" column
+					func {{$col.Field}}{{$op.String}} () PredFunc {
+						return func(pb *comparison.Predicates) {
+							pb.Add(&comparison.Predicate{
+								Col: "{{$col.Name}}",
+								Op: comparison.{{$op.String}},
+							})
+						}
 					}
-				}
+				{{end}}
 			{{else if isInOrNotOp $op }}
+				// {{$col.Field}}{{$op.String}} is a "{{$op.Desc}}" operator on "{{$col.Name}}" column
 				func {{$col.Field}}{{$op.String}} ({{$col.IdentifierPlural}} {{printf "...%T" $col.Type.V}}) PredFunc {
 					args := []interface{}{}
 					for _, v := range {{$col.IdentifierPlural}} {
@@ -98,6 +101,7 @@ type PredFunc func(*comparison.Predicates)
 					}
 				}
 			{{else}}
+				// {{$col.Field}}{{$op.String}} is a "{{$op.Desc}}" operator on "{{$col.Name}}" column
 				func {{$col.Field}}{{$op.String}} ({{$col.Identifier}} {{printf "%T" $col.Type.V}}) PredFunc {
 					return func(pb *comparison.Predicates) {
 						pb.Add(&comparison.Predicate{
@@ -113,6 +117,7 @@ type PredFunc func(*comparison.Predicates)
 				}
 
 				{{if $col.ColumnComparable -}}
+					// {{$col.Field}}{{$op.String}} is a "{{$op.Desc}}" operator on "{{$col.Name}}" column
 					func {{$col.Field}}{{$op.String}}Col (col Column) PredFunc {
 						return func(pb *comparison.Predicates) {
 							pb.Add(&comparison.Predicate{

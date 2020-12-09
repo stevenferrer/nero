@@ -78,26 +78,6 @@ func IDLtOrEq(id string) PredFunc {
 	}
 }
 
-// IDIsNull is a "is null" operator on "id" column
-func IDIsNull() PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "id",
-			Op:  comparison.IsNull,
-		})
-	}
-}
-
-// IDIsNotNull is a "is not null" operator on "id" column
-func IDIsNotNull() PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "id",
-			Op:  comparison.IsNotNull,
-		})
-	}
-}
-
 // IDIn is a "in" operator on "id" column
 func IDIn(ids ...string) PredFunc {
 	args := []interface{}{}
@@ -192,26 +172,6 @@ func UIDLtOrEq(uid ksuid.KSUID) PredFunc {
 			Col: "uid",
 			Op:  comparison.LtOrEq,
 			Arg: uid,
-		})
-	}
-}
-
-// UIDIsNull is a "is null" operator on "uid" column
-func UIDIsNull() PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "uid",
-			Op:  comparison.IsNull,
-		})
-	}
-}
-
-// UIDIsNotNull is a "is not null" operator on "uid" column
-func UIDIsNotNull() PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "uid",
-			Op:  comparison.IsNotNull,
 		})
 	}
 }
@@ -314,26 +274,6 @@ func EmailLtOrEq(email string) PredFunc {
 	}
 }
 
-// EmailIsNull is a "is null" operator on "email" column
-func EmailIsNull() PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "email",
-			Op:  comparison.IsNull,
-		})
-	}
-}
-
-// EmailIsNotNull is a "is not null" operator on "email" column
-func EmailIsNotNull() PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "email",
-			Op:  comparison.IsNotNull,
-		})
-	}
-}
-
 // EmailIn is a "in" operator on "email" column
 func EmailIn(emails ...string) PredFunc {
 	args := []interface{}{}
@@ -428,26 +368,6 @@ func NameLtOrEq(name string) PredFunc {
 			Col: "name",
 			Op:  comparison.LtOrEq,
 			Arg: name,
-		})
-	}
-}
-
-// NameIsNull is a "is null" operator on "name" column
-func NameIsNull() PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "name",
-			Op:  comparison.IsNull,
-		})
-	}
-}
-
-// NameIsNotNull is a "is not null" operator on "name" column
-func NameIsNotNull() PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "name",
-			Op:  comparison.IsNotNull,
 		})
 	}
 }
@@ -550,26 +470,6 @@ func AgeLtOrEq(age int) PredFunc {
 	}
 }
 
-// AgeIsNull is a "is null" operator on "age" column
-func AgeIsNull() PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "age",
-			Op:  comparison.IsNull,
-		})
-	}
-}
-
-// AgeIsNotNull is a "is not null" operator on "age" column
-func AgeIsNotNull() PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "age",
-			Op:  comparison.IsNotNull,
-		})
-	}
-}
-
 // AgeIn is a "in" operator on "age" column
 func AgeIn(ages ...int) PredFunc {
 	args := []interface{}{}
@@ -664,26 +564,6 @@ func GroupLtOrEq(group user.Group) PredFunc {
 			Col: "group",
 			Op:  comparison.LtOrEq,
 			Arg: group,
-		})
-	}
-}
-
-// GroupIsNull is a "is null" operator on "group" column
-func GroupIsNull() PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "group",
-			Op:  comparison.IsNull,
-		})
-	}
-}
-
-// GroupIsNotNull is a "is not null" operator on "group" column
-func GroupIsNotNull() PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "group",
-			Op:  comparison.IsNotNull,
 		})
 	}
 }
@@ -900,26 +780,6 @@ func CreatedAtLtOrEq(createdAt *time.Time) PredFunc {
 			Col: "created_at",
 			Op:  comparison.LtOrEq,
 			Arg: createdAt,
-		})
-	}
-}
-
-// CreatedAtIsNull is a "is null" operator on "created_at" column
-func CreatedAtIsNull() PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "created_at",
-			Op:  comparison.IsNull,
-		})
-	}
-}
-
-// CreatedAtIsNotNull is a "is not null" operator on "created_at" column
-func CreatedAtIsNotNull() PredFunc {
-	return func(pb *comparison.Predicates) {
-		pb.Add(&comparison.Predicate{
-			Col: "created_at",
-			Op:  comparison.IsNotNull,
 		})
 	}
 }
