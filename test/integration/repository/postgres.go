@@ -5,14 +5,14 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"io"
+	"log"
+	"os"
 	"reflect"
 	"strings"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog"
 	"github.com/segmentio/ksuid"
 	"github.com/sf9v/nero"
 	"github.com/sf9v/nero/aggregate"
@@ -23,8 +23,9 @@ import (
 
 // PostgreSQLRepository implements the Repository interface
 type PostgreSQLRepository struct {
-	db  *sql.DB
-	log *zerolog.Logger
+	db     *sql.DB
+	logger nero.Logger
+	debug  bool
 }
 
 var _ Repository = (*PostgreSQLRepository)(nil)
@@ -37,12 +38,18 @@ func NewPostgreSQLRepository(db *sql.DB) *PostgreSQLRepository {
 }
 
 // Debug enables debug mode
-func (pg *PostgreSQLRepository) Debug(out io.Writer) *PostgreSQLRepository {
-	lg := zerolog.New(out).With().Timestamp().Logger()
+func (pg *PostgreSQLRepository) Debug() *PostgreSQLRepository {
 	return &PostgreSQLRepository{
-		db:  pg.db,
-		log: &lg,
+		db:     pg.db,
+		debug:  true,
+		logger: log.New(os.Stdout, "nero: ", 0),
 	}
+}
+
+// WithLogger overrides the default logger
+func (pg *PostgreSQLRepository) WithLogger(logger nero.Logger) *PostgreSQLRepository {
+	pg.logger = logger
+	return pg
 }
 
 // Tx creates begins a new transaction
@@ -115,10 +122,9 @@ func (pg *PostgreSQLRepository) create(ctx context.Context, runner nero.SQLRunne
 		Suffix("RETURNING \"id\"").
 		PlaceholderFormat(squirrel.Dollar).
 		RunWith(runner)
-	if log := pg.log; log != nil {
+	if pg.debug {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("method", "Create").Str("stmnt", sql).
-			Interface("args", args).Err(err).Msg("")
+		pg.logger.Printf("method: Create, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
 
 	var id string
@@ -176,10 +182,9 @@ func (pg *PostgreSQLRepository) createMany(ctx context.Context, runner nero.SQLR
 
 	qb = qb.Suffix("RETURNING \"id\"").
 		PlaceholderFormat(squirrel.Dollar)
-	if log := pg.log; log != nil {
+	if pg.debug {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("method", "CreateMany").Str("stmnt", sql).
-			Interface("args", args).Err(err).Msg("")
+		pg.logger.Printf("method: CreateMany, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
 
 	_, err := qb.RunWith(runner).ExecContext(ctx)
@@ -207,10 +212,9 @@ func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Quer
 
 func (pg *PostgreSQLRepository) query(ctx context.Context, runner nero.SQLRunner, q *Queryer) ([]*user.User, error) {
 	qb := pg.buildSelect(q)
-	if log := pg.log; log != nil {
+	if pg.debug {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("method", "Query").Str("stmnt", sql).
-			Interface("args", args).Err(err).Msg("")
+		pg.logger.Printf("method: Query, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
 
 	rows, err := qb.RunWith(runner).QueryContext(ctx)
@@ -261,10 +265,9 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 
 func (pg *PostgreSQLRepository) queryOne(ctx context.Context, runner nero.SQLRunner, q *Queryer) (*user.User, error) {
 	qb := pg.buildSelect(q)
-	if log := pg.log; log != nil {
+	if pg.debug {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("method", "QueryOne").Str("stmnt", sql).
-			Interface("args", args).Err(err).Msg("")
+		pg.logger.Printf("method: QueryOne, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
 
 	var user user.User
@@ -527,10 +530,9 @@ func (pg *PostgreSQLRepository) update(ctx context.Context, runner nero.SQLRunne
 		}
 	}
 
-	if log := pg.log; log != nil {
+	if pg.debug {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("method", "Update").Str("stmnt", sql).
-			Interface("args", args).Err(err).Msg("")
+		pg.logger.Printf("method: Update, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
 
 	res, err := qb.RunWith(runner).ExecContext(ctx)
@@ -637,10 +639,9 @@ func (pg *PostgreSQLRepository) delete(ctx context.Context, runner nero.SQLRunne
 		}
 	}
 
-	if log := pg.log; log != nil {
+	if pg.debug {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("method", "Delete").Str("stmnt", sql).
-			Interface("args", args).Err(err).Msg("")
+		pg.logger.Printf("method: Delete, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
 
 	res, err := qb.RunWith(runner).ExecContext(ctx)
@@ -792,10 +793,9 @@ func (pg *PostgreSQLRepository) aggregate(ctx context.Context, runner nero.SQLRu
 		}
 	}
 
-	if log := pg.log; log != nil {
+	if pg.debug {
 		sql, args, err := qb.ToSql()
-		log.Debug().Str("method", "Aggregate").Str("stmnt", sql).
-			Interface("args", args).Err(err).Msg("")
+		pg.logger.Printf("method: Aggregate, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
 
 	rows, err := qb.RunWith(runner).QueryContext(ctx)

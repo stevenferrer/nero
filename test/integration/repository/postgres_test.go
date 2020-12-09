@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"math/rand"
 	"os"
 	"testing"
@@ -27,13 +28,15 @@ func TestPostgreSQLRepository(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, db.Ping())
 	require.NoError(t, createTable(db))
-	repo := repository.NewPostgreSQLRepository(db).Debug(os.Stderr)
+
+	logger := log.New(os.Stderr, "nero test: ", 0)
+	repo := repository.NewPostgreSQLRepository(db).Debug().WithLogger(logger)
 	newRepoTestRunner(repo)(t)
 	require.NoError(t, dropTable(db))
 
 	// tx methods
 	require.NoError(t, createTable(db))
-	repo = repository.NewPostgreSQLRepository(db).Debug(os.Stderr)
+	repo = repository.NewPostgreSQLRepository(db).Debug().WithLogger(logger)
 	newRepoTestRunnerTx(repo)(t)
 	require.NoError(t, dropTable(db))
 }
