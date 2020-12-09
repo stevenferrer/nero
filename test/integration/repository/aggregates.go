@@ -5,8 +5,10 @@ import (
 	"github.com/sf9v/nero/aggregate"
 )
 
+// AggFunc is an aggregate function
 type AggFunc func(*aggregate.Aggregates)
 
+// Avg is a average aggregate function
 func Avg(col Column) AggFunc {
 	return func(a *aggregate.Aggregates) {
 		a.Add(&aggregate.Aggregate{
@@ -16,6 +18,7 @@ func Avg(col Column) AggFunc {
 	}
 }
 
+// Count is a count aggregate function
 func Count(col Column) AggFunc {
 	return func(a *aggregate.Aggregates) {
 		a.Add(&aggregate.Aggregate{
@@ -25,6 +28,7 @@ func Count(col Column) AggFunc {
 	}
 }
 
+// Max is a max aggregate function
 func Max(col Column) AggFunc {
 	return func(a *aggregate.Aggregates) {
 		a.Add(&aggregate.Aggregate{
@@ -34,6 +38,7 @@ func Max(col Column) AggFunc {
 	}
 }
 
+// Min is a min aggregate function
 func Min(col Column) AggFunc {
 	return func(a *aggregate.Aggregates) {
 		a.Add(&aggregate.Aggregate{
@@ -43,6 +48,7 @@ func Min(col Column) AggFunc {
 	}
 }
 
+// Sum is a sum aggregate function
 func Sum(col Column) AggFunc {
 	return func(a *aggregate.Aggregates) {
 		a.Add(&aggregate.Aggregate{
@@ -52,6 +58,7 @@ func Sum(col Column) AggFunc {
 	}
 }
 
+// None is a none aggregate function
 func None(col Column) AggFunc {
 	return func(a *aggregate.Aggregates) {
 		a.Add(&aggregate.Aggregate{

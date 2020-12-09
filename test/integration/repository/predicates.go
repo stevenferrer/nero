@@ -9,8 +9,10 @@ import (
 	"github.com/sf9v/nero/test/integration/user"
 )
 
+// PredFunc is a predicate function
 type PredFunc func(*comparison.Predicates)
 
+// IDEq is a "equal" operator on "id" column
 func IDEq(id string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -21,6 +23,7 @@ func IDEq(id string) PredFunc {
 	}
 }
 
+// IDNotEq is a "not equal" operator on "id" column
 func IDNotEq(id string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -31,6 +34,7 @@ func IDNotEq(id string) PredFunc {
 	}
 }
 
+// IDGt is a "greater than" operator on "id" column
 func IDGt(id string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -41,6 +45,7 @@ func IDGt(id string) PredFunc {
 	}
 }
 
+// IDGtOrEq is a "greater than or equal" operator on "id" column
 func IDGtOrEq(id string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -51,6 +56,7 @@ func IDGtOrEq(id string) PredFunc {
 	}
 }
 
+// IDLt is a "less than" operator on "id" column
 func IDLt(id string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -61,6 +67,7 @@ func IDLt(id string) PredFunc {
 	}
 }
 
+// IDLtOrEq is a "less than or equal" operator on "id" column
 func IDLtOrEq(id string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -71,6 +78,7 @@ func IDLtOrEq(id string) PredFunc {
 	}
 }
 
+// IDIsNull is a "is null" operator on "id" column
 func IDIsNull() PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -80,6 +88,7 @@ func IDIsNull() PredFunc {
 	}
 }
 
+// IDIsNotNull is a "is not null" operator on "id" column
 func IDIsNotNull() PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -89,6 +98,7 @@ func IDIsNotNull() PredFunc {
 	}
 }
 
+// IDIn is a "in" operator on "id" column
 func IDIn(ids ...string) PredFunc {
 	args := []interface{}{}
 	for _, v := range ids {
@@ -104,6 +114,7 @@ func IDIn(ids ...string) PredFunc {
 	}
 }
 
+// IDNotIn is a "not in" operator on "id" column
 func IDNotIn(ids ...string) PredFunc {
 	args := []interface{}{}
 	for _, v := range ids {
@@ -119,6 +130,7 @@ func IDNotIn(ids ...string) PredFunc {
 	}
 }
 
+// UIDEq is a "equal" operator on "uid" column
 func UIDEq(uid ksuid.KSUID) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -129,6 +141,7 @@ func UIDEq(uid ksuid.KSUID) PredFunc {
 	}
 }
 
+// UIDNotEq is a "not equal" operator on "uid" column
 func UIDNotEq(uid ksuid.KSUID) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -139,6 +152,7 @@ func UIDNotEq(uid ksuid.KSUID) PredFunc {
 	}
 }
 
+// UIDGt is a "greater than" operator on "uid" column
 func UIDGt(uid ksuid.KSUID) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -149,6 +163,7 @@ func UIDGt(uid ksuid.KSUID) PredFunc {
 	}
 }
 
+// UIDGtOrEq is a "greater than or equal" operator on "uid" column
 func UIDGtOrEq(uid ksuid.KSUID) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -159,6 +174,7 @@ func UIDGtOrEq(uid ksuid.KSUID) PredFunc {
 	}
 }
 
+// UIDLt is a "less than" operator on "uid" column
 func UIDLt(uid ksuid.KSUID) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -169,6 +185,7 @@ func UIDLt(uid ksuid.KSUID) PredFunc {
 	}
 }
 
+// UIDLtOrEq is a "less than or equal" operator on "uid" column
 func UIDLtOrEq(uid ksuid.KSUID) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -179,6 +196,7 @@ func UIDLtOrEq(uid ksuid.KSUID) PredFunc {
 	}
 }
 
+// UIDIsNull is a "is null" operator on "uid" column
 func UIDIsNull() PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -188,6 +206,7 @@ func UIDIsNull() PredFunc {
 	}
 }
 
+// UIDIsNotNull is a "is not null" operator on "uid" column
 func UIDIsNotNull() PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -197,6 +216,7 @@ func UIDIsNotNull() PredFunc {
 	}
 }
 
+// UIDIn is a "in" operator on "uid" column
 func UIDIn(uids ...ksuid.KSUID) PredFunc {
 	args := []interface{}{}
 	for _, v := range uids {
@@ -212,6 +232,7 @@ func UIDIn(uids ...ksuid.KSUID) PredFunc {
 	}
 }
 
+// UIDNotIn is a "not in" operator on "uid" column
 func UIDNotIn(uids ...ksuid.KSUID) PredFunc {
 	args := []interface{}{}
 	for _, v := range uids {
@@ -227,6 +248,7 @@ func UIDNotIn(uids ...ksuid.KSUID) PredFunc {
 	}
 }
 
+// EmailEq is a "equal" operator on "email" column
 func EmailEq(email string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -237,6 +259,7 @@ func EmailEq(email string) PredFunc {
 	}
 }
 
+// EmailNotEq is a "not equal" operator on "email" column
 func EmailNotEq(email string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -247,6 +270,7 @@ func EmailNotEq(email string) PredFunc {
 	}
 }
 
+// EmailGt is a "greater than" operator on "email" column
 func EmailGt(email string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -257,6 +281,7 @@ func EmailGt(email string) PredFunc {
 	}
 }
 
+// EmailGtOrEq is a "greater than or equal" operator on "email" column
 func EmailGtOrEq(email string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -267,6 +292,7 @@ func EmailGtOrEq(email string) PredFunc {
 	}
 }
 
+// EmailLt is a "less than" operator on "email" column
 func EmailLt(email string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -277,6 +303,7 @@ func EmailLt(email string) PredFunc {
 	}
 }
 
+// EmailLtOrEq is a "less than or equal" operator on "email" column
 func EmailLtOrEq(email string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -287,6 +314,7 @@ func EmailLtOrEq(email string) PredFunc {
 	}
 }
 
+// EmailIsNull is a "is null" operator on "email" column
 func EmailIsNull() PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -296,6 +324,7 @@ func EmailIsNull() PredFunc {
 	}
 }
 
+// EmailIsNotNull is a "is not null" operator on "email" column
 func EmailIsNotNull() PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -305,6 +334,7 @@ func EmailIsNotNull() PredFunc {
 	}
 }
 
+// EmailIn is a "in" operator on "email" column
 func EmailIn(emails ...string) PredFunc {
 	args := []interface{}{}
 	for _, v := range emails {
@@ -320,6 +350,7 @@ func EmailIn(emails ...string) PredFunc {
 	}
 }
 
+// EmailNotIn is a "not in" operator on "email" column
 func EmailNotIn(emails ...string) PredFunc {
 	args := []interface{}{}
 	for _, v := range emails {
@@ -335,6 +366,7 @@ func EmailNotIn(emails ...string) PredFunc {
 	}
 }
 
+// NameEq is a "equal" operator on "name" column
 func NameEq(name string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -345,6 +377,7 @@ func NameEq(name string) PredFunc {
 	}
 }
 
+// NameNotEq is a "not equal" operator on "name" column
 func NameNotEq(name string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -355,6 +388,7 @@ func NameNotEq(name string) PredFunc {
 	}
 }
 
+// NameGt is a "greater than" operator on "name" column
 func NameGt(name string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -365,6 +399,7 @@ func NameGt(name string) PredFunc {
 	}
 }
 
+// NameGtOrEq is a "greater than or equal" operator on "name" column
 func NameGtOrEq(name string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -375,6 +410,7 @@ func NameGtOrEq(name string) PredFunc {
 	}
 }
 
+// NameLt is a "less than" operator on "name" column
 func NameLt(name string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -385,6 +421,7 @@ func NameLt(name string) PredFunc {
 	}
 }
 
+// NameLtOrEq is a "less than or equal" operator on "name" column
 func NameLtOrEq(name string) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -395,6 +432,7 @@ func NameLtOrEq(name string) PredFunc {
 	}
 }
 
+// NameIsNull is a "is null" operator on "name" column
 func NameIsNull() PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -404,6 +442,7 @@ func NameIsNull() PredFunc {
 	}
 }
 
+// NameIsNotNull is a "is not null" operator on "name" column
 func NameIsNotNull() PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -413,6 +452,7 @@ func NameIsNotNull() PredFunc {
 	}
 }
 
+// NameIn is a "in" operator on "name" column
 func NameIn(names ...string) PredFunc {
 	args := []interface{}{}
 	for _, v := range names {
@@ -428,6 +468,7 @@ func NameIn(names ...string) PredFunc {
 	}
 }
 
+// NameNotIn is a "not in" operator on "name" column
 func NameNotIn(names ...string) PredFunc {
 	args := []interface{}{}
 	for _, v := range names {
@@ -443,6 +484,7 @@ func NameNotIn(names ...string) PredFunc {
 	}
 }
 
+// AgeEq is a "equal" operator on "age" column
 func AgeEq(age int) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -453,6 +495,7 @@ func AgeEq(age int) PredFunc {
 	}
 }
 
+// AgeNotEq is a "not equal" operator on "age" column
 func AgeNotEq(age int) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -463,6 +506,7 @@ func AgeNotEq(age int) PredFunc {
 	}
 }
 
+// AgeGt is a "greater than" operator on "age" column
 func AgeGt(age int) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -473,6 +517,7 @@ func AgeGt(age int) PredFunc {
 	}
 }
 
+// AgeGtOrEq is a "greater than or equal" operator on "age" column
 func AgeGtOrEq(age int) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -483,6 +528,7 @@ func AgeGtOrEq(age int) PredFunc {
 	}
 }
 
+// AgeLt is a "less than" operator on "age" column
 func AgeLt(age int) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -493,6 +539,7 @@ func AgeLt(age int) PredFunc {
 	}
 }
 
+// AgeLtOrEq is a "less than or equal" operator on "age" column
 func AgeLtOrEq(age int) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -503,6 +550,7 @@ func AgeLtOrEq(age int) PredFunc {
 	}
 }
 
+// AgeIsNull is a "is null" operator on "age" column
 func AgeIsNull() PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -512,6 +560,7 @@ func AgeIsNull() PredFunc {
 	}
 }
 
+// AgeIsNotNull is a "is not null" operator on "age" column
 func AgeIsNotNull() PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -521,6 +570,7 @@ func AgeIsNotNull() PredFunc {
 	}
 }
 
+// AgeIn is a "in" operator on "age" column
 func AgeIn(ages ...int) PredFunc {
 	args := []interface{}{}
 	for _, v := range ages {
@@ -536,6 +586,7 @@ func AgeIn(ages ...int) PredFunc {
 	}
 }
 
+// AgeNotIn is a "not in" operator on "age" column
 func AgeNotIn(ages ...int) PredFunc {
 	args := []interface{}{}
 	for _, v := range ages {
@@ -551,6 +602,7 @@ func AgeNotIn(ages ...int) PredFunc {
 	}
 }
 
+// GroupEq is a "equal" operator on "group" column
 func GroupEq(group user.Group) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -561,6 +613,7 @@ func GroupEq(group user.Group) PredFunc {
 	}
 }
 
+// GroupNotEq is a "not equal" operator on "group" column
 func GroupNotEq(group user.Group) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -571,6 +624,7 @@ func GroupNotEq(group user.Group) PredFunc {
 	}
 }
 
+// GroupGt is a "greater than" operator on "group" column
 func GroupGt(group user.Group) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -581,6 +635,7 @@ func GroupGt(group user.Group) PredFunc {
 	}
 }
 
+// GroupGtOrEq is a "greater than or equal" operator on "group" column
 func GroupGtOrEq(group user.Group) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -591,6 +646,7 @@ func GroupGtOrEq(group user.Group) PredFunc {
 	}
 }
 
+// GroupLt is a "less than" operator on "group" column
 func GroupLt(group user.Group) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -601,6 +657,7 @@ func GroupLt(group user.Group) PredFunc {
 	}
 }
 
+// GroupLtOrEq is a "less than or equal" operator on "group" column
 func GroupLtOrEq(group user.Group) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -611,6 +668,7 @@ func GroupLtOrEq(group user.Group) PredFunc {
 	}
 }
 
+// GroupIsNull is a "is null" operator on "group" column
 func GroupIsNull() PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -620,6 +678,7 @@ func GroupIsNull() PredFunc {
 	}
 }
 
+// GroupIsNotNull is a "is not null" operator on "group" column
 func GroupIsNotNull() PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -629,6 +688,7 @@ func GroupIsNotNull() PredFunc {
 	}
 }
 
+// GroupIn is a "in" operator on "group" column
 func GroupIn(groups ...user.Group) PredFunc {
 	args := []interface{}{}
 	for _, v := range groups {
@@ -644,6 +704,7 @@ func GroupIn(groups ...user.Group) PredFunc {
 	}
 }
 
+// GroupNotIn is a "not in" operator on "group" column
 func GroupNotIn(groups ...user.Group) PredFunc {
 	args := []interface{}{}
 	for _, v := range groups {
@@ -659,6 +720,7 @@ func GroupNotIn(groups ...user.Group) PredFunc {
 	}
 }
 
+// UpdatedAtEq is a "equal" operator on "updated_at" column
 func UpdatedAtEq(updatedAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -669,6 +731,7 @@ func UpdatedAtEq(updatedAt *time.Time) PredFunc {
 	}
 }
 
+// UpdatedAtNotEq is a "not equal" operator on "updated_at" column
 func UpdatedAtNotEq(updatedAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -679,6 +742,7 @@ func UpdatedAtNotEq(updatedAt *time.Time) PredFunc {
 	}
 }
 
+// UpdatedAtGt is a "greater than" operator on "updated_at" column
 func UpdatedAtGt(updatedAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -689,6 +753,7 @@ func UpdatedAtGt(updatedAt *time.Time) PredFunc {
 	}
 }
 
+// UpdatedAtGtOrEq is a "greater than or equal" operator on "updated_at" column
 func UpdatedAtGtOrEq(updatedAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -699,6 +764,7 @@ func UpdatedAtGtOrEq(updatedAt *time.Time) PredFunc {
 	}
 }
 
+// UpdatedAtLt is a "less than" operator on "updated_at" column
 func UpdatedAtLt(updatedAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -709,6 +775,7 @@ func UpdatedAtLt(updatedAt *time.Time) PredFunc {
 	}
 }
 
+// UpdatedAtLtOrEq is a "less than or equal" operator on "updated_at" column
 func UpdatedAtLtOrEq(updatedAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -719,6 +786,7 @@ func UpdatedAtLtOrEq(updatedAt *time.Time) PredFunc {
 	}
 }
 
+// UpdatedAtIsNull is a "is null" operator on "updated_at" column
 func UpdatedAtIsNull() PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -728,6 +796,7 @@ func UpdatedAtIsNull() PredFunc {
 	}
 }
 
+// UpdatedAtIsNotNull is a "is not null" operator on "updated_at" column
 func UpdatedAtIsNotNull() PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -737,6 +806,7 @@ func UpdatedAtIsNotNull() PredFunc {
 	}
 }
 
+// UpdatedAtIn is a "in" operator on "updated_at" column
 func UpdatedAtIn(updatedAts ...*time.Time) PredFunc {
 	args := []interface{}{}
 	for _, v := range updatedAts {
@@ -752,6 +822,7 @@ func UpdatedAtIn(updatedAts ...*time.Time) PredFunc {
 	}
 }
 
+// UpdatedAtNotIn is a "not in" operator on "updated_at" column
 func UpdatedAtNotIn(updatedAts ...*time.Time) PredFunc {
 	args := []interface{}{}
 	for _, v := range updatedAts {
@@ -767,6 +838,7 @@ func UpdatedAtNotIn(updatedAts ...*time.Time) PredFunc {
 	}
 }
 
+// CreatedAtEq is a "equal" operator on "created_at" column
 func CreatedAtEq(createdAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -777,6 +849,7 @@ func CreatedAtEq(createdAt *time.Time) PredFunc {
 	}
 }
 
+// CreatedAtNotEq is a "not equal" operator on "created_at" column
 func CreatedAtNotEq(createdAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -787,6 +860,7 @@ func CreatedAtNotEq(createdAt *time.Time) PredFunc {
 	}
 }
 
+// CreatedAtGt is a "greater than" operator on "created_at" column
 func CreatedAtGt(createdAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -797,6 +871,7 @@ func CreatedAtGt(createdAt *time.Time) PredFunc {
 	}
 }
 
+// CreatedAtGtOrEq is a "greater than or equal" operator on "created_at" column
 func CreatedAtGtOrEq(createdAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -807,6 +882,7 @@ func CreatedAtGtOrEq(createdAt *time.Time) PredFunc {
 	}
 }
 
+// CreatedAtLt is a "less than" operator on "created_at" column
 func CreatedAtLt(createdAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -817,6 +893,7 @@ func CreatedAtLt(createdAt *time.Time) PredFunc {
 	}
 }
 
+// CreatedAtLtOrEq is a "less than or equal" operator on "created_at" column
 func CreatedAtLtOrEq(createdAt *time.Time) PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -827,6 +904,7 @@ func CreatedAtLtOrEq(createdAt *time.Time) PredFunc {
 	}
 }
 
+// CreatedAtIsNull is a "is null" operator on "created_at" column
 func CreatedAtIsNull() PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -836,6 +914,7 @@ func CreatedAtIsNull() PredFunc {
 	}
 }
 
+// CreatedAtIsNotNull is a "is not null" operator on "created_at" column
 func CreatedAtIsNotNull() PredFunc {
 	return func(pb *comparison.Predicates) {
 		pb.Add(&comparison.Predicate{
@@ -845,6 +924,7 @@ func CreatedAtIsNotNull() PredFunc {
 	}
 }
 
+// CreatedAtIn is a "in" operator on "created_at" column
 func CreatedAtIn(createdAts ...*time.Time) PredFunc {
 	args := []interface{}{}
 	for _, v := range createdAts {
@@ -860,6 +940,7 @@ func CreatedAtIn(createdAts ...*time.Time) PredFunc {
 	}
 }
 
+// CreatedAtNotIn is a "not in" operator on "created_at" column
 func CreatedAtNotIn(createdAts ...*time.Time) PredFunc {
 	args := []interface{}{}
 	for _, v := range createdAts {

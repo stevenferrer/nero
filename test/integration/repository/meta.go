@@ -32,7 +32,7 @@ func (c Column) String() string {
 		return "created_at"
 	}
 
-	return "invalid"
+	return ""
 }
 
 const (

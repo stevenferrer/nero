@@ -5,8 +5,10 @@ import (
 	"github.com/sf9v/nero/sort"
 )
 
+// SortFunc is a sort function
 type SortFunc func(*sort.Sorts)
 
+// Asc sorts in ascending order
 func Asc(col Column) SortFunc {
 	return func(s *sort.Sorts) {
 		s.Add(&sort.Sort{
@@ -16,6 +18,7 @@ func Asc(col Column) SortFunc {
 	}
 }
 
+// Desc sorts in descending order
 func Desc(col Column) SortFunc {
 	return func(s *sort.Sorts) {
 		s.Add(&sort.Sort{

@@ -4,23 +4,21 @@
 
 # Nero
 
-An experimental repository generator for Go.
+A repository generator for Go.
 
 ## Motivation
 
 Throughout our codebase, we heavily use the *[repository pattern](https://martinfowler.com/eaaCatalog/repository.html)* and we often [write our queries manually](https://golang.org/pkg/database/sql/#example_DB_QueryContext). It becomes tedious when you have more and more tables to maintain. One small change and you end-up changing a lot of things. So, we decided to experiment on creating this project to automatically generate our *[data-access layer](https://en.wikipedia.org/wiki/Data_access_layer)* code.
 
-## Inspiration
+## Inspired by
 
-Before we thought of this project, we tried many different ORMs and found [ent](https://entgo.io/). *Ent* is an ORM that uses *code generation* to make fluent and convenient data-access API. It is so convinient that we started using it on some parts of our system. 
-
-However, due to our heavy use of *repository pattern*, it is still very difficult to for us to migrate all of our code. That's when we started to ponder about the idea of generating our data access layer code.
+* [*ent*](https://entgo.io) - An entity framework for Go. Simple, yet powerful ORM for modeling and querying data.
 
 ## Goals
 
 - Decouple database specific logic by using `Repository` interface 
-- Integrate with existing codebase
-- Minimal API
+- Easy integration with existing codebase
+- Minimal and easy to use API
 
 ## Assumption
 

@@ -10,5 +10,5 @@ import (
 
 func TestColumnStringer(t *testing.T) {
 	c := repository.Column(99)
-	assert.Equal(t, "invalid", c.String())
+	assert.Equal(t, "", c.String())
 }

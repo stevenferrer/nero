@@ -44,9 +44,11 @@ import (
 	"github.com/sf9v/nero/aggregate"
 )
 
+// AggFunc is an aggregate function
 type AggFunc func(*aggregate.Aggregates)
 
 {{range $fn := .Functions}}
+// {{$fn.String}} is a {{$fn.Desc}} aggregate function
 func {{$fn.String}}(col Column) AggFunc {
 	return func(a *aggregate.Aggregates) {
 		a.Add(&aggregate.Aggregate{

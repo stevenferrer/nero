@@ -41,9 +41,11 @@ import (
 	"github.com/sf9v/nero/sort"
 )
 
+// SortFunc is a sort function
 type SortFunc func(*sort.Sorts)
 
 {{range $direction := .Directions}}
+// {{$direction.String}} sorts in {{$direction.Desc}} order
 func {{$direction.String}}(col Column) SortFunc {
 	return func(s *sort.Sorts) {
 		s.Add(&sort.Sort{

@@ -42,7 +42,7 @@ func (c Column) String() string {
     {{end -}}
 	}
 
-	return "invalid"
+	return ""
 }
 
 const (

@@ -11,7 +11,19 @@ func (d Direction) String() string {
 		return "Desc"
 	}
 
-	return "Invalid"
+	return ""
+}
+
+// Desc is a sort description
+func (d Direction) Desc() string {
+	switch d {
+	case Asc:
+		return "ascending"
+	case Desc:
+		return "descending"
+	}
+
+	return ""
 }
 
 const (

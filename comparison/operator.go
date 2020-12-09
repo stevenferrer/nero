@@ -30,31 +30,32 @@ func (op Operator) String() string {
 	return "Invalid"
 }
 
-func (op Operator) Description() string {
+// Desc is a predicate operator description
+func (op Operator) Desc() string {
 	switch op {
 	case Eq:
-		return "Equal"
+		return "equal"
 	case NotEq:
-		return "Not equal"
+		return "not equal"
 	case Gt:
-		return "Greater than"
+		return "greater than"
 	case GtOrEq:
-		return "Greater than or equal"
+		return "greater than or equal"
 	case Lt:
-		return "Less than"
+		return "less than"
 	case LtOrEq:
-		return "Less than or equal"
+		return "less than or equal"
 	case IsNull:
-		return "Is null"
+		return "is null"
 	case IsNotNull:
-		return "Is not null"
+		return "is not null"
 	case In:
-		return "In"
+		return "in"
 	case NotIn:
-		return "NotIn"
+		return "not in"
 	}
 
-	return "Invalid"
+	return ""
 }
 
 // List of comparison operators

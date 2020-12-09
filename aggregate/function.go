@@ -22,21 +22,21 @@ func (f Function) String() string {
 	return "Invalid"
 }
 
-func (f Function) Description() string {
+// Desc is a aggregate function description
+func (f Function) Desc() string {
 	switch f {
 	case Avg:
-		return "Avg is the average aggregate function"
+		return "average"
 	case Count:
-		return "Count is the count aggregate function"
+		return "count"
 	case Max:
-		return "Max is the max aggregate function"
+		return "max"
 	case Min:
-		return "Min is the min aggregate function"
+		return "min"
 	case Sum:
-		return "Sum is the sum aggregate function"
+		return "sum"
 	case None:
-		return `None is not an aggregate function and is only 
-used when you want to include a column in the result`
+		return `none`
 	}
 
 	return ""

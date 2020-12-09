@@ -21,6 +21,7 @@ import (
 	"github.com/sf9v/nero/test/integration/user"
 )
 
+// PostgreSQLRepository implements the Repository interface
 type PostgreSQLRepository struct {
 	db  *sql.DB
 	log *zerolog.Logger
@@ -28,12 +29,14 @@ type PostgreSQLRepository struct {
 
 var _ Repository = (*PostgreSQLRepository)(nil)
 
+// NewPostgreSQLRepository is a factory for PostgreSQLRepository
 func NewPostgreSQLRepository(db *sql.DB) *PostgreSQLRepository {
 	return &PostgreSQLRepository{
 		db: db,
 	}
 }
 
+// Debug enables debug mode
 func (pg *PostgreSQLRepository) Debug(out io.Writer) *PostgreSQLRepository {
 	lg := zerolog.New(out).With().Timestamp().Logger()
 	return &PostgreSQLRepository{
@@ -42,14 +45,17 @@ func (pg *PostgreSQLRepository) Debug(out io.Writer) *PostgreSQLRepository {
 	}
 }
 
+// Tx creates begins a new transaction
 func (pg *PostgreSQLRepository) Tx(ctx context.Context) (nero.Tx, error) {
 	return pg.db.BeginTx(ctx, nil)
 }
 
+// Create creates a new User
 func (pg *PostgreSQLRepository) Create(ctx context.Context, c *Creator) (string, error) {
 	return pg.create(ctx, pg.db, c)
 }
 
+// CreateTx creates a new User inside a transaction
 func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (string, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
@@ -124,10 +130,12 @@ func (pg *PostgreSQLRepository) create(ctx context.Context, runner nero.SQLRunne
 	return id, nil
 }
 
+// CreateMany creates many User
 func (pg *PostgreSQLRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
 	return pg.createMany(ctx, pg.db, cs...)
 }
 
+// CreateManyTx creates many User inside a transaction
 func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
@@ -182,10 +190,12 @@ func (pg *PostgreSQLRepository) createMany(ctx context.Context, runner nero.SQLR
 	return nil
 }
 
+// Query queries many User
 func (pg *PostgreSQLRepository) Query(ctx context.Context, q *Queryer) ([]*user.User, error) {
 	return pg.query(ctx, pg.db, q)
 }
 
+// QueryTx queries many User inside a transaction
 func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*user.User, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
@@ -234,10 +244,12 @@ func (pg *PostgreSQLRepository) query(ctx context.Context, runner nero.SQLRunner
 	return users, nil
 }
 
+// QueryOne queries one User
 func (pg *PostgreSQLRepository) QueryOne(ctx context.Context, q *Queryer) (*user.User, error) {
 	return pg.queryOne(ctx, pg.db, q)
 }
 
+// QueryOneTx queries one User inside a transaction
 func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*user.User, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
@@ -392,10 +404,12 @@ func (pg *PostgreSQLRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	return qb
 }
 
+// Update updates User
 func (pg *PostgreSQLRepository) Update(ctx context.Context, u *Updater) (int64, error) {
 	return pg.update(ctx, pg.db, u)
 }
 
+// UpdateTx updates User inside a transaction
 func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
@@ -532,10 +546,12 @@ func (pg *PostgreSQLRepository) update(ctx context.Context, runner nero.SQLRunne
 	return rowsAffected, nil
 }
 
+// Delete deletes User
 func (pg *PostgreSQLRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
 	return pg.delete(ctx, pg.db, d)
 }
 
+// Delete deletes User inside a transaction
 func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
@@ -640,10 +656,12 @@ func (pg *PostgreSQLRepository) delete(ctx context.Context, runner nero.SQLRunne
 	return rowsAffected, nil
 }
 
+// Aggregate runs aggregate operations
 func (pg *PostgreSQLRepository) Aggregate(ctx context.Context, a *Aggregator) error {
 	return pg.aggregate(ctx, pg.db, a)
 }
 
+// Aggregate runs aggregate operations inside a transaction
 func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {

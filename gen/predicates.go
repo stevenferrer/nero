@@ -66,12 +66,14 @@ import (
 	{{end -}}
 )
 
+// PredFunc is a predicate function
 type PredFunc func(*comparison.Predicates) 
 
 {{range $col := .Schema.Cols -}}
 	{{if $col.HasPreds -}}
 		{{range $op := $.Ops -}}
-			{{if isNullOrNotOp $op }}
+			// {{$col.Field}}{{$op.String}} is a "{{$op.Desc}}" operator on "{{$col.Name}}" column
+			{{- if isNullOrNotOp $op }}
 				func {{$col.Field}}{{$op.String}} () PredFunc {
 					return func(pb *comparison.Predicates) {
 						pb.Add(&comparison.Predicate{
