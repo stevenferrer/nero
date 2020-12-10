@@ -1,81 +1,33 @@
-package gen
+package template
 
-import (
-	"bytes"
-	"fmt"
-	"reflect"
-	"text/template"
-
-	"github.com/jinzhu/inflection"
-
-	"github.com/sf9v/mira"
-	gen "github.com/sf9v/nero/gen/internal"
-	stringsx "github.com/sf9v/nero/x/strings"
-)
-
-func newPostgresFile(schema *gen.Schema) (*bytes.Buffer, error) {
-	tmpl, err := template.New("postgres.tmpl").
-		Funcs(template.FuncMap{
-			"type": func(v interface{}) string {
-				t := reflect.TypeOf(v)
-				if t.Kind() != reflect.Ptr {
-					return fmt.Sprintf("%T", v)
-				}
-
-				ev := reflect.New(resolveType(t)).Elem().Interface()
-				return fmt.Sprintf("%T", ev)
-			},
-			"zero": func(v interface{}) string {
-				mt := mira.NewType(v)
-
-				if mt.IsNillable() {
-					return "nil"
-				}
-
-				if mt.Kind() == mira.Numeric {
-					return "0"
-				}
-
-				switch mt.T().Kind() {
-				case reflect.Bool:
-					return "false"
-				case reflect.Struct:
-					return fmt.Sprintf("(%T{})", v)
-				case reflect.Array:
-					if len(mt.Name()) == 0 {
-						ev := reflect.New(mt.T().Elem()).Elem().Interface()
-						return fmt.Sprintf("[%d]%T{}", mt.T().Len(), ev)
-					}
-
-					return fmt.Sprintf("(%T{})", v)
-				}
-
-				return "\"\""
-
-			},
-			"plural": func(s string) string {
-				return inflection.Plural(s)
-			},
-			"lowerCamel": func(s string) string {
-				return stringsx.ToLowerCamel(s)
-			},
-		}).
-		Parse(postgresTmpl)
-	if err != nil {
-		return nil, err
+// NewPostgresTemplate returns a new PostgresTemplate
+func NewPostgresTemplate() *PostgresTemplate {
+	return &PostgresTemplate{
+		filename: "postgres.go",
+		content:  postgresTmpl,
 	}
-
-	buf := new(bytes.Buffer)
-	err = tmpl.Execute(buf, schema)
-	return buf, err
 }
 
-func resolveType(t reflect.Type) reflect.Type {
-	switch t.Kind() {
-	case reflect.Ptr:
-		return resolveType(t.Elem())
-	}
+// PostgresTemplate is the template for generating a postgres repository
+type PostgresTemplate struct {
+	filename string
+	content  string
+}
+
+// WithFilename overrides the default filename
+func (t *PostgresTemplate) WithFilename(filename string) *PostgresTemplate {
+	t.filename = filename
 	return t
+}
+
+// Filename returns the filename
+func (t *PostgresTemplate) Filename() string {
+	return t.filename
+}
+
+// Content returns the template content
+func (t *PostgresTemplate) Content() string {
+	return t.content
 }
 
 const postgresTmpl = `
@@ -106,25 +58,25 @@ import (
 	{{end -}}
 )
 
-// PostgreSQLRepository implements the Repository interface
-type PostgreSQLRepository struct {
+// PostgresRepository implements the Repository interface
+type PostgresRepository struct {
 	db  *sql.DB
 	logger nero.Logger
 	debug bool
 }
 
-var _ Repository = (*PostgreSQLRepository)(nil)
+var _ Repository = (*PostgresRepository)(nil)
 
-// NewPostgreSQLRepository is a factory for PostgreSQLRepository
-func NewPostgreSQLRepository(db *sql.DB) *PostgreSQLRepository {
-	return &PostgreSQLRepository{
+// NewPostgresRepository is a factory for PostgresRepository
+func NewPostgresRepository(db *sql.DB) *PostgresRepository {
+	return &PostgresRepository{
 		db: db,
 	}
 }
 
 // Debug enables debug mode
-func (pg *PostgreSQLRepository) Debug() *PostgreSQLRepository {	
-	return &PostgreSQLRepository{
+func (pg *PostgresRepository) Debug() *PostgresRepository {	
+	return &PostgresRepository{
 		db:  pg.db,	
 		debug: true,
 		logger: log.New(os.Stdout, "nero: ", 0),
@@ -132,23 +84,23 @@ func (pg *PostgreSQLRepository) Debug() *PostgreSQLRepository {
 }
 
 // WithLogger overrides the default logger
-func (pg *PostgreSQLRepository) WithLogger(logger nero.Logger) *PostgreSQLRepository {	
+func (pg *PostgresRepository) WithLogger(logger nero.Logger) *PostgresRepository {	
 	pg.logger = logger
 	return pg
 }
 
 // Tx creates begins a new transaction
-func (pg *PostgreSQLRepository) Tx(ctx context.Context) (nero.Tx, error) {
+func (pg *PostgresRepository) Tx(ctx context.Context) (nero.Tx, error) {
 	return pg.db.BeginTx(ctx, nil)
 }
 
 // Create creates a new {{.Type.Name}}
-func (pg *PostgreSQLRepository) Create(ctx context.Context, c *Creator) ({{type .Ident.Type.V}}, error) {
+func (pg *PostgresRepository) Create(ctx context.Context, c *Creator) ({{type .Ident.Type.V}}, error) {
 	return pg.create(ctx, pg.db, c)
 }
 
 // CreateTx creates a new {{.Type.Name}} inside a transaction
-func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) ({{type .Ident.Type.V}}, error) {
+func (pg *PostgresRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) ({{type .Ident.Type.V}}, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return {{zero .Ident.Type.V}}, errors.New("expecting tx to be *sql.Tx")
@@ -157,7 +109,7 @@ func (pg *PostgreSQLRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 	return pg.create(ctx, txx, c)
 }
 
-func (pg *PostgreSQLRepository) create(ctx context.Context, runner nero.SQLRunner, c *Creator) ({{type .Ident.Type.V}}, error) {
+func (pg *PostgresRepository) create(ctx context.Context, runner nero.SQLRunner, c *Creator) ({{type .Ident.Type.V}}, error) {
 	columns := []string{}
 	values := []interface{}{}
 	{{range $col := .Cols }}
@@ -194,12 +146,12 @@ func (pg *PostgreSQLRepository) create(ctx context.Context, runner nero.SQLRunne
 }
 
 // CreateMany creates many {{.Type.Name}}
-func (pg *PostgreSQLRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
+func (pg *PostgresRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
 	return pg.createMany(ctx, pg.db, cs...)
 }
 
 // CreateManyTx creates many {{.Type.Name}} inside a transaction
-func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
+func (pg *PostgresRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return errors.New("expecting tx to be *sql.Tx")
@@ -208,7 +160,7 @@ func (pg *PostgreSQLRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs
 	return pg.createMany(ctx, txx, cs...)
 }
 
-func (pg *PostgreSQLRepository) createMany(ctx context.Context, runner nero.SQLRunner, cs ...*Creator) error {
+func (pg *PostgresRepository) createMany(ctx context.Context, runner nero.SQLRunner, cs ...*Creator) error {
 	if len(cs) == 0 {
 		return nil
 	}
@@ -251,12 +203,12 @@ func (pg *PostgreSQLRepository) createMany(ctx context.Context, runner nero.SQLR
 }
 
 // Query queries many {{.Type.Name}}
-func (pg *PostgreSQLRepository) Query(ctx context.Context, q *Queryer) ([]*{{type .Type.V}}, error) {
+func (pg *PostgresRepository) Query(ctx context.Context, q *Queryer) ([]*{{type .Type.V}}, error) {
 	return pg.query(ctx, pg.db, q)
 }
 
 // QueryTx queries many {{.Type.Name}} inside a transaction
-func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*{{type .Type.V}}, error) {
+func (pg *PostgresRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*{{type .Type.V}}, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
@@ -265,7 +217,7 @@ func (pg *PostgreSQLRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Quer
 	return pg.query(ctx, txx, q)
 }
 
-func (pg *PostgreSQLRepository) query(ctx context.Context, runner nero.SQLRunner, q *Queryer) ([]*{{type .Type.V}}, error) {
+func (pg *PostgresRepository) query(ctx context.Context, runner nero.SQLRunner, q *Queryer) ([]*{{type .Type.V}}, error) {
 	qb := pg.buildSelect(q)	
 	if pg.debug {
 		sql, args, err := qb.ToSql()
@@ -301,12 +253,12 @@ func (pg *PostgreSQLRepository) query(ctx context.Context, runner nero.SQLRunner
 }
 
 // QueryOne queries one {{.Type.Name}}
-func (pg *PostgreSQLRepository) QueryOne(ctx context.Context, q *Queryer) (*{{type .Type.V}}, error) {
+func (pg *PostgresRepository) QueryOne(ctx context.Context, q *Queryer) (*{{type .Type.V}}, error) {
 	return pg.queryOne(ctx, pg.db, q)
 }
 
 // QueryOneTx queries one {{.Type.Name}} inside a transaction
-func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*{{type .Type.V}}, error) {
+func (pg *PostgresRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*{{type .Type.V}}, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
@@ -315,7 +267,7 @@ func (pg *PostgreSQLRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 	return pg.queryOne(ctx, txx, q)
 }
 
-func (pg *PostgreSQLRepository) queryOne(ctx context.Context, runner nero.SQLRunner, q *Queryer) (*{{type .Type.V}}, error) {
+func (pg *PostgresRepository) queryOne(ctx context.Context, runner nero.SQLRunner, q *Queryer) (*{{type .Type.V}}, error) {
 	qb := pg.buildSelect(q)
 	if pg.debug {
 		sql, args, err := qb.ToSql()
@@ -341,7 +293,7 @@ func (pg *PostgreSQLRepository) queryOne(ctx context.Context, runner nero.SQLRun
 	return &{{lowerCamel .Type.Name}}, nil
 }
 
-func (pg *PostgreSQLRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
+func (pg *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	columns := []string{
 		{{range $col := .Cols -}}
 			"\"{{$col.Name}}\"",
@@ -385,12 +337,12 @@ func (pg *PostgreSQLRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 }
 
 // Update updates {{.Type.Name}}
-func (pg *PostgreSQLRepository) Update(ctx context.Context, u *Updater) (int64, error) {
+func (pg *PostgresRepository) Update(ctx context.Context, u *Updater) (int64, error) {
 	return pg.update(ctx, pg.db, u)
 }
 
 // UpdateTx updates {{.Type.Name}} inside a transaction
-func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
+func (pg *PostgresRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
@@ -399,7 +351,7 @@ func (pg *PostgreSQLRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 	return pg.update(ctx, txx, u)
 }
 
-func (pg *PostgreSQLRepository) update(ctx context.Context, runner nero.SQLRunner, u *Updater) (int64, error) {
+func (pg *PostgresRepository) update(ctx context.Context, runner nero.SQLRunner, u *Updater) (int64, error) {
 	qb := squirrel.Update("\"{{.Collection}}\"").
 		PlaceholderFormat(squirrel.Dollar)	
 	{{range $col := .Cols}}
@@ -440,12 +392,12 @@ func (pg *PostgreSQLRepository) update(ctx context.Context, runner nero.SQLRunne
 }
 
 // Delete deletes {{.Type.Name}}
-func (pg *PostgreSQLRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
+func (pg *PostgresRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
 	return pg.delete(ctx, pg.db, d)
 }
 
 // Delete deletes {{.Type.Name}} inside a transaction
-func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
+func (pg *PostgresRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
@@ -454,7 +406,7 @@ func (pg *PostgreSQLRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Del
 	return pg.delete(ctx, txx, d)
 }
 
-func (pg *PostgreSQLRepository) delete(ctx context.Context, runner nero.SQLRunner, d *Deleter) (int64, error) {
+func (pg *PostgresRepository) delete(ctx context.Context, runner nero.SQLRunner, d *Deleter) (int64, error) {
 	qb := squirrel.Delete("\"{{.Collection}}\"").
 		PlaceholderFormat(squirrel.Dollar)
 
@@ -484,12 +436,12 @@ func (pg *PostgreSQLRepository) delete(ctx context.Context, runner nero.SQLRunne
 }
 
 // Aggregate runs aggregate operations
-func (pg *PostgreSQLRepository) Aggregate(ctx context.Context, a *Aggregator) error {
+func (pg *PostgresRepository) Aggregate(ctx context.Context, a *Aggregator) error {
 	return pg.aggregate(ctx, pg.db, a)
 }
 
 // Aggregate runs aggregate operations inside a transaction
-func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
+func (pg *PostgresRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return errors.New("expecting tx to be *sql.Tx")
@@ -498,7 +450,7 @@ func (pg *PostgreSQLRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 	return pg.aggregate(ctx, txx, a)
 }
 
-func (pg *PostgreSQLRepository) aggregate(ctx context.Context, runner nero.SQLRunner, a *Aggregator) error {
+func (pg *PostgresRepository) aggregate(ctx context.Context, runner nero.SQLRunner, a *Aggregator) error {
 	aggs := &aggregate.Aggregates{}
 	for _, aggf := range a.aggfs {
 		aggf(aggs)

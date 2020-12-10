@@ -13,6 +13,8 @@ type Schema struct {
 	Collection string
 	// Columns is the list of columns
 	Columns []*Column
+	// Templates is the list of custom repository templates
+	Templates []Templater
 }
 
 // Column is a column
@@ -20,14 +22,22 @@ type Column struct {
 	cfg *ColumnConfig
 }
 
-// ColumnConfig is a column config
+// ColumnConfig is a column configuration
 type ColumnConfig struct {
-	Name        string
-	T           interface{}
+	// Name is the column name
+	Name string
+	// T is the column type
+	T interface{}
+	// StructField overrides the struct field
 	StructField string
+	// Auto is an auto-filled column
 	Auto,
+	// Ident is an identity column
 	Ident,
+	// Nullable is a nullable column
 	Nullable,
+	// ColumnComparable is a column that can be compared
+	// with other columns in the same collection/table
 	ColumnComparable bool
 }
 
@@ -41,7 +51,7 @@ func NewColumn(name string, t interface{}) *Column {
 	}
 }
 
-// Cfg returns the column config
+// Cfg returns the column configurations
 func (c *Column) Cfg() *ColumnConfig {
 	return c.cfg
 }
@@ -65,15 +75,16 @@ func (c *Column) Nullable() *Column {
 	return c
 }
 
-// ColumnComparable enables comparison with other column
+// ColumnComparable is a column that can be compared
+// with other columns in the same collection/table
 func (c *Column) ColumnComparable() *Column {
 	c.cfg.ColumnComparable = true
 	return c
 }
 
-// StructField is the struct field name. Use this when the
-// inferred struct field is wrong. e.g. The struct field
-// is "ID" but being referred to as "Id" in the generated code.
+// StructField overrides the struct field name. Use this when the
+// inferred struct field is wrong. e.g. The struct field of the model
+// is "ID" but being referred to as "Id" in the generated code
 func (c *Column) StructField(structField string) *Column {
 	c.cfg.StructField = structField
 	return c

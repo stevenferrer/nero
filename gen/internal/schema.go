@@ -8,6 +8,7 @@ import (
 	stringsx "github.com/sf9v/nero/x/strings"
 
 	"github.com/sf9v/nero"
+	"github.com/sf9v/nero/template"
 )
 
 // Schema is an internal schema
@@ -19,18 +20,28 @@ type Schema struct {
 	Pkg           string
 	SchemaImports []string
 	ColumnImports []string
+	Templates     []nero.Templater
 }
 
 // BuildSchema builds schema from a nero.Schemaer to Schema
 func BuildSchema(s nero.Schemaer) (*Schema, error) {
 	ns := s.Schema()
 	st := mira.NewType(s)
+
+	tmpls := ns.Templates
+	if len(tmpls) == 0 {
+		// default templates
+		tmpls = []nero.Templater{
+			template.NewPostgresTemplate(),
+		}
+	}
 	schema := &Schema{
 		Pkg:           strings.ToLower(ns.Pkg),
 		Collection:    ns.Collection,
 		Type:          st,
 		Cols:          []*Col{},
 		SchemaImports: []string{st.PkgPath()},
+		Templates:     tmpls,
 	}
 
 	colImportMap := map[string]int{}

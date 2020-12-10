@@ -4,7 +4,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/sf9v/nero"
+	"github.com/sf9v/nero/template"
 )
 
 // User is a basic example type
@@ -39,6 +41,10 @@ func (u *User) Schema() *nero.Schema {
 			nero.NewColumn("empty", u.Empty),
 			nero.NewColumn("updated_at", u.UpdatedAt).ColumnComparable(),
 			nero.NewColumn("created_at", u.CreatedAt).Auto(),
+		},
+		// Custom templates
+		Templates: []nero.Templater{
+			template.NewPostgresTemplate().WithFilename("pg.go"),
 		},
 	}
 }

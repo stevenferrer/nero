@@ -59,14 +59,17 @@ func Generate(schemaer nero.Schemaer) ([]*File, error) {
 		buf:  repoBuf,
 	})
 
-	pgBuf, err := newPostgresFile(schema)
-	if err != nil {
-		return nil, errors.Wrap(err, "postgres file")
+	for _, tmpl := range schema.Templates {
+		buff, err := newImplFile(schema, tmpl.Content())
+		if err != nil {
+			return nil, errors.Wrap(err, "repository implementation file")
+		}
+
+		files = append(files, &File{
+			name: tmpl.Filename(),
+			buf:  buff,
+		})
 	}
-	files = append(files, &File{
-		name: "postgres.go",
-		buf:  pgBuf,
-	})
 
 	return files, nil
 }

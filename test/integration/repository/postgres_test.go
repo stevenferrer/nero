@@ -30,13 +30,13 @@ func TestPostgreSQLRepository(t *testing.T) {
 	require.NoError(t, createTable(db))
 
 	logger := log.New(os.Stderr, "nero test: ", 0)
-	repo := repository.NewPostgreSQLRepository(db).Debug().WithLogger(logger)
+	repo := repository.NewPostgresRepository(db).Debug().WithLogger(logger)
 	newRepoTestRunner(repo)(t)
 	require.NoError(t, dropTable(db))
 
 	// tx methods
 	require.NoError(t, createTable(db))
-	repo = repository.NewPostgreSQLRepository(db).Debug().WithLogger(logger)
+	repo = repository.NewPostgresRepository(db).Debug().WithLogger(logger)
 	newRepoTestRunnerTx(repo)(t)
 	require.NoError(t, dropTable(db))
 }
