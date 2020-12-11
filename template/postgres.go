@@ -1,15 +1,19 @@
 package template
 
+import "github.com/sf9v/nero"
+
+// PostgresTemplate is the template for generating a postgres repository
+type PostgresTemplate struct {
+	filename string
+}
+
+var _ nero.Templater = (*PostgresTemplate)(nil)
+
 // NewPostgresTemplate returns a new PostgresTemplate
 func NewPostgresTemplate() *PostgresTemplate {
 	return &PostgresTemplate{
 		filename: "postgres.go",
 	}
-}
-
-// PostgresTemplate is the template for generating a postgres repository
-type PostgresTemplate struct {
-	filename string
 }
 
 // WithFilename overrides the default filename
