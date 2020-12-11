@@ -4,14 +4,12 @@ package template
 func NewPostgresTemplate() *PostgresTemplate {
 	return &PostgresTemplate{
 		filename: "postgres.go",
-		content:  postgresTmpl,
 	}
 }
 
 // PostgresTemplate is the template for generating a postgres repository
 type PostgresTemplate struct {
 	filename string
-	content  string
 }
 
 // WithFilename overrides the default filename
@@ -27,7 +25,7 @@ func (t *PostgresTemplate) Filename() string {
 
 // Content returns the template content
 func (t *PostgresTemplate) Content() string {
-	return t.content
+	return postgresTmpl
 }
 
 const postgresTmpl = `
