@@ -69,7 +69,7 @@ So, we decided to experiment on creating this library to auto-generate our repos
 
 ## Supported back-ends
 
-Currently, we have official support for [PostgreSQL](postgresql.org), ther back-ends will be supported soon.
+Currently, we have official support for [PostgreSQL](postgresql.org), other back-ends will be supported soon. Meanwhile, you can implement a [custom back-end](#custom-back-ends).
 
 | Back-end | Library | 
 |---------| ------- |
