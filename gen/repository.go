@@ -70,9 +70,9 @@ type Repository interface {
 	Delete(context.Context, *Deleter) (rowsAffected int64, err error)
 	// Delete deletes {{.Type.Name}} inside a transaction
 	DeleteTx(context.Context, nero.Tx, *Deleter) (rowsAffected int64, err error)
-	// Aggregate performs aggregate operations
+	// Aggregate performs aggregate query
 	Aggregate(context.Context, *Aggregator) error
-	// Aggregate performs aggregate operations inside a transaction
+	// Aggregate performs aggregate query inside a transaction
 	AggregateTx(context.Context, nero.Tx, *Aggregator) error
 }
 
@@ -119,19 +119,19 @@ func (q *Queryer) Where(pfs ...PredFunc) *Queryer {
 	return q
 }
 
-// Sort adds sorting to the query
+// Sort adds sorting expressions to the query
 func (q *Queryer) Sort(sfs ...SortFunc) *Queryer {
 	q.sfs = append(q.sfs, sfs...)
 	return q
 }
 
-// Limit adds limit to the query
+// Limit adds limit clause to the query
 func (q *Queryer) Limit(limit uint) *Queryer {
 	q.limit = limit
 	return q
 }
 
-// Offset adds offset to the query
+// Offset adds offset clause to the query
 func (q *Queryer) Offset(offset uint) *Queryer {
 	q.offset = offset
 	return q
@@ -162,13 +162,13 @@ func NewUpdater() *Updater {
 	{{end -}}
 {{end -}}
 
-// Where adds predicates to the update
+// Where adds predicates to the update builder
 func (u *Updater) Where(pfs ...PredFunc) *Updater {
 	u.pfs = append(u.pfs, pfs...)
 	return u
 }
 
-// Deleter is an update builder for {{.Type.Name}}
+// Deleter is a delete builder for {{.Type.Name}}
 type Deleter struct {
 	pfs []PredFunc
 }
@@ -178,7 +178,7 @@ func NewDeleter() *Deleter {
 	return &Deleter{}
 }
 
-// Where adds predicates to the delete
+// Where adds predicates to the delete builder
 func (d *Deleter) Where(pfs ...PredFunc) *Deleter {
 	d.pfs = append(d.pfs, pfs...)
 	return d
@@ -194,37 +194,38 @@ type Aggregator struct {
 }
 
 // NewAggregator is a factory for Aggregator
-// v must be an array of struct
+// 'v' argument must be an array of struct
 func NewAggregator(v interface{}) *Aggregator {
 	return &Aggregator{
 		v: v,
 	}
 }
 
-// Aggregate adds aggregate functions to the aggregate
+// Aggregate adds aggregate functions to the aggregate builder
 func (a *Aggregator) Aggregate(aggfs ...AggFunc) *Aggregator {
 	a.aggfs = append(a.aggfs, aggfs...)
 	return a
 }
 
-// Where adds predicates to the aggregate
+// Where adds predicates to the aggregate builder
 func (a *Aggregator) Where(pfs ...PredFunc) *Aggregator {
 	a.pfs = append(a.pfs, pfs...)
 	return a
 }
 
-// Sort adds sorting to the aggregate
+// Sort adds sorting expressions to the aggregate builder
 func (a *Aggregator) Sort(sfs ...SortFunc) *Aggregator {
 	a.sfs = append(a.sfs, sfs...)
 	return a
 }
 
-// Group adds grouping to the aggregate
+// Group adds grouping clause to the aggregate builder
 func (a *Aggregator) Group(cols ...Column) *Aggregator {
 	a.groups = append(a.groups, cols...)
 	return a
 }
 
+// rollback performs a rollback
 func rollback(tx nero.Tx, err error) error {
 	rerr := tx.Rollback()
 	if rerr != nil {
