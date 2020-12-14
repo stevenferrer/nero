@@ -98,7 +98,7 @@ To implement a custom back-end, you can refer to the official [postgres template
 
 ## Inspired by
 
-This library is inspired the these amazing projects:
+This library is inspired by these amazing projects:
 
 * [ent](https://github.com/facebook/ent). An entity framework for Go. Simple, yet powerful ORM for modeling and querying data.
 * [SQLBoiler](https://github.com/volatiletech/sqlboiler) is a tool to generate a Go ORM tailored to your database schema.
