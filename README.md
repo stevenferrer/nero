@@ -18,7 +18,8 @@ import (
 
     _ "github.com/lib/pq"
 
-    "github.com/sf9v/nero-example"
+    // import the generated package
+    "github.com/sf9v/nero-example/repository"
 )
 
 func main() {
@@ -69,9 +70,7 @@ func main() {
 
 ## Motivation
 
-We heavily use the *[repository pattern](https://threedots.tech/post/repository-pattern-in-go/)* in our codebases and we often [write our queries manually](https://golang.org/pkg/database/sql/#example_DB_QueryContext). It becomes tedious, boring and repetitive as we have more and more tables/models to maintain. One small change and we end-up changing a lot of things in different places. 
-
-So, we decided to experiment on creating this library to auto-generate our repository layer code.
+We heavily use the *[repository pattern](https://threedots.tech/post/repository-pattern-in-go/)* in our codebases and we often [write our queries manually](https://golang.org/pkg/database/sql/#example_DB_QueryContext). It becomes tedious, boring and repetitive as we have more and more tables/models to maintain. So, we decided to experiment on creating this library to auto-generate our repository layer code.
 
 ## Goals
 
@@ -81,7 +80,7 @@ So, we decided to experiment on creating this library to auto-generate our repos
 
 ## Supported back-ends
 
-Currently, we have official support for [PostgreSQL](postgresql.org). Other back-ends shall be supported soon. Meanwhile, you can implement a [custom back-end](#custom-back-ends) (yes, you can).
+Currently, we have official support for [PostgreSQL](postgresql.org). Other back-ends shall be supported soon. Meanwhile, you can implement [custom back-ends](#custom-back-ends).
 
 | Back-end | Library | 
 |---------| ------- |
@@ -92,9 +91,9 @@ Currently, we have official support for [PostgreSQL](postgresql.org). Other back
 
 ## Custom back-ends
 
-You can support custom back-ends (MongoDB, Cassandra, Badger etc.) by implementing the [_Templater_](./templater.go) interface. This interface is specifically created to support extensibility and customisability.
+Implementing your own custom back-end is very easy. In fact, you don't have to use the official back-ends. You can implement custom back-ends (MongoDB, Cassandra, Badger etc.) by implementing the [_Templater_](./templater.go) interface. This interface is specifically created to support extensibility and customisability.
 
-To implement a custom back-end, you can refer to the official [postgres template](./template/postgres.go) and this [example schema](./example/user.go#L46).
+You can refer to the official [postgres template](./template/postgres.go) and this [example schema](./example/user.go#L46).
 
 ## Inspired by
 
@@ -105,4 +104,4 @@ This library is inspired by these amazing projects:
 
 ## Contributing
 
-If you have any suggestions and ideas on how to improve this library, please feel free to [open an issue](https://github.com/sf9v/nero/issues) or by [making a pull request](https://github.com/sf9v/nero/pulls).
+Any suggestions and ideas on how to improve this library are very much welcome! Please feel free to [open an issue](https://github.com/sf9v/nero/issues) or by [making a pull request](https://github.com/sf9v/nero/pulls).
