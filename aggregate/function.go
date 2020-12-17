@@ -19,7 +19,7 @@ func (f Function) String() string {
 		return "None"
 	}
 
-	return "Invalid"
+	return ""
 }
 
 // Desc is a aggregate function description
@@ -36,7 +36,7 @@ func (f Function) Desc() string {
 	case Sum:
 		return "sum"
 	case None:
-		return `none`
+		return "none"
 	}
 
 	return ""

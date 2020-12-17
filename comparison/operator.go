@@ -27,7 +27,7 @@ func (op Operator) String() string {
 		return "NotIn"
 	}
 
-	return "Invalid"
+	return ""
 }
 
 // Desc is a predicate operator description

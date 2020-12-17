@@ -8,7 +8,7 @@ import (
 	"github.com/sf9v/nero/template"
 )
 
-func newImplFile(schema *gen.Schema, tmpl string) (*bytes.Buffer, error) {
+func newTemplateFile(schema *gen.Schema, tmpl string) (*bytes.Buffer, error) {
 	tmplt, err := template.ParseTemplate(tmpl)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse template")

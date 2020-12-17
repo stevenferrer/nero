@@ -2,7 +2,6 @@ package gen
 
 import (
 	"bytes"
-	"fmt"
 	"go/ast"
 	"go/format"
 	"go/parser"
@@ -61,7 +60,7 @@ func formatSource(filePath string) error {
 		content, _ := ioutil.ReadFile(filePath)
 		var buf bytes.Buffer
 		scanner.PrintError(&buf, err)
-		return fmt.Errorf("%s\n========\nContent:\n%s", buf.String(), content)
+		return errors.Errorf("%s\n========\nContent:\n%s", buf.String(), content)
 	}
 
 	// Clean unused imports

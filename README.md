@@ -27,7 +27,7 @@ func main() {
     db, err := sql.Open("postgres", dsn)
     ...
 
-    // initializ a new postgres repository
+    // initialize a new postgres repository
     repo := repository.NewPostgresRepository(db).Debug()
 
     // create a product
@@ -91,7 +91,7 @@ Currently, we have official support for [PostgreSQL](postgresql.org). Other back
 
 ## Custom back-ends
 
-Implementing your own custom back-end is very easy. In fact, you don't have to use the official back-ends. You can implement custom back-ends (MongoDB, Cassandra, Badger etc.) by implementing the [_Templater_](./templater.go) interface. This interface is specifically created to support extensibility and customisability.
+Implementing your own custom back-end is very easy. In fact, you don't have to use the official back-ends. You can implement custom back-ends (ClickHouse, Cassandra, CouchDB , Badger, H2, etc.) by implementing the [_Templater_](./templater.go) interface. This interface is specifically created to support extensibility and customisability.
 
 You can refer to the official [postgres template](./template/postgres.go) and this [example schema](./example/user.go#L46).
 

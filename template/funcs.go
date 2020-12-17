@@ -19,6 +19,14 @@ func typeFunc(v interface{}) string {
 	return fmt.Sprintf("%T", ev)
 }
 
+func resolveType(t reflect.Type) reflect.Type {
+	switch t.Kind() {
+	case reflect.Ptr:
+		return resolveType(t.Elem())
+	}
+	return t
+}
+
 func zeroFunc(v interface{}) string {
 	mt := mira.NewType(v)
 
