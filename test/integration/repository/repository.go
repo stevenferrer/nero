@@ -26,7 +26,7 @@ type Repository interface {
 	CreateManyTx(context.Context, nero.Tx, ...*Creator) error
 	// Query queries many User
 	Query(context.Context, *Queryer) ([]*user.User, error)
-	// QueryTx queries many { 000000000000000000000000000   0  map[] [] <nil> <nil>} inside a transaction
+	// QueryTx queries many User inside a transaction
 	QueryTx(context.Context, nero.Tx, *Queryer) ([]*user.User, error)
 	// QueryOne queries one User
 	QueryOne(context.Context, *Queryer) (*user.User, error)

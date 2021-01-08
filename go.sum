@@ -21,8 +21,6 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/segmentio/ksuid v1.0.3 h1:FoResxvleQwYiPAVKe1tMUlEirodZqlqglIuFsdDntY=
 github.com/segmentio/ksuid v1.0.3/go.mod h1:/XUiZBD3kVx5SmUOl55voK5yeAbBNNIed+2O73XgrPE=
-github.com/sf9v/mira v0.0.0-20200915071822-32044ca9f4d3 h1:yHUF1fQZ8waorA+hZrZHfugGQNcM1Ch+nVMY4v2fiKc=
-github.com/sf9v/mira v0.0.0-20200915071822-32044ca9f4d3/go.mod h1:zeNW4eWcS+HUH99UqwRG7qGFkyD9uvrKOMPExqKjAc0=
 github.com/sf9v/mira v0.1.0 h1:ohZF25vrhJysBEXmdZhg51aJn6Xeh0pbP2H7uyvBO7E=
 github.com/sf9v/mira v0.1.0/go.mod h1:zeNW4eWcS+HUH99UqwRG7qGFkyD9uvrKOMPExqKjAc0=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

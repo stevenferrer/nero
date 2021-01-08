@@ -56,7 +56,7 @@ type Repository interface {
 	CreateManyTx(context.Context, nero.Tx, ...*Creator) error
 	// Query queries many {{.Type.Name}}
 	Query(context.Context, *Queryer) ([]{{type .Type.V}}, error)
-	// QueryTx queries many {{.Type.V}} inside a transaction
+	// QueryTx queries many {{.Type.Name}} inside a transaction
 	QueryTx(context.Context, nero.Tx, *Queryer) ([]{{type .Type.V}}, error)
 	// QueryOne queries one {{.Type.Name}}
 	QueryOne(context.Context, *Queryer) ({{type .Type.V}}, error)
