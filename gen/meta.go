@@ -35,14 +35,11 @@ type Column int
 
 // String implements Stringer
 func (c Column) String() string {
-	switch c {
+	return [...]string{
     {{range .Cols -}}
-        case Column{{.Field -}}:
-            return "{{.Name -}}"
+        "{{.Name -}}",
     {{end -}}
-	}
-
-	return ""
+	}[c]
 }
 
 const (

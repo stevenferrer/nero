@@ -1,6 +1,6 @@
 package nero
 
-// Templater is the contract for a template that implements the repository interface
+// Templater is an interface for implementing a repository
 type Templater interface {
 	// Filename is the fileame of the generated file
 	Filename() string

@@ -3,61 +3,6 @@ package comparison
 // Operator is comparison operator
 type Operator int
 
-func (op Operator) String() string {
-	switch op {
-	case Eq:
-		return "Eq"
-	case NotEq:
-		return "NotEq"
-	case Gt:
-		return "Gt"
-	case GtOrEq:
-		return "GtOrEq"
-	case Lt:
-		return "Lt"
-	case LtOrEq:
-		return "LtOrEq"
-	case IsNull:
-		return "IsNull"
-	case IsNotNull:
-		return "IsNotNull"
-	case In:
-		return "In"
-	case NotIn:
-		return "NotIn"
-	}
-
-	return ""
-}
-
-// Desc is a predicate operator description
-func (op Operator) Desc() string {
-	switch op {
-	case Eq:
-		return "equal"
-	case NotEq:
-		return "not equal"
-	case Gt:
-		return "greater than"
-	case GtOrEq:
-		return "greater than or equal"
-	case Lt:
-		return "less than"
-	case LtOrEq:
-		return "less than or equal"
-	case IsNull:
-		return "is null"
-	case IsNotNull:
-		return "is not null"
-	case In:
-		return "in"
-	case NotIn:
-		return "not in"
-	}
-
-	return ""
-}
-
 // List of comparison operators
 const (
 	// Eq is an equal operator
@@ -81,3 +26,34 @@ const (
 	// In is used to check if a value is not in the list
 	NotIn
 )
+
+func (o Operator) String() string {
+	return [...]string{
+		"Eq",
+		"NotEq",
+		"Gt",
+		"GtOrEq",
+		"Lt",
+		"LtOrEq",
+		"IsNull",
+		"IsNotNull",
+		"In",
+		"NotIn",
+	}[o]
+}
+
+// Desc is a predicate operator description
+func (o Operator) Desc() string {
+	return [...]string{
+		"equal",
+		"not equal",
+		"greater than",
+		"greater than or equal",
+		"less than",
+		"less than or equal",
+		"is null",
+		"is not null",
+		"in",
+		"not in",
+	}[o]
+}

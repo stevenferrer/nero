@@ -12,11 +12,11 @@ type Sorts struct {
 }
 
 // Add adds sorters to the collection
-func (srt *Sorts) Add(ss ...*Sort) {
-	srt.list = append(srt.list, ss...)
+func (s *Sorts) Add(ss ...*Sort) {
+	s.list = append(s.list, ss...)
 }
 
 // All returns all sorters
-func (srt *Sorts) All() []*Sort {
-	return srt.list
+func (s *Sorts) All() []*Sort {
+	return s.list
 }

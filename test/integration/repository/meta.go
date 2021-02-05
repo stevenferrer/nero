@@ -9,30 +9,18 @@ type Column int
 
 // String implements Stringer
 func (c Column) String() string {
-	switch c {
-	case ColumnID:
-		return "id"
-	case ColumnUID:
-		return "uid"
-	case ColumnEmail:
-		return "email"
-	case ColumnName:
-		return "name"
-	case ColumnAge:
-		return "age"
-	case ColumnGroup:
-		return "group"
-	case ColumnKv:
-		return "kv"
-	case ColumnTags:
-		return "tags"
-	case ColumnUpdatedAt:
-		return "updated_at"
-	case ColumnCreatedAt:
-		return "created_at"
-	}
-
-	return ""
+	return [...]string{
+		"id",
+		"uid",
+		"email",
+		"name",
+		"age",
+		"group",
+		"kv",
+		"tags",
+		"updated_at",
+		"created_at",
+	}[c]
 }
 
 const (

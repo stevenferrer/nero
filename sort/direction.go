@@ -16,14 +16,10 @@ func (d Direction) String() string {
 
 // Desc is a sort description
 func (d Direction) Desc() string {
-	switch d {
-	case Asc:
-		return "ascending"
-	case Desc:
-		return "descending"
-	}
-
-	return ""
+	return [...]string{
+		"ascending",
+		"descending",
+	}[d]
 }
 
 const (

@@ -12,11 +12,11 @@ type Aggregates struct {
 }
 
 // Add adds aggregates to the list
-func (aggs *Aggregates) Add(ags ...*Aggregate) {
-	aggs.list = append(aggs.list, ags...)
+func (a *Aggregates) Add(ags ...*Aggregate) {
+	a.list = append(a.list, ags...)
 }
 
 // All returns all predicates
-func (aggs *Aggregates) All() []*Aggregate {
-	return aggs.list
+func (a *Aggregates) All() []*Aggregate {
+	return a.list
 }
