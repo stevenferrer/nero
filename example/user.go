@@ -38,7 +38,8 @@ func (u *User) Schema() *nero.Schema {
 			nero.NewColumnBuilder("is_registered", u.IsRegistered).Build(),
 			nero.NewColumnBuilder("tags", u.Tags).Build(),
 			nero.NewColumnBuilder("empty", u.Empty).Build(),
-			nero.NewColumnBuilder("updated_at", u.UpdatedAt).ColumnComparable().Build(),
+			nero.NewColumnBuilder("updated_at", u.UpdatedAt).
+				Optional().ColumnComparable().Build(),
 			nero.NewColumnBuilder("created_at", u.CreatedAt).Auto().Build(),
 		).
 		Templates(template.NewPostgresTemplate().WithFilename("postgres.go")).

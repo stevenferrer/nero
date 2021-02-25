@@ -95,6 +95,10 @@ Implementing your own custom back-end is very easy. In fact, you don't have to u
 
 You can refer to the official [postgres template](./template/postgres.go) and this [example schema](./example/user.go#L46).
 
+## Standing on the shoulders of giants
+
+This library would not be possible without the amazing open-source community projects in the wild.
+
 ## Inspired by
 
 This library is inspired by these amazing projects:

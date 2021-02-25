@@ -32,6 +32,7 @@ package {{.Pkg}}
 
 import (
 	"context"
+	"reflect"
 	"github.com/pkg/errors"
 	"github.com/sf9v/nero"
 	{{range $import := .SchemaImports -}}
@@ -99,6 +100,19 @@ func NewCreator() *Creator {
 		}
 	{{end -}}
 {{end -}}
+
+// Validate validates the creator fields
+func (c *Creator) Validate() error {
+	{{- range $col := .Cols -}}
+		{{if and (ne $col.Optional true) (ne $col.Auto true) -}}
+			if isZero(c.{{$col.Identifier}}) {
+				return nero.NewErrRequiredField("{{$col.Name}}")
+			}
+		{{end}} 
+	{{end}}
+
+	return nil
+}
 
 // Queryer is a query builder for {{.Type.Name}}
 type Queryer struct {
@@ -232,5 +246,10 @@ func rollback(tx nero.Tx, err error) error {
 		err = errors.Wrapf(err, "rollback error: %v", rerr)
 	}
 	return err
+}
+
+// isZero checks of value is zero
+func isZero(v interface{}) bool {
+	return reflect.ValueOf(v).IsZero()
 }
 `

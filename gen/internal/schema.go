@@ -54,6 +54,7 @@ func BuildSchema(schemaer nero.Schemaer) (*Schema, error) {
 			Type:             mira.NewType(c.T),
 			Ident:            c.Identity,
 			Auto:             c.Auto,
+			Optional:         c.Optional,
 			ColumnComparable: c.ColumnComparable,
 		}
 

@@ -112,20 +112,29 @@ func (pg *PostgresRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creat
 }
 
 func (pg *PostgresRepository) create(ctx context.Context, runner nero.SQLRunner, c *Creator) ({{type .Ident.Type.V}}, error) {
-	columns := []string{}
-	values := []interface{}{}
-	{{range $col := .Cols }}
-		{{if ne $col.Auto true}}
-			if c.{{$col.Identifier}} != {{zero $col.Type.V}} {
-				columns = append(columns, "\"{{$col.Name}}\"")
+	if err := c.Validate(); err != nil {
+		return {{zero .Ident.Type.V}}, err
+	}
+
+	columns := []string{
+		{{range $col := .Cols -}}
+			{{if (ne $col.Auto true) -}}
+				"\"{{$col.Name}}\"",
+			{{end -}}
+		{{end -}}
+	}
+
+	values := []interface{}{
+		{{range $col := .Cols -}}
+			{{if (ne $col.Auto true) -}}
 				{{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
-					values = append(values, pq.Array(c.{{$col.Identifier}}))
+					pq.Array(c.{{$col.Identifier}}),
 				{{else -}}
-					values = append(values, c.{{$col.Identifier}})
+					c.{{$col.Identifier}},
 				{{end -}}
-			}
-		{{end}}
-	{{end}}
+			{{end -}}
+		{{end -}}
+	}
 
 	qb := squirrel.Insert("\"{{.Collection}}\"").
 		Columns(columns...).
@@ -133,7 +142,7 @@ func (pg *PostgresRepository) create(ctx context.Context, runner nero.SQLRunner,
 		Suffix("RETURNING \"{{.Ident.Name}}\"").
 		PlaceholderFormat(squirrel.Dollar).
 		RunWith(runner)
-	if pg.debug {
+	if pg.debug && pg.logger != nil {
 		sql, args, err := qb.ToSql()
 		pg.logger.Printf("method: Create, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
@@ -176,6 +185,10 @@ func (pg *PostgresRepository) createMany(ctx context.Context, runner nero.SQLRun
 	}
 	qb := squirrel.Insert("\"{{.Collection}}\"").Columns(columns...)
 	for _, c := range cs {
+		if err := c.Validate(); err != nil {
+			return err
+		}
+
 		qb = qb.Values(
 			{{range $col := .Cols -}}
 				{{if ne $col.Auto true -}}
@@ -191,7 +204,7 @@ func (pg *PostgresRepository) createMany(ctx context.Context, runner nero.SQLRun
 
 	qb = qb.Suffix("RETURNING \"{{.Ident.Name}}\"").
 		PlaceholderFormat(squirrel.Dollar)
-	if pg.debug {
+	if pg.debug && pg.logger != nil {
 		sql, args, err := qb.ToSql()
 		pg.logger.Printf("method: CreateMany, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
@@ -221,7 +234,7 @@ func (pg *PostgresRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Querye
 
 func (pg *PostgresRepository) query(ctx context.Context, runner nero.SQLRunner, q *Queryer) ([]*{{type .Type.V}}, error) {
 	qb := pg.buildSelect(q)	
-	if pg.debug {
+	if pg.debug  && pg.logger != nil {
 		sql, args, err := qb.ToSql()
 		pg.logger.Printf("method: Query, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
@@ -271,7 +284,7 @@ func (pg *PostgresRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Que
 
 func (pg *PostgresRepository) queryOne(ctx context.Context, runner nero.SQLRunner, q *Queryer) (*{{type .Type.V}}, error) {
 	qb := pg.buildSelect(q)
-	if pg.debug {
+	if pg.debug && pg.logger != nil {
 		sql, args, err := qb.ToSql()
 		pg.logger.Printf("method: QueryOne, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
@@ -355,18 +368,25 @@ func (pg *PostgresRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updat
 
 func (pg *PostgresRepository) update(ctx context.Context, runner nero.SQLRunner, u *Updater) (int64, error) {
 	qb := squirrel.Update("\"{{.Collection}}\"").
-		PlaceholderFormat(squirrel.Dollar)	
-	{{range $col := .Cols}}
+		PlaceholderFormat(squirrel.Dollar)
+
+	cnt := 0
+	{{- range $col := .Cols}}
 		{{if ne $col.Auto true}}
-			if u.{{$col.Identifier}} != {{zero $col.Type.V}} {
+			if !isZero(u.{{$col.Identifier}}) {
 				{{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
 					qb = qb.Set("\"{{$col.Name}}\"", pq.Array(u.{{$col.Identifier}}))
 				{{else -}}
 					qb = qb.Set("\"{{$col.Name}}\"", u.{{$col.Identifier}})
 				{{end -}}
+				cnt++
 			}
 		{{end}}
 	{{end}}
+
+	if cnt == 0 {
+		return 0, nil
+	}
 
 	pfs := u.pfs
 	pb := &comparison.Predicates{}
@@ -375,7 +395,7 @@ func (pg *PostgresRepository) update(ctx context.Context, runner nero.SQLRunner,
 	}
 	` + predsBldrBlock + `
 
-	if pg.debug {
+	if pg.debug && pg.logger != nil {
 		sql, args, err := qb.ToSql()
 		pg.logger.Printf("method: Update, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
@@ -419,7 +439,7 @@ func (pg *PostgresRepository) delete(ctx context.Context, runner nero.SQLRunner,
 	}
 	` + predsBldrBlock + `
 
-	if pg.debug {
+	if pg.debug && pg.logger != nil {
 		sql, args, err := qb.ToSql()
 		pg.logger.Printf("method: Delete, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
@@ -508,7 +528,7 @@ func (pg *PostgresRepository) aggregate(ctx context.Context, runner nero.SQLRunn
 		}
 	}
 
-	if pg.debug {
+	if pg.debug && pg.logger != nil {
 		sql, args, err := qb.ToSql()
 		pg.logger.Printf("method: Aggregate, stmt: %q, args: %v, error: %v", sql, args, err)
 	}

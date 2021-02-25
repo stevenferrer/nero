@@ -142,7 +142,7 @@ func TestPredicates(t *testing.T) {
 	})
 
 	t.Run("Group", func(t *testing.T) {
-		group := user.Norn
+		group := user.GroupNorn
 		pfs := []repository.PredFunc{
 			repository.GroupEq(group), repository.GroupNotEq(group),
 			repository.GroupGt(group), repository.GroupGtOrEq(group),

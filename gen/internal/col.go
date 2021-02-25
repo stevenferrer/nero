@@ -70,12 +70,9 @@ func (c *Col) IsArray() bool {
 		kind == reflect.Slice
 }
 
-// IsNullable returns true if the column is nullable
-func (c *Col) IsNullable() bool {
-	kind := reflect.TypeOf(c.Type.V()).Kind()
-	return (kind == reflect.Ptr ||
-		kind == reflect.Slice ||
-		kind == reflect.Map)
+// IsNillable returns true if the column is nullable
+func (c *Col) IsNillable() bool {
+	return c.Type.IsNillable()
 }
 
 var valueScannerType = reflect.TypeOf(new(nero.ValueScanner)).Elem()

@@ -75,13 +75,13 @@ func newRepoTestRunner(repo repository.Repository) func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				now := time.Now()
 				for i := 1; i <= 50; i++ {
-					group := user.Human
+					group := user.GroupHuman
 					if i%2 == 0 {
-						group = user.Charr
+						group = user.GroupCharr
 					} else if i%3 == 0 {
-						group = user.Norn
+						group = user.GroupNorn
 					} else if i%4 == 0 {
-						group = user.Sylvari
+						group = user.GroupSylvari
 					}
 
 					email := fmt.Sprintf("%s_%d@gg.io", group, i)
@@ -123,13 +123,13 @@ func newRepoTestRunner(repo repository.Repository) func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				crs := []*repository.Creator{}
 				for i := 51; i <= 100; i++ {
-					group := "human"
+					group := user.GroupHuman
 					if i%2 == 0 {
-						group = "charr"
+						group = user.GroupCharr
 					} else if i%3 == 0 {
-						group = "norn"
+						group = user.GroupNorn
 					} else if i%4 == 0 {
-						group = "sylvari"
+						group = user.GroupSylvari
 					}
 
 					email := fmt.Sprintf("%s_%d_mm@gg.io", group, i)
@@ -144,7 +144,8 @@ func newRepoTestRunner(repo repository.Repository) func(t *testing.T) {
 						Name(name).
 						Age(age).
 						Kv(kv).
-						Tags(tags)
+						Tags(tags).
+						Group(group)
 					crs = append(crs, cr)
 				}
 
@@ -216,10 +217,8 @@ func newRepoTestRunner(repo repository.Repository) func(t *testing.T) {
 
 				users, err = repo.Query(ctx, repository.NewQueryer().
 					Where(
-						repository.GroupEq(user.Norn), repository.GroupNotEq(user.Human),
-						repository.GroupGt("n"), repository.GroupGtOrEq(user.Norn),
-						repository.GroupLt("nornn"), repository.GroupLtOrEq(user.Norn),
-						repository.GroupIn(user.Norn), repository.GroupNotIn(user.Human),
+						repository.GroupEq(user.GroupNorn), repository.GroupNotEq(user.GroupHuman),
+						repository.GroupIn(user.GroupNorn), repository.GroupNotIn(user.GroupHuman),
 					),
 				)
 				assert.NoError(t, err)
@@ -314,7 +313,7 @@ func newRepoTestRunner(repo repository.Repository) func(t *testing.T) {
 						repository.Sum(repository.ColumnAge),
 						repository.None(repository.ColumnGroup),
 					).
-					Where(repository.AgeGt(18), repository.GroupNotEq("")).
+					Where(repository.AgeGt(18), repository.GroupNotEq(user.GroupInvalid)).
 					Group(repository.ColumnGroup).
 					Sort(repository.Asc(repository.ColumnGroup))
 
@@ -353,7 +352,7 @@ func newRepoTestRunner(repo repository.Repository) func(t *testing.T) {
 						Email(email).
 						Name(name).
 						Age(age).
-						Group(user.Outcast).
+						Group(user.GroupOutcast).
 						Tags(newTags).
 						UpdatedAt(&now).
 						Kv(example.Map{"abc": "def"}).
@@ -373,13 +372,13 @@ func newRepoTestRunner(repo repository.Repository) func(t *testing.T) {
 				assert.Len(t, usr.Tags, 1)
 			})
 
-			t.Run("Error", func(t *testing.T) {
-				_, err = repo.Update(ctx, repository.NewUpdater())
-				assert.Error(t, err)
+			_, err = repo.Update(ctx, repository.NewUpdater())
+			assert.NoError(t, err)
 
+			t.Run("Error", func(t *testing.T) {
 				cctx, cancel := context.WithCancel(ctx)
 				cancel()
-				_, err = repo.Update(cctx, repository.NewUpdater())
+				_, err = repo.Update(cctx, repository.NewUpdater().Age(1))
 				assert.Error(t, err)
 			})
 		})
@@ -434,13 +433,13 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				now := time.Now()
 				for i := 1; i <= 50; i++ {
-					group := user.Human
+					group := user.GroupHuman
 					if i%2 == 0 {
-						group = user.Charr
+						group = user.GroupCharr
 					} else if i%3 == 0 {
-						group = user.Norn
+						group = user.GroupNorn
 					} else if i%4 == 0 {
-						group = user.Sylvari
+						group = user.GroupSylvari
 					}
 
 					email := fmt.Sprintf("%s_%d@gg.io", group, i)
@@ -469,7 +468,6 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 				id, err := repo.CreateTx(ctx, tx, repository.NewCreator())
 				assert.Error(t, err)
 				assert.Zero(t, id)
-				assert.Error(t, tx.Commit())
 
 				cctx, cancel := context.WithCancel(ctx)
 				tx = newTx(cctx, t)
@@ -484,13 +482,13 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				crs := []*repository.Creator{}
 				for i := 51; i <= 100; i++ {
-					group := "human"
+					group := user.GroupHuman
 					if i%2 == 0 {
-						group = "charr"
+						group = user.GroupCharr
 					} else if i%3 == 0 {
-						group = "norn"
+						group = user.GroupNorn
 					} else if i%4 == 0 {
-						group = "sylvari"
+						group = user.GroupSylvari
 					}
 
 					email := fmt.Sprintf("%s_%d_mm@gg.io", group, i)
@@ -505,7 +503,8 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 						Name(name).
 						Age(age).
 						Kv(kv).
-						Tags(tags)
+						Tags(tags).
+						Group(group)
 					crs = append(crs, cr)
 				}
 				tx := newTx(ctx, t)
@@ -523,7 +522,6 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 				tx := newTx(ctx, t)
 				err := repo.CreateManyTx(ctx, tx, repository.NewCreator())
 				assert.Error(t, err)
-				assert.Error(t, tx.Commit())
 
 				cctx, cancel := context.WithCancel(ctx)
 				tx = newTx(cctx, t)
@@ -589,9 +587,7 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 				tx = newTx(ctx, t)
 				users, err = repo.Query(ctx, repository.NewQueryer().
 					Where(
-						repository.GroupEq(user.Norn), repository.GroupNotEq(user.Human),
-						repository.GroupGt("n"), repository.GroupGtOrEq(user.Norn),
-						repository.GroupLt("nornn"), repository.GroupLtOrEq(user.Norn),
+						repository.GroupEq(user.GroupNorn), repository.GroupNotEq(user.GroupHuman),
 					),
 				)
 				assert.NoError(t, err)
@@ -704,7 +700,7 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 						repository.Sum(repository.ColumnAge),
 						repository.None(repository.ColumnGroup),
 					).
-					Where(repository.AgeGt(18), repository.GroupNotEq("")).
+					Where(repository.AgeGt(18), repository.GroupNotEq(user.GroupInvalid)).
 					Group(repository.ColumnGroup).
 					Sort(repository.Asc(repository.ColumnGroup))
 
@@ -747,7 +743,7 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 						Email(email).
 						Name(name).
 						Age(age).
-						Group(user.Outcast).
+						Group(user.GroupOutcast).
 						Tags(newTags).
 						UpdatedAt(&now).
 						Where(preds...),
@@ -769,16 +765,15 @@ func newRepoTestRunnerTx(repo repository.Repository) func(t *testing.T) {
 				assert.Len(t, usr.Tags, 1)
 			})
 
-			t.Run("Error", func(t *testing.T) {
-				tx := newTx(ctx, t)
-				_, err = repo.UpdateTx(ctx, tx, repository.NewUpdater())
-				assert.Error(t, err)
-				assert.NoError(t, tx.Commit())
+			tx := newTx(ctx, t)
+			_, err = repo.UpdateTx(ctx, tx, repository.NewUpdater())
+			assert.NoError(t, err)
 
+			t.Run("Error", func(t *testing.T) {
 				cctx, cancel := context.WithCancel(ctx)
 				tx = newTx(cctx, t)
 				cancel()
-				_, err = repo.UpdateTx(cctx, tx, repository.NewUpdater())
+				_, err = repo.UpdateTx(cctx, tx, repository.NewUpdater().Age(1))
 				assert.Error(t, err)
 				assert.Error(t, tx.Commit())
 			})

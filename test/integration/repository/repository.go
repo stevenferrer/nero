@@ -3,6 +3,7 @@ package repository
 
 import (
 	"context"
+	"reflect"
 	"time"
 
 	"github.com/pkg/errors"
@@ -109,6 +110,39 @@ func (c *Creator) Tags(tags []string) *Creator {
 func (c *Creator) UpdatedAt(updatedAt *time.Time) *Creator {
 	c.updatedAt = updatedAt
 	return c
+}
+
+// Validate validates the creator fields
+func (c *Creator) Validate() error {
+	if isZero(c.uid) {
+		return nero.NewErrRequiredField("uid")
+	}
+
+	if isZero(c.email) {
+		return nero.NewErrRequiredField("email")
+	}
+
+	if isZero(c.name) {
+		return nero.NewErrRequiredField("name")
+	}
+
+	if isZero(c.age) {
+		return nero.NewErrRequiredField("age")
+	}
+
+	if isZero(c.group) {
+		return nero.NewErrRequiredField("group")
+	}
+
+	if isZero(c.kv) {
+		return nero.NewErrRequiredField("kv")
+	}
+
+	if isZero(c.tags) {
+		return nero.NewErrRequiredField("tags")
+	}
+
+	return nil
 }
 
 // Queryer is a query builder for User
@@ -284,4 +318,9 @@ func rollback(tx nero.Tx, err error) error {
 		err = errors.Wrapf(err, "rollback error: %v", rerr)
 	}
 	return err
+}
+
+// isZero checks of value is zero
+func isZero(v interface{}) bool {
+	return reflect.ValueOf(v).IsZero()
 }

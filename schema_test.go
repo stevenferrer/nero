@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/sf9v/nero"
+	"github.com/sf9v/nero/template"
 )
 
 func TestSchemaBuilder(t *testing.T) {
@@ -19,6 +20,7 @@ func TestSchemaBuilder(t *testing.T) {
 				Auto().Identity().StructField("ID").Build(),
 			nero.NewColumnBuilder("name", "").Build(),
 		).
+		Templates(template.NewPostgresTemplate()).
 		Build()
 
 	assert.Equal(t, pkg, schema.PkgName)

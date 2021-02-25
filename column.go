@@ -67,6 +67,7 @@ func (c *ColumnBuilder) StructField(structField string) *ColumnBuilder {
 	return c
 }
 
+// Optional is an optional column i.e. not required
 func (c *ColumnBuilder) Optional() *ColumnBuilder {
 	c.column.Optional = true
 	return c

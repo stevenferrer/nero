@@ -23,15 +23,27 @@ type User struct {
 }
 
 // Group is a group
-type Group string
+type Group int
+
+func (g Group) String() string {
+	return [...]string{
+		"",
+		"human",
+		"charr",
+		"norn",
+		"sylvari",
+		"outcast",
+	}[g]
+}
 
 // Groups
 const (
-	Human   Group = "human"
-	Charr   Group = "charr"
-	Norn    Group = "norn"
-	Sylvari Group = "sylvari"
-	Outcast Group = "outcast"
+	GroupInvalid Group = iota
+	GroupHuman
+	GroupCharr
+	GroupNorn
+	GroupSylvari
+	GroupOutcast
 )
 
 // Schema implements nero.Schemaer
@@ -50,7 +62,8 @@ func (u *User) Schema() *nero.Schema {
 				StructField("Group").Build(),
 			nero.NewColumnBuilder("kv", u.Kv).Build(),
 			nero.NewColumnBuilder("tags", u.Tags).Build(),
-			nero.NewColumnBuilder("updated_at", u.UpdatedAt).Build(),
+			nero.NewColumnBuilder("updated_at", u.UpdatedAt).
+				Optional().Build(),
 			nero.NewColumnBuilder("created_at", u.CreatedAt).
 				Auto().Build(),
 		).
