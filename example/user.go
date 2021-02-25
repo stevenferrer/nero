@@ -25,26 +25,22 @@ type User struct {
 
 // Schema implements nero.Schemaer
 func (u *User) Schema() *nero.Schema {
-	return &nero.Schema{
-		Pkg:        "user",
-		Collection: "users",
-		Columns: []*nero.Column{
-			nero.NewColumn("id", u.ID).
-				StructField("ID").Ident().Auto(),
-			nero.NewColumn("uuid", u.UUID).StructField("UUID"),
-			nero.NewColumn("name", u.Name),
-			nero.NewColumn("group_res", u.Group).
-				StructField("Group"),
-			nero.NewColumn("age", u.Age),
-			nero.NewColumn("is_registered", u.IsRegistered),
-			nero.NewColumn("tags", u.Tags),
-			nero.NewColumn("empty", u.Empty),
-			nero.NewColumn("updated_at", u.UpdatedAt).ColumnComparable(),
-			nero.NewColumn("created_at", u.CreatedAt).Auto(),
-		},
-		// Custom templates
-		Templates: []nero.Templater{
-			template.NewPostgresTemplate().WithFilename("pg.go"),
-		},
-	}
+	return nero.NewSchemaBuilder().
+		PkgName("user").Collection("users").
+		Columns(
+			nero.NewColumnBuilder("id", u.ID).
+				StructField("ID").Identity().Auto().Build(),
+			nero.NewColumnBuilder("uuid", u.UUID).StructField("UUID").Build(),
+			nero.NewColumnBuilder("name", u.Name).Build(),
+			nero.NewColumnBuilder("group_res", u.Group).
+				StructField("Group").Build(),
+			nero.NewColumnBuilder("age", u.Age).Build(),
+			nero.NewColumnBuilder("is_registered", u.IsRegistered).Build(),
+			nero.NewColumnBuilder("tags", u.Tags).Build(),
+			nero.NewColumnBuilder("empty", u.Empty).Build(),
+			nero.NewColumnBuilder("updated_at", u.UpdatedAt).ColumnComparable().Build(),
+			nero.NewColumnBuilder("created_at", u.CreatedAt).Auto().Build(),
+		).
+		Templates(template.NewPostgresTemplate().WithFilename("postgres.go")).
+		Build()
 }

@@ -18,7 +18,7 @@ type Repository interface {
 	Tx(context.Context) (nero.Tx, error)
 	// Create creates a new User
 	Create(context.Context, *Creator) (id string, err error)
-	// CreateTx creates a new type .Type.Name}} inside a transaction
+	// CreateTx creates a new type User inside a transaction
 	CreateTx(context.Context, nero.Tx, *Creator) (id string, err error)
 	// CreateMany creates many User
 	CreateMany(context.Context, ...*Creator) error
@@ -63,49 +63,49 @@ func NewCreator() *Creator {
 	return &Creator{}
 }
 
-// UID is a setter for uid
+// UID is a setter for the UID field
 func (c *Creator) UID(uid ksuid.KSUID) *Creator {
 	c.uid = uid
 	return c
 }
 
-// Email is a setter for email
+// Email is a setter for the Email field
 func (c *Creator) Email(email string) *Creator {
 	c.email = email
 	return c
 }
 
-// Name is a setter for name
+// Name is a setter for the Name field
 func (c *Creator) Name(name string) *Creator {
 	c.name = name
 	return c
 }
 
-// Age is a setter for age
+// Age is a setter for the Age field
 func (c *Creator) Age(age int) *Creator {
 	c.age = age
 	return c
 }
 
-// Group is a setter for group
+// Group is a setter for the Group field
 func (c *Creator) Group(group user.Group) *Creator {
 	c.group = group
 	return c
 }
 
-// Kv is a setter for kv
+// Kv is a setter for the Kv field
 func (c *Creator) Kv(kv example.Map) *Creator {
 	c.kv = kv
 	return c
 }
 
-// Tags is a setter for tags
+// Tags is a setter for the Tags field
 func (c *Creator) Tags(tags []string) *Creator {
 	c.tags = tags
 	return c
 }
 
-// UpdatedAt is a setter for updatedAt
+// UpdatedAt is a setter for the UpdatedAt field
 func (c *Creator) UpdatedAt(updatedAt *time.Time) *Creator {
 	c.updatedAt = updatedAt
 	return c
@@ -166,49 +166,49 @@ func NewUpdater() *Updater {
 	return &Updater{}
 }
 
-// UID is a setter for uid
+// UID is a setter for the UID field
 func (c *Updater) UID(uid ksuid.KSUID) *Updater {
 	c.uid = uid
 	return c
 }
 
-// Email is a setter for email
+// Email is a setter for the Email field
 func (c *Updater) Email(email string) *Updater {
 	c.email = email
 	return c
 }
 
-// Name is a setter for name
+// Name is a setter for the Name field
 func (c *Updater) Name(name string) *Updater {
 	c.name = name
 	return c
 }
 
-// Age is a setter for age
+// Age is a setter for the Age field
 func (c *Updater) Age(age int) *Updater {
 	c.age = age
 	return c
 }
 
-// Group is a setter for group
+// Group is a setter for the Group field
 func (c *Updater) Group(group user.Group) *Updater {
 	c.group = group
 	return c
 }
 
-// Kv is a setter for kv
+// Kv is a setter for the Kv field
 func (c *Updater) Kv(kv example.Map) *Updater {
 	c.kv = kv
 	return c
 }
 
-// Tags is a setter for tags
+// Tags is a setter for the Tags field
 func (c *Updater) Tags(tags []string) *Updater {
 	c.tags = tags
 	return c
 }
 
-// UpdatedAt is a setter for updatedAt
+// UpdatedAt is a setter for the UpdatedAt field
 func (c *Updater) UpdatedAt(updatedAt *time.Time) *Updater {
 	c.updatedAt = updatedAt
 	return c

@@ -21,9 +21,9 @@ type Col struct {
 	Ident,
 	// Auto is an auto-filled column
 	Auto,
-	// Nullable is a nullable column
-	Nullable,
-	// ColumnComparable enables comparison with other column
+	// Optional is an optional column i.e. not required
+	Optional,
+	// ColumnComparable is a column that can be compared with other columns
 	ColumnComparable bool
 }
 
@@ -68,6 +68,14 @@ func (c *Col) IsArray() bool {
 	kind := c.Type.T().Kind()
 	return kind == reflect.Array ||
 		kind == reflect.Slice
+}
+
+// IsNullable returns true if the column is nullable
+func (c *Col) IsNullable() bool {
+	kind := reflect.TypeOf(c.Type.V()).Kind()
+	return (kind == reflect.Ptr ||
+		kind == reflect.Slice ||
+		kind == reflect.Map)
 }
 
 var valueScannerType = reflect.TypeOf(new(nero.ValueScanner)).Elem()

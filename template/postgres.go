@@ -28,7 +28,7 @@ func (t *PostgresTemplate) Filename() string {
 }
 
 // Content returns the template content
-func (t *PostgresTemplate) Content() string {
+func (t *PostgresTemplate) Template() string {
 	return postgresTmpl
 }
 

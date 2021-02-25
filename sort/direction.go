@@ -4,14 +4,10 @@ package sort
 type Direction int
 
 func (d Direction) String() string {
-	switch d {
-	case Asc:
-		return "Asc"
-	case Desc:
-		return "Desc"
-	}
-
-	return ""
+	return [...]string{
+		"Asc",
+		"Desc",
+	}[d]
 }
 
 // Desc is a sort description

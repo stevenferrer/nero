@@ -30,25 +30,24 @@ type Item struct {
 
 // Schema implements nero.Schemaer
 func (c *Custom) Schema() *nero.Schema {
-	return &nero.Schema{
-		Pkg:        "user",
-		Collection: "users",
-		Columns: []*nero.Column{
-			nero.NewColumn("id", c.ID).
-				StructField("ID").Ident().Auto(),
-			nero.NewColumn("ksid", c.KSID).StructField("KSID"),
-			nero.NewColumn("s", c.S),
-			nero.NewColumn("map_str_str", c.MapStrStr),
-			nero.NewColumn("map_str_ptr_str", c.MapStrPtrStr),
-			nero.NewColumn("map_int64_str", c.MapInt64Str),
-			nero.NewColumn("map_int64_ptr_str", c.MapInt64PtrStr),
-			nero.NewColumn("map_str_item", c.MapStrItem),
-			nero.NewColumn("map_str_ptr_item", c.MapStrPtrItem),
-			nero.NewColumn("item", c.Item),
-			nero.NewColumn("ptr_item", c.PtrItem),
-			nero.NewColumn("items", c.Items),
-			nero.NewColumn("ptr_items", c.PtrItems),
-			nero.NewColumn("null_column", c.NullColumn).Nullable(),
-		},
-	}
+	return nero.NewSchemaBuilder().
+		PkgName("user").Collection("users").
+		Columns(
+			nero.NewColumnBuilder("id", c.ID).
+				StructField("ID").Identity().Auto().Build(),
+			nero.NewColumnBuilder("ksid", c.KSID).StructField("KSID").Build(),
+			nero.NewColumnBuilder("s", c.S).Build(),
+			nero.NewColumnBuilder("map_str_str", c.MapStrStr).Build(),
+			nero.NewColumnBuilder("map_str_ptr_str", c.MapStrPtrStr).Build(),
+			nero.NewColumnBuilder("map_int64_str", c.MapInt64Str).Build(),
+			nero.NewColumnBuilder("map_int64_ptr_str", c.MapInt64PtrStr).Build(),
+			nero.NewColumnBuilder("map_str_item", c.MapStrItem).Build(),
+			nero.NewColumnBuilder("map_str_ptr_item", c.MapStrPtrItem).Build(),
+			nero.NewColumnBuilder("item", c.Item).Build(),
+			nero.NewColumnBuilder("ptr_item", c.PtrItem).Build(),
+			nero.NewColumnBuilder("items", c.Items).Build(),
+			nero.NewColumnBuilder("ptr_items", c.PtrItems).Build(),
+			nero.NewColumnBuilder("null_column", c.NullColumn).Build(),
+		).
+		Build()
 }

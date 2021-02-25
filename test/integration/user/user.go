@@ -36,24 +36,23 @@ const (
 
 // Schema implements nero.Schemaer
 func (u *User) Schema() *nero.Schema {
-	return &nero.Schema{
-		Pkg:        "repository",
-		Collection: "users",
-		Columns: []*nero.Column{
-			nero.NewColumn("id", u.ID).
-				StructField("ID").Ident().Auto(),
-			nero.NewColumn("uid", u.UID).
-				StructField("UID"),
-			nero.NewColumn("email", u.Email),
-			nero.NewColumn("name", u.Name),
-			nero.NewColumn("age", u.Age),
-			nero.NewColumn("group", u.Group).
-				StructField("Group"),
-			nero.NewColumn("kv", u.Kv),
-			nero.NewColumn("tags", u.Tags),
-			nero.NewColumn("updated_at", u.UpdatedAt).Nullable(),
-			nero.NewColumn("created_at", u.CreatedAt).
-				Auto(),
-		},
-	}
+	return nero.NewSchemaBuilder().
+		PkgName("repository").Collection("users").
+		Columns(
+			nero.NewColumnBuilder("id", u.ID).
+				StructField("ID").Identity().Auto().Build(),
+			nero.NewColumnBuilder("uid", u.UID).
+				StructField("UID").Build(),
+			nero.NewColumnBuilder("email", u.Email).Build(),
+			nero.NewColumnBuilder("name", u.Name).Build(),
+			nero.NewColumnBuilder("age", u.Age).Build(),
+			nero.NewColumnBuilder("group", u.Group).
+				StructField("Group").Build(),
+			nero.NewColumnBuilder("kv", u.Kv).Build(),
+			nero.NewColumnBuilder("tags", u.Tags).Build(),
+			nero.NewColumnBuilder("updated_at", u.UpdatedAt).Build(),
+			nero.NewColumnBuilder("created_at", u.CreatedAt).
+				Auto().Build(),
+		).
+		Build()
 }

@@ -1,12 +1,12 @@
 package repository_test
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"fmt"
 	"log"
 	"math/rand"
-	"os"
 	"testing"
 	"time"
 
@@ -29,7 +29,8 @@ func TestPostgreSQLRepository(t *testing.T) {
 	require.NoError(t, db.Ping())
 	require.NoError(t, createTable(db))
 
-	logger := log.New(os.Stderr, "nero test: ", 0)
+	buf := &bytes.Buffer{}
+	logger := log.New(buf, "", 0)
 	repo := repository.NewPostgresRepository(db).Debug().WithLogger(logger)
 	newRepoTestRunner(repo)(t)
 	require.NoError(t, dropTable(db))

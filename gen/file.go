@@ -20,7 +20,8 @@ import (
 // File is a generated file
 type File struct {
 	name string
-	buf  *bytes.Buffer
+	// FIXME: Use io.Writer or something else
+	buf *bytes.Buffer
 }
 
 // Render renders the file to the specified path

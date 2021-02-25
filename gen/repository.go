@@ -48,7 +48,7 @@ type Repository interface {
 	Tx(context.Context) (nero.Tx, error)
 	// Create creates a new {{.Type.Name}}
 	Create(context.Context, *Creator) (id {{type .Ident.Type.V}}, err error)
-	// CreateTx creates a new type .Type.Name}} inside a transaction
+	// CreateTx creates a new type {{.Type.Name}} inside a transaction
 	CreateTx(context.Context, nero.Tx, *Creator) (id {{type .Ident.Type.V}}, err error)
 	// CreateMany creates many {{.Type.Name}}
 	CreateMany(context.Context, ...*Creator) error
@@ -92,7 +92,7 @@ func NewCreator() *Creator {
 
 {{range $col := .Cols}}
 	{{if ne $col.Auto true -}}
-		// {{$col.Field}} is a setter for {{$col.Identifier}}
+		// {{$col.Field}} is a setter for the {{$col.Field}} field
 		func (c *Creator) {{$col.Field}}({{$col.Identifier}} {{type $col.Type.V}}) *Creator {
 			c.{{$col.Identifier}} = {{$col.Identifier}}
 			return c
@@ -154,7 +154,7 @@ func NewUpdater() *Updater {
 
 {{range $col := .Cols}}
 	{{if ne $col.Auto true -}}
-		// {{$col.Field}} is a setter for {{$col.Identifier}}
+		// {{$col.Field}} is a setter for the {{$col.Field}} field
 		func (c *Updater) {{$col.Field}}({{$col.Identifier}} {{type $col.Type.V}}) *Updater {
 			c.{{$col.Identifier}} = {{$col.Identifier}}
 			return c

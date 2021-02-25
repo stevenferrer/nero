@@ -60,7 +60,7 @@ func Generate(schemaer nero.Schemaer) ([]*File, error) {
 	})
 
 	for _, tmpl := range schema.Templates {
-		buff, err := newTemplateFile(schema, tmpl.Content())
+		buff, err := newTemplateFile(schema, tmpl.Template())
 		if err != nil {
 			return nil, errors.Wrap(err, "repository implementation file")
 		}

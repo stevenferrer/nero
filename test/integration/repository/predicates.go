@@ -784,6 +784,26 @@ func CreatedAtLtOrEq(createdAt *time.Time) PredFunc {
 	}
 }
 
+// CreatedAtIsNull is a "is null" operator on "created_at" column
+func CreatedAtIsNull() PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "created_at",
+			Op:  comparison.IsNull,
+		})
+	}
+}
+
+// CreatedAtIsNotNull is a "is not null" operator on "created_at" column
+func CreatedAtIsNotNull() PredFunc {
+	return func(pb *comparison.Predicates) {
+		pb.Add(&comparison.Predicate{
+			Col: "created_at",
+			Op:  comparison.IsNotNull,
+		})
+	}
+}
+
 // CreatedAtIn is a "in" operator on "created_at" column
 func CreatedAtIn(createdAts ...*time.Time) PredFunc {
 	args := []interface{}{}

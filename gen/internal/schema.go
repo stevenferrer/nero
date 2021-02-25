@@ -24,20 +24,20 @@ type Schema struct {
 }
 
 // BuildSchema builds schema from a nero.Schemaer to Schema
-func BuildSchema(s nero.Schemaer) (*Schema, error) {
-	ns := s.Schema()
-	st := mira.NewType(s)
+func BuildSchema(schemaer nero.Schemaer) (*Schema, error) {
+	schema := schemaer.Schema()
+	st := mira.NewType(schemaer)
 
-	tmpls := ns.Templates
+	tmpls := schema.Templates
 	if len(tmpls) == 0 {
 		// default templates
 		tmpls = []nero.Templater{
 			template.NewPostgresTemplate(),
 		}
 	}
-	schema := &Schema{
-		Pkg:           strings.ToLower(ns.Pkg),
-		Collection:    ns.Collection,
+	internalSchema := &Schema{
+		Pkg:           strings.ToLower(schema.PkgName),
+		Collection:    schema.Collection,
 		Type:          st,
 		Cols:          []*Col{},
 		SchemaImports: []string{st.PkgPath()},
@@ -47,24 +47,22 @@ func BuildSchema(s nero.Schemaer) (*Schema, error) {
 	colImportMap := map[string]int{}
 
 	identCnt := 0
-	for _, column := range ns.Columns {
-		cfg := column.Cfg()
+	for _, c := range schema.Columns {
 		col := &Col{
-			Name:             cfg.Name,
-			StructField:      stringsx.ToCamel(cfg.Name),
-			Type:             mira.NewType(cfg.T),
-			Ident:            cfg.Ident,
-			Auto:             cfg.Auto,
-			Nullable:         cfg.Nullable,
-			ColumnComparable: cfg.ColumnComparable,
+			Name:             c.Name,
+			StructField:      stringsx.ToCamel(c.Name),
+			Type:             mira.NewType(c.T),
+			Ident:            c.Identity,
+			Auto:             c.Auto,
+			ColumnComparable: c.ColumnComparable,
 		}
 
-		if len(cfg.StructField) > 0 {
-			col.StructField = cfg.StructField
+		if len(c.StructField) > 0 {
+			col.StructField = c.StructField
 		}
 
-		if cfg.Ident {
-			schema.Ident = col
+		if c.Identity {
+			internalSchema.Ident = col
 			identCnt++
 		}
 
@@ -72,7 +70,7 @@ func BuildSchema(s nero.Schemaer) (*Schema, error) {
 			colImportMap[col.Type.PkgPath()] = 1
 		}
 
-		schema.Cols = append(schema.Cols, col)
+		internalSchema.Cols = append(internalSchema.Cols, col)
 	}
 
 	columnImports := []string{}
@@ -80,7 +78,7 @@ func BuildSchema(s nero.Schemaer) (*Schema, error) {
 		columnImports = append(columnImports, k)
 	}
 
-	schema.ColumnImports = columnImports
+	internalSchema.ColumnImports = columnImports
 
 	if identCnt == 0 {
 		return nil, errors.New("an identity column is required")
@@ -90,5 +88,5 @@ func BuildSchema(s nero.Schemaer) (*Schema, error) {
 		return nil, errors.New("only one identity column is allowed")
 	}
 
-	return schema, nil
+	return internalSchema, nil
 }

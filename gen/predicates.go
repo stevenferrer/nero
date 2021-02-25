@@ -73,7 +73,7 @@ type PredFunc func(*comparison.Predicates)
 	{{if $col.HasPreds -}}
 		{{range $op := $.Ops -}}
 			{{if isNullOrNotOp $op }}
-				{{if $col.Nullable}}
+				{{if $col.IsNullable}}
 					// {{$col.Field}}{{$op.String}} is a "{{$op.Desc}}" operator on "{{$col.Name}}" column
 					func {{$col.Field}}{{$op.String}} () PredFunc {
 						return func(pb *comparison.Predicates) {

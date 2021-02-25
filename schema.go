@@ -1,14 +1,14 @@
 package nero
 
-// Schemaer is a contract for generating a repository
+// Schemaer is an interface that wraps the Schema method
 type Schemaer interface {
 	Schema() *Schema
 }
 
-// Schema is a nero schema
+// Schema is a nero schema used for generating the repository
 type Schema struct {
-	// Pkg is the package name of the generated files
-	Pkg string
+	// PkgName is the package name of the generated files
+	PkgName string
 	// Collection is the name of the collection/table
 	Collection string
 	// Columns is the list of columns
@@ -17,75 +17,46 @@ type Schema struct {
 	Templates []Templater
 }
 
-// Column is a column
-type Column struct {
-	cfg *ColumnConfig
+// SchemaBuilder is schema builder
+type SchemaBuilder struct {
+	schema *Schema
 }
 
-// ColumnConfig is a column configuration
-type ColumnConfig struct {
-	// Name is the column name
-	Name string
-	// T is the column type
-	T interface{}
-	// StructField overrides the struct field
-	StructField string
-	// Auto is an auto-filled column
-	Auto,
-	// Ident is an identity column
-	Ident,
-	// Nullable is a nullable column
-	Nullable,
-	// ColumnComparable is a column that can be compared
-	// with other columns in the same collection/table
-	ColumnComparable bool
+// NewSchemaBuilder returns a SchemaBuilder
+func NewSchemaBuilder() *SchemaBuilder {
+	return &SchemaBuilder{schema: &Schema{
+		Columns:   []*Column{},
+		Templates: []Templater{},
+	}}
 }
 
-// NewColumn creates a new column
-func NewColumn(name string, t interface{}) *Column {
-	return &Column{
-		cfg: &ColumnConfig{
-			Name: name,
-			T:    t,
-		},
-	}
+// Build builds the schema
+func (s *SchemaBuilder) Build() *Schema {
+	return s.schema
 }
 
-// Cfg returns the column configurations
-func (c *Column) Cfg() *ColumnConfig {
-	return c.cfg
+// Schema is a nero schema
+
+// PkgName sets the pkg name
+func (s *SchemaBuilder) PkgName(pkgName string) *SchemaBuilder {
+	s.schema.PkgName = pkgName
+	return s
 }
 
-// Auto is an auto-filled column i.e. auto-increment
-// primary key id, auto-filled date etc.
-func (c *Column) Auto() *Column {
-	c.cfg.Auto = true
-	return c
+// Collection sets the collection
+func (s *SchemaBuilder) Collection(collection string) *SchemaBuilder {
+	s.schema.Collection = collection
+	return s
 }
 
-// Ident is an identity column
-func (c *Column) Ident() *Column {
-	c.cfg.Ident = true
-	return c
+// Columns sets the columns
+func (s *SchemaBuilder) Columns(columns ...*Column) *SchemaBuilder {
+	s.schema.Columns = append(s.schema.Columns, columns...)
+	return s
 }
 
-// Nullable is a nullable column
-func (c *Column) Nullable() *Column {
-	c.cfg.Nullable = true
-	return c
-}
-
-// ColumnComparable is a column that can be compared
-// with other columns in the same collection/table
-func (c *Column) ColumnComparable() *Column {
-	c.cfg.ColumnComparable = true
-	return c
-}
-
-// StructField overrides the struct field name. Use this when the
-// inferred struct field is wrong. e.g. The struct field of the model
-// is "ID" but being referred to as "Id" in the generated code
-func (c *Column) StructField(structField string) *Column {
-	c.cfg.StructField = structField
-	return c
+// Templates sets the templates
+func (s *SchemaBuilder) Templates(templates ...Templater) *SchemaBuilder {
+	s.schema.Templates = append(s.schema.Templates, templates...)
+	return s
 }

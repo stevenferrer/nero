@@ -16,14 +16,13 @@ type Group struct {
 
 // Schema implements nero.Schamaer
 func (g *Group) Schema() *nero.Schema {
-	return &nero.Schema{
-		Pkg:        "user",
-		Collection: "users",
-		Columns: []*nero.Column{
-			nero.NewColumn("id", g.ID).StructField("ID").Ident().Auto(),
-			nero.NewColumn("name", g.Name),
-			nero.NewColumn("updated_at", g.UpdatedAt),
-			nero.NewColumn("created_at", g.CreatedAt).Auto(),
-		},
-	}
+	return nero.NewSchemaBuilder().
+		PkgName("user").Collection("users").
+		Columns(
+			nero.NewColumnBuilder("id", g.ID).StructField("ID").
+				Identity().Auto().Build(),
+			nero.NewColumnBuilder("name", g.Name).Build(),
+			nero.NewColumnBuilder("updated_at", g.UpdatedAt).Build(),
+			nero.NewColumnBuilder("created_at", g.CreatedAt).Auto().Build(),
+		).Build()
 }

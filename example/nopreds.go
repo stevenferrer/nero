@@ -18,15 +18,13 @@ type MyStruct struct {
 
 // Schema implements nero.Schemaer
 func (n *NoPreds) Schema() *nero.Schema {
-	return &nero.Schema{
-		Pkg:        "user",
-		Collection: "users",
-		Columns: []*nero.Column{
-			nero.NewColumn("id", n.ID).
-				StructField("ID").Ident().Auto(),
-			nero.NewColumn("m", n.M),
-			nero.NewColumn("a", n.A),
-			nero.NewColumn("s", n.S),
-		},
-	}
+	return nero.NewSchemaBuilder().
+		PkgName("user").Collection("users").
+		Columns(
+			nero.NewColumnBuilder("id", n.ID).
+				StructField("ID").Identity().Auto().Build(),
+			nero.NewColumnBuilder("m", n.M).Build(),
+			nero.NewColumnBuilder("a", n.A).Build(),
+			nero.NewColumnBuilder("s", n.S).Build(),
+		).Build()
 }

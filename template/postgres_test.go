@@ -12,6 +12,6 @@ func TestPostgresTemplate(t *testing.T) {
 
 	assert.Equal(t, "pg.go", tmpl.Filename())
 
-	_, err := ParseTemplate(tmpl.Content())
+	_, err := ParseTemplate(tmpl.Template())
 	require.NoError(t, err)
 }

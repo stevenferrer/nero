@@ -10,7 +10,7 @@ $ go get github.com/sf9v/nero
 
 ## Example
 
-See the [integration test](./test/integration) for other examples.
+See the [integration test](./test/integration) for a more complete example.
 
 ```go
 import (

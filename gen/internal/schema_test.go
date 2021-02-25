@@ -18,12 +18,10 @@ func (*example1) Schema() *nero.Schema {
 type example2 struct{}
 
 func (*example2) Schema() *nero.Schema {
-	return &nero.Schema{
-		Columns: []*nero.Column{
-			nero.NewColumn("id1", int64(0)).Ident(),
-			nero.NewColumn("id2", int64(0)).Ident(),
-		},
-	}
+	return nero.NewSchemaBuilder().Columns(
+		nero.NewColumnBuilder("id1", int64(0)).Identity().Build(),
+		nero.NewColumnBuilder("id2", int64(0)).Identity().Build(),
+	).Build()
 }
 
 func TestBuildSchema(t *testing.T) {
