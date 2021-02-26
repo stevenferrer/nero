@@ -48,11 +48,13 @@ const (
 
 // Schema implements nero.Schemaer
 func (u *User) Schema() *nero.Schema {
-	return nero.NewSchemaBuilder().
+	return nero.NewSchemaBuilder(u).
 		PkgName("repository").Collection("users").
-		Columns(
+		Identity(
 			nero.NewColumnBuilder("id", u.ID).
-				StructField("ID").Identity().Auto().Build(),
+				StructField("ID").Auto().Build(),
+		).
+		Columns(
 			nero.NewColumnBuilder("uid", u.UID).
 				StructField("UID").Build(),
 			nero.NewColumnBuilder("email", u.Email).Build(),

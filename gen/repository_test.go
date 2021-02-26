@@ -8,12 +8,10 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/sf9v/nero/example"
-	gen "github.com/sf9v/nero/gen/internal"
 )
 
 func Test_newRepositoryFile(t *testing.T) {
-	schema, err := gen.BuildSchema(new(example.User))
-	require.NoError(t, err)
+	schema := (&example.User{}).Schema()
 	buf, err := newRepositoryFile(schema)
 	require.NoError(t, err)
 

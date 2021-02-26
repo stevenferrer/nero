@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/sf9v/nero"
-	"github.com/sf9v/nero/template"
 )
 
 // User is a basic example type
@@ -25,12 +24,15 @@ type User struct {
 
 // Schema implements nero.Schemaer
 func (u *User) Schema() *nero.Schema {
-	return nero.NewSchemaBuilder().
+	return nero.NewSchemaBuilder(u).
 		PkgName("user").Collection("users").
-		Columns(
+		Identity(
 			nero.NewColumnBuilder("id", u.ID).
-				StructField("ID").Identity().Auto().Build(),
-			nero.NewColumnBuilder("uuid", u.UUID).StructField("UUID").Build(),
+				StructField("ID").Auto().Build(),
+		).
+		Columns(
+			nero.NewColumnBuilder("uuid", u.UUID).
+				StructField("UUID").Build(),
 			nero.NewColumnBuilder("name", u.Name).Build(),
 			nero.NewColumnBuilder("group_res", u.Group).
 				StructField("Group").Build(),
@@ -39,9 +41,9 @@ func (u *User) Schema() *nero.Schema {
 			nero.NewColumnBuilder("tags", u.Tags).Build(),
 			nero.NewColumnBuilder("empty", u.Empty).Build(),
 			nero.NewColumnBuilder("updated_at", u.UpdatedAt).
-				Optional().ColumnComparable().Build(),
+				Optional().Comparable().Build(),
 			nero.NewColumnBuilder("created_at", u.CreatedAt).Auto().Build(),
 		).
-		Templates(template.NewPostgresTemplate().WithFilename("postgres.go")).
+		Templates(nero.NewPostgresTemplate().WithFilename("postgres.go")).
 		Build()
 }

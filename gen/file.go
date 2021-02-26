@@ -25,15 +25,15 @@ type File struct {
 }
 
 // Render renders the file to the specified path
-func (fl *File) Render(basePath string) error {
-	filePath := path.Join(basePath, fl.name)
+func (ff *File) Render(basePath string) error {
+	filePath := path.Join(basePath, ff.name)
 	f, err := os.Create(filePath)
 	if err != nil {
 		return errors.Wrap(err, "create base path")
 	}
 	defer f.Close()
 
-	_, err = f.Write(fl.Bytes())
+	_, err = f.Write(ff.Bytes())
 	if err != nil {
 		return errors.Wrap(err, "write file")
 	}
@@ -41,14 +41,14 @@ func (fl *File) Render(basePath string) error {
 	return errors.Wrap(formatSource(filePath), "format source")
 }
 
-// FileName returns the filename
-func (fl *File) FileName() string {
-	return fl.name
+// Filename returns the filename
+func (ff *File) Filename() string {
+	return ff.name
 }
 
 // Bytes returns the bytes
-func (fl *File) Bytes() []byte {
-	return fl.buf.Bytes()
+func (ff *File) Bytes() []byte {
+	return ff.buf.Bytes()
 }
 
 // formatSource removes unneeded imports from the given Go source file and runs gofmt on it.

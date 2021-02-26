@@ -5,14 +5,12 @@ import (
 	"testing"
 
 	"github.com/sf9v/nero/example"
-	gen "github.com/sf9v/nero/gen/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_newAggregatesFile(t *testing.T) {
-	schema, err := gen.BuildSchema(new(example.User))
-	require.NoError(t, err)
+	schema := (&example.User{}).Schema()
 	require.NotNil(t, schema)
 
 	buf, err := newAggregatesFile(schema)

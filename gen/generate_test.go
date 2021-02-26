@@ -12,12 +12,12 @@ import (
 )
 
 func TestGenerate(t *testing.T) {
-	files, err := Generate(new(example.User))
+	files, err := Generate(&example.User{})
 	assert.NoError(t, err)
 	assert.Len(t, files, 6)
 
 	for _, file := range files {
-		require.NotEmpty(t, file.FileName())
+		require.NotEmpty(t, file.Filename())
 		require.NotEmpty(t, file.Bytes())
 	}
 

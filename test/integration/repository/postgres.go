@@ -118,7 +118,7 @@ func (pg *PostgresRepository) create(ctx context.Context, runner nero.SQLRunner,
 	return id, nil
 }
 
-// CreateMany creates many User
+// CreateMany creates User
 func (pg *PostgresRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
 	return pg.createMany(ctx, pg.db, cs...)
 }
@@ -272,6 +272,7 @@ func (pg *PostgresRepository) queryOne(ctx context.Context, runner nero.SQLRunne
 			&user.CreatedAt,
 		)
 	if err != nil {
+		// TODO: embed the zero function to type info
 		return nil, err
 	}
 

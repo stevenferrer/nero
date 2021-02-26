@@ -1,62 +1,80 @@
 package nero
 
+import (
+	"github.com/jinzhu/inflection"
+	"github.com/sf9v/mira"
+	stringsx "github.com/sf9v/nero/x/strings"
+)
+
 // Schemaer is an interface that wraps the Schema method
 type Schemaer interface {
 	Schema() *Schema
 }
 
-// Schema is a nero schema used for generating the repository
+// Schema is a schema used for generating the repository
 type Schema struct {
-	// PkgName is the package name of the generated files
-	PkgName string
+	// pkgName is the package name of the generated files
+	pkgName string
 	// Collection is the name of the collection/table
-	Collection string
+	collection string
+	// typeInfo is the type info the schema model
+	typeInfo *mira.Type
+	// Identity is the identity column
+	identity *Column
 	// Columns is the list of columns
-	Columns []*Column
-	// Templates is the list of custom repository templates
-	Templates []Templater
+	columns []*Column
+	// Imports are list of package imports
+	imports []string
+	// Templates is the list of custom repository templaters
+	templaters []Templater
 }
 
-// SchemaBuilder is schema builder
-type SchemaBuilder struct {
-	schema *Schema
+// PkgName returns the pkg name
+func (s *Schema) PkgName() string {
+	return s.pkgName
 }
 
-// NewSchemaBuilder returns a SchemaBuilder
-func NewSchemaBuilder() *SchemaBuilder {
-	return &SchemaBuilder{schema: &Schema{
-		Columns:   []*Column{},
-		Templates: []Templater{},
-	}}
+// Collection returns the collection
+func (s *Schema) Collection() string {
+	return s.collection
 }
 
-// Build builds the schema
-func (s *SchemaBuilder) Build() *Schema {
-	return s.schema
+// Identity returns the identity column
+func (s *Schema) Identity() *Column {
+	return s.identity
 }
 
-// Schema is a nero schema
-
-// PkgName sets the pkg name
-func (s *SchemaBuilder) PkgName(pkgName string) *SchemaBuilder {
-	s.schema.PkgName = pkgName
-	return s
+// Columns returns the columns
+func (s *Schema) Columns() []*Column {
+	return append([]*Column{}, s.columns...)
 }
 
-// Collection sets the collection
-func (s *SchemaBuilder) Collection(collection string) *SchemaBuilder {
-	s.schema.Collection = collection
-	return s
+// Imports returns the pkg imports
+func (s *Schema) Imports() []string {
+	return append([]string{}, s.imports...)
 }
 
-// Columns sets the columns
-func (s *SchemaBuilder) Columns(columns ...*Column) *SchemaBuilder {
-	s.schema.Columns = append(s.schema.Columns, columns...)
-	return s
+// Templaters returns the templaters
+func (s *Schema) Templaters() []Templater {
+	return append([]Templater{}, s.templaters...)
 }
 
-// Templates sets the templates
-func (s *SchemaBuilder) Templates(templates ...Templater) *SchemaBuilder {
-	s.schema.Templates = append(s.schema.Templates, templates...)
-	return s
+// TypeInfo returns the type info
+func (s *Schema) TypeInfo() *mira.Type {
+	return s.typeInfo
+}
+
+// TypeName returns the type name
+func (s *Schema) TypeName() string {
+	return s.typeInfo.Name()
+}
+
+// TypeIdentifier returns the type identifier
+func (s *Schema) TypeIdentifier() string {
+	return stringsx.ToLowerCamel(s.TypeName())
+}
+
+// TypeIdentifierPlural returns the plural form of type identifier
+func (s *Schema) TypeIdentifierPlural() string {
+	return inflection.Plural(s.TypeIdentifier())
 }

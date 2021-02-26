@@ -27,17 +27,18 @@ func TestPostgreSQLRepository(t *testing.T) {
 	db, err := sql.Open("postgres", dsn)
 	require.NoError(t, err)
 	require.NoError(t, db.Ping())
-	require.NoError(t, createTable(db))
 
-	buf := &bytes.Buffer{}
-	logger := log.New(buf, "", 0)
-	repo := repository.NewPostgresRepository(db).Debug().WithLogger(logger)
+	// create table
+	require.NoError(t, createTable(db))
+	repo := repository.NewPostgresRepository(db).Debug().
+		WithLogger(log.New(&bytes.Buffer{}, "", 0))
 	newRepoTestRunner(repo)(t)
 	require.NoError(t, dropTable(db))
 
 	// tx methods
 	require.NoError(t, createTable(db))
-	repo = repository.NewPostgresRepository(db).Debug().WithLogger(logger)
+	repo = repository.NewPostgresRepository(db).Debug().
+		WithLogger(log.New(&bytes.Buffer{}, "", 0))
 	newRepoTestRunnerTx(repo)(t)
 	require.NoError(t, dropTable(db))
 }

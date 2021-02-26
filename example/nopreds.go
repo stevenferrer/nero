@@ -17,14 +17,16 @@ type MyStruct struct {
 }
 
 // Schema implements nero.Schemaer
-func (n *NoPreds) Schema() *nero.Schema {
-	return nero.NewSchemaBuilder().
+func (np *NoPreds) Schema() *nero.Schema {
+	return nero.NewSchemaBuilder(np).
 		PkgName("user").Collection("users").
+		Identity(
+			nero.NewColumnBuilder("id", np.ID).
+				StructField("ID").Auto().Build(),
+		).
 		Columns(
-			nero.NewColumnBuilder("id", n.ID).
-				StructField("ID").Identity().Auto().Build(),
-			nero.NewColumnBuilder("m", n.M).Build(),
-			nero.NewColumnBuilder("a", n.A).Build(),
-			nero.NewColumnBuilder("s", n.S).Build(),
+			nero.NewColumnBuilder("m", np.M).Build(),
+			nero.NewColumnBuilder("a", np.A).Build(),
+			nero.NewColumnBuilder("s", np.S).Build(),
 		).Build()
 }

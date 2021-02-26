@@ -3,15 +3,11 @@ package gen
 import (
 	"github.com/pkg/errors"
 	"github.com/sf9v/nero"
-	gen "github.com/sf9v/nero/gen/internal"
 )
 
 // Generate generates the repository code
 func Generate(schemaer nero.Schemaer) ([]*File, error) {
-	schema, err := gen.BuildSchema(schemaer)
-	if err != nil {
-		return nil, errors.Wrap(err, "build schema")
-	}
+	schema := schemaer.Schema()
 
 	files := []*File{}
 	metaBuf, err := newMetaFile(schema)
@@ -59,14 +55,14 @@ func Generate(schemaer nero.Schemaer) ([]*File, error) {
 		buf:  repoBuf,
 	})
 
-	for _, tmpl := range schema.Templates {
-		buff, err := newTemplateFile(schema, tmpl.Template())
+	for _, tmpltr := range schema.Templaters() {
+		buff, err := newTemplater(schema, tmpltr)
 		if err != nil {
 			return nil, errors.Wrap(err, "repository implementation file")
 		}
 
 		files = append(files, &File{
-			name: tmpl.Filename(),
+			name: tmpltr.Filename(),
 			buf:  buff,
 		})
 	}

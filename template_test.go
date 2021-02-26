@@ -1,8 +1,9 @@
-package template
+package nero
 
 import (
 	"testing"
 
+	"github.com/sf9v/nero/comparison"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,7 +16,7 @@ func TestFuncs(t *testing.T) {
 		assert.Equal(t, expect, got)
 
 		got = typeFunc(&myType{})
-		expect = "template.myType"
+		expect = "nero.myType"
 		assert.Equal(t, expect, got)
 	})
 
@@ -33,7 +34,7 @@ func TestFuncs(t *testing.T) {
 		assert.Equal(t, expect, got)
 
 		got = zeroFunc(myType{})
-		expect = "(template.myType{})"
+		expect = "(nero.myType{})"
 		assert.Equal(t, expect, got)
 
 		got = zeroFunc([1]int{1})
@@ -41,7 +42,11 @@ func TestFuncs(t *testing.T) {
 		assert.Equal(t, expect, got)
 
 		got = zeroFunc([1][1]*myType{})
-		expect = "([1][1]*template.myType{})"
+		expect = "([1][1]*nero.myType{})"
+		assert.Equal(t, expect, got)
+
+		got = zeroFunc([0]interface{}{})
+		expect = "([0]interface {}{})"
 		assert.Equal(t, expect, got)
 
 		got = zeroFunc("")
@@ -49,19 +54,11 @@ func TestFuncs(t *testing.T) {
 		assert.Equal(t, expect, got)
 	})
 
-	t.Run("pluralFunc", func(t *testing.T) {
-		got := pluralFunc("user")
-		expect := "users"
-		assert.Equal(t, got, expect)
+	assert.True(t, isNullOp(comparison.IsNull))
+	assert.True(t, isNullOp(comparison.IsNotNull))
 
-		got = pluralFunc("matrix")
-		expect = "matrices"
-		assert.Equal(t, got, expect)
-	})
+	assert.True(t, isInOp(comparison.In))
+	assert.True(t, isInOp(comparison.NotIn))
 
-	t.Run("lowerCamelFunc", func(t *testing.T) {
-		got := lowerCamelFunc("TheMatrix")
-		expect := "theMatrix"
-		assert.Equal(t, got, expect)
-	})
+	assert.Len(t, prependToColumns(&Column{}, []*Column{}), 1)
 }

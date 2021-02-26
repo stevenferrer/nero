@@ -1,74 +1,100 @@
 package nero
 
+import (
+	"reflect"
+
+	"github.com/jinzhu/inflection"
+	"github.com/sf9v/mira"
+	stringsx "github.com/sf9v/nero/x/strings"
+)
+
 // Column is a column
 type Column struct {
-	// Name is the column name
-	Name string
-	// T is the column type
-	T interface{}
+	// name is the column name
+	name string
+	// typeInfo is inferred column type info
+	typeInfo *mira.Type
 	// StructField overrides the struct field
-	StructField string
-	// Identity is an identity column
-	Identity,
-	// Auto is an auto-filled column and thus will not have any setter
-	Auto,
-	// Optional is an optional column i.e. not required
-	Optional,
-	// ColumnComparable is a column that can be compared
-	// with other columns in the same collection/table
-	ColumnComparable bool
+	structField string
+	// Auto is an auto-filled column flag
+	auto,
+	// Optional is an optional column flag
+	optional,
+	// ColumnComparable is a flag that enables
+	// comparison against other columns
+	comparable bool
 }
 
-// ColumnBuilder is a column
-type ColumnBuilder struct {
-	column *Column
+// TypeInfo returns the type info
+func (c *Column) TypeInfo() *mira.Type {
+	return c.typeInfo
 }
 
-// NewColumnBuilder returns a ColumnBuilder
-func NewColumnBuilder(name string, t interface{}) *ColumnBuilder {
-	return &ColumnBuilder{
-		column: &Column{
-			Name: name,
-			T:    t,
-		},
+// Name returns the column name
+func (c *Column) Name() string {
+	return c.name
+}
+
+// FieldName returns the field name
+func (c *Column) FieldName() string {
+	field := stringsx.ToCamel(c.name)
+	if len(c.structField) > 0 {
+		field = c.structField
 	}
+
+	return field
 }
 
-// Build builds the column
-func (c *ColumnBuilder) Build() *Column {
-	return c.column
+// Identifier returns the lower-camelized field name
+func (c *Column) Identifier() string {
+	return stringsx.ToLowerCamel(c.FieldName())
 }
 
-// Auto is an auto-filled column i.e. auto-increment
-// primary key id, auto-filled date etc.
-func (c *ColumnBuilder) Auto() *ColumnBuilder {
-	c.column.Auto = true
-	return c
+// IdentifierPlural returns the plural form of lower-camelized field name
+func (c *Column) IdentifierPlural() string {
+	return inflection.Plural(c.Identifier())
 }
 
-// Identity is an identity column
-func (c *ColumnBuilder) Identity() *ColumnBuilder {
-	c.column.Identity = true
-	return c
+// CanHavePreds returns true if column can have predicate functions
+func (c *Column) CanHavePreds() bool {
+	kind := c.typeInfo.T().Kind()
+	return !(kind == reflect.Map ||
+		kind == reflect.Slice)
 }
 
-// ColumnComparable is a column that can be compared
-// with other columns in the same collection/table
-func (c *ColumnBuilder) ColumnComparable() *ColumnBuilder {
-	c.column.ColumnComparable = true
-	return c
+// IsArray returns true if column is an array or a slice
+func (c *Column) IsArray() bool {
+	kind := c.typeInfo.T().Kind()
+	return kind == reflect.Array ||
+		kind == reflect.Slice
 }
 
-// StructField overrides the struct field name. Use this when the
-// inferred struct field is wrong. e.g. The struct field of the model
-// is "ID" but being referred to as "Id" in the generated code
-func (c *ColumnBuilder) StructField(structField string) *ColumnBuilder {
-	c.column.StructField = structField
-	return c
+// IsNillable returns true if the column is nillable
+func (c *Column) IsNillable() bool {
+	return c.typeInfo.IsNillable()
 }
 
-// Optional is an optional column i.e. not required
-func (c *ColumnBuilder) Optional() *ColumnBuilder {
-	c.column.Optional = true
-	return c
+// IsValueScanner returns true if column implements value scanner
+func (c *Column) IsValueScanner() bool {
+	t := reflect.TypeOf(c.typeInfo.V())
+	if t.Kind() != reflect.Ptr {
+		t = reflect.New(t).Type()
+	}
+
+	return t.Implements(reflect.TypeOf(new(ValueScanner)).Elem())
+}
+
+// IsAuto returns the auto flag
+func (c *Column) IsAuto() bool {
+	return c.auto
+}
+
+// IsOptional returns the optional flag
+func (c *Column) IsOptional() bool {
+	return c.optional
+}
+
+// IsComparable returns the column comparable flag
+func (c *Column) IsComparable() bool {
+	return c.comparable
 }

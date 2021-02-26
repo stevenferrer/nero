@@ -30,11 +30,13 @@ type Item struct {
 
 // Schema implements nero.Schemaer
 func (c *Custom) Schema() *nero.Schema {
-	return nero.NewSchemaBuilder().
+	return nero.NewSchemaBuilder(c).
 		PkgName("user").Collection("users").
-		Columns(
+		Identity(
 			nero.NewColumnBuilder("id", c.ID).
-				StructField("ID").Identity().Auto().Build(),
+				StructField("ID").Auto().Build(),
+		).
+		Columns(
 			nero.NewColumnBuilder("ksid", c.KSID).StructField("KSID").Build(),
 			nero.NewColumnBuilder("s", c.S).Build(),
 			nero.NewColumnBuilder("map_str_str", c.MapStrStr).Build(),

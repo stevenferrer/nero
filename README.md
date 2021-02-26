@@ -91,9 +91,9 @@ Currently, we have official support for [PostgreSQL](postgresql.org). Other back
 
 ## Custom back-ends
 
-Implementing your own custom back-end is very easy. In fact, you don't have to use the official back-ends. You can implement custom back-ends (ClickHouse, Cassandra, CouchDB , Badger, H2, etc.) by implementing the [_Templater_](./templater.go) interface. This interface is specifically created to support extensibility and customisability.
+Implementing your own custom back-end is very easy. In fact, you don't have to use the official back-ends. You can implement custom back-ends (ClickHouse, Cassandra, CouchDB , Badger, H2, etc.) by implementing the [_Templater_](./templates.go) interface. This interface is specifically created to support extensibility and customisability.
 
-You can refer to the official [postgres template](./template/postgres.go) and this [example schema](./example/user.go#L46).
+You can refer to the official [postgres template](./postgres_template.go) and this [example schema](./example/user.go#L46).
 
 ## Standing on the shoulders of giants
 
