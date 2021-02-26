@@ -2,20 +2,14 @@ package gen
 
 import (
 	"bytes"
-	"fmt"
 	"text/template"
 
-	"github.com/jinzhu/inflection"
 	"github.com/sf9v/nero"
 )
 
 func newRepositoryFile(schema *nero.Schema) (*bytes.Buffer, error) {
-	tmpl, err := template.New("repository.tmpl").Funcs(template.FuncMap{
-		"plural": inflection.Plural,
-		"type": func(v interface{}) string {
-			return fmt.Sprintf("%T", v)
-		},
-	}).Parse(repositoryTmpl)
+	tmpl, err := template.New("repository.tmpl").
+		Funcs(nero.NewFuncMap()).Parse(repositoryTmpl)
 	if err != nil {
 		return nil, err
 	}
@@ -45,21 +39,21 @@ type Repository interface {
 	// Tx begins a new transaction
 	Tx(context.Context) (nero.Tx, error)
 	// Create runs a create
-	Create(context.Context, *Creator) (id {{type .Identity.TypeInfo.V}}, err error)
+	Create(context.Context, *Creator) (id {{rawType .Identity.TypeInfo.V}}, err error)
 	// CreateTx runs a create in a transaction
-	CreateTx(context.Context, nero.Tx, *Creator) (id {{type .Identity.TypeInfo.V}}, err error)
+	CreateTx(context.Context, nero.Tx, *Creator) (id {{rawType .Identity.TypeInfo.V}}, err error)
 	// CreateMany runs a batch create
 	CreateMany(context.Context, ...*Creator) error
 	// CreateManyTx runs a batch create in a transaction
 	CreateManyTx(context.Context, nero.Tx, ...*Creator) error
 	// Query runs a query
-	Query(context.Context, *Queryer) ([]{{type .TypeInfo.V}}, error)
+	Query(context.Context, *Queryer) ([]{{rawType .TypeInfo.V}}, error)
 	// QueryTx runs a query in a transaction
-	QueryTx(context.Context, nero.Tx, *Queryer) ([]{{type .TypeInfo.V}}, error)
+	QueryTx(context.Context, nero.Tx, *Queryer) ([]{{rawType .TypeInfo.V}}, error)
 	// QueryOne runs a query that expects only one result
-	QueryOne(context.Context, *Queryer) ({{type .TypeInfo.V}}, error)
+	QueryOne(context.Context, *Queryer) ({{rawType .TypeInfo.V}}, error)
 	// QueryOneTx runs a query that expects only one result in a transaction
-	QueryOneTx(context.Context, nero.Tx, *Queryer) ({{type .TypeInfo.V}}, error)
+	QueryOneTx(context.Context, nero.Tx, *Queryer) ({{rawType .TypeInfo.V}}, error)
 	// Update runs an update
 	Update(context.Context, *Updater) (rowsAffected int64, err error)
 	// UpdateTx runs an update in a transaction
@@ -74,11 +68,14 @@ type Repository interface {
 	AggregateTx(context.Context, nero.Tx, *Aggregator) error
 }
 
+
+{{ $cols := prependToColumns .Identity .Columns }}
+
 // Creator is a create builder
 type Creator struct {
-	{{range $col := .Columns -}}
+	{{range $col := $cols -}}
 		{{if ne $col.IsAuto true -}}
-		{{$col.Identifier}} {{type $col.TypeInfo.V}}
+		{{$col.Identifier}} {{rawType $col.TypeInfo.V}}
 		{{end -}}
 	{{end -}}
 }
@@ -88,10 +85,10 @@ func NewCreator() *Creator {
 	return &Creator{}
 }
 
-{{range $col := .Columns}}
+{{range $col := $cols }}
 	{{if ne $col.IsAuto true -}}
 		// {{$col.FieldName}} sets the {{$col.FieldName}} field
-		func (c *Creator) {{$col.FieldName}}({{$col.Identifier}} {{type $col.TypeInfo.V}}) *Creator {
+		func (c *Creator) {{$col.FieldName}}({{$col.Identifier}} {{rawType $col.TypeInfo.V}}) *Creator {
 			c.{{$col.Identifier}} = {{$col.Identifier}}
 			return c
 		}
@@ -153,7 +150,7 @@ func (q *Queryer) Offset(offset uint) *Queryer {
 type Updater struct {
 	{{range $col := .Columns -}}
 		{{if ne $col.IsAuto true -}}
-		{{$col.Identifier}} {{type $col.TypeInfo.V}}
+			{{$col.Identifier}} {{rawType $col.TypeInfo.V}}
 		{{end -}}
 	{{end -}}
 	pfs []PredFunc
@@ -167,7 +164,7 @@ func NewUpdater() *Updater {
 {{range $col := .Columns}}
 	{{if ne $col.IsAuto true -}}
 		// {{$col.FieldName}} sets the {{$col.FieldName}} field
-		func (c *Updater) {{$col.FieldName}}({{$col.Identifier}} {{type $col.TypeInfo.V}}) *Updater {
+		func (c *Updater) {{$col.FieldName}}({{$col.Identifier}} {{rawType $col.TypeInfo.V}}) *Updater {
 			c.{{$col.Identifier}} = {{$col.Identifier}}
 			return c
 		}

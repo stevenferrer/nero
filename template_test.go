@@ -10,13 +10,23 @@ import (
 type myType struct{}
 
 func TestFuncs(t *testing.T) {
-	t.Run("typeFunc", func(t *testing.T) {
-		got := typeFunc(1)
+	t.Run("realTypeFunc", func(t *testing.T) {
+		got := realTypeFunc(1)
 		expect := "int"
 		assert.Equal(t, expect, got)
 
-		got = typeFunc(&myType{})
+		got = realTypeFunc(&myType{})
 		expect = "nero.myType"
+		assert.Equal(t, expect, got)
+	})
+
+	t.Run("rawTypeFunc", func(t *testing.T) {
+		got := rawTypeFunc(1)
+		expect := "int"
+		assert.Equal(t, expect, got)
+
+		got = rawTypeFunc(&myType{})
+		expect = "*nero.myType"
 		assert.Equal(t, expect, got)
 	})
 

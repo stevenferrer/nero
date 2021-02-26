@@ -55,6 +55,8 @@ import (
 	{{end -}}
 )
 
+{{ $cols := prependToColumns .Identity .Columns }}
+
 // PostgresRepository implements the Repository interface
 type PostgresRepository struct {
 	db  *sql.DB
@@ -92,12 +94,12 @@ func (pg *PostgresRepository) Tx(ctx context.Context) (nero.Tx, error) {
 }
 
 // Create creates a new {{.TypeName}}
-func (pg *PostgresRepository) Create(ctx context.Context, c *Creator) ({{type .Identity.TypeInfo.V}}, error) {
+func (pg *PostgresRepository) Create(ctx context.Context, c *Creator) ({{rawType .Identity.TypeInfo.V}}, error) {
 	return pg.create(ctx, pg.db, c)
 }
 
 // CreateTx creates a new {{.TypeName}} inside a transaction
-func (pg *PostgresRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) ({{type .Identity.TypeInfo.V}}, error) {
+func (pg *PostgresRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) ({{rawType .Identity.TypeInfo.V}}, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return {{zero .Identity.TypeInfo.V}}, errors.New("expecting tx to be *sql.Tx")
@@ -106,13 +108,13 @@ func (pg *PostgresRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creat
 	return pg.create(ctx, txx, c)
 }
 
-func (pg *PostgresRepository) create(ctx context.Context, runner nero.SQLRunner, c *Creator) ({{type .Identity.TypeInfo.V}}, error) {
+func (pg *PostgresRepository) create(ctx context.Context, runner nero.SQLRunner, c *Creator) ({{rawType .Identity.TypeInfo.V}}, error) {
 	if err := c.Validate(); err != nil {
 		return {{zero .Identity.TypeInfo.V}}, err
 	}
 
 	columns := []string{
-		{{range $col := .Columns -}}
+		{{range $col := $cols -}}
 			{{if (ne $col.IsAuto true) -}}
 				"\"{{$col.Name}}\"",
 			{{end -}}
@@ -120,7 +122,7 @@ func (pg *PostgresRepository) create(ctx context.Context, runner nero.SQLRunner,
 	}
 
 	values := []interface{}{
-		{{range $col := .Columns -}}
+		{{range $col := $cols -}}
 			{{if (ne $col.IsAuto true) -}}
 				{{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
 					pq.Array(c.{{$col.Identifier}}),
@@ -142,7 +144,7 @@ func (pg *PostgresRepository) create(ctx context.Context, runner nero.SQLRunner,
 		pg.logger.Printf("method: Create, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
 
-	var {{.Identity.Identifier}} {{type .Identity.TypeInfo.V}}
+	var {{.Identity.Identifier}} {{rawType .Identity.TypeInfo.V}}
 	err := qb.QueryRowContext(ctx).Scan(&{{.Identity.Identifier}})
 	if err != nil {
 		return {{zero .Identity.TypeInfo.V}}, err
@@ -172,7 +174,7 @@ func (pg *PostgresRepository) createMany(ctx context.Context, runner nero.SQLRun
 	}
 
 	columns := []string{
-		{{range $col := .Columns -}}
+		{{range $col := $cols -}}
 			{{if ne $col.IsAuto true -}}
 				"\"{{$col.Name}}\"",
 			{{end -}}
@@ -185,7 +187,7 @@ func (pg *PostgresRepository) createMany(ctx context.Context, runner nero.SQLRun
 		}
 
 		qb = qb.Values(
-			{{range $col := .Columns -}}
+			{{range $col := $cols -}}
 				{{if ne $col.IsAuto true -}}
 					{{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
 						pq.Array(c.{{$col.Identifier}}),
@@ -213,12 +215,12 @@ func (pg *PostgresRepository) createMany(ctx context.Context, runner nero.SQLRun
 }
 
 // Query queries many {{.TypeName}}
-func (pg *PostgresRepository) Query(ctx context.Context, q *Queryer) ([]*{{type .TypeInfo.V}}, error) {
+func (pg *PostgresRepository) Query(ctx context.Context, q *Queryer) ([]{{rawType .TypeInfo.V}}, error) {
 	return pg.query(ctx, pg.db, q)
 }
 
 // QueryTx queries many {{.TypeName}} inside a transaction
-func (pg *PostgresRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*{{type .TypeInfo.V}}, error) {
+func (pg *PostgresRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]{{rawType .TypeInfo.V}}, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
@@ -227,7 +229,7 @@ func (pg *PostgresRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Querye
 	return pg.query(ctx, txx, q)
 }
 
-func (pg *PostgresRepository) query(ctx context.Context, runner nero.SQLRunner, q *Queryer) ([]*{{type .TypeInfo.V}}, error) {
+func (pg *PostgresRepository) query(ctx context.Context, runner nero.SQLRunner, q *Queryer) ([]{{rawType .TypeInfo.V}}, error) {
 	qb := pg.buildSelect(q)	
 	if pg.debug  && pg.logger != nil {
 		sql, args, err := qb.ToSql()
@@ -240,12 +242,11 @@ func (pg *PostgresRepository) query(ctx context.Context, runner nero.SQLRunner, 
 	}
 	defer rows.Close()
 
-	{{.TypeIdentifierPlural}} := []*{{type .TypeInfo.V}}{}
+	{{.TypeIdentifierPlural}} := []{{rawType .TypeInfo.V}}{}
 	for rows.Next() {
-		var {{.TypeIdentifier}} {{type .TypeInfo.V}}
+		var {{.TypeIdentifier}} {{realType .TypeInfo.V}}
 		err = rows.Scan(
-			{{ $cols := prependToColumns .Identity .Columns}}
-			{{- range $col := $cols -}}
+			{{range $col := $cols -}}
 				{{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
 					pq.Array(&{{$.TypeIdentifier}}.{{$col.FieldName}}),
 				{{else -}}
@@ -264,12 +265,12 @@ func (pg *PostgresRepository) query(ctx context.Context, runner nero.SQLRunner, 
 }
 
 // QueryOne queries one {{.TypeName}}
-func (pg *PostgresRepository) QueryOne(ctx context.Context, q *Queryer) (*{{type .TypeInfo.V}}, error) {
+func (pg *PostgresRepository) QueryOne(ctx context.Context, q *Queryer) ({{rawType .TypeInfo.V}}, error) {
 	return pg.queryOne(ctx, pg.db, q)
 }
 
 // QueryOneTx queries one {{.TypeName}} inside a transaction
-func (pg *PostgresRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*{{type .TypeInfo.V}}, error) {
+func (pg *PostgresRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) ({{rawType .TypeInfo.V}}, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
@@ -278,19 +279,18 @@ func (pg *PostgresRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Que
 	return pg.queryOne(ctx, txx, q)
 }
 
-func (pg *PostgresRepository) queryOne(ctx context.Context, runner nero.SQLRunner, q *Queryer) (*{{type .TypeInfo.V}}, error) {
+func (pg *PostgresRepository) queryOne(ctx context.Context, runner nero.SQLRunner, q *Queryer) ({{rawType .TypeInfo.V}}, error) {
 	qb := pg.buildSelect(q)
 	if pg.debug && pg.logger != nil {
 		sql, args, err := qb.ToSql()
 		pg.logger.Printf("method: QueryOne, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
 
-	var {{.TypeIdentifier}} {{type .TypeInfo.V}}
+	var {{.TypeIdentifier}} {{realType .TypeInfo.V}}
 	err := qb.RunWith(runner).
 		QueryRowContext(ctx).
 		Scan(
-			{{$cols := prependToColumns .Identity .Columns}}
-			{{- range $col := $cols -}}
+			{{range $col := $cols -}}
 				{{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
 					pq.Array(&{{$.TypeIdentifier}}.{{$col.FieldName}}),
 				{{else -}}
@@ -308,8 +308,7 @@ func (pg *PostgresRepository) queryOne(ctx context.Context, runner nero.SQLRunne
 
 func (pg *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	columns := []string{
-		{{ $cols := prependToColumns .Identity .Columns }}
-		{{- range $col := $cols -}}
+		{{range $col := $cols -}}
 			"\"{{$col.Name}}\"",
 		{{end -}}
 	}
@@ -370,7 +369,7 @@ func (pg *PostgresRepository) update(ctx context.Context, runner nero.SQLRunner,
 		PlaceholderFormat(squirrel.Dollar)
 
 	cnt := 0
-	{{- range $col := .Columns}}
+	{{range $col := .Columns}}
 		{{if ne $col.IsAuto true}}
 			if !isZero(u.{{$col.Identifier}}) {
 				{{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}

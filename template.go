@@ -29,7 +29,8 @@ func ParseTemplater(tmpl Templater) (*template.Template, error) {
 // NewFuncMap returns a tempalte func map
 func NewFuncMap() template.FuncMap {
 	return template.FuncMap{
-		"type":             typeFunc,
+		"realType":         realTypeFunc,
+		"rawType":          rawTypeFunc,
 		"zero":             zeroFunc,
 		"isNullOp":         isNullOp,
 		"isInOp":           isInOp,
@@ -47,7 +48,7 @@ func isInOp(op comparison.Operator) bool {
 		op == comparison.NotIn
 }
 
-func typeFunc(v interface{}) string {
+func realTypeFunc(v interface{}) string {
 	t := reflect.TypeOf(v)
 	if t.Kind() != reflect.Ptr {
 		return fmt.Sprintf("%T", v)
@@ -55,6 +56,10 @@ func typeFunc(v interface{}) string {
 
 	ev := reflect.New(resolveType(t)).Elem().Interface()
 	return fmt.Sprintf("%T", ev)
+}
+
+func rawTypeFunc(v interface{}) string {
+	return fmt.Sprintf("%T", v)
 }
 
 func resolveType(t reflect.Type) reflect.Type {
