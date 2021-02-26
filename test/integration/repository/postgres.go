@@ -51,17 +51,17 @@ func (pg *PostgresRepository) WithLogger(logger nero.Logger) *PostgresRepository
 	return pg
 }
 
-// Tx creates begins a new transaction
+// Tx begins a new transaction
 func (pg *PostgresRepository) Tx(ctx context.Context) (nero.Tx, error) {
 	return pg.db.BeginTx(ctx, nil)
 }
 
-// Create creates a new User
+// Create creates a User
 func (pg *PostgresRepository) Create(ctx context.Context, c *Creator) (string, error) {
 	return pg.create(ctx, pg.db, c)
 }
 
-// CreateTx creates a new User inside a transaction
+// CreateTx creates a User in a transaction
 func (pg *PostgresRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (string, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
@@ -118,12 +118,12 @@ func (pg *PostgresRepository) create(ctx context.Context, runner nero.SQLRunner,
 	return id, nil
 }
 
-// CreateMany creates User
+// CreateMany batch creates Users
 func (pg *PostgresRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
 	return pg.createMany(ctx, pg.db, cs...)
 }
 
-// CreateManyTx creates many User inside a transaction
+// CreateManyTx batch creates Users in a transaction
 func (pg *PostgresRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
@@ -181,12 +181,12 @@ func (pg *PostgresRepository) createMany(ctx context.Context, runner nero.SQLRun
 	return nil
 }
 
-// Query queries many User
+// Query queries Users
 func (pg *PostgresRepository) Query(ctx context.Context, q *Queryer) ([]*user.User, error) {
 	return pg.query(ctx, pg.db, q)
 }
 
-// QueryTx queries many User inside a transaction
+// QueryTx queries Users in a transaction
 func (pg *PostgresRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*user.User, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
@@ -234,12 +234,12 @@ func (pg *PostgresRepository) query(ctx context.Context, runner nero.SQLRunner, 
 	return users, nil
 }
 
-// QueryOne queries one User
+// QueryOne queries a User
 func (pg *PostgresRepository) QueryOne(ctx context.Context, q *Queryer) (*user.User, error) {
 	return pg.queryOne(ctx, pg.db, q)
 }
 
-// QueryOneTx queries one User inside a transaction
+// QueryOneTx queries a User in a transaction
 func (pg *PostgresRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*user.User, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
@@ -272,7 +272,6 @@ func (pg *PostgresRepository) queryOne(ctx context.Context, runner nero.SQLRunne
 			&user.CreatedAt,
 		)
 	if err != nil {
-		// TODO: embed the zero function to type info
 		return nil, err
 	}
 
@@ -394,12 +393,12 @@ func (pg *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	return qb
 }
 
-// Update updates User
+// Update updates a User or many Users
 func (pg *PostgresRepository) Update(ctx context.Context, u *Updater) (int64, error) {
 	return pg.update(ctx, pg.db, u)
 }
 
-// UpdateTx updates User inside a transaction
+// UpdateTx updates a User many Users in a transaction
 func (pg *PostgresRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
@@ -549,12 +548,12 @@ func (pg *PostgresRepository) update(ctx context.Context, runner nero.SQLRunner,
 	return rowsAffected, nil
 }
 
-// Delete deletes User
+// Delete deletes a User or many Users
 func (pg *PostgresRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
 	return pg.delete(ctx, pg.db, d)
 }
 
-// Delete deletes User inside a transaction
+// Delete deletes a User or many Users in a transaction
 func (pg *PostgresRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
@@ -658,12 +657,12 @@ func (pg *PostgresRepository) delete(ctx context.Context, runner nero.SQLRunner,
 	return rowsAffected, nil
 }
 
-// Aggregate runs aggregate operations
+// Aggregate runs an aggregate query
 func (pg *PostgresRepository) Aggregate(ctx context.Context, a *Aggregator) error {
 	return pg.aggregate(ctx, pg.db, a)
 }
 
-// Aggregate runs aggregate operations inside a transaction
+// Aggregate runs an aggregate query in a transaction
 func (pg *PostgresRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {

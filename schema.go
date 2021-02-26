@@ -69,6 +69,10 @@ func (s *Schema) TypeName() string {
 	return s.typeInfo.Name()
 }
 
+func (s *Schema) TypeNamePlural() string {
+	return inflection.Plural(s.TypeName())
+}
+
 // TypeIdentifier returns the type identifier
 func (s *Schema) TypeIdentifier() string {
 	return stringsx.ToLowerCamel(s.TypeName())

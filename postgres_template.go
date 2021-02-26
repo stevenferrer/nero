@@ -88,17 +88,17 @@ func (pg *PostgresRepository) WithLogger(logger nero.Logger) *PostgresRepository
 	return pg
 }
 
-// Tx creates begins a new transaction
+// Tx begins a new transaction
 func (pg *PostgresRepository) Tx(ctx context.Context) (nero.Tx, error) {
 	return pg.db.BeginTx(ctx, nil)
 }
 
-// Create creates a new {{.TypeName}}
+// Create creates a {{.TypeName}}
 func (pg *PostgresRepository) Create(ctx context.Context, c *Creator) ({{rawType .Identity.TypeInfo.V}}, error) {
 	return pg.create(ctx, pg.db, c)
 }
 
-// CreateTx creates a new {{.TypeName}} inside a transaction
+// CreateTx creates a {{.TypeName}} in a transaction
 func (pg *PostgresRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) ({{rawType .Identity.TypeInfo.V}}, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
@@ -153,12 +153,12 @@ func (pg *PostgresRepository) create(ctx context.Context, runner nero.SQLRunner,
 	return {{.Identity.Identifier}}, nil
 }
 
-// CreateMany creates {{.TypeName}}
+// CreateMany batch creates {{.TypeNamePlural}}
 func (pg *PostgresRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
 	return pg.createMany(ctx, pg.db, cs...)
 }
 
-// CreateManyTx creates many {{.TypeName}} inside a transaction
+// CreateManyTx batch creates {{.TypeNamePlural}} in a transaction
 func (pg *PostgresRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
@@ -214,12 +214,12 @@ func (pg *PostgresRepository) createMany(ctx context.Context, runner nero.SQLRun
 	return nil
 }
 
-// Query queries many {{.TypeName}}
+// Query queries {{.TypeNamePlural}}
 func (pg *PostgresRepository) Query(ctx context.Context, q *Queryer) ([]{{rawType .TypeInfo.V}}, error) {
 	return pg.query(ctx, pg.db, q)
 }
 
-// QueryTx queries many {{.TypeName}} inside a transaction
+// QueryTx queries {{.TypeNamePlural}} in a transaction
 func (pg *PostgresRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]{{rawType .TypeInfo.V}}, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
@@ -264,12 +264,12 @@ func (pg *PostgresRepository) query(ctx context.Context, runner nero.SQLRunner, 
 	return {{.TypeIdentifierPlural}}, nil
 }
 
-// QueryOne queries one {{.TypeName}}
+// QueryOne queries a {{.TypeName}}
 func (pg *PostgresRepository) QueryOne(ctx context.Context, q *Queryer) ({{rawType .TypeInfo.V}}, error) {
 	return pg.queryOne(ctx, pg.db, q)
 }
 
-// QueryOneTx queries one {{.TypeName}} inside a transaction
+// QueryOneTx queries a {{.TypeName}} in a transaction
 func (pg *PostgresRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) ({{rawType .TypeInfo.V}}, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
@@ -299,7 +299,6 @@ func (pg *PostgresRepository) queryOne(ctx context.Context, runner nero.SQLRunne
 			{{end -}}
 		)
 	if err != nil {
-		// TODO: embed the zero function to type info
 		return {{zero .TypeInfo.V}}, err
 	}
 
@@ -349,12 +348,12 @@ func (pg *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	return qb
 }
 
-// Update updates {{.TypeName}}
+// Update updates a {{.TypeName}} or many {{.TypeNamePlural}}
 func (pg *PostgresRepository) Update(ctx context.Context, u *Updater) (int64, error) {
 	return pg.update(ctx, pg.db, u)
 }
 
-// UpdateTx updates {{.TypeName}} inside a transaction
+// UpdateTx updates a {{.TypeName}} many {{.TypeNamePlural}} in a transaction
 func (pg *PostgresRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
@@ -411,12 +410,12 @@ func (pg *PostgresRepository) update(ctx context.Context, runner nero.SQLRunner,
 	return rowsAffected, nil
 }
 
-// Delete deletes {{.TypeName}}
+// Delete deletes a {{.TypeName}} or many {{.TypeNamePlural}}
 func (pg *PostgresRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
 	return pg.delete(ctx, pg.db, d)
 }
 
-// Delete deletes {{.TypeName}} inside a transaction
+// Delete deletes a {{.TypeName}} or many {{.TypeNamePlural}} in a transaction
 func (pg *PostgresRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
@@ -455,12 +454,12 @@ func (pg *PostgresRepository) delete(ctx context.Context, runner nero.SQLRunner,
 	return rowsAffected, nil
 }
 
-// Aggregate runs aggregate operations
+// Aggregate runs an aggregate query
 func (pg *PostgresRepository) Aggregate(ctx context.Context, a *Aggregator) error {
 	return pg.aggregate(ctx, pg.db, a)
 }
 
-// Aggregate runs aggregate operations inside a transaction
+// Aggregate runs an aggregate query in a transaction
 func (pg *PostgresRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {

@@ -18,33 +18,33 @@ import (
 type Repository interface {
 	// Tx begins a new transaction
 	Tx(context.Context) (nero.Tx, error)
-	// Create runs a create
+	// Create creates a User
 	Create(context.Context, *Creator) (id string, err error)
-	// CreateTx runs a create in a transaction
+	// CreateTx creates a User in a transaction
 	CreateTx(context.Context, nero.Tx, *Creator) (id string, err error)
-	// CreateMany runs a batch create
+	// CreateMany batch creates Users
 	CreateMany(context.Context, ...*Creator) error
-	// CreateManyTx runs a batch create in a transaction
+	// CreateManyTx batch creates Users in a transaction
 	CreateManyTx(context.Context, nero.Tx, ...*Creator) error
-	// Query runs a query
+	// Query queries Users
 	Query(context.Context, *Queryer) ([]*user.User, error)
-	// QueryTx runs a query in a transaction
+	// QueryTx queries Users in a transaction
 	QueryTx(context.Context, nero.Tx, *Queryer) ([]*user.User, error)
-	// QueryOne runs a query that expects only one result
+	// QueryOne queries a User
 	QueryOne(context.Context, *Queryer) (*user.User, error)
-	// QueryOneTx runs a query that expects only one result in a transaction
+	// QueryOneTx queries a User in a transaction
 	QueryOneTx(context.Context, nero.Tx, *Queryer) (*user.User, error)
-	// Update runs an update
+	// Update updates a User or many Users
 	Update(context.Context, *Updater) (rowsAffected int64, err error)
-	// UpdateTx runs an update in a transaction
+	// UpdateTx updates a User many Users in a transaction
 	UpdateTx(context.Context, nero.Tx, *Updater) (rowsAffected int64, err error)
-	// Delete runs a delete
+	// Delete deletes a User or many Users
 	Delete(context.Context, *Deleter) (rowsAffected int64, err error)
-	// Delete runs a delete in a transaction
+	// Delete deletes a User or many Users in a transaction
 	DeleteTx(context.Context, nero.Tx, *Deleter) (rowsAffected int64, err error)
-	// Aggregate runs aggregate query
+	// Aggregate runs an aggregate query
 	Aggregate(context.Context, *Aggregator) error
-	// Aggregate runs aggregate query in a transaction
+	// Aggregate runs an aggregate query in a transaction
 	AggregateTx(context.Context, nero.Tx, *Aggregator) error
 }
 

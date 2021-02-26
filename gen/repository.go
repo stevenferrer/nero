@@ -38,33 +38,33 @@ import (
 type Repository interface {
 	// Tx begins a new transaction
 	Tx(context.Context) (nero.Tx, error)
-	// Create runs a create
+	// Create creates a {{.TypeName}}
 	Create(context.Context, *Creator) (id {{rawType .Identity.TypeInfo.V}}, err error)
-	// CreateTx runs a create in a transaction
+	// CreateTx creates a {{.TypeName}} in a transaction
 	CreateTx(context.Context, nero.Tx, *Creator) (id {{rawType .Identity.TypeInfo.V}}, err error)
-	// CreateMany runs a batch create
+	// CreateMany batch creates {{.TypeNamePlural}}
 	CreateMany(context.Context, ...*Creator) error
-	// CreateManyTx runs a batch create in a transaction
+	// CreateManyTx batch creates {{.TypeNamePlural}} in a transaction
 	CreateManyTx(context.Context, nero.Tx, ...*Creator) error
-	// Query runs a query
+	// Query queries {{.TypeNamePlural}}
 	Query(context.Context, *Queryer) ([]{{rawType .TypeInfo.V}}, error)
-	// QueryTx runs a query in a transaction
+	// QueryTx queries {{.TypeNamePlural}} in a transaction
 	QueryTx(context.Context, nero.Tx, *Queryer) ([]{{rawType .TypeInfo.V}}, error)
-	// QueryOne runs a query that expects only one result
+	// QueryOne queries a {{.TypeName}}
 	QueryOne(context.Context, *Queryer) ({{rawType .TypeInfo.V}}, error)
-	// QueryOneTx runs a query that expects only one result in a transaction
+	// QueryOneTx queries a {{.TypeName}} in a transaction
 	QueryOneTx(context.Context, nero.Tx, *Queryer) ({{rawType .TypeInfo.V}}, error)
-	// Update runs an update
+	// Update updates a {{.TypeName}} or many {{.TypeNamePlural}}
 	Update(context.Context, *Updater) (rowsAffected int64, err error)
-	// UpdateTx runs an update in a transaction
+	// UpdateTx updates a {{.TypeName}} many {{.TypeNamePlural}} in a transaction
 	UpdateTx(context.Context, nero.Tx, *Updater) (rowsAffected int64, err error)
-	// Delete runs a delete
+	// Delete deletes a {{.TypeName}} or many {{.TypeNamePlural}}
 	Delete(context.Context, *Deleter) (rowsAffected int64, err error)
-	// Delete runs a delete in a transaction
+	// Delete deletes a {{.TypeName}} or many {{.TypeNamePlural}} in a transaction
 	DeleteTx(context.Context, nero.Tx, *Deleter) (rowsAffected int64, err error)
-	// Aggregate runs aggregate query
+	// Aggregate runs an aggregate query
 	Aggregate(context.Context, *Aggregator) error
-	// Aggregate runs aggregate query in a transaction
+	// Aggregate runs an aggregate query in a transaction
 	AggregateTx(context.Context, nero.Tx, *Aggregator) error
 }
 
