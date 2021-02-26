@@ -10,60 +10,60 @@ func Generate(schemaer nero.Schemaer) ([]*File, error) {
 	schema := schemaer.Schema()
 
 	files := []*File{}
-	metaBuf, err := newMetaFile(schema)
+	buf, err := newMetaFile(schema)
 	if err != nil {
 		return nil, errors.Wrap(err, "meta file")
 	}
 	files = append(files, &File{
 		name: "meta.go",
-		buf:  metaBuf,
+		buf:  buf.Bytes(),
 	})
 
-	predsBuf, err := newPredicatesFile(schema)
+	buf, err = newPredicatesFile(schema)
 	if err != nil {
 		return nil, errors.Wrap(err, "predicates file")
 	}
 	files = append(files, &File{
 		name: "predicates.go",
-		buf:  predsBuf,
+		buf:  buf.Bytes(),
 	})
 
-	sortsBuf, err := newSortsFile(schema)
+	buf, err = newSortsFile(schema)
 	if err != nil {
 		return nil, errors.Wrap(err, "sorts file")
 	}
 	files = append(files, &File{
 		name: "sorts.go",
-		buf:  sortsBuf,
+		buf:  buf.Bytes(),
 	})
 
-	aggsBuf, err := newAggregatesFile(schema)
+	buf, err = newAggregatesFile(schema)
 	if err != nil {
 		return nil, errors.Wrap(err, "aggregates file")
 	}
 	files = append(files, &File{
 		name: "aggregates.go",
-		buf:  aggsBuf,
+		buf:  buf.Bytes(),
 	})
 
-	repoBuf, err := newRepositoryFile(schema)
+	buf, err = newRepositoryFile(schema)
 	if err != nil {
 		return nil, errors.Wrap(err, "repository file")
 	}
 	files = append(files, &File{
 		name: "repository.go",
-		buf:  repoBuf,
+		buf:  buf.Bytes(),
 	})
 
 	for _, tmpltr := range schema.Templaters() {
-		buff, err := newTemplater(schema, tmpltr)
+		buf, err = newTemplater(schema, tmpltr)
 		if err != nil {
 			return nil, errors.Wrap(err, "repository implementation file")
 		}
 
 		files = append(files, &File{
 			name: tmpltr.Filename(),
-			buf:  buff,
+			buf:  buf.Bytes(),
 		})
 	}
 

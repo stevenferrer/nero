@@ -46,17 +46,17 @@ func (s *Schema) Identity() *Column {
 
 // Columns returns the columns
 func (s *Schema) Columns() []*Column {
-	return append([]*Column{}, s.columns...)
+	return s.columns[:]
 }
 
 // Imports returns the pkg imports
 func (s *Schema) Imports() []string {
-	return append([]string{}, s.imports...)
+	return s.imports[:]
 }
 
 // Templaters returns the templaters
 func (s *Schema) Templaters() []Templater {
-	return append([]Templater{}, s.templaters...)
+	return s.templaters[:]
 }
 
 // TypeInfo returns the type info

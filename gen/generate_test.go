@@ -1,4 +1,4 @@
-package gen
+package gen_test
 
 import (
 	"os"
@@ -9,16 +9,17 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/sf9v/nero/example"
+	"github.com/sf9v/nero/gen"
 )
 
 func TestGenerate(t *testing.T) {
-	files, err := Generate(&example.User{})
+	files, err := gen.Generate(&example.User{})
 	assert.NoError(t, err)
 	assert.Len(t, files, 6)
 
 	for _, file := range files {
 		require.NotEmpty(t, file.Filename())
-		require.NotEmpty(t, file.Bytes())
+		require.NotEmpty(t, file.Buf())
 	}
 
 	// create base directory
@@ -27,8 +28,8 @@ func TestGenerate(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.NoError(t, err)
-	for _, file := range files {
-		err = file.Render(basePath)
+	for _, f := range files {
+		err = f.Render(basePath)
 		require.NoError(t, err)
 	}
 }

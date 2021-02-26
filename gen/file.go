@@ -20,45 +20,44 @@ import (
 // File is a generated file
 type File struct {
 	name string
-	// FIXME: Use io.Writer or something else
-	buf *bytes.Buffer
+	buf  []byte
 }
 
 // Render renders the file to the specified path
-func (ff *File) Render(basePath string) error {
-	filePath := path.Join(basePath, ff.name)
-	f, err := os.Create(filePath)
+func (f *File) Render(basePath string) error {
+	filePath := path.Join(basePath, f.name)
+	of, err := os.Create(filePath)
 	if err != nil {
 		return errors.Wrap(err, "create base path")
 	}
-	defer f.Close()
+	defer of.Close()
 
-	_, err = f.Write(ff.Bytes())
+	_, err = of.Write(f.buf)
 	if err != nil {
 		return errors.Wrap(err, "write file")
 	}
 
-	return errors.Wrap(formatSource(filePath), "format source")
+	return errors.Wrap(fmtSrc(filePath), "format source")
 }
 
 // Filename returns the filename
-func (ff *File) Filename() string {
-	return ff.name
+func (f *File) Filename() string {
+	return f.name
 }
 
 // Bytes returns the bytes
-func (ff *File) Bytes() []byte {
-	return ff.buf.Bytes()
+func (f *File) Buf() []byte {
+	return f.buf[:]
 }
 
-// formatSource removes unneeded imports from the given Go source file and runs gofmt on it.
+// fmtSrc removes unneeded imports from the given Go source file and runs gofmt on it.
 // Copied from goa codebase https://github.com/goadesign/goa/blob/v3/codegen/file.go#L136
-func formatSource(filePath string) error {
+func fmtSrc(path string) error {
 	// Make sure file parses and print content if it does not.
 	fset := token.NewFileSet()
-	file, err := parser.ParseFile(fset, filePath, nil, parser.ParseComments)
+	file, err := parser.ParseFile(fset, path, nil, parser.ParseComments)
 	if err != nil {
-		content, _ := ioutil.ReadFile(filePath)
+		content, _ := ioutil.ReadFile(path)
 		var buf bytes.Buffer
 		scanner.PrintError(&buf, err)
 		return errors.Errorf("%s\n========\nContent:\n%s", buf.String(), content)
@@ -79,7 +78,7 @@ func formatSource(filePath string) error {
 		}
 	}
 	ast.SortImports(fset, file)
-	w, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
+	w, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -89,7 +88,7 @@ func formatSource(filePath string) error {
 	w.Close()
 
 	// Format code using goimport standard
-	bs, err := ioutil.ReadFile(filePath)
+	bs, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
 	}
@@ -97,10 +96,10 @@ func formatSource(filePath string) error {
 		Comments:   true,
 		FormatOnly: true,
 	}
-	bs, err = imports.Process(filePath, bs, &opt)
+	bs, err = imports.Process(path, bs, &opt)
 	if err != nil {
 		return err
 	}
 
-	return ioutil.WriteFile(filePath, bs, os.ModePerm)
+	return ioutil.WriteFile(path, bs, os.ModePerm)
 }

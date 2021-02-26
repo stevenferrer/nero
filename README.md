@@ -97,7 +97,7 @@ You can refer to the official [postgres template](./postgres_template.go) and th
 
 ## Standing on the shoulders of giants
 
-This library would not be possible without the amazing open-source community projects in the wild.
+This library would not be possible without the amazing open-source community projects.
 
 ## Inspired by
 
