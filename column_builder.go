@@ -4,7 +4,7 @@ import "github.com/sf9v/mira"
 
 // ColumnBuilder is a column
 type ColumnBuilder struct {
-	*Column
+	column *Column
 }
 
 // NewColumnBuilder returns a ColumnBuilder
@@ -18,30 +18,30 @@ func NewColumnBuilder(name string, v interface{}) *ColumnBuilder {
 // Build builds the column
 func (cb *ColumnBuilder) Build() *Column {
 	return &Column{
-		name:        cb.name,
-		typeInfo:    cb.typeInfo,
-		auto:        cb.auto,
-		comparable:  cb.comparable,
-		optional:    cb.optional,
-		structField: cb.structField,
+		name:        cb.column.name,
+		typeInfo:    cb.column.typeInfo,
+		auto:        cb.column.auto,
+		comparable:  cb.column.comparable,
+		optional:    cb.column.optional,
+		structField: cb.column.structField,
 	}
 }
 
 // Auto sets the column as auto-filled
 func (cb *ColumnBuilder) Auto() *ColumnBuilder {
-	cb.auto = true
+	cb.column.auto = true
 	return cb
 }
 
 // Comparable sets the column as comparable
 func (cb *ColumnBuilder) Comparable() *ColumnBuilder {
-	cb.comparable = true
+	cb.column.comparable = true
 	return cb
 }
 
 // Optional sets the column as optional
 func (cb *ColumnBuilder) Optional() *ColumnBuilder {
-	cb.optional = true
+	cb.column.optional = true
 	return cb
 }
 
@@ -49,6 +49,6 @@ func (cb *ColumnBuilder) Optional() *ColumnBuilder {
 // inferred struct field is different from the actual field e.g. The struct
 // field of the model is "ID" but being referred to as "Id" in the generated code
 func (cb *ColumnBuilder) StructField(structField string) *ColumnBuilder {
-	cb.structField = structField
+	cb.column.structField = structField
 	return cb
 }

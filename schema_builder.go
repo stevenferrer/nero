@@ -6,12 +6,12 @@ import (
 
 // SchemaBuilder is schema builder
 type SchemaBuilder struct {
-	*Schema
+	schema *Schema
 }
 
 // NewSchemaBuilder takes a model struct value and  returns a SchemaBuilder
 func NewSchemaBuilder(v interface{}) *SchemaBuilder {
-	return &SchemaBuilder{&Schema{
+	return &SchemaBuilder{schema: &Schema{
 		typeInfo:   mira.NewTypeInfo(v),
 		columns:    []*Column{},
 		templaters: []Templater{},
@@ -20,7 +20,7 @@ func NewSchemaBuilder(v interface{}) *SchemaBuilder {
 
 // Build builds the schema
 func (sb *SchemaBuilder) Build() *Schema {
-	templates := sb.templaters
+	templates := sb.schema.templaters
 
 	// use default template set
 	if len(templates) == 0 {
@@ -29,23 +29,23 @@ func (sb *SchemaBuilder) Build() *Schema {
 
 	// get pkg imports
 	importMap := map[string]int{}
-	for _, c := range append(sb.columns, sb.identity) {
+	for _, c := range append(sb.schema.columns, sb.schema.identity) {
 		if c.typeInfo.PkgPath() != "" {
 			importMap[c.typeInfo.PkgPath()] = 1
 		}
 	}
 
-	imports := []string{sb.typeInfo.PkgPath()}
+	imports := []string{sb.schema.typeInfo.PkgPath()}
 	for imp := range importMap {
 		imports = append(imports, imp)
 	}
 
 	return &Schema{
-		typeInfo:   sb.typeInfo,
-		pkgName:    sb.pkgName,
-		collection: sb.collection,
-		identity:   sb.identity,
-		columns:    sb.columns,
+		typeInfo:   sb.schema.typeInfo,
+		pkgName:    sb.schema.pkgName,
+		collection: sb.schema.collection,
+		identity:   sb.schema.identity,
+		columns:    sb.schema.columns,
 		imports:    imports,
 		templaters: templates,
 	}
@@ -55,30 +55,30 @@ func (sb *SchemaBuilder) Build() *Schema {
 
 // PkgName sets the pkg name
 func (sb *SchemaBuilder) PkgName(pkgName string) *SchemaBuilder {
-	sb.pkgName = pkgName
+	sb.schema.pkgName = pkgName
 	return sb
 }
 
 // Collection sets the collection
 func (sb *SchemaBuilder) Collection(collection string) *SchemaBuilder {
-	sb.collection = collection
+	sb.schema.collection = collection
 	return sb
 }
 
 // Identity sets the identity column
 func (sb *SchemaBuilder) Identity(column *Column) *SchemaBuilder {
-	sb.identity = column
+	sb.schema.identity = column
 	return sb
 }
 
 // Columns sets the columns
 func (sb *SchemaBuilder) Columns(columns ...*Column) *SchemaBuilder {
-	sb.columns = append(sb.columns, columns...)
+	sb.schema.columns = append(sb.schema.columns, columns...)
 	return sb
 }
 
 // Templates sets the templates
 func (sb *SchemaBuilder) Templates(templaters ...Templater) *SchemaBuilder {
-	sb.templaters = append(sb.templaters, templaters...)
+	sb.schema.templaters = append(sb.schema.templaters, templaters...)
 	return sb
 }
