@@ -6,21 +6,21 @@ import (
 	"path"
 
 	"github.com/sf9v/nero/gen"
-	"github.com/sf9v/nero/test/integration/user"
+	"github.com/sf9v/nero/test/integration/player"
 )
 
 func main() {
 	// generate
-	files, err := gen.Generate(new(user.User))
+	files, err := gen.Generate((player.Player{}).Schema())
 	checkErr(err)
 
 	// create base directory
-	basePath := path.Join("repository")
+	basePath := path.Join("playerrepo")
 	err = os.MkdirAll(basePath, os.ModePerm)
 	checkErr(err)
 
-	for _, f := range files {
-		err = f.Render(basePath)
+	for _, file := range files {
+		err = file.Render(basePath)
 		checkErr(err)
 	}
 }

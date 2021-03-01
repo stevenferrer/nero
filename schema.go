@@ -6,11 +6,6 @@ import (
 	stringsx "github.com/sf9v/nero/x/strings"
 )
 
-// Schemaer is an interface that wraps the Schema method
-type Schemaer interface {
-	Schema() *Schema
-}
-
 // Schema is a schema used for generating the repository
 type Schema struct {
 	// pkgName is the package name of the generated files
@@ -18,7 +13,7 @@ type Schema struct {
 	// Collection is the name of the collection/table
 	collection string
 	// typeInfo is the type info the schema model
-	typeInfo *mira.Type
+	typeInfo *mira.TypeInfo
 	// Identity is the identity column
 	identity *Column
 	// Columns is the list of columns
@@ -60,7 +55,7 @@ func (s *Schema) Templaters() []Templater {
 }
 
 // TypeInfo returns the type info
-func (s *Schema) TypeInfo() *mira.Type {
+func (s *Schema) TypeInfo() *mira.TypeInfo {
 	return s.typeInfo
 }
 

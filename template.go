@@ -71,17 +71,17 @@ func resolveType(t reflect.Type) reflect.Type {
 }
 
 func zeroFunc(v interface{}) string {
-	tt := mira.NewType(v)
+	ti := mira.NewTypeInfo(v)
 
-	if tt.IsNillable() {
+	if ti.IsNillable() {
 		return "nil"
 	}
 
-	if tt.Kind() == mira.Numeric {
+	if ti.IsNumeric() {
 		return "0"
 	}
 
-	switch tt.T().Kind() {
+	switch ti.T().Kind() {
 	case reflect.Bool:
 		return "false"
 	case reflect.Struct,

@@ -12,7 +12,7 @@ type SchemaBuilder struct {
 // NewSchemaBuilder takes a model struct value and  returns a SchemaBuilder
 func NewSchemaBuilder(v interface{}) *SchemaBuilder {
 	return &SchemaBuilder{&Schema{
-		typeInfo:   mira.NewType(v),
+		typeInfo:   mira.NewTypeInfo(v),
 		columns:    []*Column{},
 		templaters: []Templater{},
 	}}

@@ -57,7 +57,7 @@ import (
 
 {{ $cols := prependToColumns .Identity .Columns }}
 
-// PostgresRepository implements the Repository interface
+// PostgresRepository is a repository that uses PostgreSQL as data store
 type PostgresRepository struct {
 	db  *sql.DB
 	logger nero.Logger
@@ -66,7 +66,7 @@ type PostgresRepository struct {
 
 var _ Repository = (*PostgresRepository)(nil)
 
-// NewPostgresRepository is a factory for PostgresRepository
+// NewPostgresRepository returns a PostresRepository
 func NewPostgresRepository(db *sql.DB) *PostgresRepository {
 	return &PostgresRepository{
 		db: db,

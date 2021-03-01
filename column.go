@@ -13,7 +13,7 @@ type Column struct {
 	// name is the column name
 	name string
 	// typeInfo is inferred column type info
-	typeInfo *mira.Type
+	typeInfo *mira.TypeInfo
 	// StructField overrides the struct field
 	structField string
 	// Auto is an auto-filled column flag
@@ -26,7 +26,7 @@ type Column struct {
 }
 
 // TypeInfo returns the type info
-func (c *Column) TypeInfo() *mira.Type {
+func (c *Column) TypeInfo() *mira.TypeInfo {
 	return c.typeInfo
 }
 

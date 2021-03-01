@@ -11,7 +11,7 @@ type ColumnBuilder struct {
 func NewColumnBuilder(name string, v interface{}) *ColumnBuilder {
 	return &ColumnBuilder{&Column{
 		name:     name,
-		typeInfo: mira.NewType(v),
+		typeInfo: mira.NewTypeInfo(v),
 	}}
 }
 

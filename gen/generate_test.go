@@ -13,7 +13,7 @@ import (
 )
 
 func TestGenerate(t *testing.T) {
-	files, err := gen.Generate(&example.User{})
+	files, err := gen.Generate((example.User{}).Schema())
 	assert.NoError(t, err)
 	assert.Len(t, files, 6)
 
