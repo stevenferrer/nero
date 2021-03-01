@@ -1,6 +1,6 @@
 # Nero ![Github Actions](https://github.com/sf9v/nero/workflows/test/badge.svg) [![Coverage Status](https://coveralls.io/repos/github/sf9v/nero/badge.svg?branch=main)](https://coveralls.io/github/sf9v/nero?branch=main) [![Go Report Card](https://goreportcard.com/badge/github.com/sf9v/nero)](https://goreportcard.com/report/github.com/sf9v/nero)
 
-Nero is a library for generating the repository layer code. Please see this [blog post](https://sf9v.github.io/posts/generating-the-repository-layer-in-go/) for more details.
+A library for generating the repository layer code. Please see this [blog post](https://sf9v.github.io/posts/generating-the-repository-layer-in-go/) for more details.
 
 ## Installation
 
@@ -70,17 +70,17 @@ func main() {
 
 ## Motivation
 
-We heavily use the *[repository pattern](https://threedots.tech/post/repository-pattern-in-go/)* in our codebases and we often [write our queries manually](https://golang.org/pkg/database/sql/#example_DB_QueryContext). It becomes tedious, boring and repetitive as we have more and more tables/models to maintain. So, we decided to experiment on creating this library to auto-generate our repository layer code.
+We heavily use the *[repository pattern](https://threedots.tech/post/repository-pattern-in-go/)* in our codebases and we often [write our queries manually](https://golang.org/pkg/database/sql/#example_DB_QueryContext). It becomes tedious and repetitive as we have more tables/models to maintain. So, we decided to experiment on creating this project to generate our repository layer automatically.
 
 ## Goals
 
-- Decouple database specific logic by using `Repository` interface 
+- Decouple implementation details from the `Repository` interface
 - Easy integration with existing codebase
-- Minimal and easy to use API
+- Minimal API
 
 ## Supported back-ends
 
-Currently, we have official support for [PostgreSQL](postgresql.org). Other back-ends shall be supported soon. Meanwhile, you can implement [custom back-ends](#custom-back-ends).
+Currently, we have official support for [PostgreSQL](postgresql.org), which is what we mainly use. Other back-ends shall be supported as time permits. 
 
 | Back-end | Library | 
 |---------| ------- |
@@ -89,19 +89,27 @@ Currently, we have official support for [PostgreSQL](postgresql.org). Other back
 | MySQL/MariaDB (soon) | |
 | MongoDB ??? | |
 
+If your your back-end is not yet supported, you can implement your own [custom back-end](#custom-back-ends).
+
+
 ## Custom back-ends
 
-Implementing your own custom back-end is very easy. In fact, you don't have to use the official back-ends. You can implement custom back-ends (ClickHouse, Cassandra, CouchDB , Badger, H2, etc.) by implementing the [_Templater_](./templates.go) interface. This interface is specifically created to support extensibility and customisability.
+Implementing a custom back-end is very easy. In fact, you don't have to use the official back-ends. You can implement custom back-ends (ClickHouse, Cassandra, CouchDB , Badger, H2, etc.) by implementing the [_Templater_](./template.go) interface. This interface is specifically created to support extensibility and customisability.
 
 You can refer to the official [postgres template](./postgres_template.go) and this [example schema](./example/user.go#L46).
 
 ## Standing on the shoulders of giants
 
-This library would not be possible without the amazing open-source community projects.
+This project wouldn't be possible with the amazing open-source projects it was built on. 
 
-## Inspired by
+* [Masterminds/squirrel](https://github.com/Masterminds/squirrel) - Fluent SQL generation in golang
+* [lib/pq](https://github.com/lib/pq) - Pure Go Postgres driver for database/sql
+* [pkg/errors](https://github.com/pkg/errors) -  Simple error handling primitives
+* [hashicorp/multierror](https://github.com/hashicorp/go-multierror) - A Go (golang) package for representing a list of errors as a single error.
+* [jinzhu/inflection](https://github.com/jinzhu/inflection) - Pluralizes and singularizes English nouns
+* [stretchr/testify](https://github.com/stretchr/testify) - A toolkit with common assertions and mocks that plays nicely with the standard library
 
-This library is inspired by these amazing projects:
+Also, the following have a huge influence on this project and deserves most of the credits:
 
 * [ent](https://github.com/facebook/ent). An entity framework for Go. Simple, yet powerful ORM for modeling and querying data.
 * [SQLBoiler](https://github.com/volatiletech/sqlboiler) is a tool to generate a Go ORM tailored to your database schema.
