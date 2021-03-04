@@ -283,55 +283,74 @@ func (pg *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	for _, predFunc := range q.predFuncs {
 		preds = predFunc(preds)
 	}
+	qb = squirrel.SelectBuilder(pg.buildPreds(squirrel.StatementBuilderType(qb), preds))
 
+	sorts := []*sort.Sort{}
+	for _, sortFunc := range q.sortFuncs {
+		sorts = sortFunc(sorts)
+	}
+	qb = pg.buildSort(qb, sorts)
+
+	if q.limit > 0 {
+		qb = qb.Limit(uint64(q.limit))
+	}
+
+	if q.offset > 0 {
+		qb = qb.Offset(uint64(q.offset))
+	}
+
+	return qb
+}
+
+func (pg *PostgresRepository) buildPreds(sb squirrel.StatementBuilderType, preds []*comparison.Predicate) squirrel.StatementBuilderType {
 	for _, pred := range preds {
 		switch pred.Op {
 		case comparison.Eq:
 			col, ok := pred.Arg.(Column)
 			if ok {
-				qb = qb.Where(fmt.Sprintf("%q = %q", pred.Col, col.String()))
+				sb = sb.Where(fmt.Sprintf("%q = %q", pred.Col, col.String()))
 			} else {
-				qb = qb.Where(fmt.Sprintf("%q = ?", pred.Col), pred.Arg)
+				sb = sb.Where(fmt.Sprintf("%q = ?", pred.Col), pred.Arg)
 			}
 		case comparison.NotEq:
 			col, ok := pred.Arg.(Column)
 			if ok {
-				qb = qb.Where(fmt.Sprintf("%q <> %q", pred.Col, col.String()))
+				sb = sb.Where(fmt.Sprintf("%q <> %q", pred.Col, col.String()))
 			} else {
-				qb = qb.Where(fmt.Sprintf("%q <> ?", pred.Col), pred.Arg)
+				sb = sb.Where(fmt.Sprintf("%q <> ?", pred.Col), pred.Arg)
 			}
 		case comparison.Gt:
 			col, ok := pred.Arg.(Column)
 			if ok {
-				qb = qb.Where(fmt.Sprintf("%q > %q", pred.Col, col.String()))
+				sb = sb.Where(fmt.Sprintf("%q > %q", pred.Col, col.String()))
 			} else {
-				qb = qb.Where(fmt.Sprintf("%q > ?", pred.Col), pred.Arg)
+				sb = sb.Where(fmt.Sprintf("%q > ?", pred.Col), pred.Arg)
 			}
 		case comparison.GtOrEq:
 			col, ok := pred.Arg.(Column)
 			if ok {
-				qb = qb.Where(fmt.Sprintf("%q >= %q", pred.Col, col.String()))
+				sb = sb.Where(fmt.Sprintf("%q >= %q", pred.Col, col.String()))
 			} else {
-				qb = qb.Where(fmt.Sprintf("%q >= ?", pred.Col), pred.Arg)
+				sb = sb.Where(fmt.Sprintf("%q >= ?", pred.Col), pred.Arg)
 			}
 		case comparison.Lt:
 			col, ok := pred.Arg.(Column)
 			if ok {
-				qb = qb.Where(fmt.Sprintf("%q < %q", pred.Col, col.String()))
+				sb = sb.Where(fmt.Sprintf("%q < %q", pred.Col, col.String()))
 			} else {
-				qb = qb.Where(fmt.Sprintf("%q < ?", pred.Col), pred.Arg)
+				sb = sb.Where(fmt.Sprintf("%q < ?", pred.Col), pred.Arg)
 			}
 		case comparison.LtOrEq:
 			col, ok := pred.Arg.(Column)
 			if ok {
-				qb = qb.Where(fmt.Sprintf("%q <= %q", pred.Col, col.String()))
+				sb = sb.Where(fmt.Sprintf("%q <= %q", pred.Col, col.String()))
 			} else {
-				qb = qb.Where(fmt.Sprintf("%q <= ?", pred.Col), pred.Arg)
+				sb = sb.Where(fmt.Sprintf("%q <= ?", pred.Col), pred.Arg)
 			}
 		case comparison.IsNull:
-			qb = qb.Where(fmt.Sprintf("%q IS NULL", pred.Col))
+			sb = sb.Where(fmt.Sprintf("%q IS NULL", pred.Col))
 		case comparison.IsNotNull:
-			qb = qb.Where(fmt.Sprintf("%q IS NOT NULL", pred.Col))
+			sb = sb.Where(fmt.Sprintf("%q IS NOT NULL", pred.Col))
 		case comparison.In, comparison.NotIn:
 			args := pred.Arg.([]interface{})
 			if len(args) == 0 {
@@ -345,14 +364,14 @@ func (pg *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 			if pred.Op == comparison.NotIn {
 				fmtStr = "%q NOT IN (%s)"
 			}
-			qb = qb.Where(fmt.Sprintf(fmtStr, pred.Col, strings.Join(placeholders, ",")), args...)
+			sb = sb.Where(fmt.Sprintf(fmtStr, pred.Col, strings.Join(placeholders, ",")), args...)
 		}
 	}
 
-	sorts := []*sort.Sort{}
-	for _, sortFunc := range q.sortFuncs {
-		sorts = sortFunc(sorts)
-	}
+	return sb
+}
+
+func (pg *PostgresRepository) buildSort(qb squirrel.SelectBuilder, sorts []*sort.Sort) squirrel.SelectBuilder {
 	for _, s := range sorts {
 		col := fmt.Sprintf("%q", s.Col)
 		switch s.Direction {
@@ -361,14 +380,6 @@ func (pg *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 		case sort.Desc:
 			qb = qb.OrderBy(col + " DESC")
 		}
-	}
-
-	if q.limit > 0 {
-		qb = qb.Limit(uint64(q.limit))
-	}
-
-	if q.offset > 0 {
-		qb = qb.Offset(uint64(q.offset))
 	}
 
 	return qb
@@ -433,71 +444,7 @@ func (pg *PostgresRepository) update(ctx context.Context, runner nero.SQLRunner,
 	for _, predFunc := range u.predFuncs {
 		preds = predFunc(preds)
 	}
-
-	for _, pred := range preds {
-		switch pred.Op {
-		case comparison.Eq:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				qb = qb.Where(fmt.Sprintf("%q = %q", pred.Col, col.String()))
-			} else {
-				qb = qb.Where(fmt.Sprintf("%q = ?", pred.Col), pred.Arg)
-			}
-		case comparison.NotEq:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				qb = qb.Where(fmt.Sprintf("%q <> %q", pred.Col, col.String()))
-			} else {
-				qb = qb.Where(fmt.Sprintf("%q <> ?", pred.Col), pred.Arg)
-			}
-		case comparison.Gt:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				qb = qb.Where(fmt.Sprintf("%q > %q", pred.Col, col.String()))
-			} else {
-				qb = qb.Where(fmt.Sprintf("%q > ?", pred.Col), pred.Arg)
-			}
-		case comparison.GtOrEq:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				qb = qb.Where(fmt.Sprintf("%q >= %q", pred.Col, col.String()))
-			} else {
-				qb = qb.Where(fmt.Sprintf("%q >= ?", pred.Col), pred.Arg)
-			}
-		case comparison.Lt:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				qb = qb.Where(fmt.Sprintf("%q < %q", pred.Col, col.String()))
-			} else {
-				qb = qb.Where(fmt.Sprintf("%q < ?", pred.Col), pred.Arg)
-			}
-		case comparison.LtOrEq:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				qb = qb.Where(fmt.Sprintf("%q <= %q", pred.Col, col.String()))
-			} else {
-				qb = qb.Where(fmt.Sprintf("%q <= ?", pred.Col), pred.Arg)
-			}
-		case comparison.IsNull:
-			qb = qb.Where(fmt.Sprintf("%q IS NULL", pred.Col))
-		case comparison.IsNotNull:
-			qb = qb.Where(fmt.Sprintf("%q IS NOT NULL", pred.Col))
-		case comparison.In, comparison.NotIn:
-			args := pred.Arg.([]interface{})
-			if len(args) == 0 {
-				continue
-			}
-			placeholders := []string{}
-			for range args {
-				placeholders = append(placeholders, "?")
-			}
-			fmtStr := "%q IN (%s)"
-			if pred.Op == comparison.NotIn {
-				fmtStr = "%q NOT IN (%s)"
-			}
-			qb = qb.Where(fmt.Sprintf(fmtStr, pred.Col, strings.Join(placeholders, ",")), args...)
-		}
-	}
+	qb = squirrel.UpdateBuilder(pg.buildPreds(squirrel.StatementBuilderType(qb), preds))
 
 	if pg.debug && pg.logger != nil {
 		sql, args, err := qb.ToSql()
@@ -540,71 +487,7 @@ func (pg *PostgresRepository) delete(ctx context.Context, runner nero.SQLRunner,
 	for _, predFunc := range d.predFuncs {
 		preds = predFunc(preds)
 	}
-
-	for _, pred := range preds {
-		switch pred.Op {
-		case comparison.Eq:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				qb = qb.Where(fmt.Sprintf("%q = %q", pred.Col, col.String()))
-			} else {
-				qb = qb.Where(fmt.Sprintf("%q = ?", pred.Col), pred.Arg)
-			}
-		case comparison.NotEq:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				qb = qb.Where(fmt.Sprintf("%q <> %q", pred.Col, col.String()))
-			} else {
-				qb = qb.Where(fmt.Sprintf("%q <> ?", pred.Col), pred.Arg)
-			}
-		case comparison.Gt:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				qb = qb.Where(fmt.Sprintf("%q > %q", pred.Col, col.String()))
-			} else {
-				qb = qb.Where(fmt.Sprintf("%q > ?", pred.Col), pred.Arg)
-			}
-		case comparison.GtOrEq:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				qb = qb.Where(fmt.Sprintf("%q >= %q", pred.Col, col.String()))
-			} else {
-				qb = qb.Where(fmt.Sprintf("%q >= ?", pred.Col), pred.Arg)
-			}
-		case comparison.Lt:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				qb = qb.Where(fmt.Sprintf("%q < %q", pred.Col, col.String()))
-			} else {
-				qb = qb.Where(fmt.Sprintf("%q < ?", pred.Col), pred.Arg)
-			}
-		case comparison.LtOrEq:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				qb = qb.Where(fmt.Sprintf("%q <= %q", pred.Col, col.String()))
-			} else {
-				qb = qb.Where(fmt.Sprintf("%q <= ?", pred.Col), pred.Arg)
-			}
-		case comparison.IsNull:
-			qb = qb.Where(fmt.Sprintf("%q IS NULL", pred.Col))
-		case comparison.IsNotNull:
-			qb = qb.Where(fmt.Sprintf("%q IS NOT NULL", pred.Col))
-		case comparison.In, comparison.NotIn:
-			args := pred.Arg.([]interface{})
-			if len(args) == 0 {
-				continue
-			}
-			placeholders := []string{}
-			for range args {
-				placeholders = append(placeholders, "?")
-			}
-			fmtStr := "%q IN (%s)"
-			if pred.Op == comparison.NotIn {
-				fmtStr = "%q NOT IN (%s)"
-			}
-			qb = qb.Where(fmt.Sprintf(fmtStr, pred.Col, strings.Join(placeholders, ",")), args...)
-		}
-	}
+	qb = squirrel.DeleteBuilder(pg.buildPreds(squirrel.StatementBuilderType(qb), preds))
 
 	if pg.debug && pg.logger != nil {
 		sql, args, err := qb.ToSql()
@@ -677,85 +560,13 @@ func (pg *PostgresRepository) aggregate(ctx context.Context, runner nero.SQLRunn
 	for _, predFunc := range a.predFuncs {
 		preds = predFunc(preds)
 	}
-
-	for _, pred := range preds {
-		switch pred.Op {
-		case comparison.Eq:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				qb = qb.Where(fmt.Sprintf("%q = %q", pred.Col, col.String()))
-			} else {
-				qb = qb.Where(fmt.Sprintf("%q = ?", pred.Col), pred.Arg)
-			}
-		case comparison.NotEq:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				qb = qb.Where(fmt.Sprintf("%q <> %q", pred.Col, col.String()))
-			} else {
-				qb = qb.Where(fmt.Sprintf("%q <> ?", pred.Col), pred.Arg)
-			}
-		case comparison.Gt:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				qb = qb.Where(fmt.Sprintf("%q > %q", pred.Col, col.String()))
-			} else {
-				qb = qb.Where(fmt.Sprintf("%q > ?", pred.Col), pred.Arg)
-			}
-		case comparison.GtOrEq:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				qb = qb.Where(fmt.Sprintf("%q >= %q", pred.Col, col.String()))
-			} else {
-				qb = qb.Where(fmt.Sprintf("%q >= ?", pred.Col), pred.Arg)
-			}
-		case comparison.Lt:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				qb = qb.Where(fmt.Sprintf("%q < %q", pred.Col, col.String()))
-			} else {
-				qb = qb.Where(fmt.Sprintf("%q < ?", pred.Col), pred.Arg)
-			}
-		case comparison.LtOrEq:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				qb = qb.Where(fmt.Sprintf("%q <= %q", pred.Col, col.String()))
-			} else {
-				qb = qb.Where(fmt.Sprintf("%q <= ?", pred.Col), pred.Arg)
-			}
-		case comparison.IsNull:
-			qb = qb.Where(fmt.Sprintf("%q IS NULL", pred.Col))
-		case comparison.IsNotNull:
-			qb = qb.Where(fmt.Sprintf("%q IS NOT NULL", pred.Col))
-		case comparison.In, comparison.NotIn:
-			args := pred.Arg.([]interface{})
-			if len(args) == 0 {
-				continue
-			}
-			placeholders := []string{}
-			for range args {
-				placeholders = append(placeholders, "?")
-			}
-			fmtStr := "%q IN (%s)"
-			if pred.Op == comparison.NotIn {
-				fmtStr = "%q NOT IN (%s)"
-			}
-			qb = qb.Where(fmt.Sprintf(fmtStr, pred.Col, strings.Join(placeholders, ",")), args...)
-		}
-	}
+	qb = squirrel.SelectBuilder(pg.buildPreds(squirrel.StatementBuilderType(qb), preds))
 
 	sorts := []*sort.Sort{}
 	for _, sortFunc := range a.sortFuncs {
 		sorts = sortFunc(sorts)
 	}
-	for _, s := range sorts {
-		col := fmt.Sprintf("%q", s.Col)
-		switch s.Direction {
-		case sort.Asc:
-			qb = qb.OrderBy(col + " ASC")
-		case sort.Desc:
-			qb = qb.OrderBy(col + " DESC")
-		}
-	}
+	qb = pg.buildSort(qb, sorts)
 
 	if pg.debug && pg.logger != nil {
 		sql, args, err := qb.ToSql()

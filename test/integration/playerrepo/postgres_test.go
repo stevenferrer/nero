@@ -632,10 +632,7 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 						playerrepo.RaceNotEq(player.RaceTitan),
 					).
 					GroupBy(playerrepo.ColumnRace).
-					Sort(
-						playerrepo.Asc(playerrepo.ColumnRace),
-						playerrepo.Desc(playerrepo.ColumnAge),
-					)
+					Sort(playerrepo.Asc(playerrepo.ColumnRace))
 
 				tx := newTx(ctx, t)
 				err := repo.AggregateTx(ctx, tx, a)
