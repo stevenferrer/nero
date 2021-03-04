@@ -26,7 +26,7 @@ func ParseTemplater(tmpl Templater) (*template.Template, error) {
 	return tmplt, err
 }
 
-// NewFuncMap returns a tempalte func map
+// NewFuncMap returns a template func map
 func NewFuncMap() template.FuncMap {
 	return template.FuncMap{
 		"realType":         realTypeFunc,

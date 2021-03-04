@@ -18,6 +18,7 @@ type Player struct {
 	CreatedAt *time.Time
 }
 
+// Race is the player race
 type Race string
 
 // Factions

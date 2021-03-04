@@ -19,7 +19,7 @@ func TestGenerate(t *testing.T) {
 
 	for _, file := range files {
 		require.NotEmpty(t, file.Filename())
-		require.NotEmpty(t, file.Buf())
+		require.NotEmpty(t, file.Bytes())
 	}
 
 	// create base directory

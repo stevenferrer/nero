@@ -46,7 +46,7 @@ func (f *File) Filename() string {
 }
 
 // Bytes returns the bytes
-func (f *File) Buf() []byte {
+func (f *File) Bytes() []byte {
 	return f.buf[:]
 }
 

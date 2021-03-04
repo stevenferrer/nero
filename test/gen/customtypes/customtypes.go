@@ -4,6 +4,7 @@ import (
 	"github.com/sf9v/nero"
 )
 
+// UUID is a uuid type
 type UUID [16]byte
 
 // Custom demonstrates the use of many different field types

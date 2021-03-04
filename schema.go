@@ -64,6 +64,7 @@ func (s *Schema) TypeName() string {
 	return s.typeInfo.Name()
 }
 
+// TypeNamePlural returns the plural form of the type name
 func (s *Schema) TypeNamePlural() string {
 	return inflection.Plural(s.TypeName())
 }
