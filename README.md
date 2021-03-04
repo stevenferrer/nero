@@ -39,24 +39,25 @@ func main() {
     productRepo := repo.NewPostgresRepository(db).Debug()
 
     // create
-    productID, err := productRepo.Create(ctx, repo.NewCreator().Name("Product 1"))
+    creator := repo.NewCreator().Name("Product 1")
+    productID, err := productRepo.Create(ctx, creator)
     ...
 
     // query
-    product, err := productRepo.QueryOne(ctx, repo.NewQueryer().
-            Where(repository.IDEq(product1ID)))
+    queryer := repo.NewQueryer().Where(repo.IDEq(product1ID))
+    product, err := productRepo.QueryOne(ctx, queryr)
     ...
 
     // update
     now := time.Now()
-    _, err = productRepo.Update(ctx, repo.NewUpdater().
-            Name("Updated Product 1").UpdatedAt(&now).
-            Where(repository.IDEq(product1ID)))
+    updater := repo.NewUpdater().Name("Updated Product 1").
+        UpdatedAt(&now).Where(repo.IDEq(product1ID))
+    _, err = productRepo.Update(ctx, updater)
     ...
 
     // delete
-    _, err = productRepo.Delete(ctx, repo.NewDeleter().
-            Where(repository.IDEq(product1ID)))
+    deleter := repo.NewDeleter().Where(repo.IDEq(product1ID))
+    _, err = productRepo.Delete(ctx, deleter)
     ...
 }
 ```
