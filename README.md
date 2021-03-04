@@ -15,7 +15,7 @@ $ go get github.com/sf9v/nero
 
 ## Example
 
-See the [integration test](./test/integration) for a more complete example.
+See the [integration test](./test/integration/playerrepo) for a more complete example.
 
 ```go
 import (
@@ -24,7 +24,7 @@ import (
     _ "github.com/lib/pq"
 
     // import the generated package
-    "github.com/sf9v/nero-example/repository"
+    repo "github.com/sf9v/nero-example/repository"
 )
 
 func main() {
@@ -32,43 +32,31 @@ func main() {
     db, err := sql.Open("postgres", dsn)
     ...
 
-    // initialize a new postgres repository
-    repo := repository.NewPostgresRepository(db).Debug()
+    ctx := context.Background()
 
-    // create a product
-    productID, err := repo.Create(
-        context.Background(),
-        repository.NewCreator().Name("Product 1"),
-    )
+
+    // initialize a product repository and enable debug
+    productRepo := repo.NewPostgresRepository(db).Debug()
+
+    // create
+    productID, err := productRepo.Create(ctx, repo.NewCreator().Name("Product 1"))
     ...
 
-    // query the product
-    product, err := repo.QueryOne(
-        context.Background(),
-        repository.NewQueryer().
-            Where(repository.IDEq(product1ID)),
-    )
+    // query
+    product, err := productRepo.QueryOne(ctx, repo.NewQueryer().
+            Where(repository.IDEq(product1ID)))
     ...
 
-    // update the product
+    // update
     now := time.Now()
-    _, err = repo.Update(
-        context.Background(),
-        repository.NewUpdater().
-            Name("Updated Product 1").
-            UpdatedAt(&now).
-            Where(repository.IDEq(product1ID),
-        ),
-    )
+    _, err = productRepo.Update(ctx, repo.NewUpdater().
+            Name("Updated Product 1").UpdatedAt(&now).
+            Where(repository.IDEq(product1ID)))
     ...
 
-    // delete the product
-    _, err = repo.Delete(
-        context.Background(),
-        repository.NewDeleter().
-            Where(repository.IDEq(product1ID),
-        ),
-    )
+    // delete
+    _, err = productRepo.Delete(ctx, repo.NewDeleter().
+            Where(repository.IDEq(product1ID)))
     ...
 }
 ```
@@ -87,20 +75,17 @@ We heavily use the _[repository pattern](https://threedots.tech/post/repository-
 
 Currently, we have official support for [PostgreSQL](postgresql.org), which is what we mainly use. Other back-ends shall be supported as time permits.
 
-| Back-end                             | Library                            |
-| ------------------------------------ | ---------------------------------- |
-| [PostgreSQL](https://postgresql.org) | [lib/pq](http://github.com/lib/pq) |
-| [SQLite](https://sqlite.org) (soon)  |                                    |
-| MySQL/MariaDB (soon)                 |                                    |
-| MongoDB ???                          |                                    |
+| Back-end                              | Library                            |
+| ------------------------------------- | ---------------------------------- |
+| [PostgreSQL](https://postgresql.org)  | [lib/pq](http://github.com/lib/pq) |
+| [SQLite](https://sqlite.org) (soon)   |                                    |
+| [MariaDB](https://mariadb.org/) (soon)|                                    |
 
 If your your back-end is not yet supported, you can implement your own [custom back-end](#custom-back-ends).
 
 ## Custom back-ends
 
-Implementing a custom back-end is very easy. In fact, you don't have to use the official back-ends. You can implement custom back-ends (ClickHouse, Cassandra, CouchDB , Badger, H2, etc.) by implementing the [_Templater_](./template.go) interface. This interface is specifically created to support extensibility and customisability.
-
-You can refer to the official [postgres template](./postgres_template.go) and this [example schema](./example/user.go#L46).
+Implementing a custom back-end is very easy. In fact, you don't have to use the official back-ends. You can implement custom back-ends (BoltDB, Badger, MongoDB, CouchDB, H2, etc.) by implementing the [_Templater_](./template.go) interface. Please refer to the official [postgres template](./postgres_template.go) and this [example schema](./example/user.go).
 
 ## Standing on the shoulders of giants
 
