@@ -10,9 +10,9 @@ import (
 type Schema struct {
 	// pkgName is the package name of the generated files
 	pkgName string
-	// Collection is the name of the collection/table
+	// Collection is the name of the database collection/table
 	collection string
-	// typeInfo is the type info the schema model
+	// typeInfo is the type info of the schema model
 	typeInfo *mira.TypeInfo
 	// Identity is the identity column
 	identity *Column

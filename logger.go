@@ -1,6 +1,6 @@
 package nero
 
-// Logger is a logger interface
+// Logger is an interface that wraps the Printf method
 type Logger interface {
 	Printf(string, ...interface{})
 }

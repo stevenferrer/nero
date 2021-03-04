@@ -10,10 +10,10 @@ import (
 
 func newAggregatesFile(schema *nero.Schema) (*bytes.Buffer, error) {
 	v := struct {
-		Functions []aggregate.Function
+		Operators []aggregate.Operator
 		Schema    *nero.Schema
 	}{
-		Functions: []aggregate.Function{
+		Operators: []aggregate.Operator{
 			aggregate.Avg, aggregate.Count,
 			aggregate.Max, aggregate.Min,
 			aggregate.Sum, aggregate.None,
@@ -44,16 +44,13 @@ import (
 	"github.com/sf9v/nero/aggregate"
 )
 
-// AggFunc is an aggregate function
-type AggFunc func(*aggregate.Aggregates)
-
-{{range $fn := .Functions}}
-// {{$fn.String}} is a {{$fn.Desc}} aggregate function
-func {{$fn.String}}(col Column) AggFunc {
-	return func(a *aggregate.Aggregates) {
-		a.Add(&aggregate.Aggregate{
+{{range $op := .Operators}}
+// {{$op.String}} is a {{$op.Desc}} aggregate operator
+func {{$op.String}}(col Column) aggregate.AggFunc {
+	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
+		return append(aggs, &aggregate.Aggregate{
 			Col: col.String(),
-			Fn: aggregate.{{$fn.String}},
+			Op: aggregate.{{$op.String}},
 		})
 	}
 }

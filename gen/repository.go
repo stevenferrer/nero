@@ -28,6 +28,9 @@ import (
 	"reflect"
 	"github.com/pkg/errors"
 	"github.com/sf9v/nero"
+	"github.com/sf9v/nero/comparison"
+	"github.com/sf9v/nero/sort"
+	"github.com/sf9v/nero/aggregate"
 	multierror "github.com/hashicorp/go-multierror"
 	{{range $import := .Imports -}}
 		"{{$import}}"
@@ -113,8 +116,8 @@ func (c *Creator) Validate() error {
 type Queryer struct {
 	limit  uint
 	offset uint
-	pfs    []PredFunc
-	sfs    []SortFunc
+	predFuncs []comparison.PredFunc
+	sortFuncs []sort.SortFunc
 }
 
 // NewQueryer returns a Queryer
@@ -123,14 +126,14 @@ func NewQueryer() *Queryer {
 }
 
 // Where applies predicates
-func (q *Queryer) Where(pfs ...PredFunc) *Queryer {
-	q.pfs = append(q.pfs, pfs...)
+func (q *Queryer) Where(predFuncs ...comparison.PredFunc) *Queryer {
+	q.predFuncs = append(q.predFuncs, predFuncs...)
 	return q
 }
 
 // Sort applies sorting expressions
-func (q *Queryer) Sort(sfs ...SortFunc) *Queryer {
-	q.sfs = append(q.sfs, sfs...)
+func (q *Queryer) Sort(sortFuncs ...sort.SortFunc) *Queryer {
+	q.sortFuncs = append(q.sortFuncs, sortFuncs...)
 	return q
 }
 
@@ -153,7 +156,7 @@ type Updater struct {
 			{{$col.Identifier}} {{rawType $col.TypeInfo.V}}
 		{{end -}}
 	{{end -}}
-	pfs []PredFunc
+	predFuncs []comparison.PredFunc
 }
 
 // NewUpdater returns an Updater
@@ -172,14 +175,14 @@ func NewUpdater() *Updater {
 {{end -}}
 
 // Where applies predicates
-func (u *Updater) Where(pfs ...PredFunc) *Updater {
-	u.pfs = append(u.pfs, pfs...)
+func (u *Updater) Where(predFuncs ...comparison.PredFunc) *Updater {
+	u.predFuncs = append(u.predFuncs, predFuncs...)
 	return u
 }
 
 // Deleter is a delete builder
 type Deleter struct {
-	pfs []PredFunc
+	predFuncs []comparison.PredFunc
 }
 
 // NewDeleter returns a Deleter
@@ -188,18 +191,18 @@ func NewDeleter() *Deleter {
 }
 
 // Where applies predicates
-func (d *Deleter) Where(pfs ...PredFunc) *Deleter {
-	d.pfs = append(d.pfs, pfs...)
+func (d *Deleter) Where(predFuncs ...comparison.PredFunc) *Deleter {
+	d.predFuncs = append(d.predFuncs, predFuncs...)
 	return d
 }
 
 // Aggregator is an aggregate query builder
 type Aggregator struct {
 	v      interface{}
-	aggfs  []AggFunc
-	pfs    []PredFunc
-	sfs    []SortFunc
-	groups []Column
+	aggFuncs	[]aggregate.AggFunc
+	predFuncs	[]comparison.PredFunc
+	sortFuncs	[]sort.SortFunc
+	groupBys []Column
 }
 
 // NewAggregator expects a v and returns an Aggregator 
@@ -209,26 +212,26 @@ func NewAggregator(v interface{}) *Aggregator {
 }
 
 // Aggregate applies aggregate functions
-func (a *Aggregator) Aggregate(aggfs ...AggFunc) *Aggregator {
-	a.aggfs = append(a.aggfs, aggfs...)
+func (a *Aggregator) Aggregate(aggFuncs ...aggregate.AggFunc) *Aggregator {
+	a.aggFuncs = append(a.aggFuncs, aggFuncs...)
 	return a
 }
 
 // Where applies predicates
-func (a *Aggregator) Where(pfs ...PredFunc) *Aggregator {
-	a.pfs = append(a.pfs, pfs...)
+func (a *Aggregator) Where(predFuncs ...comparison.PredFunc) *Aggregator {
+	a.predFuncs = append(a.predFuncs, predFuncs...)
 	return a
 }
 
 // Sort applies sorting expressions
-func (a *Aggregator) Sort(sfs ...SortFunc) *Aggregator {
-	a.sfs = append(a.sfs, sfs...)
+func (a *Aggregator) Sort(sortFuncs ...sort.SortFunc) *Aggregator {
+	a.sortFuncs = append(a.sortFuncs, sortFuncs...)
 	return a
 }
 
 // Group applies group clauses
-func (a *Aggregator) Group(cols ...Column) *Aggregator {
-	a.groups = append(a.groups, cols...)
+func (a *Aggregator) GroupBy(cols ...Column) *Aggregator {
+	a.groupBys = append(a.groupBys, cols...)
 	return a
 }
 

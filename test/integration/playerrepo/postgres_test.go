@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/sf9v/nero"
+	"github.com/sf9v/nero/comparison"
 	"github.com/sf9v/nero/test/integration/player"
 	"github.com/sf9v/nero/test/integration/playerrepo"
 )
@@ -262,7 +263,7 @@ func newRepoTestRunner(repo playerrepo.Repository) func(t *testing.T) {
 						playerrepo.None(playerrepo.ColumnRace),
 					).
 					Where(playerrepo.AgeGt(18), playerrepo.RaceNotEq(player.RaceHuman)).
-					Group(playerrepo.ColumnRace).
+					GroupBy(playerrepo.ColumnRace).
 					Sort(playerrepo.Asc(playerrepo.ColumnRace))
 
 				err := repo.Aggregate(ctx, a)
@@ -285,7 +286,7 @@ func newRepoTestRunner(repo playerrepo.Repository) func(t *testing.T) {
 		t.Run("Update", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				now := time.Now()
-				preds := []playerrepo.PredFunc{
+				preds := []comparison.PredFunc{
 					playerrepo.IDEq("1"), playerrepo.IDNotEq("2"),
 					playerrepo.IDGt("0"), playerrepo.IDGtOrEq("1"),
 					playerrepo.IDLt("2"), playerrepo.IDLtOrEq("1"),
@@ -331,7 +332,7 @@ func newRepoTestRunner(repo playerrepo.Repository) func(t *testing.T) {
 
 		t.Run("Delete", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
-				preds := []playerrepo.PredFunc{
+				preds := []comparison.PredFunc{
 					playerrepo.IDEq("1"), playerrepo.IDNotEq("2"),
 					playerrepo.IDGt("0"), playerrepo.IDGtOrEq("1"),
 					playerrepo.IDLt("2"), playerrepo.IDLtOrEq("1"),
@@ -626,9 +627,15 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 						playerrepo.Sum(playerrepo.ColumnAge),
 						playerrepo.None(playerrepo.ColumnRace),
 					).
-					Where(playerrepo.AgeGt(18), playerrepo.RaceNotEq(player.RaceTitan)).
-					Group(playerrepo.ColumnRace).
-					Sort(playerrepo.Asc(playerrepo.ColumnRace))
+					Where(
+						playerrepo.AgeGt(18),
+						playerrepo.RaceNotEq(player.RaceTitan),
+					).
+					GroupBy(playerrepo.ColumnRace).
+					Sort(
+						playerrepo.Asc(playerrepo.ColumnRace),
+						playerrepo.Desc(playerrepo.ColumnAge),
+					)
 
 				tx := newTx(ctx, t)
 				err := repo.AggregateTx(ctx, tx, a)
@@ -652,7 +659,7 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 		t.Run("UpdateTx", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				now := time.Now()
-				preds := []playerrepo.PredFunc{
+				preds := []comparison.PredFunc{
 					playerrepo.IDEq("1"), playerrepo.IDNotEq("2"),
 					playerrepo.IDGt("0"), playerrepo.IDGtOrEq("1"),
 					playerrepo.IDLt("2"), playerrepo.IDLtOrEq("1"),
@@ -706,7 +713,7 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 
 		t.Run("DeleteTx", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
-				preds := []playerrepo.PredFunc{
+				preds := []comparison.PredFunc{
 					playerrepo.IDEq("1"), playerrepo.IDNotEq("2"),
 					playerrepo.IDGt("0"), playerrepo.IDGtOrEq("1"),
 					playerrepo.IDLt("2"), playerrepo.IDLtOrEq("1"),

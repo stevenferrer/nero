@@ -55,9 +55,6 @@ import (
 	{{end -}}
 )
 
-// PredFunc is a predicate function
-type PredFunc func(*comparison.Predicates) 
-
 {{ $cols := prependToColumns .Schema.Identity .Schema.Columns }}
 
 {{range $col := $cols -}}
@@ -66,9 +63,9 @@ type PredFunc func(*comparison.Predicates)
 			{{if isNullOp $op }}
 				{{if $col.IsNillable}}
 					// {{$col.FieldName}}{{$op.String}} applies "{{$op.Desc}}" operator on "{{$col.Name}}" column
-					func {{$col.FieldName}}{{$op.String}} () PredFunc {
-						return func(pb *comparison.Predicates) {
-							pb.Add(&comparison.Predicate{
+					func {{$col.FieldName}}{{$op.String}} () comparison.PredFunc {
+						return func(preds []*comparison.Predicate) []*comparison.Predicate {
+							return append(preds, &comparison.Predicate{
 								Col: "{{$col.Name}}",
 								Op: comparison.{{$op.String}},
 							})
@@ -77,14 +74,14 @@ type PredFunc func(*comparison.Predicates)
 				{{end}}
 			{{else if isInOp $op }}
 				// {{$col.FieldName}}{{$op.String}} applies "{{$op.Desc}}" operator on "{{$col.Name}}" column
-				func {{$col.FieldName}}{{$op.String}} ({{$col.IdentifierPlural}} {{printf "...%T" $col.TypeInfo.V}}) PredFunc {
+				func {{$col.FieldName}}{{$op.String}} ({{$col.IdentifierPlural}} {{printf "...%T" $col.TypeInfo.V}}) comparison.PredFunc {
 					args := []interface{}{}
 					for _, v := range {{$col.IdentifierPlural}} {
 						args = append(args, v)
 					}
 
-					return func(pb *comparison.Predicates) {
-						pb.Add(&comparison.Predicate{
+					return func(preds []*comparison.Predicate) []*comparison.Predicate {
+						return append(preds, &comparison.Predicate{
 							Col: "{{$col.Name}}",
 							Op: comparison.{{$op.String}},
 							Arg: args,
@@ -93,9 +90,9 @@ type PredFunc func(*comparison.Predicates)
 				}
 			{{else}}
 				// {{$col.FieldName}}{{$op.String}} applies "{{$op.Desc}}" operator on "{{$col.Name}}" column
-				func {{$col.FieldName}}{{$op.String}} ({{$col.Identifier}} {{printf "%T" $col.TypeInfo.V}}) PredFunc {
-					return func(pb *comparison.Predicates) {
-						pb.Add(&comparison.Predicate{
+				func {{$col.FieldName}}{{$op.String}} ({{$col.Identifier}} {{printf "%T" $col.TypeInfo.V}}) comparison.PredFunc {
+					return func(preds []*comparison.Predicate) []*comparison.Predicate {
+						return append(preds, &comparison.Predicate{
 							Col: "{{$col.Name}}",
 							Op: comparison.{{$op.String}},
 							{{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
@@ -109,9 +106,9 @@ type PredFunc func(*comparison.Predicates)
 
 				{{if $col.IsComparable -}}
 					// {{$col.FieldName}}{{$op.String}} applies "{{$op.Desc}}" operator on "{{$col.Name}}" column
-					func {{$col.FieldName}}{{$op.String}}Col (col Column) PredFunc {
-						return func(pb *comparison.Predicates) {
-							pb.Add(&comparison.Predicate{
+					func {{$col.FieldName}}{{$op.String}}Col (col Column) comparison.PredFunc {
+						return func(preds []*comparison.Predicate) []*comparison.Predicate {
+							return append(preds, &comparison.Predicate{
 								Col: "{{$col.Name}}",
 								Op: comparison.{{$op.String}},
 								Arg: col,

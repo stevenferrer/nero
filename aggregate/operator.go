@@ -1,25 +1,25 @@
 package aggregate
 
-// Function is an aggregate function
-type Function int
+// Operator is an aggregate operator
+type Operator int
 
 const (
-	// Avg is average aggregate function
-	Avg Function = iota
-	// Count is the count aggregate function
+	// Avg is average operator
+	Avg Operator = iota
+	// Count is the count operator
 	Count
-	// Max is the max aggregate function
+	// Max is the max operator
 	Max
-	// Min is the min aggregate function
+	// Min is the min operator
 	Min
-	// Sum is the sum aggregate function
+	// Sum is the sum operator
 	Sum
 	// None is not an aggregate function and is only used
 	// when you want to include a column in the result
 	None
 )
 
-func (f Function) String() string {
+func (o Operator) String() string {
 	return [...]string{
 		"Avg",
 		"Count",
@@ -27,11 +27,11 @@ func (f Function) String() string {
 		"Min",
 		"Sum",
 		"None",
-	}[f]
+	}[o]
 }
 
 // Desc is a aggregate function description
-func (f Function) Desc() string {
+func (o Operator) Desc() string {
 	return [...]string{
 		"average",
 		"count",
@@ -39,5 +39,5 @@ func (f Function) Desc() string {
 		"min",
 		"sum",
 		"none",
-	}[f]
+	}[o]
 }

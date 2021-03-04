@@ -5,65 +5,62 @@ import (
 	"github.com/sf9v/nero/aggregate"
 )
 
-// AggFunc is an aggregate function
-type AggFunc func(*aggregate.Aggregates)
-
-// Avg is a average aggregate function
-func Avg(col Column) AggFunc {
-	return func(a *aggregate.Aggregates) {
-		a.Add(&aggregate.Aggregate{
+// Avg is a average aggregate operator
+func Avg(col Column) aggregate.AggFunc {
+	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
+		return append(aggs, &aggregate.Aggregate{
 			Col: col.String(),
-			Fn:  aggregate.Avg,
+			Op:  aggregate.Avg,
 		})
 	}
 }
 
-// Count is a count aggregate function
-func Count(col Column) AggFunc {
-	return func(a *aggregate.Aggregates) {
-		a.Add(&aggregate.Aggregate{
+// Count is a count aggregate operator
+func Count(col Column) aggregate.AggFunc {
+	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
+		return append(aggs, &aggregate.Aggregate{
 			Col: col.String(),
-			Fn:  aggregate.Count,
+			Op:  aggregate.Count,
 		})
 	}
 }
 
-// Max is a max aggregate function
-func Max(col Column) AggFunc {
-	return func(a *aggregate.Aggregates) {
-		a.Add(&aggregate.Aggregate{
+// Max is a max aggregate operator
+func Max(col Column) aggregate.AggFunc {
+	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
+		return append(aggs, &aggregate.Aggregate{
 			Col: col.String(),
-			Fn:  aggregate.Max,
+			Op:  aggregate.Max,
 		})
 	}
 }
 
-// Min is a min aggregate function
-func Min(col Column) AggFunc {
-	return func(a *aggregate.Aggregates) {
-		a.Add(&aggregate.Aggregate{
+// Min is a min aggregate operator
+func Min(col Column) aggregate.AggFunc {
+	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
+		return append(aggs, &aggregate.Aggregate{
 			Col: col.String(),
-			Fn:  aggregate.Min,
+			Op:  aggregate.Min,
 		})
 	}
 }
 
-// Sum is a sum aggregate function
-func Sum(col Column) AggFunc {
-	return func(a *aggregate.Aggregates) {
-		a.Add(&aggregate.Aggregate{
+// Sum is a sum aggregate operator
+func Sum(col Column) aggregate.AggFunc {
+	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
+		return append(aggs, &aggregate.Aggregate{
 			Col: col.String(),
-			Fn:  aggregate.Sum,
+			Op:  aggregate.Sum,
 		})
 	}
 }
 
-// None is a none aggregate function
-func None(col Column) AggFunc {
-	return func(a *aggregate.Aggregates) {
-		a.Add(&aggregate.Aggregate{
+// None is a none aggregate operator
+func None(col Column) aggregate.AggFunc {
+	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
+		return append(aggs, &aggregate.Aggregate{
 			Col: col.String(),
-			Fn:  aggregate.None,
+			Op:  aggregate.None,
 		})
 	}
 }

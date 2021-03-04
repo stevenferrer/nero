@@ -68,9 +68,7 @@ var _ Repository = (*PostgresRepository)(nil)
 
 // NewPostgresRepository returns a PostresRepository
 func NewPostgresRepository(db *sql.DB) *PostgresRepository {
-	return &PostgresRepository{
-		db: db,
-	}
+	return &PostgresRepository{db: db}
 }
 
 // Debug enables debug mode
@@ -315,19 +313,17 @@ func (pg *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 		From("\"{{.Collection}}\"").
 		PlaceholderFormat(squirrel.Dollar)
 
-	pfs := q.pfs
-	pb := &comparison.Predicates{}
-	for _, pf := range pfs {
-		pf(pb)
+	preds := []*comparison.Predicate{}
+	for _, predFunc := range q.predFuncs {
+		preds = predFunc(preds)
 	}
 	` + pgPredsBlock + `
 
-	sfs := q.sfs
-	sorts := &sort.Sorts{}
-	for _, sf := range sfs {
-		sf(sorts)
+	sorts := []*sort.Sort{}
+	for _, sortFunc := range q.sortFuncs {
+		sorts = sortFunc(sorts)
 	}
-	for _, s := range sorts.All() {
+	for _, s := range sorts {
 		col := fmt.Sprintf("%q", s.Col)
 		switch s.Direction {
 		case sort.Asc:
@@ -385,10 +381,9 @@ func (pg *PostgresRepository) update(ctx context.Context, runner nero.SQLRunner,
 		return 0, nil
 	}
 
-	pfs := u.pfs
-	pb := &comparison.Predicates{}
-	for _, pf := range pfs {
-		pf(pb)
+	preds := []*comparison.Predicate{}
+	for _, predFunc := range u.predFuncs {
+		preds = predFunc(preds)
 	}
 	` + pgPredsBlock + `
 
@@ -429,10 +424,9 @@ func (pg *PostgresRepository) delete(ctx context.Context, runner nero.SQLRunner,
 	qb := squirrel.Delete("\"{{.Collection}}\"").
 		PlaceholderFormat(squirrel.Dollar)
 
-	pfs := d.pfs
-	pb := &comparison.Predicates{}
-	for _, pf := range pfs {
-		pf(pb)
+	preds := []*comparison.Predicate{}
+	for _, predFunc := range d.predFuncs {
+		preds = predFunc(preds)
 	}
 	` + pgPredsBlock + `
 
@@ -470,15 +464,15 @@ func (pg *PostgresRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Ag
 }
 
 func (pg *PostgresRepository) aggregate(ctx context.Context, runner nero.SQLRunner, a *Aggregator) error {
-	aggs := &aggregate.Aggregates{}
-	for _, aggf := range a.aggfs {
-		aggf(aggs)
+	aggs := []*aggregate.Aggregate{}
+	for _, aggFunc := range a.aggFuncs {
+		aggs = aggFunc(aggs)
 	}
 	cols := []string{}
-	for _, agg := range aggs.All() {
+	for _, agg := range aggs {
 		col := agg.Col
 		qcol := fmt.Sprintf("%q", col)
-		switch agg.Fn {
+		switch agg.Op {
 		case aggregate.Avg:
 			cols = append(cols, "AVG("+qcol+") avg_"+col)
 		case aggregate.Count:
@@ -497,25 +491,23 @@ func (pg *PostgresRepository) aggregate(ctx context.Context, runner nero.SQLRunn
 	qb := squirrel.Select(cols...).From("\"{{.Collection}}\"").
 		PlaceholderFormat(squirrel.Dollar)
 
-	groups := []string{}
-	for _, group := range a.groups {
-		groups = append(groups, fmt.Sprintf("%q", group.String()))
+	groupBys := []string{}
+	for _, groupBy := range a.groupBys {
+		groupBys = append(groupBys, fmt.Sprintf("%q", groupBy.String()))
 	}
-	qb = qb.GroupBy(groups...)
+	qb = qb.GroupBy(groupBys...)
 
-	pfs := a.pfs
-	pb := &comparison.Predicates{}
-	for _, pf := range pfs {
-		pf(pb)
+	preds := []*comparison.Predicate{}
+	for _, predFunc := range a.predFuncs {
+		preds = predFunc(preds)
 	}
 	` + pgPredsBlock + `
 
-	sfs := a.sfs
-	sorts := &sort.Sorts{}
-	for _, sf := range sfs {
-		sf(sorts)
+	sorts := []*sort.Sort{}
+	for _, sortFunc := range a.sortFuncs {
+		sorts = sortFunc(sorts)
 	}
-	for _, s := range sorts.All() {
+	for _, s := range sorts {
 		col := fmt.Sprintf("%q", s.Col)
 		switch s.Direction {
 		case sort.Asc:
@@ -562,69 +554,68 @@ func (pg *PostgresRepository) aggregate(ctx context.Context, runner nero.SQLRunn
 `
 
 const pgPredsBlock = `
-	for _, p := range pb.All() {
-		switch p.Op {
+	for _, pred := range preds {
+		switch pred.Op {
 		case comparison.Eq:
-			col, ok := p.Arg.(Column)
+			col, ok := pred.Arg.(Column)
 			if ok {
-				qb = qb.Where(fmt.Sprintf("%q = %q", p.Col, col.String()))
+				qb = qb.Where(fmt.Sprintf("%q = %q", pred.Col, col.String()))
 			} else {
-				qb = qb.Where(fmt.Sprintf("%q = ?", p.Col), p.Arg)
+				qb = qb.Where(fmt.Sprintf("%q = ?", pred.Col), pred.Arg)
 			}
 		case comparison.NotEq:
-			col, ok := p.Arg.(Column)
+			col, ok := pred.Arg.(Column)
 			if ok {
-				qb = qb.Where(fmt.Sprintf("%q <> %q", p.Col, col.String()))
+				qb = qb.Where(fmt.Sprintf("%q <> %q", pred.Col, col.String()))
 			} else {	
-				qb = qb.Where(fmt.Sprintf("%q <> ?", p.Col), p.Arg)
+				qb = qb.Where(fmt.Sprintf("%q <> ?", pred.Col), pred.Arg)
 			}
 		case comparison.Gt:
-			col, ok := p.Arg.(Column)
+			col, ok := pred.Arg.(Column)
 			if ok {
-				qb = qb.Where(fmt.Sprintf("%q > %q", p.Col, col.String()))
+				qb = qb.Where(fmt.Sprintf("%q > %q", pred.Col, col.String()))
 			} else {
-				qb = qb.Where(fmt.Sprintf("%q > ?", p.Col), p.Arg)
+				qb = qb.Where(fmt.Sprintf("%q > ?", pred.Col), pred.Arg)
 			}
 		case comparison.GtOrEq:
-			col, ok := p.Arg.(Column)
+			col, ok := pred.Arg.(Column)
 			if ok {
-				qb = qb.Where(fmt.Sprintf("%q >= %q", p.Col, col.String()))
+				qb = qb.Where(fmt.Sprintf("%q >= %q", pred.Col, col.String()))
 			} else {
-				qb = qb.Where(fmt.Sprintf("%q >= ?", p.Col), p.Arg)
+				qb = qb.Where(fmt.Sprintf("%q >= ?", pred.Col), pred.Arg)
 			}
 		case comparison.Lt:
-			col, ok := p.Arg.(Column)
+			col, ok := pred.Arg.(Column)
 			if ok {
-				qb = qb.Where(fmt.Sprintf("%q < %q", p.Col, col.String()))
+				qb = qb.Where(fmt.Sprintf("%q < %q", pred.Col, col.String()))
 			} else {
-				qb = qb.Where(fmt.Sprintf("%q < ?", p.Col), p.Arg)
+				qb = qb.Where(fmt.Sprintf("%q < ?", pred.Col), pred.Arg)
 			}
 		case comparison.LtOrEq:
-			col, ok := p.Arg.(Column)
+			col, ok := pred.Arg.(Column)
 			if ok {
-				qb = qb.Where(fmt.Sprintf("%q <= %q", p.Col, col.String()))
+				qb = qb.Where(fmt.Sprintf("%q <= %q", pred.Col, col.String()))
 			} else {
-				qb = qb.Where(fmt.Sprintf("%q <= ?", p.Col), p.Arg)
+				qb = qb.Where(fmt.Sprintf("%q <= ?", pred.Col), pred.Arg)
 			}
 		case comparison.IsNull:
-			qb = qb.Where(fmt.Sprintf("%q IS NULL", p.Col))
+			qb = qb.Where(fmt.Sprintf("%q IS NULL", pred.Col))
 		case comparison.IsNotNull:
-			qb = qb.Where(fmt.Sprintf("%q IS NOT NULL", p.Col))
+			qb = qb.Where(fmt.Sprintf("%q IS NOT NULL", pred.Col))
 		case comparison.In, comparison.NotIn:
-			args := p.Arg.([]interface{})
+			args := pred.Arg.([]interface{})
 			if len(args) == 0 {
 				continue
 			}
-			qms := []string{}
+			placeholders := []string{}
 			for range args {
-				qms = append(qms, "?")
+				placeholders = append(placeholders, "?")
 			}
 			fmtStr := "%q IN (%s)"
-			if p.Op == comparison.NotIn {
+			if pred.Op == comparison.NotIn {
 				fmtStr = "%q NOT IN (%s)"
 			}
-			plchldr := strings.Join(qms, ",")
-			qb = qb.Where(fmt.Sprintf(fmtStr, p.Col, plchldr), args...)
+			qb = qb.Where(fmt.Sprintf(fmtStr, pred.Col, strings.Join(placeholders, ",")), args...)
 		}
 	}
 `

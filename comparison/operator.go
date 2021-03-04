@@ -1,6 +1,6 @@
 package comparison
 
-// Operator is comparison operator
+// Operator is comparison operator type
 type Operator int
 
 // List of comparison operators
