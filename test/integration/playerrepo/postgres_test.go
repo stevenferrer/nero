@@ -1,3 +1,5 @@
+// +build integration
+
 package playerrepo_test
 
 import (
@@ -163,8 +165,6 @@ func newRepoTestRunner(repo playerrepo.Repository) func(t *testing.T) {
 				// with predicates
 				players, err = repo.Query(ctx, playerrepo.NewQueryer().
 					Where(playerrepo.IDEq("2"), playerrepo.IDNotEq("1"),
-						playerrepo.IDGt("1"), playerrepo.IDGtOrEq("2"),
-						playerrepo.IDLt("3"), playerrepo.IDLtOrEq("2"),
 						playerrepo.IDIn("2"), playerrepo.IDNotIn("1"),
 					),
 				)
@@ -288,8 +288,6 @@ func newRepoTestRunner(repo playerrepo.Repository) func(t *testing.T) {
 				now := time.Now()
 				preds := []comparison.PredFunc{
 					playerrepo.IDEq("1"), playerrepo.IDNotEq("2"),
-					playerrepo.IDGt("0"), playerrepo.IDGtOrEq("1"),
-					playerrepo.IDLt("2"), playerrepo.IDLtOrEq("1"),
 				}
 
 				email := "titan@gg.io"
@@ -334,8 +332,6 @@ func newRepoTestRunner(repo playerrepo.Repository) func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				preds := []comparison.PredFunc{
 					playerrepo.IDEq("1"), playerrepo.IDNotEq("2"),
-					playerrepo.IDGt("0"), playerrepo.IDGtOrEq("1"),
-					playerrepo.IDLt("2"), playerrepo.IDLtOrEq("1"),
 				}
 				// delete one
 				rowsAffected, err := repo.Delete(ctx,
@@ -502,9 +498,7 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 				// with predicates
 				tx = newTx(ctx, t)
 				users, err = repo.QueryTx(ctx, tx, playerrepo.NewQueryer().
-					Where(playerrepo.IDEq("2"), playerrepo.IDNotEq("1"),
-						playerrepo.IDGt("1"), playerrepo.IDGtOrEq("2"),
-						playerrepo.IDLt("3"), playerrepo.IDLtOrEq("2")))
+					Where(playerrepo.IDEq("2"), playerrepo.IDNotEq("1")))
 				assert.NoError(t, err)
 				assert.Len(t, users, 1)
 				assert.NoError(t, tx.Commit())
@@ -658,8 +652,6 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 				now := time.Now()
 				preds := []comparison.PredFunc{
 					playerrepo.IDEq("1"), playerrepo.IDNotEq("2"),
-					playerrepo.IDGt("0"), playerrepo.IDGtOrEq("1"),
-					playerrepo.IDLt("2"), playerrepo.IDLtOrEq("1"),
 				}
 
 				email := "titan@gg.io"
@@ -712,8 +704,6 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				preds := []comparison.PredFunc{
 					playerrepo.IDEq("1"), playerrepo.IDNotEq("2"),
-					playerrepo.IDGt("0"), playerrepo.IDGtOrEq("1"),
-					playerrepo.IDLt("2"), playerrepo.IDLtOrEq("1"),
 				}
 				// delete one
 				tx := newTx(ctx, t)

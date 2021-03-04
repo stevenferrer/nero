@@ -40,7 +40,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Test
-        run: go test -race -coverprofile=profile.cov ./...
+        run: go test -race -tags integration -coverprofile=profile.cov ./...
       - name: Send Coverage
         uses: shogo82148/actions-goveralls@v1
         with:

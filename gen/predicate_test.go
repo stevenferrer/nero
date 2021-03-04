@@ -10,15 +10,15 @@ import (
 	"github.com/sf9v/nero/example"
 )
 
-func Test_newPredicatesFile(t *testing.T) {
+func Test_newPredicateFile(t *testing.T) {
 	schema := (&example.User{}).Schema()
 	require.NotNil(t, schema)
-	buf, err := newPredicatesFile(schema)
+	buf, err := newPredicateFile(schema)
 	require.NoError(t, err)
 
 	_, err = format.Source(buf.Bytes())
 	require.NoError(t, err)
 
-	_, err = newPredicatesFile(nil)
+	_, err = newPredicateFile(nil)
 	assert.Error(t, err)
 }

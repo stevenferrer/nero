@@ -8,7 +8,7 @@ import (
 	"github.com/sf9v/nero/aggregate"
 )
 
-func newAggregatesFile(schema *nero.Schema) (*bytes.Buffer, error) {
+func newAggregateFile(schema *nero.Schema) (*bytes.Buffer, error) {
 	v := struct {
 		Operators []aggregate.Operator
 		Schema    *nero.Schema

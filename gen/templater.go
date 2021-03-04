@@ -13,7 +13,7 @@ func newTemplater(schema *nero.Schema, templater nero.Templater) (*bytes.Buffer,
 		return nil, errors.Wrap(err, "parse templater")
 	}
 
-	buf := new(bytes.Buffer)
+	buf := &bytes.Buffer{}
 	err = tmpl.Execute(buf, schema)
 	return buf, err
 }

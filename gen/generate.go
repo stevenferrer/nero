@@ -14,24 +14,24 @@ func Generate(schema *nero.Schema) ([]*File, error) {
 	}
 	files = append(files, &File{name: "meta.go", buf: buf.Bytes()})
 
-	buf, err = newPredicatesFile(schema)
+	buf, err = newPredicateFile(schema)
 	if err != nil {
-		return nil, errors.Wrap(err, "predicates file")
+		return nil, errors.Wrap(err, "predicate file")
 	}
-	files = append(files, &File{name: "predicates.go", buf: buf.Bytes()})
+	files = append(files, &File{name: "predicate.go", buf: buf.Bytes()})
 
-	buf, err = newSortsFile(schema)
+	buf, err = newSortFile(schema)
 	if err != nil {
-		return nil, errors.Wrap(err, "sorts file")
+		return nil, errors.Wrap(err, "sort file")
 	}
-	files = append(files, &File{name: "sorts.go", buf: buf.Bytes()})
+	files = append(files, &File{name: "sort.go", buf: buf.Bytes()})
 
-	buf, err = newAggregatesFile(schema)
+	buf, err = newAggregateFile(schema)
 	if err != nil {
-		return nil, errors.Wrap(err, "aggregates file")
+		return nil, errors.Wrap(err, "aggregate file")
 	}
 	files = append(files, &File{
-		name: "aggregates.go",
+		name: "aggregate.go",
 		buf:  buf.Bytes(),
 	})
 

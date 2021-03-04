@@ -14,7 +14,7 @@ func newRepositoryFile(schema *nero.Schema) (*bytes.Buffer, error) {
 		return nil, err
 	}
 
-	buf := new(bytes.Buffer)
+	buf := &bytes.Buffer{}
 	err = tmpl.Execute(buf, schema)
 	return buf, err
 }

@@ -304,49 +304,30 @@ func (pg *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 
 func (pg *PostgresRepository) buildPreds(sb squirrel.StatementBuilderType, preds []*comparison.Predicate) squirrel.StatementBuilderType {
 	for _, pred := range preds {
+		var (
+			isCol bool
+			col   Column
+			arg   = pred.Arg
+		)
+		// see if argument is a column
+		col, isCol = arg.(Column)
+		if isCol {
+			arg = fmt.Sprintf("%q", col)
+		}
+
 		switch pred.Op {
 		case comparison.Eq:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				sb = sb.Where(fmt.Sprintf("%q = %q", pred.Col, col.String()))
-			} else {
-				sb = sb.Where(fmt.Sprintf("%q = ?", pred.Col), pred.Arg)
-			}
+			sb = sb.Where(fmt.Sprintf("%q = ?", pred.Col), arg)
 		case comparison.NotEq:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				sb = sb.Where(fmt.Sprintf("%q <> %q", pred.Col, col.String()))
-			} else {
-				sb = sb.Where(fmt.Sprintf("%q <> ?", pred.Col), pred.Arg)
-			}
+			sb = sb.Where(fmt.Sprintf("%q <> ?", pred.Col), arg)
 		case comparison.Gt:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				sb = sb.Where(fmt.Sprintf("%q > %q", pred.Col, col.String()))
-			} else {
-				sb = sb.Where(fmt.Sprintf("%q > ?", pred.Col), pred.Arg)
-			}
+			sb = sb.Where(fmt.Sprintf("%q > ?", pred.Col), arg)
 		case comparison.GtOrEq:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				sb = sb.Where(fmt.Sprintf("%q >= %q", pred.Col, col.String()))
-			} else {
-				sb = sb.Where(fmt.Sprintf("%q >= ?", pred.Col), pred.Arg)
-			}
+			sb = sb.Where(fmt.Sprintf("%q >= ?", pred.Col), arg)
 		case comparison.Lt:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				sb = sb.Where(fmt.Sprintf("%q < %q", pred.Col, col.String()))
-			} else {
-				sb = sb.Where(fmt.Sprintf("%q < ?", pred.Col), pred.Arg)
-			}
+			sb = sb.Where(fmt.Sprintf("%q < ?", pred.Col), arg)
 		case comparison.LtOrEq:
-			col, ok := pred.Arg.(Column)
-			if ok {
-				sb = sb.Where(fmt.Sprintf("%q <= %q", pred.Col, col.String()))
-			} else {
-				sb = sb.Where(fmt.Sprintf("%q <= ?", pred.Col), pred.Arg)
-			}
+			sb = sb.Where(fmt.Sprintf("%q <= ?", pred.Col), arg)
 		case comparison.IsNull:
 			sb = sb.Where(fmt.Sprintf("%q IS NULL", pred.Col))
 		case comparison.IsNotNull:

@@ -8,13 +8,12 @@ import (
 )
 
 func newMetaFile(schema *nero.Schema) (*bytes.Buffer, error) {
-	buf := new(bytes.Buffer)
-
 	tmpl, err := template.New("meta.tmpl").Parse(metaTmpl)
 	if err != nil {
 		return nil, err
 	}
 
+	buf := &bytes.Buffer{}
 	err = tmpl.Execute(buf, schema)
 	if err != nil {
 		return nil, err

@@ -30,50 +30,6 @@ func IDNotEq(id string) comparison.PredFunc {
 	}
 }
 
-// IDGt applies "greater than" operator on "id" column
-func IDGt(id string) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "id",
-			Op:  comparison.Gt,
-			Arg: id,
-		})
-	}
-}
-
-// IDGtOrEq applies "greater than or equal" operator on "id" column
-func IDGtOrEq(id string) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "id",
-			Op:  comparison.GtOrEq,
-			Arg: id,
-		})
-	}
-}
-
-// IDLt applies "less than" operator on "id" column
-func IDLt(id string) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "id",
-			Op:  comparison.Lt,
-			Arg: id,
-		})
-	}
-}
-
-// IDLtOrEq applies "less than or equal" operator on "id" column
-func IDLtOrEq(id string) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "id",
-			Op:  comparison.LtOrEq,
-			Arg: id,
-		})
-	}
-}
-
 // IDIn applies "in" operator on "id" column
 func IDIn(ids ...string) comparison.PredFunc {
 	args := []interface{}{}
@@ -128,50 +84,6 @@ func EmailNotEq(email string) comparison.PredFunc {
 	}
 }
 
-// EmailGt applies "greater than" operator on "email" column
-func EmailGt(email string) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "email",
-			Op:  comparison.Gt,
-			Arg: email,
-		})
-	}
-}
-
-// EmailGtOrEq applies "greater than or equal" operator on "email" column
-func EmailGtOrEq(email string) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "email",
-			Op:  comparison.GtOrEq,
-			Arg: email,
-		})
-	}
-}
-
-// EmailLt applies "less than" operator on "email" column
-func EmailLt(email string) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "email",
-			Op:  comparison.Lt,
-			Arg: email,
-		})
-	}
-}
-
-// EmailLtOrEq applies "less than or equal" operator on "email" column
-func EmailLtOrEq(email string) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "email",
-			Op:  comparison.LtOrEq,
-			Arg: email,
-		})
-	}
-}
-
 // EmailIn applies "in" operator on "email" column
 func EmailIn(emails ...string) comparison.PredFunc {
 	args := []interface{}{}
@@ -221,50 +133,6 @@ func NameNotEq(name string) comparison.PredFunc {
 		return append(preds, &comparison.Predicate{
 			Col: "name",
 			Op:  comparison.NotEq,
-			Arg: name,
-		})
-	}
-}
-
-// NameGt applies "greater than" operator on "name" column
-func NameGt(name string) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "name",
-			Op:  comparison.Gt,
-			Arg: name,
-		})
-	}
-}
-
-// NameGtOrEq applies "greater than or equal" operator on "name" column
-func NameGtOrEq(name string) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "name",
-			Op:  comparison.GtOrEq,
-			Arg: name,
-		})
-	}
-}
-
-// NameLt applies "less than" operator on "name" column
-func NameLt(name string) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "name",
-			Op:  comparison.Lt,
-			Arg: name,
-		})
-	}
-}
-
-// NameLtOrEq applies "less than or equal" operator on "name" column
-func NameLtOrEq(name string) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "name",
-			Op:  comparison.LtOrEq,
 			Arg: name,
 		})
 	}
@@ -422,50 +290,6 @@ func RaceNotEq(race player.Race) comparison.PredFunc {
 	}
 }
 
-// RaceGt applies "greater than" operator on "race" column
-func RaceGt(race player.Race) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "race",
-			Op:  comparison.Gt,
-			Arg: race,
-		})
-	}
-}
-
-// RaceGtOrEq applies "greater than or equal" operator on "race" column
-func RaceGtOrEq(race player.Race) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "race",
-			Op:  comparison.GtOrEq,
-			Arg: race,
-		})
-	}
-}
-
-// RaceLt applies "less than" operator on "race" column
-func RaceLt(race player.Race) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "race",
-			Op:  comparison.Lt,
-			Arg: race,
-		})
-	}
-}
-
-// RaceLtOrEq applies "less than or equal" operator on "race" column
-func RaceLtOrEq(race player.Race) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "race",
-			Op:  comparison.LtOrEq,
-			Arg: race,
-		})
-	}
-}
-
 // RaceIn applies "in" operator on "race" column
 func RaceIn(races ...player.Race) comparison.PredFunc {
 	args := []interface{}{}
@@ -515,50 +339,6 @@ func UpdatedAtNotEq(updatedAt *time.Time) comparison.PredFunc {
 		return append(preds, &comparison.Predicate{
 			Col: "updated_at",
 			Op:  comparison.NotEq,
-			Arg: updatedAt,
-		})
-	}
-}
-
-// UpdatedAtGt applies "greater than" operator on "updated_at" column
-func UpdatedAtGt(updatedAt *time.Time) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "updated_at",
-			Op:  comparison.Gt,
-			Arg: updatedAt,
-		})
-	}
-}
-
-// UpdatedAtGtOrEq applies "greater than or equal" operator on "updated_at" column
-func UpdatedAtGtOrEq(updatedAt *time.Time) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "updated_at",
-			Op:  comparison.GtOrEq,
-			Arg: updatedAt,
-		})
-	}
-}
-
-// UpdatedAtLt applies "less than" operator on "updated_at" column
-func UpdatedAtLt(updatedAt *time.Time) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "updated_at",
-			Op:  comparison.Lt,
-			Arg: updatedAt,
-		})
-	}
-}
-
-// UpdatedAtLtOrEq applies "less than or equal" operator on "updated_at" column
-func UpdatedAtLtOrEq(updatedAt *time.Time) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "updated_at",
-			Op:  comparison.LtOrEq,
 			Arg: updatedAt,
 		})
 	}
@@ -633,50 +413,6 @@ func CreatedAtNotEq(createdAt *time.Time) comparison.PredFunc {
 		return append(preds, &comparison.Predicate{
 			Col: "created_at",
 			Op:  comparison.NotEq,
-			Arg: createdAt,
-		})
-	}
-}
-
-// CreatedAtGt applies "greater than" operator on "created_at" column
-func CreatedAtGt(createdAt *time.Time) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "created_at",
-			Op:  comparison.Gt,
-			Arg: createdAt,
-		})
-	}
-}
-
-// CreatedAtGtOrEq applies "greater than or equal" operator on "created_at" column
-func CreatedAtGtOrEq(createdAt *time.Time) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "created_at",
-			Op:  comparison.GtOrEq,
-			Arg: createdAt,
-		})
-	}
-}
-
-// CreatedAtLt applies "less than" operator on "created_at" column
-func CreatedAtLt(createdAt *time.Time) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "created_at",
-			Op:  comparison.Lt,
-			Arg: createdAt,
-		})
-	}
-}
-
-// CreatedAtLtOrEq applies "less than or equal" operator on "created_at" column
-func CreatedAtLtOrEq(createdAt *time.Time) comparison.PredFunc {
-	return func(preds []*comparison.Predicate) []*comparison.Predicate {
-		return append(preds, &comparison.Predicate{
-			Col: "created_at",
-			Op:  comparison.LtOrEq,
 			Arg: createdAt,
 		})
 	}

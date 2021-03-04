@@ -8,7 +8,7 @@ import (
 	"github.com/sf9v/nero/sort"
 )
 
-func newSortsFile(schema *nero.Schema) (*bytes.Buffer, error) {
+func newSortFile(schema *nero.Schema) (*bytes.Buffer, error) {
 	v := struct {
 		Directions []sort.Direction
 		Schema     *nero.Schema
@@ -19,12 +19,12 @@ func newSortsFile(schema *nero.Schema) (*bytes.Buffer, error) {
 		Schema: schema,
 	}
 
-	tmpl, err := template.New("sorts.tmpl").Parse(sortTmpl)
+	tmpl, err := template.New("sort.tmpl").Parse(sortTmpl)
 	if err != nil {
 		return nil, err
 	}
 
-	buf := new(bytes.Buffer)
+	buf := &bytes.Buffer{}
 	err = tmpl.Execute(buf, v)
 	if err != nil {
 		return nil, err
