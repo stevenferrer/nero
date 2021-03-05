@@ -86,7 +86,9 @@ If your your back-end is not yet supported, you can implement your own [custom b
 
 ## Custom back-ends
 
-Implementing a custom back-end is very easy. In fact, you don't have to use the official back-ends. You can implement custom back-ends (BoltDB, Badger, MongoDB, CouchDB, H2, etc.) by implementing the [_Templater_](./template.go) interface. Please refer to the official [postgres template](./postgres_template.go) and this [example schema](./example/user.go).
+Implementing a custom back-end is very easy. In fact, you don't have to use the official back-ends. You can implement custom back-ends (BoltDB, Badger, MongoDB, CouchDB, H2, etc.) by implementing the [_Templater_](./template.go) interface. 
+
+See official [postgres template](./postgres_template.go) for reference.
 
 ## Standing on the shoulders of giants
 
@@ -106,4 +108,9 @@ Also, the following have a huge influence on this project and deserves most of t
 
 ## Contributing
 
-Any suggestions and ideas on how to improve this library are very much welcome! Please feel free to [open an issue](https://github.com/sf9v/nero/issues) or by [making a pull request](https://github.com/sf9v/nero/pulls).
+Any suggestions and ideas are very much welcome! Feel free to [open an issue](https://github.com/sf9v/nero/issues) or by [making a pull request](https://github.com/sf9v/nero/pulls).
+
+
+## License
+
+[Apache-2.0](LICENSE)
