@@ -19,8 +19,8 @@ func (d Direction) Desc() string {
 }
 
 const (
-	// Asc is an ascending sort direction
+	// Asc ascending sort direction
 	Asc Direction = iota
-	// Desc is a descending sort direction
+	// Desc descending sort direction
 	Desc
 )

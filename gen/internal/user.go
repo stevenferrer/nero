@@ -1,4 +1,4 @@
-package example
+package internal
 
 import (
 	"time"
@@ -6,7 +6,7 @@ import (
 	"github.com/sf9v/nero"
 )
 
-// User is a
+// User is a user model
 type User struct {
 	ID         int64
 	Name       string
@@ -15,10 +15,10 @@ type User struct {
 	CreatedAt  *time.Time
 }
 
-// Schema implements nero.Schemaer
+// Schema returns the schema for user model
 func (u User) Schema() *nero.Schema {
 	return nero.NewSchemaBuilder(&u).
-		PkgName("user").Collection("users").
+		PkgName("userrepo").Collection("users").
 		Identity(
 			nero.NewColumnBuilder("id", u.ID).StructField("ID").
 				Auto().Build(),

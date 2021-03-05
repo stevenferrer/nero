@@ -4,16 +4,14 @@ import (
 	"go/format"
 	"testing"
 
-	"github.com/sf9v/nero/example"
+	"github.com/sf9v/nero/gen/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_newAggregateFile(t *testing.T) {
-	schema := (&example.User{}).Schema()
-	require.NotNil(t, schema)
-
-	buf, err := newAggregateFile(schema)
+	u := internal.User{}
+	buf, err := newAggregateFile(u.Schema())
 	require.NoError(t, err)
 
 	_, err = format.Source(buf.Bytes())

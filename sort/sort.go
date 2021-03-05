@@ -1,6 +1,6 @@
 package sort
 
-// Sort is a sorter
+// Sort is a sort parameter
 type Sort struct {
 	Col       string
 	Direction Direction

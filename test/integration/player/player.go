@@ -31,23 +31,23 @@ const (
 )
 
 // Schema implements nero.Schemaer
-func (u Player) Schema() *nero.Schema {
-	return nero.NewSchemaBuilder(&u).
+func (p Player) Schema() *nero.Schema {
+	return nero.NewSchemaBuilder(&p).
 		PkgName("playerrepo").
 		Collection("players").
 		Identity(
-			nero.NewColumnBuilder("id", u.ID).
+			nero.NewColumnBuilder("id", p.ID).
 				StructField("ID").Auto().Build(),
 		).
 		Columns(
-			nero.NewColumnBuilder("email", u.Email).Build(),
-			nero.NewColumnBuilder("name", u.Name).Build(),
-			nero.NewColumnBuilder("age", u.Age).Build(),
-			nero.NewColumnBuilder("race", u.Race).Build(),
-			nero.NewColumnBuilder("interests", u.Interests).Build(),
-			nero.NewColumnBuilder("updated_at", u.UpdatedAt).
+			nero.NewColumnBuilder("email", p.Email).Build(),
+			nero.NewColumnBuilder("name", p.Name).Build(),
+			nero.NewColumnBuilder("age", p.Age).Build(),
+			nero.NewColumnBuilder("race", p.Race).Build(),
+			nero.NewColumnBuilder("interests", p.Interests).Build(),
+			nero.NewColumnBuilder("updated_at", p.UpdatedAt).
 				Optional().Build(),
-			nero.NewColumnBuilder("created_at", u.CreatedAt).
+			nero.NewColumnBuilder("created_at", p.CreatedAt).
 				Auto().Build(),
 		).
 		Build()

@@ -2,18 +2,18 @@ package gen_test
 
 import (
 	"os"
-	"path"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/sf9v/nero/example"
 	"github.com/sf9v/nero/gen"
+	"github.com/sf9v/nero/gen/internal"
 )
 
 func TestGenerate(t *testing.T) {
-	files, err := gen.Generate((example.User{}).Schema())
+	u := internal.User{}
+	files, err := gen.Generate(u.Schema())
 	assert.NoError(t, err)
 	assert.Len(t, files, 6)
 
@@ -23,7 +23,7 @@ func TestGenerate(t *testing.T) {
 	}
 
 	// create base directory
-	basePath := path.Join("gen", "user")
+	basePath := "userrepo"
 	err = os.MkdirAll(basePath, os.ModePerm)
 	require.NoError(t, err)
 

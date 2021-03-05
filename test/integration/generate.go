@@ -11,7 +11,8 @@ import (
 
 func main() {
 	// generate
-	files, err := gen.Generate((player.Player{}).Schema())
+	p := player.Player{}
+	files, err := gen.Generate(p.Schema())
 	checkErr(err)
 
 	// create base directory

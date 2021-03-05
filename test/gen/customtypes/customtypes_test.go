@@ -12,7 +12,8 @@ import (
 )
 
 func TestCustomTypes(t *testing.T) {
-	files, err := gen.Generate((customtypes.Custom{}).Schema())
+	c := customtypes.Custom{}
+	files, err := gen.Generate(c.Schema())
 	require.NoError(t, err)
 	assert.Len(t, files, 6)
 

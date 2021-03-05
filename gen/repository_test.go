@@ -7,12 +7,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/sf9v/nero/example"
+	"github.com/sf9v/nero/gen/internal"
 )
 
 func Test_newRepositoryFile(t *testing.T) {
-	schema := (&example.User{}).Schema()
-	buf, err := newRepositoryFile(schema)
+	u := internal.User{}
+	buf, err := newRepositoryFile(u.Schema())
 	require.NoError(t, err)
 
 	_, err = format.Source(buf.Bytes())
