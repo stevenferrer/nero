@@ -5,7 +5,7 @@
 
 # Nero
 
-A library for generating the repository layer code. Please see this [blog post](https://sf9v.github.io/posts/generating-the-repository-layer-in-go/) for more details.
+A library for generating the repository pattern.
 
 ## Installation
 
@@ -64,11 +64,11 @@ func main() {
 
 ## Motivation
 
-We heavily use the _[repository pattern](https://threedots.tech/post/repository-pattern-in-go/)_ in our codebases and we often [write our queries manually](https://golang.org/pkg/database/sql/#example_DB_QueryContext). It becomes tedious and repetitive as we have more tables/models to maintain. So, we decided to experiment on creating this project to generate our repository layer automatically.
+We heavily use the _[repository pattern](https://threedots.tech/post/repository-pattern-in-go/)_ in our codebases and we often [write our queries manually](https://golang.org/pkg/database/sql/#example_DB_QueryContext). It becomes tedious and repetitive as we have more tables/models to maintain. So, we decided to experiment on creating this library to generate our repositories automatically.
 
 ## Goals
 
-- Decouple implementation details from the `Repository` interface
+- Decouple implementation from the `Repository` interface
 - Easy integration with existing codebase
 - Minimal API
 
@@ -88,7 +88,7 @@ If your your back-end is not yet supported, you can implement your own [custom b
 
 Implementing a custom back-end is very easy. In fact, you don't have to use the official back-ends. You can implement custom back-ends (BoltDB, Badger, MongoDB, CouchDB, H2, etc.) by implementing the [_Templater_](./template.go) interface. 
 
-See official [postgres template](./postgres_template.go) for reference.
+See official [postgres template](./pg_template.go) for reference.
 
 ## Standing on the shoulders of giants
 
