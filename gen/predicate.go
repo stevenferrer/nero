@@ -70,7 +70,7 @@ import (
 	{{if $field.IsComparable  -}}
         {{ range $op := $.EqOps }} 
             // {{$field.StructField}}{{$op.String}} {{$op.Desc}} operator on {{$field.StructField}} field
-            func {{$field.StructField}}{{$op.String}} ({{$field.Identifier}} {{printf "%T" $field.TypeInfo.V}}) comparison.PredFunc {
+            func {{$field.StructField}}{{$op.String}} ({{$field.Identifier}} {{rawType $field.TypeInfo.V}}) comparison.PredFunc {
                 return func(preds []*comparison.Predicate) []*comparison.Predicate {
                     return append(preds, &comparison.Predicate{
                         Field: "{{$field.Name}}",
@@ -88,7 +88,7 @@ import (
         {{ range $op := $.LtGtOps }}
             {{if $field.TypeInfo.IsNumeric }}
                 // {{$field.StructField}}{{$op.String}} {{$op.Desc}} operator on {{$field.StructField}} field
-                func {{$field.StructField}}{{$op.String}} ({{$field.Identifier}} {{printf "%T" $field.TypeInfo.V}}) comparison.PredFunc {
+                func {{$field.StructField}}{{$op.String}} ({{$field.Identifier}} {{rawType $field.TypeInfo.V}}) comparison.PredFunc {
                     return func(preds []*comparison.Predicate) []*comparison.Predicate {
                         return append(preds, &comparison.Predicate{
                             Field: "{{$field.Name}}",
@@ -120,7 +120,7 @@ import (
 
         {{ range $op := $.InOps }}
             // {{$field.StructField}}{{$op.String}} {{$op.Desc}} operator on {{$field.StructField}} field
-            func {{$field.StructField}}{{$op.String}} ({{$field.IdentifierPlural}} {{printf "...%T" $field.TypeInfo.V}}) comparison.PredFunc {
+            func {{$field.StructField}}{{$op.String}} ({{$field.IdentifierPlural}} ...{{rawType $field.TypeInfo.V}}) comparison.PredFunc {
                 args := []interface{}{}
                 for _, v := range {{$field.IdentifierPlural}} {
                     args = append(args, v)

@@ -6,7 +6,6 @@ import (
 	"text/template"
 
 	"github.com/sf9v/mira"
-	"github.com/sf9v/nero/comparison"
 )
 
 // Templater is an interface that wraps the Filename and Template method
@@ -26,26 +25,15 @@ func ParseTemplater(tmpl Templater) (*template.Template, error) {
 // NewFuncMap returns a template func map
 func NewFuncMap() template.FuncMap {
 	return template.FuncMap{
-		"realType":        realTypeFunc,
+		"type":            typeFunc,
 		"rawType":         rawTypeFunc,
-		"zero":            zeroFunc,
-		"isNullOp":        isNullOp,
-		"isInOp":          isInOp,
+		"zeroValue":       zeroValueFunc,
 		"prependToFields": prependToFields,
 	}
 }
 
-func isNullOp(op comparison.Operator) bool {
-	return op == comparison.IsNull ||
-		op == comparison.IsNotNull
-}
-
-func isInOp(op comparison.Operator) bool {
-	return op == comparison.In ||
-		op == comparison.NotIn
-}
-
-func realTypeFunc(v interface{}) string {
+// typeFunc returns the type of the value
+func typeFunc(v interface{}) string {
 	t := reflect.TypeOf(v)
 	if t.Kind() != reflect.Ptr {
 		return fmt.Sprintf("%T", v)
@@ -55,10 +43,12 @@ func realTypeFunc(v interface{}) string {
 	return fmt.Sprintf("%T", ev)
 }
 
+// rawTypeFunc returns the raw type of the value
 func rawTypeFunc(v interface{}) string {
 	return fmt.Sprintf("%T", v)
 }
 
+// resolveType resolves the type of the value
 func resolveType(t reflect.Type) reflect.Type {
 	switch t.Kind() {
 	case reflect.Ptr:
@@ -67,7 +57,8 @@ func resolveType(t reflect.Type) reflect.Type {
 	return t
 }
 
-func zeroFunc(v interface{}) string {
+// zeroValueFunc returns zero value as a string
+func zeroValueFunc(v interface{}) string {
 	ti := mira.NewTypeInfo(v)
 
 	if ti.IsNillable() {
@@ -90,6 +81,7 @@ func zeroFunc(v interface{}) string {
 
 }
 
+// prependToFields prepends a field to the list of fields
 func prependToFields(field *Field, fields []*Field) []*Field {
 	return append([]*Field{field}, fields...)
 }

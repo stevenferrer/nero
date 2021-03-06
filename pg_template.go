@@ -100,7 +100,7 @@ func (pg *PostgresRepository) Create(ctx context.Context, c *Creator) ({{rawType
 func (pg *PostgresRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) ({{rawType .Identity.TypeInfo.V}}, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
-		return {{zero .Identity.TypeInfo.V}}, errors.New("expecting tx to be *sql.Tx")
+		return {{zeroValue .Identity.TypeInfo.V}}, errors.New("expecting tx to be *sql.Tx")
 	}
 
 	return pg.create(ctx, txx, c)
@@ -108,7 +108,7 @@ func (pg *PostgresRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creat
 
 func (pg *PostgresRepository) create(ctx context.Context, runner nero.SQLRunner, c *Creator) ({{rawType .Identity.TypeInfo.V}}, error) {
 	if err := c.Validate(); err != nil {
-		return {{zero .Identity.TypeInfo.V}}, err
+		return {{zeroValue .Identity.TypeInfo.V}}, err
 	}
 
 	columns := []string{
@@ -145,7 +145,7 @@ func (pg *PostgresRepository) create(ctx context.Context, runner nero.SQLRunner,
 	var {{.Identity.Identifier}} {{rawType .Identity.TypeInfo.V}}
 	err := qb.QueryRowContext(ctx).Scan(&{{.Identity.Identifier}})
 	if err != nil {
-		return {{zero .Identity.TypeInfo.V}}, err
+		return {{zeroValue .Identity.TypeInfo.V}}, err
 	}
 
 	return {{.Identity.Identifier}}, nil
@@ -242,7 +242,7 @@ func (pg *PostgresRepository) query(ctx context.Context, runner nero.SQLRunner, 
 
 	{{.TypeIdentifierPlural}} := []{{rawType .TypeInfo.V}}{}
 	for rows.Next() {
-		var {{.TypeIdentifier}} {{realType .TypeInfo.V}}
+		var {{.TypeIdentifier}} {{type .TypeInfo.V}}
 		err = rows.Scan(
 			{{range $field := $fields -}}
 				{{if and ($field.IsArray) (ne $field.IsValueScanner true) -}}
@@ -284,7 +284,7 @@ func (pg *PostgresRepository) queryOne(ctx context.Context, runner nero.SQLRunne
 		pg.logger.Printf("method: QueryOne, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
 
-	var {{.TypeIdentifier}} {{realType .TypeInfo.V}}
+	var {{.TypeIdentifier}} {{type .TypeInfo.V}}
 	err := qb.RunWith(runner).
 		QueryRowContext(ctx).
 		Scan(
@@ -297,7 +297,7 @@ func (pg *PostgresRepository) queryOne(ctx context.Context, runner nero.SQLRunne
 			{{end -}}
 		)
 	if err != nil {
-		return {{zero .TypeInfo.V}}, err
+		return {{zeroValue .TypeInfo.V}}, err
 	}
 
 	return &{{.TypeIdentifier}}, nil
