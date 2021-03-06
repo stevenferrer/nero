@@ -21,19 +21,18 @@ func TestSchemaBuilder(t *testing.T) {
 	schemaBuilder := nero.NewSchemaBuilder(ms).
 		PkgName(pkg).Collection(collection).
 		Identity(
-			nero.NewColumnBuilder("id", ms.ID).
+			nero.NewFieldBuilder("id", ms.ID).
 				Auto().StructField("ID").Build(),
 		).
-		Columns(
-			nero.NewColumnBuilder("name", ms.Name).Build(),
+		Fields(
+			nero.NewFieldBuilder("name", ms.Name).Build(),
 		)
 
 	schema := schemaBuilder.Build()
-
 	assert.Equal(t, pkg, schema.PkgName())
 	assert.Equal(t, collection, schema.Collection())
 	assert.NotNil(t, schema.Identity())
-	assert.Len(t, schema.Columns(), 1)
+	assert.Len(t, schema.Fields(), 1)
 	assert.Len(t, schema.Imports(), 2)
 	assert.Len(t, schema.Templaters(), 1)
 	assert.NotNil(t, schema.TypeInfo())

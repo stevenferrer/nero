@@ -15,7 +15,8 @@ import (
 	"github.com/sf9v/nero/test/integration/player"
 )
 
-// Repository is an interface for interacting with a Player repository
+// Repository is an interface that wraps the methods
+// for interacting with a Player repository
 type Repository interface {
 	// Tx begins a new transaction
 	Tx(context.Context) (nero.Tx, error)
@@ -243,7 +244,7 @@ type Aggregator struct {
 	aggFuncs  []aggregate.AggFunc
 	predFuncs []comparison.PredFunc
 	sortFuncs []sort.SortFunc
-	groupBys  []Column
+	groupBys  []Field
 }
 
 // NewAggregator expects a v and returns an Aggregator
@@ -271,8 +272,8 @@ func (a *Aggregator) Sort(sortFuncs ...sort.SortFunc) *Aggregator {
 }
 
 // Group applies group clauses
-func (a *Aggregator) GroupBy(cols ...Column) *Aggregator {
-	a.groupBys = append(a.groupBys, cols...)
+func (a *Aggregator) GroupBy(fields ...Field) *Aggregator {
+	a.groupBys = append(a.groupBys, fields...)
 	return a
 }
 

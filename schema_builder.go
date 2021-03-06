@@ -6,21 +6,21 @@ import (
 
 // SchemaBuilder is schema builder
 type SchemaBuilder struct {
-	schema *Schema
+	sc *Schema
 }
 
 // NewSchemaBuilder takes a model struct value and  returns a SchemaBuilder
 func NewSchemaBuilder(v interface{}) *SchemaBuilder {
-	return &SchemaBuilder{schema: &Schema{
+	return &SchemaBuilder{sc: &Schema{
 		typeInfo:   mira.NewTypeInfo(v),
-		columns:    []*Column{},
+		fields:     []*Field{},
 		templaters: []Templater{},
 	}}
 }
 
 // Build builds the schema
 func (sb *SchemaBuilder) Build() *Schema {
-	templates := sb.schema.templaters
+	templates := sb.sc.templaters
 
 	// use default template set
 	if len(templates) == 0 {
@@ -29,56 +29,54 @@ func (sb *SchemaBuilder) Build() *Schema {
 
 	// get pkg imports
 	importMap := map[string]int{}
-	for _, c := range append(sb.schema.columns, sb.schema.identity) {
-		if c.typeInfo.PkgPath() != "" {
-			importMap[c.typeInfo.PkgPath()] = 1
+	for _, fld := range append(sb.sc.fields, sb.sc.identity) {
+		if fld.typeInfo.PkgPath() != "" {
+			importMap[fld.typeInfo.PkgPath()] = 1
 		}
 	}
 
-	imports := []string{sb.schema.typeInfo.PkgPath()}
+	imports := []string{sb.sc.typeInfo.PkgPath()}
 	for imp := range importMap {
 		imports = append(imports, imp)
 	}
 
 	return &Schema{
-		typeInfo:   sb.schema.typeInfo,
-		pkgName:    sb.schema.pkgName,
-		collection: sb.schema.collection,
-		identity:   sb.schema.identity,
-		columns:    sb.schema.columns,
+		typeInfo:   sb.sc.typeInfo,
+		pkgName:    sb.sc.pkgName,
+		collection: sb.sc.collection,
+		identity:   sb.sc.identity,
+		fields:     sb.sc.fields,
 		imports:    imports,
 		templaters: templates,
 	}
 }
 
-// Schema is a nero schema
-
-// PkgName sets the pkg name
+// PkgName sets the package name
 func (sb *SchemaBuilder) PkgName(pkgName string) *SchemaBuilder {
-	sb.schema.pkgName = pkgName
+	sb.sc.pkgName = pkgName
 	return sb
 }
 
-// Collection sets the collection
+// Collection sets teh collection
 func (sb *SchemaBuilder) Collection(collection string) *SchemaBuilder {
-	sb.schema.collection = collection
+	sb.sc.collection = collection
 	return sb
 }
 
-// Identity sets the identity column
-func (sb *SchemaBuilder) Identity(column *Column) *SchemaBuilder {
-	sb.schema.identity = column
+// Identity sets the identity field
+func (sb *SchemaBuilder) Identity(field *Field) *SchemaBuilder {
+	sb.sc.identity = field
 	return sb
 }
 
-// Columns sets the columns
-func (sb *SchemaBuilder) Columns(columns ...*Column) *SchemaBuilder {
-	sb.schema.columns = append(sb.schema.columns, columns...)
+// Fields sets the fields
+func (sb *SchemaBuilder) Fields(fields ...*Field) *SchemaBuilder {
+	sb.sc.fields = append(sb.sc.fields, fields...)
 	return sb
 }
 
 // Templates sets the templates
 func (sb *SchemaBuilder) Templates(templaters ...Templater) *SchemaBuilder {
-	sb.schema.templaters = append(sb.schema.templaters, templaters...)
+	sb.sc.templaters = append(sb.sc.templaters, templaters...)
 	return sb
 }

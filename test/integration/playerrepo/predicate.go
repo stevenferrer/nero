@@ -8,29 +8,29 @@ import (
 	"github.com/sf9v/nero/test/integration/player"
 )
 
-// IDEq applies "equal" operator on "id" column
+// IDEq equal operator on ID field
 func IDEq(id string) comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "id",
-			Op:  comparison.Eq,
-			Arg: id,
+			Field: "id",
+			Op:    comparison.Eq,
+			Arg:   id,
 		})
 	}
 }
 
-// IDNotEq applies "not equal" operator on "id" column
+// IDNotEq not equal operator on ID field
 func IDNotEq(id string) comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "id",
-			Op:  comparison.NotEq,
-			Arg: id,
+			Field: "id",
+			Op:    comparison.NotEq,
+			Arg:   id,
 		})
 	}
 }
 
-// IDIn applies "in" operator on "id" column
+// IDIn in operator on ID field
 func IDIn(ids ...string) comparison.PredFunc {
 	args := []interface{}{}
 	for _, v := range ids {
@@ -39,14 +39,14 @@ func IDIn(ids ...string) comparison.PredFunc {
 
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "id",
-			Op:  comparison.In,
-			Arg: args,
+			Field: "id",
+			Op:    comparison.In,
+			Arg:   args,
 		})
 	}
 }
 
-// IDNotIn applies "not in" operator on "id" column
+// IDNotIn not in operator on ID field
 func IDNotIn(ids ...string) comparison.PredFunc {
 	args := []interface{}{}
 	for _, v := range ids {
@@ -55,36 +55,36 @@ func IDNotIn(ids ...string) comparison.PredFunc {
 
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "id",
-			Op:  comparison.NotIn,
-			Arg: args,
+			Field: "id",
+			Op:    comparison.NotIn,
+			Arg:   args,
 		})
 	}
 }
 
-// EmailEq applies "equal" operator on "email" column
+// EmailEq equal operator on Email field
 func EmailEq(email string) comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "email",
-			Op:  comparison.Eq,
-			Arg: email,
+			Field: "email",
+			Op:    comparison.Eq,
+			Arg:   email,
 		})
 	}
 }
 
-// EmailNotEq applies "not equal" operator on "email" column
+// EmailNotEq not equal operator on Email field
 func EmailNotEq(email string) comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "email",
-			Op:  comparison.NotEq,
-			Arg: email,
+			Field: "email",
+			Op:    comparison.NotEq,
+			Arg:   email,
 		})
 	}
 }
 
-// EmailIn applies "in" operator on "email" column
+// EmailIn in operator on Email field
 func EmailIn(emails ...string) comparison.PredFunc {
 	args := []interface{}{}
 	for _, v := range emails {
@@ -93,14 +93,14 @@ func EmailIn(emails ...string) comparison.PredFunc {
 
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "email",
-			Op:  comparison.In,
-			Arg: args,
+			Field: "email",
+			Op:    comparison.In,
+			Arg:   args,
 		})
 	}
 }
 
-// EmailNotIn applies "not in" operator on "email" column
+// EmailNotIn not in operator on Email field
 func EmailNotIn(emails ...string) comparison.PredFunc {
 	args := []interface{}{}
 	for _, v := range emails {
@@ -109,36 +109,36 @@ func EmailNotIn(emails ...string) comparison.PredFunc {
 
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "email",
-			Op:  comparison.NotIn,
-			Arg: args,
+			Field: "email",
+			Op:    comparison.NotIn,
+			Arg:   args,
 		})
 	}
 }
 
-// NameEq applies "equal" operator on "name" column
+// NameEq equal operator on Name field
 func NameEq(name string) comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "name",
-			Op:  comparison.Eq,
-			Arg: name,
+			Field: "name",
+			Op:    comparison.Eq,
+			Arg:   name,
 		})
 	}
 }
 
-// NameNotEq applies "not equal" operator on "name" column
+// NameNotEq not equal operator on Name field
 func NameNotEq(name string) comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "name",
-			Op:  comparison.NotEq,
-			Arg: name,
+			Field: "name",
+			Op:    comparison.NotEq,
+			Arg:   name,
 		})
 	}
 }
 
-// NameIn applies "in" operator on "name" column
+// NameIn in operator on Name field
 func NameIn(names ...string) comparison.PredFunc {
 	args := []interface{}{}
 	for _, v := range names {
@@ -147,14 +147,14 @@ func NameIn(names ...string) comparison.PredFunc {
 
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "name",
-			Op:  comparison.In,
-			Arg: args,
+			Field: "name",
+			Op:    comparison.In,
+			Arg:   args,
 		})
 	}
 }
 
-// NameNotIn applies "not in" operator on "name" column
+// NameNotIn not in operator on Name field
 func NameNotIn(names ...string) comparison.PredFunc {
 	args := []interface{}{}
 	for _, v := range names {
@@ -163,80 +163,80 @@ func NameNotIn(names ...string) comparison.PredFunc {
 
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "name",
-			Op:  comparison.NotIn,
-			Arg: args,
+			Field: "name",
+			Op:    comparison.NotIn,
+			Arg:   args,
 		})
 	}
 }
 
-// AgeEq applies "equal" operator on "age" column
+// AgeEq equal operator on Age field
 func AgeEq(age int) comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "age",
-			Op:  comparison.Eq,
-			Arg: age,
+			Field: "age",
+			Op:    comparison.Eq,
+			Arg:   age,
 		})
 	}
 }
 
-// AgeNotEq applies "not equal" operator on "age" column
+// AgeNotEq not equal operator on Age field
 func AgeNotEq(age int) comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "age",
-			Op:  comparison.NotEq,
-			Arg: age,
+			Field: "age",
+			Op:    comparison.NotEq,
+			Arg:   age,
 		})
 	}
 }
 
-// AgeGt applies "greater than" operator on "age" column
+// AgeGt greater than operator on Age field
 func AgeGt(age int) comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "age",
-			Op:  comparison.Gt,
-			Arg: age,
+			Field: "age",
+			Op:    comparison.Gt,
+			Arg:   age,
 		})
 	}
 }
 
-// AgeGtOrEq applies "greater than or equal" operator on "age" column
+// AgeGtOrEq greater than or equal operator on Age field
 func AgeGtOrEq(age int) comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "age",
-			Op:  comparison.GtOrEq,
-			Arg: age,
+			Field: "age",
+			Op:    comparison.GtOrEq,
+			Arg:   age,
 		})
 	}
 }
 
-// AgeLt applies "less than" operator on "age" column
+// AgeLt less than operator on Age field
 func AgeLt(age int) comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "age",
-			Op:  comparison.Lt,
-			Arg: age,
+			Field: "age",
+			Op:    comparison.Lt,
+			Arg:   age,
 		})
 	}
 }
 
-// AgeLtOrEq applies "less than or equal" operator on "age" column
+// AgeLtOrEq less than or equal operator on Age field
 func AgeLtOrEq(age int) comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "age",
-			Op:  comparison.LtOrEq,
-			Arg: age,
+			Field: "age",
+			Op:    comparison.LtOrEq,
+			Arg:   age,
 		})
 	}
 }
 
-// AgeIn applies "in" operator on "age" column
+// AgeIn in operator on Age field
 func AgeIn(ages ...int) comparison.PredFunc {
 	args := []interface{}{}
 	for _, v := range ages {
@@ -245,14 +245,14 @@ func AgeIn(ages ...int) comparison.PredFunc {
 
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "age",
-			Op:  comparison.In,
-			Arg: args,
+			Field: "age",
+			Op:    comparison.In,
+			Arg:   args,
 		})
 	}
 }
 
-// AgeNotIn applies "not in" operator on "age" column
+// AgeNotIn not in operator on Age field
 func AgeNotIn(ages ...int) comparison.PredFunc {
 	args := []interface{}{}
 	for _, v := range ages {
@@ -261,36 +261,36 @@ func AgeNotIn(ages ...int) comparison.PredFunc {
 
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "age",
-			Op:  comparison.NotIn,
-			Arg: args,
+			Field: "age",
+			Op:    comparison.NotIn,
+			Arg:   args,
 		})
 	}
 }
 
-// RaceEq applies "equal" operator on "race" column
+// RaceEq equal operator on Race field
 func RaceEq(race player.Race) comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "race",
-			Op:  comparison.Eq,
-			Arg: race,
+			Field: "race",
+			Op:    comparison.Eq,
+			Arg:   race,
 		})
 	}
 }
 
-// RaceNotEq applies "not equal" operator on "race" column
+// RaceNotEq not equal operator on Race field
 func RaceNotEq(race player.Race) comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "race",
-			Op:  comparison.NotEq,
-			Arg: race,
+			Field: "race",
+			Op:    comparison.NotEq,
+			Arg:   race,
 		})
 	}
 }
 
-// RaceIn applies "in" operator on "race" column
+// RaceIn in operator on Race field
 func RaceIn(races ...player.Race) comparison.PredFunc {
 	args := []interface{}{}
 	for _, v := range races {
@@ -299,14 +299,14 @@ func RaceIn(races ...player.Race) comparison.PredFunc {
 
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "race",
-			Op:  comparison.In,
-			Arg: args,
+			Field: "race",
+			Op:    comparison.In,
+			Arg:   args,
 		})
 	}
 }
 
-// RaceNotIn applies "not in" operator on "race" column
+// RaceNotIn not in operator on Race field
 func RaceNotIn(races ...player.Race) comparison.PredFunc {
 	args := []interface{}{}
 	for _, v := range races {
@@ -315,56 +315,56 @@ func RaceNotIn(races ...player.Race) comparison.PredFunc {
 
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "race",
-			Op:  comparison.NotIn,
-			Arg: args,
+			Field: "race",
+			Op:    comparison.NotIn,
+			Arg:   args,
 		})
 	}
 }
 
-// UpdatedAtEq applies "equal" operator on "updated_at" column
+// UpdatedAtEq equal operator on UpdatedAt field
 func UpdatedAtEq(updatedAt *time.Time) comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "updated_at",
-			Op:  comparison.Eq,
-			Arg: updatedAt,
+			Field: "updated_at",
+			Op:    comparison.Eq,
+			Arg:   updatedAt,
 		})
 	}
 }
 
-// UpdatedAtNotEq applies "not equal" operator on "updated_at" column
+// UpdatedAtNotEq not equal operator on UpdatedAt field
 func UpdatedAtNotEq(updatedAt *time.Time) comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "updated_at",
-			Op:  comparison.NotEq,
-			Arg: updatedAt,
+			Field: "updated_at",
+			Op:    comparison.NotEq,
+			Arg:   updatedAt,
 		})
 	}
 }
 
-// UpdatedAtIsNull applies "is null" operator on "updated_at" column
+// UpdatedAtIsNull is null operator on UpdatedAt field
 func UpdatedAtIsNull() comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "updated_at",
-			Op:  comparison.IsNull,
+			Field: "updated_at",
+			Op:    comparison.IsNull,
 		})
 	}
 }
 
-// UpdatedAtIsNotNull applies "is not null" operator on "updated_at" column
+// UpdatedAtIsNotNull is not null operator on UpdatedAt field
 func UpdatedAtIsNotNull() comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "updated_at",
-			Op:  comparison.IsNotNull,
+			Field: "updated_at",
+			Op:    comparison.IsNotNull,
 		})
 	}
 }
 
-// UpdatedAtIn applies "in" operator on "updated_at" column
+// UpdatedAtIn in operator on UpdatedAt field
 func UpdatedAtIn(updatedAts ...*time.Time) comparison.PredFunc {
 	args := []interface{}{}
 	for _, v := range updatedAts {
@@ -373,14 +373,14 @@ func UpdatedAtIn(updatedAts ...*time.Time) comparison.PredFunc {
 
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "updated_at",
-			Op:  comparison.In,
-			Arg: args,
+			Field: "updated_at",
+			Op:    comparison.In,
+			Arg:   args,
 		})
 	}
 }
 
-// UpdatedAtNotIn applies "not in" operator on "updated_at" column
+// UpdatedAtNotIn not in operator on UpdatedAt field
 func UpdatedAtNotIn(updatedAts ...*time.Time) comparison.PredFunc {
 	args := []interface{}{}
 	for _, v := range updatedAts {
@@ -389,56 +389,56 @@ func UpdatedAtNotIn(updatedAts ...*time.Time) comparison.PredFunc {
 
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "updated_at",
-			Op:  comparison.NotIn,
-			Arg: args,
+			Field: "updated_at",
+			Op:    comparison.NotIn,
+			Arg:   args,
 		})
 	}
 }
 
-// CreatedAtEq applies "equal" operator on "created_at" column
+// CreatedAtEq equal operator on CreatedAt field
 func CreatedAtEq(createdAt *time.Time) comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "created_at",
-			Op:  comparison.Eq,
-			Arg: createdAt,
+			Field: "created_at",
+			Op:    comparison.Eq,
+			Arg:   createdAt,
 		})
 	}
 }
 
-// CreatedAtNotEq applies "not equal" operator on "created_at" column
+// CreatedAtNotEq not equal operator on CreatedAt field
 func CreatedAtNotEq(createdAt *time.Time) comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "created_at",
-			Op:  comparison.NotEq,
-			Arg: createdAt,
+			Field: "created_at",
+			Op:    comparison.NotEq,
+			Arg:   createdAt,
 		})
 	}
 }
 
-// CreatedAtIsNull applies "is null" operator on "created_at" column
+// CreatedAtIsNull is null operator on CreatedAt field
 func CreatedAtIsNull() comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "created_at",
-			Op:  comparison.IsNull,
+			Field: "created_at",
+			Op:    comparison.IsNull,
 		})
 	}
 }
 
-// CreatedAtIsNotNull applies "is not null" operator on "created_at" column
+// CreatedAtIsNotNull is not null operator on CreatedAt field
 func CreatedAtIsNotNull() comparison.PredFunc {
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "created_at",
-			Op:  comparison.IsNotNull,
+			Field: "created_at",
+			Op:    comparison.IsNotNull,
 		})
 	}
 }
 
-// CreatedAtIn applies "in" operator on "created_at" column
+// CreatedAtIn in operator on CreatedAt field
 func CreatedAtIn(createdAts ...*time.Time) comparison.PredFunc {
 	args := []interface{}{}
 	for _, v := range createdAts {
@@ -447,14 +447,14 @@ func CreatedAtIn(createdAts ...*time.Time) comparison.PredFunc {
 
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "created_at",
-			Op:  comparison.In,
-			Arg: args,
+			Field: "created_at",
+			Op:    comparison.In,
+			Arg:   args,
 		})
 	}
 }
 
-// CreatedAtNotIn applies "not in" operator on "created_at" column
+// CreatedAtNotIn not in operator on CreatedAt field
 func CreatedAtNotIn(createdAts ...*time.Time) comparison.PredFunc {
 	args := []interface{}{}
 	for _, v := range createdAts {
@@ -463,9 +463,87 @@ func CreatedAtNotIn(createdAts ...*time.Time) comparison.PredFunc {
 
 	return func(preds []*comparison.Predicate) []*comparison.Predicate {
 		return append(preds, &comparison.Predicate{
-			Col: "created_at",
-			Op:  comparison.NotIn,
-			Arg: args,
+			Field: "created_at",
+			Op:    comparison.NotIn,
+			Arg:   args,
+		})
+	}
+}
+
+// FieldXEqFieldY fieldX equal fieldY
+//
+// Note: fieldX and fieldY must be of the same type
+func FieldXEqFieldY(fieldX, fieldY Field) comparison.PredFunc {
+	return func(preds []*comparison.Predicate) []*comparison.Predicate {
+		return append(preds, &comparison.Predicate{
+			Field: fieldX.String(),
+			Op:    comparison.Eq,
+			Arg:   fieldY,
+		})
+	}
+}
+
+// FieldXNotEqFieldY fieldX not equal fieldY
+//
+// Note: fieldX and fieldY must be of the same type
+func FieldXNotEqFieldY(fieldX, fieldY Field) comparison.PredFunc {
+	return func(preds []*comparison.Predicate) []*comparison.Predicate {
+		return append(preds, &comparison.Predicate{
+			Field: fieldX.String(),
+			Op:    comparison.NotEq,
+			Arg:   fieldY,
+		})
+	}
+}
+
+// FieldXGtFieldY fieldX greater than fieldY
+//
+// Note: fieldX and fieldY must be numeric types
+func FieldXGtFieldY(fieldX, fieldY Field) comparison.PredFunc {
+	return func(preds []*comparison.Predicate) []*comparison.Predicate {
+		return append(preds, &comparison.Predicate{
+			Field: fieldX.String(),
+			Op:    comparison.Gt,
+			Arg:   fieldY,
+		})
+	}
+}
+
+// FieldXGtOrEqFieldY fieldX greater than or equal fieldY
+//
+// Note: fieldX and fieldY must be numeric types
+func FieldXGtOrEqFieldY(fieldX, fieldY Field) comparison.PredFunc {
+	return func(preds []*comparison.Predicate) []*comparison.Predicate {
+		return append(preds, &comparison.Predicate{
+			Field: fieldX.String(),
+			Op:    comparison.GtOrEq,
+			Arg:   fieldY,
+		})
+	}
+}
+
+// FieldXLtFieldY fieldX less than fieldY
+//
+// Note: fieldX and fieldY must be numeric types
+func FieldXLtFieldY(fieldX, fieldY Field) comparison.PredFunc {
+	return func(preds []*comparison.Predicate) []*comparison.Predicate {
+		return append(preds, &comparison.Predicate{
+			Field: fieldX.String(),
+			Op:    comparison.Lt,
+			Arg:   fieldY,
+		})
+	}
+}
+
+// FieldXLtOrEqFieldY fieldX less than or equal fieldY
+//
+// Note: fieldX and fieldY must be numeric types
+func FieldXLtOrEqFieldY(fieldX, fieldY Field) comparison.PredFunc {
+	return func(preds []*comparison.Predicate) []*comparison.Predicate {
+		return append(preds, &comparison.Predicate{
+			Field: fieldX.String(),
+			Op:    comparison.LtOrEq,
+			Arg:   fieldY,
 		})
 	}
 }

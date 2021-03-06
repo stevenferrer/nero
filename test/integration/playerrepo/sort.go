@@ -5,21 +5,21 @@ import (
 	"github.com/sf9v/nero/sort"
 )
 
-// Asc sorts in ascending order
-func Asc(col Column) sort.SortFunc {
+// Asc ascending sort direction
+func Asc(field Field) sort.SortFunc {
 	return func(sorts []*sort.Sort) []*sort.Sort {
 		return append(sorts, &sort.Sort{
-			Col:       col.String(),
+			Field:     field.String(),
 			Direction: sort.Asc,
 		})
 	}
 }
 
-// Desc sorts in descending order
-func Desc(col Column) sort.SortFunc {
+// Desc descending sort direction
+func Desc(field Field) sort.SortFunc {
 	return func(sorts []*sort.Sort) []*sort.Sort {
 		return append(sorts, &sort.Sort{
-			Col:       col.String(),
+			Field:     field.String(),
 			Direction: sort.Desc,
 		})
 	}

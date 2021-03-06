@@ -1,5 +1,3 @@
-// +build integration
-
 package playerrepo_test
 
 import (
@@ -197,8 +195,8 @@ func newRepoTestRunner(repo playerrepo.Repository) func(t *testing.T) {
 				// get last user
 				players, err = repo.Query(ctx, playerrepo.NewQueryer().
 					Sort(
-						playerrepo.Desc(playerrepo.ColumnID),
-						playerrepo.Asc(playerrepo.ColumnCreatedAt),
+						playerrepo.Desc(playerrepo.FieldID),
+						playerrepo.Asc(playerrepo.FieldCreatedAt),
 					),
 				)
 				assert.NoError(t, err)
@@ -255,16 +253,16 @@ func newRepoTestRunner(repo playerrepo.Repository) func(t *testing.T) {
 
 				a := playerrepo.NewAggregator(&agg).
 					Aggregate(
-						playerrepo.Avg(playerrepo.ColumnAge),
-						playerrepo.Min(playerrepo.ColumnAge),
-						playerrepo.Max(playerrepo.ColumnAge),
-						playerrepo.Count(playerrepo.ColumnAge),
-						playerrepo.Sum(playerrepo.ColumnAge),
-						playerrepo.None(playerrepo.ColumnRace),
+						playerrepo.Avg(playerrepo.FieldAge),
+						playerrepo.Min(playerrepo.FieldAge),
+						playerrepo.Max(playerrepo.FieldAge),
+						playerrepo.Count(playerrepo.FieldAge),
+						playerrepo.Sum(playerrepo.FieldAge),
+						playerrepo.None(playerrepo.FieldRace),
 					).
 					Where(playerrepo.AgeGt(18), playerrepo.RaceNotEq(player.RaceHuman)).
-					GroupBy(playerrepo.ColumnRace).
-					Sort(playerrepo.Asc(playerrepo.ColumnRace))
+					GroupBy(playerrepo.FieldRace).
+					Sort(playerrepo.Asc(playerrepo.FieldRace))
 
 				err := repo.Aggregate(ctx, a)
 				require.NoError(t, err)
@@ -286,10 +284,6 @@ func newRepoTestRunner(repo playerrepo.Repository) func(t *testing.T) {
 		t.Run("Update", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				now := time.Now()
-				preds := []comparison.PredFunc{
-					playerrepo.IDEq("1"), playerrepo.IDNotEq("2"),
-				}
-
 				email := "titan@gg.io"
 				name := "titan"
 				age := 300
@@ -301,13 +295,23 @@ func newRepoTestRunner(repo playerrepo.Repository) func(t *testing.T) {
 						Race(player.RaceTitan).
 						Interests(newInterests).
 						UpdatedAt(&now).
-						Where(preds...),
+						Where(
+							playerrepo.IDEq("1"),
+							playerrepo.IDNotEq("2"),
+						),
 				)
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), rowsAffected)
 
 				playr, err := repo.QueryOne(ctx, playerrepo.NewQueryer().
-					Where(preds...))
+					Where(
+						playerrepo.IDEq("1"),
+						playerrepo.IDNotEq("2"),
+						playerrepo.FieldXGtFieldY(
+							playerrepo.FieldUpdatedAt,
+							playerrepo.FieldCreatedAt,
+						),
+					))
 				assert.NoError(t, err)
 
 				assert.Equal(t, email, playr.Email)
@@ -545,8 +549,8 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 				tx = newTx(ctx, t)
 				users, err = repo.Query(ctx, playerrepo.NewQueryer().
 					Sort(
-						playerrepo.Desc(playerrepo.ColumnID),
-						playerrepo.Asc(playerrepo.ColumnCreatedAt),
+						playerrepo.Desc(playerrepo.FieldID),
+						playerrepo.Asc(playerrepo.FieldCreatedAt),
 					),
 				)
 				assert.NoError(t, err)
@@ -614,19 +618,19 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 
 				a := playerrepo.NewAggregator(&agg).
 					Aggregate(
-						playerrepo.Avg(playerrepo.ColumnAge),
-						playerrepo.Min(playerrepo.ColumnAge),
-						playerrepo.Max(playerrepo.ColumnAge),
-						playerrepo.Count(playerrepo.ColumnAge),
-						playerrepo.Sum(playerrepo.ColumnAge),
-						playerrepo.None(playerrepo.ColumnRace),
+						playerrepo.Avg(playerrepo.FieldAge),
+						playerrepo.Min(playerrepo.FieldAge),
+						playerrepo.Max(playerrepo.FieldAge),
+						playerrepo.Count(playerrepo.FieldAge),
+						playerrepo.Sum(playerrepo.FieldAge),
+						playerrepo.None(playerrepo.FieldRace),
 					).
 					Where(
 						playerrepo.AgeGt(18),
 						playerrepo.RaceNotEq(player.RaceTitan),
 					).
-					GroupBy(playerrepo.ColumnRace).
-					Sort(playerrepo.Asc(playerrepo.ColumnRace))
+					GroupBy(playerrepo.FieldRace).
+					Sort(playerrepo.Asc(playerrepo.FieldRace))
 
 				tx := newTx(ctx, t)
 				err := repo.AggregateTx(ctx, tx, a)

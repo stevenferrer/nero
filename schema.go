@@ -10,15 +10,15 @@ import (
 type Schema struct {
 	// pkgName is the package name of the generated files
 	pkgName string
-	// Collection is the name of the database collection/table
+	// Collection is the name of the database collection
 	collection string
 	// typeInfo is the type info of the schema model
 	typeInfo *mira.TypeInfo
-	// Identity is the identity column
-	identity *Column
-	// Columns is the list of columns
-	columns []*Column
-	// Imports are list of package imports
+	// identity is the identity field
+	identity *Field
+	// fields is the list of fields
+	fields []*Field
+	// imports are list of package imports
 	imports []string
 	// Templates is the list of custom repository templaters
 	templaters []Templater
@@ -34,14 +34,14 @@ func (s *Schema) Collection() string {
 	return s.collection
 }
 
-// Identity returns the identity column
-func (s *Schema) Identity() *Column {
+// Identity returns the identity field
+func (s *Schema) Identity() *Field {
 	return s.identity
 }
 
-// Columns returns the columns
-func (s *Schema) Columns() []*Column {
-	return s.columns[:]
+// Fields returns the fields
+func (s *Schema) Fields() []*Field {
+	return s.fields[:]
 }
 
 // Imports returns the pkg imports

@@ -26,6 +26,8 @@ type Custom struct {
 }
 
 // Item is an example struct embedded in Custom struct
+//
+// Note: Custom types like these must implement ValueScanner
 type Item struct {
 	Name string
 }
@@ -35,22 +37,22 @@ func (c Custom) Schema() *nero.Schema {
 	return nero.NewSchemaBuilder(&c).
 		PkgName("user").Collection("users").
 		Identity(
-			nero.NewColumnBuilder("id", c.ID).
+			nero.NewFieldBuilder("id", c.ID).
 				StructField("ID").Auto().Build(),
 		).
-		Columns(
-			nero.NewColumnBuilder("uuid", c.UUID).StructField("UUID").Build(),
-			nero.NewColumnBuilder("str", c.Str).Build(),
-			nero.NewColumnBuilder("map_str_str", c.MapStrStr).Build(),
-			nero.NewColumnBuilder("map_str_ptr_str", c.MapStrPtrStr).Build(),
-			nero.NewColumnBuilder("map_int64_str", c.MapInt64Str).Build(),
-			nero.NewColumnBuilder("map_int64_ptr_str", c.MapInt64PtrStr).Build(),
-			nero.NewColumnBuilder("map_str_item", c.MapStrItem).Build(),
-			nero.NewColumnBuilder("map_str_ptr_item", c.MapStrPtrItem).Build(),
-			nero.NewColumnBuilder("item", c.Item).Build(),
-			nero.NewColumnBuilder("ptr_item", c.PtrItem).Build(),
-			nero.NewColumnBuilder("items", c.Items).Build(),
-			nero.NewColumnBuilder("ptr_items", c.PtrItems).Build(),
-			nero.NewColumnBuilder("null_column", c.NullColumn).Build(),
+		Fields(
+			nero.NewFieldBuilder("uuid", c.UUID).StructField("UUID").Build(),
+			nero.NewFieldBuilder("str", c.Str).Build(),
+			nero.NewFieldBuilder("map_str_str", c.MapStrStr).Build(),
+			nero.NewFieldBuilder("map_str_ptr_str", c.MapStrPtrStr).Build(),
+			nero.NewFieldBuilder("map_int64_str", c.MapInt64Str).Build(),
+			nero.NewFieldBuilder("map_int64_ptr_str", c.MapInt64PtrStr).Build(),
+			nero.NewFieldBuilder("map_str_item", c.MapStrItem).Build(),
+			nero.NewFieldBuilder("map_str_ptr_item", c.MapStrPtrItem).Build(),
+			nero.NewFieldBuilder("item", c.Item).Build(),
+			nero.NewFieldBuilder("ptr_item", c.PtrItem).Build(),
+			nero.NewFieldBuilder("items", c.Items).Build(),
+			nero.NewFieldBuilder("ptr_items", c.PtrItems).Build(),
+			nero.NewFieldBuilder("null_column", c.NullColumn).Build(),
 		).Build()
 }

@@ -8,8 +8,13 @@ import (
 	"github.com/sf9v/nero/sort"
 )
 
-func newSortFile(schema *nero.Schema) (*bytes.Buffer, error) {
-	v := struct {
+func newSortFile(schema *nero.Schema) (*File, error) {
+	tmpl, err := template.New("sort.tmpl").Parse(sortTmpl)
+	if err != nil {
+		return nil, err
+	}
+
+	data := struct {
 		Directions []sort.Direction
 		Schema     *nero.Schema
 	}{
@@ -19,18 +24,13 @@ func newSortFile(schema *nero.Schema) (*bytes.Buffer, error) {
 		Schema: schema,
 	}
 
-	tmpl, err := template.New("sort.tmpl").Parse(sortTmpl)
-	if err != nil {
-		return nil, err
-	}
-
 	buf := &bytes.Buffer{}
-	err = tmpl.Execute(buf, v)
+	err = tmpl.Execute(buf, data)
 	if err != nil {
 		return nil, err
 	}
 
-	return buf, nil
+	return &File{name: "sort.go", buf: buf.Bytes()}, nil
 }
 
 const sortTmpl = `
@@ -42,11 +42,11 @@ import (
 )
 
 {{range $direction := .Directions}}
-// {{$direction.String}} sorts in {{$direction.Desc}} order
-func {{$direction.String}}(col Column) sort.SortFunc {
+// {{$direction.String}} {{$direction.Desc}} sort direction
+func {{$direction.String}}(field Field) sort.SortFunc {
 	return func(sorts []*sort.Sort) []*sort.Sort {
 		return append(sorts, &sort.Sort{
-			Col: col.String(),
+			Field: field.String(),
 			Direction: sort.{{$direction.String}},
 		})
 	}

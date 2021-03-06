@@ -70,5 +70,5 @@ func TestFuncs(t *testing.T) {
 	assert.True(t, isInOp(comparison.In))
 	assert.True(t, isInOp(comparison.NotIn))
 
-	assert.Len(t, prependToColumns(&Column{}, []*Column{}), 1)
+	assert.Len(t, prependToFields(&Field{}, []*Field{}), 1)
 }

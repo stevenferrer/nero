@@ -8,14 +8,13 @@ import (
 	"github.com/sf9v/nero/comparison"
 )
 
-func newPredicateFile(schema *nero.Schema) (*bytes.Buffer, error) {
+func newPredicateFile(schema *nero.Schema) (*File, error) {
 	tmpl, err := template.New("predicates.tmpl").
 		Funcs(nero.NewFuncMap()).Parse(predicatesTmpl)
 	if err != nil {
 		return nil, err
 	}
 
-	buf := &bytes.Buffer{}
 	data := struct {
 		EqOps   []comparison.Operator
 		LtGtOps []comparison.Operator
@@ -43,12 +42,14 @@ func newPredicateFile(schema *nero.Schema) (*bytes.Buffer, error) {
 		},
 		Schema: schema,
 	}
+
+	buf := &bytes.Buffer{}
 	err = tmpl.Execute(buf, data)
 	if err != nil {
 		return nil, err
 	}
 
-	return buf, nil
+	return &File{name: "predicate.go", buf: buf.Bytes()}, nil
 }
 
 const predicatesTmpl = `
@@ -63,52 +64,39 @@ import (
 	{{end -}}
 )
 
-{{ $cols := prependToColumns .Schema.Identity .Schema.Columns }}
+{{ $fields := prependToFields .Schema.Identity .Schema.Fields }}
 
-{{range $col := $cols -}}
-	{{if $col.CanHavePreds -}}
+{{range $field := $fields -}}
+	{{if $field.IsComparable  -}}
         {{ range $op := $.EqOps }} 
-            // {{$col.FieldName}}{{$op.String}} applies "{{$op.Desc}}" operator on "{{$col.Name}}" column
-            func {{$col.FieldName}}{{$op.String}} ({{$col.Identifier}} {{printf "%T" $col.TypeInfo.V}}) comparison.PredFunc {
+            // {{$field.StructField}}{{$op.String}} {{$op.Desc}} operator on {{$field.StructField}} field
+            func {{$field.StructField}}{{$op.String}} ({{$field.Identifier}} {{printf "%T" $field.TypeInfo.V}}) comparison.PredFunc {
                 return func(preds []*comparison.Predicate) []*comparison.Predicate {
                     return append(preds, &comparison.Predicate{
-                        Col: "{{$col.Name}}",
+                        Field: "{{$field.Name}}",
                         Op: comparison.{{$op.String}},
-                        {{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
-                            Arg: pq.Array({{$col.Identifier}}),
+                        {{if and ($field.IsArray) (ne $field.IsValueScanner true) -}}
+                            Arg: pq.Array({{$field.Identifier}}),
                         {{else -}}
-                            Arg: {{$col.Identifier}},
+                            Arg: {{$field.Identifier}},
                         {{end -}}
                     })
                 }
             }
-
-            {{if $col.IsComparable -}}
-                // {{$col.FieldName}}{{$op.String}} applies "{{$op.Desc}}" operator on "{{$col.Name}}" column
-                func {{$col.FieldName}}{{$op.String}}Col (col Column) comparison.PredFunc {
-                    return func(preds []*comparison.Predicate) []*comparison.Predicate {
-                        return append(preds, &comparison.Predicate{
-                            Col: "{{$col.Name}}",
-                            Op: comparison.{{$op.String}},
-                            Arg: col,
-                        })
-                    }
-                }
-            {{end}}
         {{end}}
 
         {{ range $op := $.LtGtOps }}
-            {{if $col.TypeInfo.IsNumeric }}
-                // {{$col.FieldName}}{{$op.String}} applies "{{$op.Desc}}" operator on "{{$col.Name}}" column
-                func {{$col.FieldName}}{{$op.String}} ({{$col.Identifier}} {{printf "%T" $col.TypeInfo.V}}) comparison.PredFunc {
+            {{if $field.TypeInfo.IsNumeric }}
+                // {{$field.StructField}}{{$op.String}} {{$op.Desc}} operator on {{$field.StructField}} field
+                func {{$field.StructField}}{{$op.String}} ({{$field.Identifier}} {{printf "%T" $field.TypeInfo.V}}) comparison.PredFunc {
                     return func(preds []*comparison.Predicate) []*comparison.Predicate {
                         return append(preds, &comparison.Predicate{
-                            Col: "{{$col.Name}}",
+                            Field: "{{$field.Name}}",
                             Op: comparison.{{$op.String}},
-                            {{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
-                                Arg: pq.Array({{$col.Identifier}}),
+                            {{if and ($field.IsArray) (ne $field.IsValueScanner true) -}}
+                                Arg: pq.Array({{$field.Identifier}}),
                             {{else -}}
-                                Arg: {{$col.Identifier}},
+                                Arg: {{$field.Identifier}},
                             {{end -}}
                         })
                     }
@@ -117,12 +105,12 @@ import (
         {{end }}
 
         {{ range $op := $.NullOps }}
-            {{if $col.IsNillable}}
-                // {{$col.FieldName}}{{$op.String}} applies "{{$op.Desc}}" operator on "{{$col.Name}}" column
-                func {{$col.FieldName}}{{$op.String}} () comparison.PredFunc {
+            {{if $field.IsNillable}}
+                // {{$field.StructField}}{{$op.String}} {{$op.Desc}} operator on {{$field.StructField}} field
+                func {{$field.StructField}}{{$op.String}} () comparison.PredFunc {
                     return func(preds []*comparison.Predicate) []*comparison.Predicate {
                         return append(preds, &comparison.Predicate{
-                            Col: "{{$col.Name}}",
+                            Field: "{{$field.Name}}",
                             Op: comparison.{{$op.String}},
                         })
                     }
@@ -131,16 +119,16 @@ import (
         {{end}}
 
         {{ range $op := $.InOps }}
-            // {{$col.FieldName}}{{$op.String}} applies "{{$op.Desc}}" operator on "{{$col.Name}}" column
-            func {{$col.FieldName}}{{$op.String}} ({{$col.IdentifierPlural}} {{printf "...%T" $col.TypeInfo.V}}) comparison.PredFunc {
+            // {{$field.StructField}}{{$op.String}} {{$op.Desc}} operator on {{$field.StructField}} field
+            func {{$field.StructField}}{{$op.String}} ({{$field.IdentifierPlural}} {{printf "...%T" $field.TypeInfo.V}}) comparison.PredFunc {
                 args := []interface{}{}
-                for _, v := range {{$col.IdentifierPlural}} {
+                for _, v := range {{$field.IdentifierPlural}} {
                     args = append(args, v)
                 }
 
                 return func(preds []*comparison.Predicate) []*comparison.Predicate {
                     return append(preds, &comparison.Predicate{
-                        Col: "{{$col.Name}}",
+                        Field: "{{$field.Name}}",
                         Op: comparison.{{$op.String}},
                         Arg: args,
                     })
@@ -149,4 +137,34 @@ import (
         {{end}}
 	{{end}}
 {{end -}}
+
+{{ range $op := $.EqOps }} 
+    // FieldX{{$op.String}}FieldY fieldX {{$op.Desc}} fieldY
+    //
+    // Note: fieldX and fieldY must be of the same type
+    func FieldX{{$op.String}}FieldY (fieldX, fieldY Field) comparison.PredFunc {
+        return func(preds []*comparison.Predicate) []*comparison.Predicate {
+            return append(preds, &comparison.Predicate{
+                Field: fieldX.String(),
+                Op: comparison.{{$op.String}},
+                Arg: fieldY,
+            })
+        }
+    }
+{{end}}
+
+{{ range $op := $.LtGtOps }} 
+    // FieldX{{$op.String}}FieldY fieldX {{$op.Desc}} fieldY
+    // 
+    // Note: fieldX and fieldY must be numeric types
+    func FieldX{{$op.String}}FieldY (fieldX, fieldY Field) comparison.PredFunc {
+        return func(preds []*comparison.Predicate) []*comparison.Predicate {
+            return append(preds, &comparison.Predicate{
+                Field: fieldX.String(),
+                Op: comparison.{{$op.String}},
+                Arg: fieldY,
+            })
+        }
+    }
+{{end}}
 `

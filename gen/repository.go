@@ -7,7 +7,7 @@ import (
 	"github.com/sf9v/nero"
 )
 
-func newRepositoryFile(schema *nero.Schema) (*bytes.Buffer, error) {
+func newRepositoryFile(schema *nero.Schema) (*File, error) {
 	tmpl, err := template.New("repository.tmpl").
 		Funcs(nero.NewFuncMap()).Parse(repositoryTmpl)
 	if err != nil {
@@ -16,7 +16,11 @@ func newRepositoryFile(schema *nero.Schema) (*bytes.Buffer, error) {
 
 	buf := &bytes.Buffer{}
 	err = tmpl.Execute(buf, schema)
-	return buf, err
+	if err != nil {
+		return nil, err
+	}
+
+	return &File{name: "repository.go", buf: buf.Bytes()}, nil
 }
 
 const repositoryTmpl = `
@@ -37,7 +41,8 @@ import (
 	{{end -}}
 )
 
-// Repository is an interface for interacting with a {{.TypeInfo.Name}} repository
+// Repository is an interface that wraps the methods 
+// for interacting with a {{.TypeInfo.Name}} repository
 type Repository interface {
 	// Tx begins a new transaction
 	Tx(context.Context) (nero.Tx, error)
@@ -72,13 +77,13 @@ type Repository interface {
 }
 
 
-{{ $cols := prependToColumns .Identity .Columns }}
+{{ $fields := prependToFields .Identity .Fields }}
 
 // Creator is a create builder
 type Creator struct {
-	{{range $col := $cols -}}
-		{{if ne $col.IsAuto true -}}
-		{{$col.Identifier}} {{rawType $col.TypeInfo.V}}
+	{{range $field := $fields -}}
+		{{if ne $field.IsAuto true -}}
+		{{$field.Identifier}} {{rawType $field.TypeInfo.V}}
 		{{end -}}
 	{{end -}}
 }
@@ -88,11 +93,11 @@ func NewCreator() *Creator {
 	return &Creator{}
 }
 
-{{range $col := $cols }}
-	{{if ne $col.IsAuto true -}}
-		// {{$col.FieldName}} sets the {{$col.FieldName}} field
-		func (c *Creator) {{$col.FieldName}}({{$col.Identifier}} {{rawType $col.TypeInfo.V}}) *Creator {
-			c.{{$col.Identifier}} = {{$col.Identifier}}
+{{range $field := $fields }}
+	{{if ne $field.IsAuto true -}}
+		// {{$field.StructField}} sets the {{$field.StructField}} field
+		func (c *Creator) {{$field.StructField}}({{$field.Identifier}} {{rawType $field.TypeInfo.V}}) *Creator {
+			c.{{$field.Identifier}} = {{$field.Identifier}}
 			return c
 		}
 	{{end -}}
@@ -101,10 +106,10 @@ func NewCreator() *Creator {
 // Validate validates the fields
 func (c *Creator) Validate() error {
 	var err error
-	{{range $col := .Columns -}}
-		{{if and (ne $col.IsOptional true) (ne $col.IsAuto true) -}}
-			if isZero(c.{{$col.Identifier}}) {
-				err = multierror.Append(err, nero.NewErrRequiredField("{{$col.Name}}"))
+	{{range $field := .Fields -}}
+		{{if and (ne $field.IsOptional true) (ne $field.IsAuto true) -}}
+			if isZero(c.{{$field.Identifier}}) {
+				err = multierror.Append(err, nero.NewErrRequiredField("{{$field.Name}}"))
 			}
 		{{end}} 
 	{{end}}
@@ -151,9 +156,9 @@ func (q *Queryer) Offset(offset uint) *Queryer {
 
 // Updater is an update builder
 type Updater struct {
-	{{range $col := .Columns -}}
-		{{if ne $col.IsAuto true -}}
-			{{$col.Identifier}} {{rawType $col.TypeInfo.V}}
+	{{range $field := .Fields -}}
+		{{if ne $field.IsAuto true -}}
+			{{$field.Identifier}} {{rawType $field.TypeInfo.V}}
 		{{end -}}
 	{{end -}}
 	predFuncs []comparison.PredFunc
@@ -164,11 +169,11 @@ func NewUpdater() *Updater {
 	return &Updater{}
 }
 
-{{range $col := .Columns}}
-	{{if ne $col.IsAuto true -}}
-		// {{$col.FieldName}} sets the {{$col.FieldName}} field
-		func (c *Updater) {{$col.FieldName}}({{$col.Identifier}} {{rawType $col.TypeInfo.V}}) *Updater {
-			c.{{$col.Identifier}} = {{$col.Identifier}}
+{{range $field := .Fields}}
+	{{if ne $field.IsAuto true -}}
+		// {{$field.StructField}} sets the {{$field.StructField}} field
+		func (c *Updater) {{$field.StructField}}({{$field.Identifier}} {{rawType $field.TypeInfo.V}}) *Updater {
+			c.{{$field.Identifier}} = {{$field.Identifier}}
 			return c
 		}
 	{{end -}}
@@ -202,7 +207,7 @@ type Aggregator struct {
 	aggFuncs	[]aggregate.AggFunc
 	predFuncs	[]comparison.PredFunc
 	sortFuncs	[]sort.SortFunc
-	groupBys []Column
+	groupBys []Field
 }
 
 // NewAggregator expects a v and returns an Aggregator 
@@ -230,8 +235,8 @@ func (a *Aggregator) Sort(sortFuncs ...sort.SortFunc) *Aggregator {
 }
 
 // Group applies group clauses
-func (a *Aggregator) GroupBy(cols ...Column) *Aggregator {
-	a.groupBys = append(a.groupBys, cols...)
+func (a *Aggregator) GroupBy(fields ...Field) *Aggregator {
+	a.groupBys = append(a.groupBys, fields...)
 	return a
 }
 

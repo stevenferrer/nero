@@ -8,8 +8,14 @@ import (
 	"github.com/sf9v/nero/aggregate"
 )
 
-func newAggregateFile(schema *nero.Schema) (*bytes.Buffer, error) {
-	v := struct {
+func newAggregateFile(schema *nero.Schema) (*File, error) {
+	tmpl, err := template.New("aggregates.tmpl").
+		Parse(aggregatesTmpl)
+	if err != nil {
+		return nil, err
+	}
+
+	data := struct {
 		Operators []aggregate.Operator
 		Schema    *nero.Schema
 	}{
@@ -21,19 +27,13 @@ func newAggregateFile(schema *nero.Schema) (*bytes.Buffer, error) {
 		Schema: schema,
 	}
 
-	tmpl, err := template.New("aggregates.tmpl").
-		Parse(aggregatesTmpl)
+	buf := &bytes.Buffer{}
+	err = tmpl.Execute(buf, data)
 	if err != nil {
 		return nil, err
 	}
 
-	buf := new(bytes.Buffer)
-	err = tmpl.Execute(buf, v)
-	if err != nil {
-		return nil, err
-	}
-
-	return buf, nil
+	return &File{name: "aggregate.go", buf: buf.Bytes()}, nil
 }
 
 const aggregatesTmpl = `
@@ -45,11 +45,11 @@ import (
 )
 
 {{range $op := .Operators}}
-// {{$op.String}} is a {{$op.Desc}} aggregate operator
-func {{$op.String}}(col Column) aggregate.AggFunc {
+// {{$op.String}} is the {{$op.Desc}} aggregate operator
+func {{$op.String}}(field Field) aggregate.AggFunc {
 	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
 		return append(aggs, &aggregate.Aggregate{
-			Col: col.String(),
+			Field: field.String(),
 			Op: aggregate.{{$op.String}},
 		})
 	}

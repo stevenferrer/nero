@@ -18,7 +18,7 @@ func TestCustomTypes(t *testing.T) {
 	assert.Len(t, files, 6)
 
 	// create base directory
-	basePath := path.Join("gen", "user")
+	basePath := path.Join("customrepo")
 	err = os.MkdirAll(basePath, os.ModePerm)
 	require.NoError(t, err)
 

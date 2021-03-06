@@ -15,5 +15,5 @@ func NewErrRequiredField(field string) *ErrRequiredField {
 }
 
 func (e *ErrRequiredField) Error() string {
-	return fmt.Sprintf("%q is required", e.field)
+	return fmt.Sprintf("%s field is required", e.field)
 }

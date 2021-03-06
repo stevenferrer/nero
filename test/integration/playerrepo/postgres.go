@@ -304,48 +304,49 @@ func (pg *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 
 func (pg *PostgresRepository) buildPreds(sb squirrel.StatementBuilderType, preds []*comparison.Predicate) squirrel.StatementBuilderType {
 	for _, pred := range preds {
-		var (
-			isCol bool
-			col   Column
-			arg   = pred.Arg
-		)
-		// see if argument is a column
-		col, isCol = arg.(Column)
-		if isCol {
-			arg = fmt.Sprintf("%q", col)
+		ph := "?"
+		fieldX, arg := pred.Field, pred.Arg
+
+		args := []interface{}{}
+		if fieldY, ok := arg.(Field); ok { // a field
+			ph = fmt.Sprintf("%q", fieldY)
+		} else if vals, ok := arg.([]interface{}); ok { // array of values
+			args = append(args, vals...)
+		} else { // single value
+			args = append(args, arg)
 		}
 
 		switch pred.Op {
 		case comparison.Eq:
-			sb = sb.Where(fmt.Sprintf("%q = ?", pred.Col), arg)
+			sb = sb.Where(fmt.Sprintf("%q = "+ph, fieldX), args...)
 		case comparison.NotEq:
-			sb = sb.Where(fmt.Sprintf("%q <> ?", pred.Col), arg)
+			sb = sb.Where(fmt.Sprintf("%q <> "+ph, fieldX), args...)
 		case comparison.Gt:
-			sb = sb.Where(fmt.Sprintf("%q > ?", pred.Col), arg)
+			sb = sb.Where(fmt.Sprintf("%q > "+ph, fieldX), args...)
 		case comparison.GtOrEq:
-			sb = sb.Where(fmt.Sprintf("%q >= ?", pred.Col), arg)
+			sb = sb.Where(fmt.Sprintf("%q >= "+ph, fieldX), args...)
 		case comparison.Lt:
-			sb = sb.Where(fmt.Sprintf("%q < ?", pred.Col), arg)
+			sb = sb.Where(fmt.Sprintf("%q < "+ph, fieldX), args...)
 		case comparison.LtOrEq:
-			sb = sb.Where(fmt.Sprintf("%q <= ?", pred.Col), arg)
-		case comparison.IsNull:
-			sb = sb.Where(fmt.Sprintf("%q IS NULL", pred.Col))
-		case comparison.IsNotNull:
-			sb = sb.Where(fmt.Sprintf("%q IS NOT NULL", pred.Col))
+			sb = sb.Where(fmt.Sprintf("%q <= "+ph, fieldX), args...)
+		case comparison.IsNull, comparison.IsNotNull:
+			fmtStr := "%q IS NULL"
+			if pred.Op == comparison.IsNotNull {
+				fmtStr = "%q IS NOT NULL"
+			}
+			sb = sb.Where(fmt.Sprintf(fmtStr, fieldX))
 		case comparison.In, comparison.NotIn:
-			args := pred.Arg.([]interface{})
-			if len(args) == 0 {
-				continue
-			}
-			placeholders := []string{}
-			for range args {
-				placeholders = append(placeholders, "?")
-			}
 			fmtStr := "%q IN (%s)"
 			if pred.Op == comparison.NotIn {
 				fmtStr = "%q NOT IN (%s)"
 			}
-			sb = sb.Where(fmt.Sprintf(fmtStr, pred.Col, strings.Join(placeholders, ",")), args...)
+
+			phs := []string{}
+			for range args {
+				phs = append(phs, "?")
+			}
+
+			sb = sb.Where(fmt.Sprintf(fmtStr, fieldX, strings.Join(phs, ",")), args...)
 		}
 	}
 
@@ -354,12 +355,12 @@ func (pg *PostgresRepository) buildPreds(sb squirrel.StatementBuilderType, preds
 
 func (pg *PostgresRepository) buildSort(qb squirrel.SelectBuilder, sorts []*sort.Sort) squirrel.SelectBuilder {
 	for _, s := range sorts {
-		col := fmt.Sprintf("%q", s.Col)
+		field := fmt.Sprintf("%q", s.Field)
 		switch s.Direction {
 		case sort.Asc:
-			qb = qb.OrderBy(col + " ASC")
+			qb = qb.OrderBy(field + " ASC")
 		case sort.Desc:
-			qb = qb.OrderBy(col + " DESC")
+			qb = qb.OrderBy(field + " DESC")
 		}
 	}
 
@@ -508,27 +509,27 @@ func (pg *PostgresRepository) aggregate(ctx context.Context, runner nero.SQLRunn
 	for _, aggFunc := range a.aggFuncs {
 		aggs = aggFunc(aggs)
 	}
-	cols := []string{}
+	columns := []string{}
 	for _, agg := range aggs {
-		col := agg.Col
-		qcol := fmt.Sprintf("%q", col)
+		field := agg.Field
+		qf := fmt.Sprintf("%q", field)
 		switch agg.Op {
 		case aggregate.Avg:
-			cols = append(cols, "AVG("+qcol+") avg_"+col)
+			columns = append(columns, "AVG("+qf+") avg_"+field)
 		case aggregate.Count:
-			cols = append(cols, "COUNT("+qcol+") count_"+col)
+			columns = append(columns, "COUNT("+qf+") count_"+field)
 		case aggregate.Max:
-			cols = append(cols, "MAX("+qcol+") max_"+col)
+			columns = append(columns, "MAX("+qf+") max_"+field)
 		case aggregate.Min:
-			cols = append(cols, "MIN("+qcol+") min_"+col)
+			columns = append(columns, "MIN("+qf+") min_"+field)
 		case aggregate.Sum:
-			cols = append(cols, "SUM("+qcol+") sum_"+col)
+			columns = append(columns, "SUM("+qf+") sum_"+field)
 		case aggregate.None:
-			cols = append(cols, qcol)
+			columns = append(columns, qf)
 		}
 	}
 
-	qb := squirrel.Select(cols...).From("\"players\"").
+	qb := squirrel.Select(columns...).From("\"players\"").
 		PlaceholderFormat(squirrel.Dollar)
 
 	groupBys := []string{}
@@ -562,8 +563,8 @@ func (pg *PostgresRepository) aggregate(ctx context.Context, runner nero.SQLRunn
 
 	v := reflect.ValueOf(a.v).Elem()
 	t := reflect.TypeOf(v.Interface()).Elem()
-	if t.NumField() != len(cols) {
-		return errors.New("aggregate columns and destination struct field count should match")
+	if len(columns) != t.NumField() {
+		return errors.Errorf("column count (%v) and destination struct field count (%v) doesn't match", len(columns), t.NumField())
 	}
 
 	for rows.Next() {

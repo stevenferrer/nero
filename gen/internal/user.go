@@ -20,19 +20,20 @@ func (u User) Schema() *nero.Schema {
 	return nero.NewSchemaBuilder(&u).
 		PkgName("userrepo").Collection("users").
 		Identity(
-			nero.NewColumnBuilder("id", u.ID).StructField("ID").
+			nero.NewFieldBuilder("id", u.ID).
+				StructField("ID").Auto().Build(),
+		).
+		Fields(
+			nero.NewFieldBuilder("name", u.Name).
+				Build(),
+			nero.NewFieldBuilder("department", u.Department).
+				Build(),
+			nero.NewFieldBuilder("updated_at", u.UpdatedAt).
+				Optional().Build(),
+			nero.NewFieldBuilder("created_at", u.CreatedAt).
 				Auto().Build(),
 		).
-		Columns(
-			nero.NewColumnBuilder("name", u.Name).Build(),
-			nero.NewColumnBuilder("department", u.Department).Build(),
-			nero.NewColumnBuilder("updated_at", u.UpdatedAt).
-				Optional().Comparable().Build(),
-			nero.NewColumnBuilder("created_at", u.CreatedAt).
-				Auto().Build(),
-		).
-		Templates(
-			nero.NewPostgresTemplate().WithFilename("postgres.go"),
-		).
+		Templates(nero.NewPostgresTemplate().
+			WithFilename("postgres.go")).
 		Build()
 }

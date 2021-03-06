@@ -2,6 +2,6 @@ package sort
 
 // Sort is a sort parameter
 type Sort struct {
-	Col       string
+	Field     string
 	Direction Direction
 }

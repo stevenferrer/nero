@@ -5,62 +5,62 @@ import (
 	"github.com/sf9v/nero/aggregate"
 )
 
-// Avg is a average aggregate operator
-func Avg(col Column) aggregate.AggFunc {
+// Avg is the average aggregate operator
+func Avg(field Field) aggregate.AggFunc {
 	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
 		return append(aggs, &aggregate.Aggregate{
-			Col: col.String(),
-			Op:  aggregate.Avg,
+			Field: field.String(),
+			Op:    aggregate.Avg,
 		})
 	}
 }
 
-// Count is a count aggregate operator
-func Count(col Column) aggregate.AggFunc {
+// Count is the count aggregate operator
+func Count(field Field) aggregate.AggFunc {
 	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
 		return append(aggs, &aggregate.Aggregate{
-			Col: col.String(),
-			Op:  aggregate.Count,
+			Field: field.String(),
+			Op:    aggregate.Count,
 		})
 	}
 }
 
-// Max is a max aggregate operator
-func Max(col Column) aggregate.AggFunc {
+// Max is the max aggregate operator
+func Max(field Field) aggregate.AggFunc {
 	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
 		return append(aggs, &aggregate.Aggregate{
-			Col: col.String(),
-			Op:  aggregate.Max,
+			Field: field.String(),
+			Op:    aggregate.Max,
 		})
 	}
 }
 
-// Min is a min aggregate operator
-func Min(col Column) aggregate.AggFunc {
+// Min is the min aggregate operator
+func Min(field Field) aggregate.AggFunc {
 	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
 		return append(aggs, &aggregate.Aggregate{
-			Col: col.String(),
-			Op:  aggregate.Min,
+			Field: field.String(),
+			Op:    aggregate.Min,
 		})
 	}
 }
 
-// Sum is a sum aggregate operator
-func Sum(col Column) aggregate.AggFunc {
+// Sum is the sum aggregate operator
+func Sum(field Field) aggregate.AggFunc {
 	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
 		return append(aggs, &aggregate.Aggregate{
-			Col: col.String(),
-			Op:  aggregate.Sum,
+			Field: field.String(),
+			Op:    aggregate.Sum,
 		})
 	}
 }
 
-// None is a none aggregate operator
-func None(col Column) aggregate.AggFunc {
+// None is the none aggregate operator
+func None(field Field) aggregate.AggFunc {
 	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
 		return append(aggs, &aggregate.Aggregate{
-			Col: col.String(),
-			Op:  aggregate.None,
+			Field: field.String(),
+			Op:    aggregate.None,
 		})
 	}
 }

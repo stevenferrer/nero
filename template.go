@@ -19,22 +19,19 @@ type Templater interface {
 
 // ParseTemplater parses the repository templater
 func ParseTemplater(tmpl Templater) (*template.Template, error) {
-	tmplt, err := template.New(tmpl.Filename() + ".tmpl").
-		Funcs(NewFuncMap()).
-		Parse(tmpl.Template())
-
-	return tmplt, err
+	return template.New(tmpl.Filename() + ".tmpl").
+		Funcs(NewFuncMap()).Parse(tmpl.Template())
 }
 
 // NewFuncMap returns a template func map
 func NewFuncMap() template.FuncMap {
 	return template.FuncMap{
-		"realType":         realTypeFunc,
-		"rawType":          rawTypeFunc,
-		"zero":             zeroFunc,
-		"isNullOp":         isNullOp,
-		"isInOp":           isInOp,
-		"prependToColumns": prependToColumns,
+		"realType":        realTypeFunc,
+		"rawType":         rawTypeFunc,
+		"zero":            zeroFunc,
+		"isNullOp":        isNullOp,
+		"isInOp":          isInOp,
+		"prependToFields": prependToFields,
 	}
 }
 
@@ -93,7 +90,6 @@ func zeroFunc(v interface{}) string {
 
 }
 
-// appendToColumns appends a column to a slice of columns
-func prependToColumns(column *Column, columns []*Column) []*Column {
-	return append([]*Column{column}, columns...)
+func prependToFields(field *Field, fields []*Field) []*Field {
+	return append([]*Field{field}, fields...)
 }

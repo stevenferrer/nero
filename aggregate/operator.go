@@ -14,8 +14,7 @@ const (
 	Min
 	// Sum is the sum operator
 	Sum
-	// None is not an aggregate function and is only used
-	// when you want to include a column in the result
+	// None is used to include a field in the result
 	None
 )
 

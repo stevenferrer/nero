@@ -55,7 +55,7 @@ import (
 	{{end -}}
 )
 
-{{ $cols := prependToColumns .Identity .Columns }}
+{{ $fields := prependToFields .Identity .Fields }}
 
 // PostgresRepository is a repository that uses PostgreSQL as data store
 type PostgresRepository struct {
@@ -112,20 +112,20 @@ func (pg *PostgresRepository) create(ctx context.Context, runner nero.SQLRunner,
 	}
 
 	columns := []string{
-		{{range $col := $cols -}}
-			{{if (ne $col.IsAuto true) -}}
-				"\"{{$col.Name}}\"",
+		{{range $field := $fields -}}
+			{{if (ne $field.IsAuto true) -}}
+				"\"{{$field.Name}}\"",
 			{{end -}}
 		{{end -}}
 	}
 
 	values := []interface{}{
-		{{range $col := $cols -}}
-			{{if (ne $col.IsAuto true) -}}
-				{{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
-					pq.Array(c.{{$col.Identifier}}),
+		{{range $field := $fields -}}
+			{{if (ne $field.IsAuto true) -}}
+				{{if and ($field.IsArray) (ne $field.IsValueScanner true) -}}
+					pq.Array(c.{{$field.Identifier}}),
 				{{else -}}
-					c.{{$col.Identifier}},
+					c.{{$field.Identifier}},
 				{{end -}}
 			{{end -}}
 		{{end -}}
@@ -172,9 +172,9 @@ func (pg *PostgresRepository) createMany(ctx context.Context, runner nero.SQLRun
 	}
 
 	columns := []string{
-		{{range $col := $cols -}}
-			{{if ne $col.IsAuto true -}}
-				"\"{{$col.Name}}\"",
+		{{range $field := $fields -}}
+			{{if ne $field.IsAuto true -}}
+				"\"{{$field.Name}}\"",
 			{{end -}}
 		{{end -}}
 	}
@@ -185,12 +185,12 @@ func (pg *PostgresRepository) createMany(ctx context.Context, runner nero.SQLRun
 		}
 
 		qb = qb.Values(
-			{{range $col := $cols -}}
-				{{if ne $col.IsAuto true -}}
-					{{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
-						pq.Array(c.{{$col.Identifier}}),
+			{{range $field := $fields -}}
+				{{if ne $field.IsAuto true -}}
+					{{if and ($field.IsArray) (ne $field.IsValueScanner true) -}}
+						pq.Array(c.{{$field.Identifier}}),
 					{{else -}}
-						c.{{$col.Identifier}},
+						c.{{$field.Identifier}},
 					{{end -}}
 				{{end -}}
 			{{end -}}
@@ -244,11 +244,11 @@ func (pg *PostgresRepository) query(ctx context.Context, runner nero.SQLRunner, 
 	for rows.Next() {
 		var {{.TypeIdentifier}} {{realType .TypeInfo.V}}
 		err = rows.Scan(
-			{{range $col := $cols -}}
-				{{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
-					pq.Array(&{{$.TypeIdentifier}}.{{$col.FieldName}}),
+			{{range $field := $fields -}}
+				{{if and ($field.IsArray) (ne $field.IsValueScanner true) -}}
+					pq.Array(&{{$.TypeIdentifier}}.{{$field.StructField}}),
 				{{else -}}
-					&{{$.TypeIdentifier}}.{{$col.FieldName}},
+					&{{$.TypeIdentifier}}.{{$field.StructField}},
 				{{end -}}
 			{{end -}}
 		)
@@ -288,11 +288,11 @@ func (pg *PostgresRepository) queryOne(ctx context.Context, runner nero.SQLRunne
 	err := qb.RunWith(runner).
 		QueryRowContext(ctx).
 		Scan(
-			{{range $col := $cols -}}
-				{{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
-					pq.Array(&{{$.TypeIdentifier}}.{{$col.FieldName}}),
+			{{range $field := $fields -}}
+				{{if and ($field.IsArray) (ne $field.IsValueScanner true) -}}
+					pq.Array(&{{$.TypeIdentifier}}.{{$field.StructField}}),
 				{{else -}}
-					&{{$.TypeIdentifier}}.{{$col.FieldName}},
+					&{{$.TypeIdentifier}}.{{$field.StructField}},
 				{{end -}}	
 			{{end -}}
 		)
@@ -305,8 +305,8 @@ func (pg *PostgresRepository) queryOne(ctx context.Context, runner nero.SQLRunne
 
 func (pg *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	columns := []string{
-		{{range $col := $cols -}}
-			"\"{{$col.Name}}\"",
+		{{range $field := $fields -}}
+			"\"{{$field.Name}}\"",
 		{{end -}}
 	}
 	qb := squirrel.Select(columns...).
@@ -337,49 +337,50 @@ func (pg *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 }
 
 func (pg *PostgresRepository) buildPreds(sb squirrel.StatementBuilderType, preds []*comparison.Predicate) squirrel.StatementBuilderType {
-	for _, pred := range preds {
-		var (
-			isCol bool
-			col   Column
-			arg   = pred.Arg
-		)
-		// see if argument is a column
-		col, isCol = arg.(Column)
-		if isCol {
-			arg = fmt.Sprintf("%q", col)
+	for _, pred := range preds {	
+		ph := "?"
+		fieldX, arg := pred.Field, pred.Arg
+
+		args := []interface{}{}
+		if fieldY, ok := arg.(Field); ok { // a field
+			ph = fmt.Sprintf("%q", fieldY)
+		} else if vals, ok := arg.([]interface{}); ok  {  // array of values 
+			args = append(args, vals...)
+		} else { // single value
+			args = append(args, arg)
 		}
 		
 		switch pred.Op {
 		case comparison.Eq:
-			sb = sb.Where(fmt.Sprintf("%q = ?", pred.Col), arg)
+			sb = sb.Where(fmt.Sprintf("%q = "+ph, fieldX), args...)
 		case comparison.NotEq:
-			sb = sb.Where(fmt.Sprintf("%q <> ?", pred.Col), arg)
+			sb = sb.Where(fmt.Sprintf("%q <> "+ph, fieldX), args...)
 		case comparison.Gt:
-			sb = sb.Where(fmt.Sprintf("%q > ?", pred.Col), arg)
+			sb = sb.Where(fmt.Sprintf("%q > "+ph, fieldX), args...)
 		case comparison.GtOrEq:
-			sb = sb.Where(fmt.Sprintf("%q >= ?", pred.Col), arg)
+			sb = sb.Where(fmt.Sprintf("%q >= "+ph, fieldX), args...)
 		case comparison.Lt:
-			sb = sb.Where(fmt.Sprintf("%q < ?", pred.Col), arg)
+			sb = sb.Where(fmt.Sprintf("%q < "+ph, fieldX), args...)
 		case comparison.LtOrEq:
-			sb = sb.Where(fmt.Sprintf("%q <= ?", pred.Col), arg)
-		case comparison.IsNull:
-			sb = sb.Where(fmt.Sprintf("%q IS NULL", pred.Col))
-		case comparison.IsNotNull:
-			sb = sb.Where(fmt.Sprintf("%q IS NOT NULL", pred.Col))
+			sb = sb.Where(fmt.Sprintf("%q <= "+ph, fieldX), args...)
+		case comparison.IsNull, comparison.IsNotNull:
+			fmtStr := "%q IS NULL"
+			if pred.Op == comparison.IsNotNull {
+				fmtStr = "%q IS NOT NULL"
+			}
+			sb = sb.Where(fmt.Sprintf(fmtStr, fieldX))
 		case comparison.In, comparison.NotIn:
-			args := pred.Arg.([]interface{})
-			if len(args) == 0 {
-				continue
-			}
-			placeholders := []string{}
-			for range args {
-				placeholders = append(placeholders, "?")
-			}
 			fmtStr := "%q IN (%s)"
 			if pred.Op == comparison.NotIn {
 				fmtStr = "%q NOT IN (%s)"
 			}
-			sb = sb.Where(fmt.Sprintf(fmtStr, pred.Col, strings.Join(placeholders, ",")), args...)
+
+			phs := []string{}
+			for range args {
+				phs = append(phs, "?")
+			}
+
+			sb = sb.Where(fmt.Sprintf(fmtStr, fieldX, strings.Join(phs, ",")), args...)
 		}
 	}
 
@@ -388,12 +389,12 @@ func (pg *PostgresRepository) buildPreds(sb squirrel.StatementBuilderType, preds
 
 func (pg *PostgresRepository) buildSort(qb squirrel.SelectBuilder, sorts []*sort.Sort) squirrel.SelectBuilder {
 	for _, s := range sorts {
-		col := fmt.Sprintf("%q", s.Col)
+		field := fmt.Sprintf("%q", s.Field)
 		switch s.Direction {
 		case sort.Asc:
-			qb = qb.OrderBy(col + " ASC")
+			qb = qb.OrderBy(field + " ASC")
 		case sort.Desc:
-			qb = qb.OrderBy(col + " DESC")
+			qb = qb.OrderBy(field + " DESC")
 		}
 	}
 
@@ -420,13 +421,13 @@ func (pg *PostgresRepository) update(ctx context.Context, runner nero.SQLRunner,
 		PlaceholderFormat(squirrel.Dollar)
 
 	cnt := 0
-	{{range $col := .Columns}}
-		{{if ne $col.IsAuto true}}
-			if !isZero(u.{{$col.Identifier}}) {
-				{{if and ($col.IsArray) (ne $col.IsValueScanner true) -}}
-					qb = qb.Set("\"{{$col.Name}}\"", pq.Array(u.{{$col.Identifier}}))
+	{{range $field := .Fields }}
+		{{if ne $field.IsAuto true}}
+			if !isZero(u.{{$field.Identifier}}) {
+				{{if and ($field.IsArray) (ne $field.IsValueScanner true) -}}
+					qb = qb.Set("\"{{$field.Name}}\"", pq.Array(u.{{$field.Identifier}}))
 				{{else -}}
-					qb = qb.Set("\"{{$col.Name}}\"", u.{{$col.Identifier}})
+					qb = qb.Set("\"{{$field.Name}}\"", u.{{$field.Identifier}})
 				{{end -}}
 				cnt++
 			}
@@ -524,27 +525,27 @@ func (pg *PostgresRepository) aggregate(ctx context.Context, runner nero.SQLRunn
 	for _, aggFunc := range a.aggFuncs {
 		aggs = aggFunc(aggs)
 	}
-	cols := []string{}
+	columns := []string{}
 	for _, agg := range aggs {
-		col := agg.Col
-		qcol := fmt.Sprintf("%q", col)
+		field := agg.Field
+		qf := fmt.Sprintf("%q", field)
 		switch agg.Op {
 		case aggregate.Avg:
-			cols = append(cols, "AVG("+qcol+") avg_"+col)
+			columns = append(columns, "AVG("+qf+") avg_"+field)
 		case aggregate.Count:
-			cols = append(cols, "COUNT("+qcol+") count_"+col)
+			columns = append(columns, "COUNT("+qf+") count_"+field)
 		case aggregate.Max:
-			cols = append(cols, "MAX("+qcol+") max_"+col)
+			columns = append(columns, "MAX("+qf+") max_"+field)
 		case aggregate.Min:
-			cols = append(cols, "MIN("+qcol+") min_"+col)
+			columns = append(columns, "MIN("+qf+") min_"+field)
 		case aggregate.Sum:
-			cols = append(cols, "SUM("+qcol+") sum_"+col)
+			columns = append(columns, "SUM("+qf+") sum_"+field)
 		case aggregate.None:
-			cols = append(cols, qcol)
+			columns = append(columns, qf)
 		}
 	}
 
-	qb := squirrel.Select(cols...).From("\"{{.Collection}}\"").
+	qb := squirrel.Select(columns...).From("\"{{.Collection}}\"").
 		PlaceholderFormat(squirrel.Dollar)
 
 	groupBys := []string{}
@@ -578,8 +579,8 @@ func (pg *PostgresRepository) aggregate(ctx context.Context, runner nero.SQLRunn
 
 	v := reflect.ValueOf(a.v).Elem()
 	t := reflect.TypeOf(v.Interface()).Elem()
-	if t.NumField() != len(cols) {
-		return errors.New("aggregate columns and destination struct field count should match")
+	if len(columns) != t.NumField() {
+		return errors.Errorf("column count (%v) and destination struct field count (%v) doesn't match",  len(columns), t.NumField(),)
 	}
 
 	for rows.Next() {
