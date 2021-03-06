@@ -108,7 +108,7 @@ Also, the following have a huge influence on this project and deserves most of t
 
 ## Contributing
 
-Any suggestions and ideas are very much welcome! Feel free to [open an issue](https://github.com/sf9v/nero/issues) or by [making a pull request](https://github.com/sf9v/nero/pulls).
+Any suggestions and ideas are very much welcome, feel free to [open an issue](https://github.com/sf9v/nero/issues) or [make a pull request](https://github.com/sf9v/nero/pulls)!
 
 
 ## License
