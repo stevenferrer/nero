@@ -56,7 +56,6 @@ type Creator struct {
 	name      string
 	age       int
 	race      player.Race
-	interests []string
 	updatedAt *time.Time
 }
 
@@ -89,12 +88,6 @@ func (c *Creator) Race(race player.Race) *Creator {
 	return c
 }
 
-// Interests sets the Interests field
-func (c *Creator) Interests(interests []string) *Creator {
-	c.interests = interests
-	return c
-}
-
 // UpdatedAt sets the UpdatedAt field
 func (c *Creator) UpdatedAt(updatedAt *time.Time) *Creator {
 	c.updatedAt = updatedAt
@@ -118,10 +111,6 @@ func (c *Creator) Validate() error {
 
 	if isZero(c.race) {
 		err = multierror.Append(err, nero.NewErrRequiredField("race"))
-	}
-
-	if isZero(c.interests) {
-		err = multierror.Append(err, nero.NewErrRequiredField("interests"))
 	}
 
 	return err
@@ -170,7 +159,6 @@ type Updater struct {
 	name      string
 	age       int
 	race      player.Race
-	interests []string
 	updatedAt *time.Time
 	predFuncs []comparison.PredFunc
 }
@@ -201,12 +189,6 @@ func (c *Updater) Age(age int) *Updater {
 // Race sets the Race field
 func (c *Updater) Race(race player.Race) *Updater {
 	c.race = race
-	return c
-}
-
-// Interests sets the Interests field
-func (c *Updater) Interests(interests []string) *Updater {
-	c.interests = interests
 	return c
 }
 

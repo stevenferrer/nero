@@ -33,7 +33,6 @@ func (u User) Schema() *nero.Schema {
 			nero.NewFieldBuilder("created_at", u.CreatedAt).
 				Auto().Build(),
 		).
-		Templates(nero.NewPostgresTemplate().
-			WithFilename("postgres.go")).
+		Templates(nero.NewPostgresTemplate()).
 		Build()
 }

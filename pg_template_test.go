@@ -3,9 +3,10 @@ package nero_test
 import (
 	"testing"
 
-	"github.com/sf9v/nero"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/sf9v/nero"
 )
 
 func TestPostgresTemplate(t *testing.T) {

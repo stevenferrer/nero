@@ -64,4 +64,5 @@ func TestFuncs(t *testing.T) {
 	})
 
 	assert.Len(t, prependToFields(&Field{}, []*Field{}), 1)
+	assert.NotEmpty(t, fileHeadersFunc())
 }

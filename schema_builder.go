@@ -24,7 +24,9 @@ func (sb *SchemaBuilder) Build() *Schema {
 
 	// use default template set
 	if len(templates) == 0 {
-		templates = []Templater{NewPostgresTemplate()}
+		templates = []Templater{
+			NewPostgresTemplate(),
+		}
 	}
 
 	// get pkg imports

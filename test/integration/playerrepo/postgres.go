@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/lib/pq"
+	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
 	"github.com/sf9v/nero"
 	"github.com/sf9v/nero/aggregate"
@@ -35,41 +35,41 @@ func NewPostgresRepository(db *sql.DB) *PostgresRepository {
 }
 
 // Debug enables debug mode
-func (pg *PostgresRepository) Debug() *PostgresRepository {
+func (repo *PostgresRepository) Debug() *PostgresRepository {
 	return &PostgresRepository{
-		db:     pg.db,
+		db:     repo.db,
 		debug:  true,
 		logger: log.New(os.Stdout, "nero: ", 0),
 	}
 }
 
 // WithLogger overrides the default logger
-func (pg *PostgresRepository) WithLogger(logger nero.Logger) *PostgresRepository {
-	pg.logger = logger
-	return pg
+func (repo *PostgresRepository) WithLogger(logger nero.Logger) *PostgresRepository {
+	repo.logger = logger
+	return repo
 }
 
 // Tx begins a new transaction
-func (pg *PostgresRepository) Tx(ctx context.Context) (nero.Tx, error) {
-	return pg.db.BeginTx(ctx, nil)
+func (repo *PostgresRepository) Tx(ctx context.Context) (nero.Tx, error) {
+	return repo.db.BeginTx(ctx, nil)
 }
 
 // Create creates a Player
-func (pg *PostgresRepository) Create(ctx context.Context, c *Creator) (string, error) {
-	return pg.create(ctx, pg.db, c)
+func (repo *PostgresRepository) Create(ctx context.Context, c *Creator) (string, error) {
+	return repo.create(ctx, repo.db, c)
 }
 
 // CreateTx creates a Player in a transaction
-func (pg *PostgresRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (string, error) {
+func (repo *PostgresRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (string, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return "", errors.New("expecting tx to be *sql.Tx")
 	}
 
-	return pg.create(ctx, txx, c)
+	return repo.create(ctx, txx, c)
 }
 
-func (pg *PostgresRepository) create(ctx context.Context, runner nero.SQLRunner, c *Creator) (string, error) {
+func (repo *PostgresRepository) create(ctx context.Context, runner nero.SQLRunner, c *Creator) (string, error) {
 	if err := c.Validate(); err != nil {
 		return "", err
 	}
@@ -79,8 +79,6 @@ func (pg *PostgresRepository) create(ctx context.Context, runner nero.SQLRunner,
 		"\"name\"",
 		"\"age\"",
 		"\"race\"",
-		"\"interests\"",
-		"\"updated_at\"",
 	}
 
 	values := []interface{}{
@@ -88,8 +86,11 @@ func (pg *PostgresRepository) create(ctx context.Context, runner nero.SQLRunner,
 		c.name,
 		c.age,
 		c.race,
-		pq.Array(c.interests),
-		c.updatedAt,
+	}
+
+	if !isZero(c.updatedAt) {
+		columns = append(columns, "updated_at")
+		values = append(values, c.updatedAt)
 	}
 
 	qb := squirrel.Insert("\"players\"").
@@ -98,9 +99,9 @@ func (pg *PostgresRepository) create(ctx context.Context, runner nero.SQLRunner,
 		Suffix("RETURNING \"id\"").
 		PlaceholderFormat(squirrel.Dollar).
 		RunWith(runner)
-	if pg.debug && pg.logger != nil {
+	if repo.debug && repo.logger != nil {
 		sql, args, err := qb.ToSql()
-		pg.logger.Printf("method: Create, stmt: %q, args: %v, error: %v", sql, args, err)
+		repo.logger.Printf("method: Create, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
 
 	var id string
@@ -113,21 +114,21 @@ func (pg *PostgresRepository) create(ctx context.Context, runner nero.SQLRunner,
 }
 
 // CreateMany batch creates Players
-func (pg *PostgresRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
-	return pg.createMany(ctx, pg.db, cs...)
+func (repo *PostgresRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
+	return repo.createMany(ctx, repo.db, cs...)
 }
 
 // CreateManyTx batch creates Players in a transaction
-func (pg *PostgresRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
+func (repo *PostgresRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return errors.New("expecting tx to be *sql.Tx")
 	}
 
-	return pg.createMany(ctx, txx, cs...)
+	return repo.createMany(ctx, txx, cs...)
 }
 
-func (pg *PostgresRepository) createMany(ctx context.Context, runner nero.SQLRunner, cs ...*Creator) error {
+func (repo *PostgresRepository) createMany(ctx context.Context, runner nero.SQLRunner, cs ...*Creator) error {
 	if len(cs) == 0 {
 		return nil
 	}
@@ -137,9 +138,9 @@ func (pg *PostgresRepository) createMany(ctx context.Context, runner nero.SQLRun
 		"\"name\"",
 		"\"age\"",
 		"\"race\"",
-		"\"interests\"",
 		"\"updated_at\"",
 	}
+
 	qb := squirrel.Insert("\"players\"").Columns(columns...)
 	for _, c := range cs {
 		if err := c.Validate(); err != nil {
@@ -151,16 +152,15 @@ func (pg *PostgresRepository) createMany(ctx context.Context, runner nero.SQLRun
 			c.name,
 			c.age,
 			c.race,
-			pq.Array(c.interests),
 			c.updatedAt,
 		)
 	}
 
 	qb = qb.Suffix("RETURNING \"id\"").
 		PlaceholderFormat(squirrel.Dollar)
-	if pg.debug && pg.logger != nil {
+	if repo.debug && repo.logger != nil {
 		sql, args, err := qb.ToSql()
-		pg.logger.Printf("method: CreateMany, stmt: %q, args: %v, error: %v", sql, args, err)
+		repo.logger.Printf("method: CreateMany, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
 
 	_, err := qb.RunWith(runner).ExecContext(ctx)
@@ -172,25 +172,25 @@ func (pg *PostgresRepository) createMany(ctx context.Context, runner nero.SQLRun
 }
 
 // Query queries Players
-func (pg *PostgresRepository) Query(ctx context.Context, q *Queryer) ([]*player.Player, error) {
-	return pg.query(ctx, pg.db, q)
+func (repo *PostgresRepository) Query(ctx context.Context, q *Queryer) ([]*player.Player, error) {
+	return repo.query(ctx, repo.db, q)
 }
 
 // QueryTx queries Players in a transaction
-func (pg *PostgresRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*player.Player, error) {
+func (repo *PostgresRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*player.Player, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	return pg.query(ctx, txx, q)
+	return repo.query(ctx, txx, q)
 }
 
-func (pg *PostgresRepository) query(ctx context.Context, runner nero.SQLRunner, q *Queryer) ([]*player.Player, error) {
-	qb := pg.buildSelect(q)
-	if pg.debug && pg.logger != nil {
+func (repo *PostgresRepository) query(ctx context.Context, runner nero.SQLRunner, q *Queryer) ([]*player.Player, error) {
+	qb := repo.buildSelect(q)
+	if repo.debug && repo.logger != nil {
 		sql, args, err := qb.ToSql()
-		pg.logger.Printf("method: Query, stmt: %q, args: %v, error: %v", sql, args, err)
+		repo.logger.Printf("method: Query, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
 
 	rows, err := qb.RunWith(runner).QueryContext(ctx)
@@ -208,7 +208,6 @@ func (pg *PostgresRepository) query(ctx context.Context, runner nero.SQLRunner, 
 			&player.Name,
 			&player.Age,
 			&player.Race,
-			pq.Array(&player.Interests),
 			&player.UpdatedAt,
 			&player.CreatedAt,
 		)
@@ -223,25 +222,25 @@ func (pg *PostgresRepository) query(ctx context.Context, runner nero.SQLRunner, 
 }
 
 // QueryOne queries a Player
-func (pg *PostgresRepository) QueryOne(ctx context.Context, q *Queryer) (*player.Player, error) {
-	return pg.queryOne(ctx, pg.db, q)
+func (repo *PostgresRepository) QueryOne(ctx context.Context, q *Queryer) (*player.Player, error) {
+	return repo.queryOne(ctx, repo.db, q)
 }
 
 // QueryOneTx queries a Player in a transaction
-func (pg *PostgresRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*player.Player, error) {
+func (repo *PostgresRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*player.Player, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	return pg.queryOne(ctx, txx, q)
+	return repo.queryOne(ctx, txx, q)
 }
 
-func (pg *PostgresRepository) queryOne(ctx context.Context, runner nero.SQLRunner, q *Queryer) (*player.Player, error) {
-	qb := pg.buildSelect(q)
-	if pg.debug && pg.logger != nil {
+func (repo *PostgresRepository) queryOne(ctx context.Context, runner nero.SQLRunner, q *Queryer) (*player.Player, error) {
+	qb := repo.buildSelect(q)
+	if repo.debug && repo.logger != nil {
 		sql, args, err := qb.ToSql()
-		pg.logger.Printf("method: QueryOne, stmt: %q, args: %v, error: %v", sql, args, err)
+		repo.logger.Printf("method: QueryOne, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
 
 	var player player.Player
@@ -253,7 +252,6 @@ func (pg *PostgresRepository) queryOne(ctx context.Context, runner nero.SQLRunne
 			&player.Name,
 			&player.Age,
 			&player.Race,
-			pq.Array(&player.Interests),
 			&player.UpdatedAt,
 			&player.CreatedAt,
 		)
@@ -264,14 +262,13 @@ func (pg *PostgresRepository) queryOne(ctx context.Context, runner nero.SQLRunne
 	return &player, nil
 }
 
-func (pg *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
+func (repo *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	columns := []string{
 		"\"id\"",
 		"\"email\"",
 		"\"name\"",
 		"\"age\"",
 		"\"race\"",
-		"\"interests\"",
 		"\"updated_at\"",
 		"\"created_at\"",
 	}
@@ -283,13 +280,13 @@ func (pg *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	for _, predFunc := range q.predFuncs {
 		preds = predFunc(preds)
 	}
-	qb = squirrel.SelectBuilder(pg.buildPreds(squirrel.StatementBuilderType(qb), preds))
+	qb = squirrel.SelectBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), preds))
 
 	sorts := []*sort.Sort{}
 	for _, sortFunc := range q.sortFuncs {
 		sorts = sortFunc(sorts)
 	}
-	qb = pg.buildSort(qb, sorts)
+	qb = repo.buildSort(qb, sorts)
 
 	if q.limit > 0 {
 		qb = qb.Limit(uint64(q.limit))
@@ -302,7 +299,7 @@ func (pg *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	return qb
 }
 
-func (pg *PostgresRepository) buildPreds(sb squirrel.StatementBuilderType, preds []*comparison.Predicate) squirrel.StatementBuilderType {
+func (repo *PostgresRepository) buildPreds(sb squirrel.StatementBuilderType, preds []*comparison.Predicate) squirrel.StatementBuilderType {
 	for _, pred := range preds {
 		ph := "?"
 		fieldX, arg := pred.Field, pred.Arg
@@ -353,7 +350,7 @@ func (pg *PostgresRepository) buildPreds(sb squirrel.StatementBuilderType, preds
 	return sb
 }
 
-func (pg *PostgresRepository) buildSort(qb squirrel.SelectBuilder, sorts []*sort.Sort) squirrel.SelectBuilder {
+func (repo *PostgresRepository) buildSort(qb squirrel.SelectBuilder, sorts []*sort.Sort) squirrel.SelectBuilder {
 	for _, s := range sorts {
 		field := fmt.Sprintf("%q", s.Field)
 		switch s.Direction {
@@ -368,21 +365,21 @@ func (pg *PostgresRepository) buildSort(qb squirrel.SelectBuilder, sorts []*sort
 }
 
 // Update updates a Player or many Players
-func (pg *PostgresRepository) Update(ctx context.Context, u *Updater) (int64, error) {
-	return pg.update(ctx, pg.db, u)
+func (repo *PostgresRepository) Update(ctx context.Context, u *Updater) (int64, error) {
+	return repo.update(ctx, repo.db, u)
 }
 
 // UpdateTx updates a Player many Players in a transaction
-func (pg *PostgresRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
+func (repo *PostgresRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	return pg.update(ctx, txx, u)
+	return repo.update(ctx, txx, u)
 }
 
-func (pg *PostgresRepository) update(ctx context.Context, runner nero.SQLRunner, u *Updater) (int64, error) {
+func (repo *PostgresRepository) update(ctx context.Context, runner nero.SQLRunner, u *Updater) (int64, error) {
 	qb := squirrel.Update("\"players\"").
 		PlaceholderFormat(squirrel.Dollar)
 
@@ -408,11 +405,6 @@ func (pg *PostgresRepository) update(ctx context.Context, runner nero.SQLRunner,
 		cnt++
 	}
 
-	if !isZero(u.interests) {
-		qb = qb.Set("\"interests\"", pq.Array(u.interests))
-		cnt++
-	}
-
 	if !isZero(u.updatedAt) {
 		qb = qb.Set("\"updated_at\"", u.updatedAt)
 		cnt++
@@ -426,11 +418,11 @@ func (pg *PostgresRepository) update(ctx context.Context, runner nero.SQLRunner,
 	for _, predFunc := range u.predFuncs {
 		preds = predFunc(preds)
 	}
-	qb = squirrel.UpdateBuilder(pg.buildPreds(squirrel.StatementBuilderType(qb), preds))
+	qb = squirrel.UpdateBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), preds))
 
-	if pg.debug && pg.logger != nil {
+	if repo.debug && repo.logger != nil {
 		sql, args, err := qb.ToSql()
-		pg.logger.Printf("method: Update, stmt: %q, args: %v, error: %v", sql, args, err)
+		repo.logger.Printf("method: Update, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
 
 	res, err := qb.RunWith(runner).ExecContext(ctx)
@@ -447,21 +439,21 @@ func (pg *PostgresRepository) update(ctx context.Context, runner nero.SQLRunner,
 }
 
 // Delete deletes a Player or many Players
-func (pg *PostgresRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
-	return pg.delete(ctx, pg.db, d)
+func (repo *PostgresRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
+	return repo.delete(ctx, repo.db, d)
 }
 
 // Delete deletes a Player or many Players in a transaction
-func (pg *PostgresRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
+func (repo *PostgresRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
 	}
 
-	return pg.delete(ctx, txx, d)
+	return repo.delete(ctx, txx, d)
 }
 
-func (pg *PostgresRepository) delete(ctx context.Context, runner nero.SQLRunner, d *Deleter) (int64, error) {
+func (repo *PostgresRepository) delete(ctx context.Context, runner nero.SQLRunner, d *Deleter) (int64, error) {
 	qb := squirrel.Delete("\"players\"").
 		PlaceholderFormat(squirrel.Dollar)
 
@@ -469,11 +461,11 @@ func (pg *PostgresRepository) delete(ctx context.Context, runner nero.SQLRunner,
 	for _, predFunc := range d.predFuncs {
 		preds = predFunc(preds)
 	}
-	qb = squirrel.DeleteBuilder(pg.buildPreds(squirrel.StatementBuilderType(qb), preds))
+	qb = squirrel.DeleteBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), preds))
 
-	if pg.debug && pg.logger != nil {
+	if repo.debug && repo.logger != nil {
 		sql, args, err := qb.ToSql()
-		pg.logger.Printf("method: Delete, stmt: %q, args: %v, error: %v", sql, args, err)
+		repo.logger.Printf("method: Delete, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
 
 	res, err := qb.RunWith(runner).ExecContext(ctx)
@@ -490,21 +482,21 @@ func (pg *PostgresRepository) delete(ctx context.Context, runner nero.SQLRunner,
 }
 
 // Aggregate runs an aggregate query
-func (pg *PostgresRepository) Aggregate(ctx context.Context, a *Aggregator) error {
-	return pg.aggregate(ctx, pg.db, a)
+func (repo *PostgresRepository) Aggregate(ctx context.Context, a *Aggregator) error {
+	return repo.aggregate(ctx, repo.db, a)
 }
 
 // Aggregate runs an aggregate query in a transaction
-func (pg *PostgresRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
+func (repo *PostgresRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return errors.New("expecting tx to be *sql.Tx")
 	}
 
-	return pg.aggregate(ctx, txx, a)
+	return repo.aggregate(ctx, txx, a)
 }
 
-func (pg *PostgresRepository) aggregate(ctx context.Context, runner nero.SQLRunner, a *Aggregator) error {
+func (repo *PostgresRepository) aggregate(ctx context.Context, runner nero.SQLRunner, a *Aggregator) error {
 	aggs := []*aggregate.Aggregate{}
 	for _, aggFunc := range a.aggFuncs {
 		aggs = aggFunc(aggs)
@@ -542,17 +534,17 @@ func (pg *PostgresRepository) aggregate(ctx context.Context, runner nero.SQLRunn
 	for _, predFunc := range a.predFuncs {
 		preds = predFunc(preds)
 	}
-	qb = squirrel.SelectBuilder(pg.buildPreds(squirrel.StatementBuilderType(qb), preds))
+	qb = squirrel.SelectBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), preds))
 
 	sorts := []*sort.Sort{}
 	for _, sortFunc := range a.sortFuncs {
 		sorts = sortFunc(sorts)
 	}
-	qb = pg.buildSort(qb, sorts)
+	qb = repo.buildSort(qb, sorts)
 
-	if pg.debug && pg.logger != nil {
+	if repo.debug && repo.logger != nil {
 		sql, args, err := qb.ToSql()
-		pg.logger.Printf("method: Aggregate, stmt: %q, args: %v, error: %v", sql, args, err)
+		repo.logger.Printf("method: Aggregate, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
 
 	rows, err := qb.RunWith(runner).QueryContext(ctx)

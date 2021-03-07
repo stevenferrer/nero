@@ -15,7 +15,6 @@ func (f Field) String() string {
 		"name",
 		"age",
 		"race",
-		"interests",
 		"updated_at",
 		"created_at",
 	}[f]
@@ -27,7 +26,6 @@ const (
 	FieldName
 	FieldAge
 	FieldRace
-	FieldInterests
 	FieldUpdatedAt
 	FieldCreatedAt
 )

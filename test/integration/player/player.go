@@ -13,7 +13,6 @@ type Player struct {
 	Name      string
 	Age       int
 	Race      Race
-	Interests []string
 	UpdatedAt *time.Time
 	CreatedAt *time.Time
 }
@@ -44,7 +43,6 @@ func (p Player) Schema() *nero.Schema {
 			nero.NewFieldBuilder("name", p.Name).Build(),
 			nero.NewFieldBuilder("age", p.Age).Build(),
 			nero.NewFieldBuilder("race", p.Race).Build(),
-			nero.NewFieldBuilder("interests", p.Interests).Build(),
 			nero.NewFieldBuilder("updated_at", p.UpdatedAt).
 				Optional().Build(),
 			nero.NewFieldBuilder("created_at", p.CreatedAt).

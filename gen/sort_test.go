@@ -12,10 +12,10 @@ import (
 
 func Test_newSortFile(t *testing.T) {
 	u := internal.User{}
-	buf, err := newSortFile(u.Schema())
+	f, err := newSortFile(u.Schema())
 	require.NoError(t, err)
 
-	_, err = format.Source(buf.Bytes())
+	_, err = format.Source(f.Bytes())
 	require.NoError(t, err)
 
 	_, err = newSortFile(nil)

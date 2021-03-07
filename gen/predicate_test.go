@@ -12,10 +12,10 @@ import (
 
 func Test_newPredicateFile(t *testing.T) {
 	u := internal.User{}
-	buf, err := newPredicateFile(u.Schema())
+	f, err := newPredicateFile(u.Schema())
 	require.NoError(t, err)
 
-	_, err = format.Source(buf.Bytes())
+	_, err = format.Source(f.Bytes())
 	require.NoError(t, err)
 
 	_, err = newPredicateFile(nil)

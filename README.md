@@ -1,11 +1,21 @@
+[![GoDoc Reference](https://pkg.go.dev/badge/github.com/sf9v/nero)](https://pkg.go.dev/github.com/sf9v/nero)
 ![Github Actions](https://github.com/sf9v/nero/workflows/test/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/sf9v/nero/badge.svg?branch=main)](https://coveralls.io/github/sf9v/nero?branch=main)
 [![Go Report Card](https://goreportcard.com/badge/github.com/sf9v/nero)](https://goreportcard.com/report/github.com/sf9v/nero)
-[![Go Doc](https://pkg.go.dev/badge/github.com/sf9v/nero)](https://pkg.go.dev/github.com/sf9v/nero)
 
 # Nero
 
 A library for generating the repository pattern.
+
+## Motivation
+
+We heavily use the _[repository pattern](https://threedots.tech/post/repository-pattern-in-go/)_ in our codebases and we often [write our queries manually](https://golang.org/pkg/database/sql/#example_DB_QueryContext). It becomes tedious and repetitive as we have more tables/models to maintain. So, we decided to experiment on creating this library to generate our repositories automatically.
+
+## Goals
+
+- Decouple implementation from the `Repository` interface
+- Easy integration with existing codebase
+- Minimal API
 
 ## Installation
 
@@ -62,31 +72,21 @@ func main() {
 }
 ```
 
-## Motivation
-
-We heavily use the _[repository pattern](https://threedots.tech/post/repository-pattern-in-go/)_ in our codebases and we often [write our queries manually](https://golang.org/pkg/database/sql/#example_DB_QueryContext). It becomes tedious and repetitive as we have more tables/models to maintain. So, we decided to experiment on creating this library to generate our repositories automatically.
-
-## Goals
-
-- Decouple implementation from the `Repository` interface
-- Easy integration with existing codebase
-- Minimal API
-
 ## Supported back-ends
 
-Currently, we have official support for [PostgreSQL](postgresql.org), which is what we mainly use. Other back-ends shall be supported as time permits.
+Below is the list of supported back-ends.
 
-| Back-end                              | Library                            |
-| ------------------------------------- | ---------------------------------- |
-| [PostgreSQL](https://postgresql.org)  | [lib/pq](http://github.com/lib/pq) |
-| [SQLite](https://sqlite.org) (soon)   |                                    |
-| [MariaDB](https://mariadb.org/) (soon)|                                    |
+| Back-end             | Library                                                       |
+| -------------------- | ------------------------------------------------------------- |
+| PostgreSQL           | [lib/pq](http://github.com/lib/pq)                            |
+| SQLite (soon)        | [mattn/go-sqlite3](https://github.com/mattn/go-sqlite3)       |
+| MySQL/MariaDB (soon) | [go-sql-driver/mysql](https://github.com/go-sql-driver/mysql) |
 
 If your your back-end is not yet supported, you can implement your own [custom back-end](#custom-back-ends).
 
 ## Custom back-ends
 
-Implementing a custom back-end is very easy. In fact, you don't have to use the official back-ends. You can implement custom back-ends (BoltDB, Badger, MongoDB, CouchDB, H2, etc.) by implementing the [_Templater_](./template.go) interface. 
+Implementing a custom back-end is very easy. In fact, you don't have to use the official back-ends. You can implement custom back-ends (Oracle, MSSQL, BoltDB, MongoDB, etc.) by implementing the [_Templater_](./template.go) interface.
 
 See official [postgres template](./pg_template.go) for reference.
 
@@ -103,13 +103,12 @@ This project wouldn't be possible with the amazing open-source projects it was b
 
 Also, the following have a huge influence on this project and deserves most of the credits:
 
-- [ent](https://github.com/facebook/ent). An entity framework for Go. Simple, yet powerful ORM for modeling and querying data.
-- [SQLBoiler](https://github.com/volatiletech/sqlboiler) is a tool to generate a Go ORM tailored to your database schema.
+- [ent](https://github.com/facebook/ent) - An entity framework for Go. Simple, yet powerful ORM for modeling and querying data.
+- [SQLBoiler](https://github.com/volatiletech/sqlboiler) - Generate a Go ORM tailored to your database schema.
 
 ## Contributing
 
 Any suggestions and ideas are very much welcome, feel free to [open an issue](https://github.com/sf9v/nero/issues) or [make a pull request](https://github.com/sf9v/nero/pulls)!
-
 
 ## License
 

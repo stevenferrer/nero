@@ -12,10 +12,10 @@ import (
 
 func Test_newMetaFile(t *testing.T) {
 	u := internal.User{}
-	buf, err := newMetaFile(u.Schema())
+	f, err := newMetaFile(u.Schema())
 	require.NoError(t, err)
 
-	_, err = format.Source(buf.Bytes())
+	_, err = format.Source(f.Bytes())
 	require.NoError(t, err)
 
 	_, err = newMetaFile(nil)
