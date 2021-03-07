@@ -45,7 +45,7 @@ import (
 	"log"
 	"os"
 	"github.com/Masterminds/squirrel"
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 	"github.com/pkg/errors"
 	"github.com/sf9v/nero"
 	"github.com/sf9v/nero/aggregate"

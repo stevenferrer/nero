@@ -48,5 +48,9 @@ func (p Player) Schema() *nero.Schema {
 			nero.NewFieldBuilder("created_at", p.CreatedAt).
 				Auto().Build(),
 		).
+		Templates(
+			nero.NewPostgresTemplate(),
+			nero.NewSQLiteTemplate(),
+		).
 		Build()
 }

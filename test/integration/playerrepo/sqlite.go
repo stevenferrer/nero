@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/Masterminds/squirrel"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
 	"github.com/sf9v/nero"
 	"github.com/sf9v/nero/aggregate"
@@ -19,23 +20,23 @@ import (
 	"github.com/sf9v/nero/test/integration/player"
 )
 
-// PostgresRepository is a repository that uses PostgreSQL as data store
-type PostgresRepository struct {
+// SQLiteRepository is a repository that uses PostgreSQL as data store
+type SQLiteRepository struct {
 	db     *sql.DB
 	logger nero.Logger
 	debug  bool
 }
 
-var _ Repository = (*PostgresRepository)(nil)
+var _ Repository = (*SQLiteRepository)(nil)
 
-// NewPostgresRepository returns a PostresRepository
-func NewPostgresRepository(db *sql.DB) *PostgresRepository {
-	return &PostgresRepository{db: db}
+// NewSQLiteRepository returns a PostresRepository
+func NewSQLiteRepository(db *sql.DB) *SQLiteRepository {
+	return &SQLiteRepository{db: db}
 }
 
 // Debug enables debug mode
-func (repo *PostgresRepository) Debug() *PostgresRepository {
-	return &PostgresRepository{
+func (repo *SQLiteRepository) Debug() *SQLiteRepository {
+	return &SQLiteRepository{
 		db:     repo.db,
 		debug:  true,
 		logger: log.New(os.Stdout, "nero: ", 0),
@@ -43,23 +44,23 @@ func (repo *PostgresRepository) Debug() *PostgresRepository {
 }
 
 // WithLogger overrides the default logger
-func (repo *PostgresRepository) WithLogger(logger nero.Logger) *PostgresRepository {
+func (repo *SQLiteRepository) WithLogger(logger nero.Logger) *SQLiteRepository {
 	repo.logger = logger
 	return repo
 }
 
 // Tx begins a new transaction
-func (repo *PostgresRepository) Tx(ctx context.Context) (nero.Tx, error) {
+func (repo *SQLiteRepository) Tx(ctx context.Context) (nero.Tx, error) {
 	return repo.db.BeginTx(ctx, nil)
 }
 
 // Create creates a Player
-func (repo *PostgresRepository) Create(ctx context.Context, c *Creator) (string, error) {
+func (repo *SQLiteRepository) Create(ctx context.Context, c *Creator) (string, error) {
 	return repo.create(ctx, repo.db, c)
 }
 
 // CreateTx creates a Player in a transaction
-func (repo *PostgresRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (string, error) {
+func (repo *SQLiteRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (string, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return "", errors.New("expecting tx to be *sql.Tx")
@@ -68,7 +69,7 @@ func (repo *PostgresRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Cre
 	return repo.create(ctx, txx, c)
 }
 
-func (repo *PostgresRepository) create(ctx context.Context, runner nero.SQLRunner, c *Creator) (string, error) {
+func (repo *SQLiteRepository) create(ctx context.Context, runner nero.SQLRunner, c *Creator) (string, error) {
 	if err := c.Validate(); err != nil {
 		return "", err
 	}
@@ -92,19 +93,20 @@ func (repo *PostgresRepository) create(ctx context.Context, runner nero.SQLRunne
 		values = append(values, c.updatedAt)
 	}
 
-	qb := squirrel.Insert("\"players\"").
-		Columns(columns...).
-		Values(values...).
-		Suffix("RETURNING \"id\"").
-		PlaceholderFormat(squirrel.Dollar).
-		RunWith(runner)
+	qb := squirrel.Insert("\"players\"").Columns(columns...).
+		Values(values...).RunWith(runner)
 	if repo.debug && repo.logger != nil {
 		sql, args, err := qb.ToSql()
 		repo.logger.Printf("method: Create, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
 
+	_, err := qb.ExecContext(ctx)
+	if err != nil {
+		return "", err
+	}
+
 	var id string
-	err := qb.QueryRowContext(ctx).Scan(&id)
+	err = repo.db.QueryRowContext(ctx, "select last_insert_rowid()").Scan(&id)
 	if err != nil {
 		return "", err
 	}
@@ -113,12 +115,12 @@ func (repo *PostgresRepository) create(ctx context.Context, runner nero.SQLRunne
 }
 
 // CreateMany batch creates Players
-func (repo *PostgresRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
+func (repo *SQLiteRepository) CreateMany(ctx context.Context, cs ...*Creator) error {
 	return repo.createMany(ctx, repo.db, cs...)
 }
 
 // CreateManyTx batch creates Players in a transaction
-func (repo *PostgresRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
+func (repo *SQLiteRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return errors.New("expecting tx to be *sql.Tx")
@@ -127,7 +129,7 @@ func (repo *PostgresRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs
 	return repo.createMany(ctx, txx, cs...)
 }
 
-func (repo *PostgresRepository) createMany(ctx context.Context, runner nero.SQLRunner, cs ...*Creator) error {
+func (repo *SQLiteRepository) createMany(ctx context.Context, runner nero.SQLRunner, cs ...*Creator) error {
 	if len(cs) == 0 {
 		return nil
 	}
@@ -139,7 +141,6 @@ func (repo *PostgresRepository) createMany(ctx context.Context, runner nero.SQLR
 		"\"race\"",
 		"\"updated_at\"",
 	}
-
 	qb := squirrel.Insert("\"players\"").Columns(columns...)
 	for _, c := range cs {
 		if err := c.Validate(); err != nil {
@@ -155,8 +156,6 @@ func (repo *PostgresRepository) createMany(ctx context.Context, runner nero.SQLR
 		)
 	}
 
-	qb = qb.Suffix("RETURNING \"id\"").
-		PlaceholderFormat(squirrel.Dollar)
 	if repo.debug && repo.logger != nil {
 		sql, args, err := qb.ToSql()
 		repo.logger.Printf("method: CreateMany, stmt: %q, args: %v, error: %v", sql, args, err)
@@ -171,12 +170,12 @@ func (repo *PostgresRepository) createMany(ctx context.Context, runner nero.SQLR
 }
 
 // Query queries Players
-func (repo *PostgresRepository) Query(ctx context.Context, q *Queryer) ([]*player.Player, error) {
+func (repo *SQLiteRepository) Query(ctx context.Context, q *Queryer) ([]*player.Player, error) {
 	return repo.query(ctx, repo.db, q)
 }
 
 // QueryTx queries Players in a transaction
-func (repo *PostgresRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*player.Player, error) {
+func (repo *SQLiteRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*player.Player, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
@@ -185,7 +184,7 @@ func (repo *PostgresRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Quer
 	return repo.query(ctx, txx, q)
 }
 
-func (repo *PostgresRepository) query(ctx context.Context, runner nero.SQLRunner, q *Queryer) ([]*player.Player, error) {
+func (repo *SQLiteRepository) query(ctx context.Context, runner nero.SQLRunner, q *Queryer) ([]*player.Player, error) {
 	qb := repo.buildSelect(q)
 	if repo.debug && repo.logger != nil {
 		sql, args, err := qb.ToSql()
@@ -221,12 +220,12 @@ func (repo *PostgresRepository) query(ctx context.Context, runner nero.SQLRunner
 }
 
 // QueryOne queries a Player
-func (repo *PostgresRepository) QueryOne(ctx context.Context, q *Queryer) (*player.Player, error) {
+func (repo *SQLiteRepository) QueryOne(ctx context.Context, q *Queryer) (*player.Player, error) {
 	return repo.queryOne(ctx, repo.db, q)
 }
 
 // QueryOneTx queries a Player in a transaction
-func (repo *PostgresRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*player.Player, error) {
+func (repo *SQLiteRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*player.Player, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
@@ -235,7 +234,7 @@ func (repo *PostgresRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Q
 	return repo.queryOne(ctx, txx, q)
 }
 
-func (repo *PostgresRepository) queryOne(ctx context.Context, runner nero.SQLRunner, q *Queryer) (*player.Player, error) {
+func (repo *SQLiteRepository) queryOne(ctx context.Context, runner nero.SQLRunner, q *Queryer) (*player.Player, error) {
 	qb := repo.buildSelect(q)
 	if repo.debug && repo.logger != nil {
 		sql, args, err := qb.ToSql()
@@ -261,7 +260,7 @@ func (repo *PostgresRepository) queryOne(ctx context.Context, runner nero.SQLRun
 	return &player, nil
 }
 
-func (repo *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
+func (repo *SQLiteRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	columns := []string{
 		"\"id\"",
 		"\"email\"",
@@ -271,9 +270,7 @@ func (repo *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 		"\"updated_at\"",
 		"\"created_at\"",
 	}
-	qb := squirrel.Select(columns...).
-		From("\"players\"").
-		PlaceholderFormat(squirrel.Dollar)
+	qb := squirrel.Select(columns...).From("\"players\"")
 
 	preds := []*comparison.Predicate{}
 	for _, predFunc := range q.predFuncs {
@@ -298,7 +295,7 @@ func (repo *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	return qb
 }
 
-func (repo *PostgresRepository) buildPreds(sb squirrel.StatementBuilderType, preds []*comparison.Predicate) squirrel.StatementBuilderType {
+func (repo *SQLiteRepository) buildPreds(sb squirrel.StatementBuilderType, preds []*comparison.Predicate) squirrel.StatementBuilderType {
 	for _, pred := range preds {
 		ph := "?"
 		fieldX, arg := pred.Field, pred.Arg
@@ -349,7 +346,7 @@ func (repo *PostgresRepository) buildPreds(sb squirrel.StatementBuilderType, pre
 	return sb
 }
 
-func (repo *PostgresRepository) buildSort(qb squirrel.SelectBuilder, sorts []*sort.Sort) squirrel.SelectBuilder {
+func (repo *SQLiteRepository) buildSort(qb squirrel.SelectBuilder, sorts []*sort.Sort) squirrel.SelectBuilder {
 	for _, s := range sorts {
 		field := fmt.Sprintf("%q", s.Field)
 		switch s.Direction {
@@ -364,12 +361,12 @@ func (repo *PostgresRepository) buildSort(qb squirrel.SelectBuilder, sorts []*so
 }
 
 // Update updates a Player or many Players
-func (repo *PostgresRepository) Update(ctx context.Context, u *Updater) (int64, error) {
+func (repo *SQLiteRepository) Update(ctx context.Context, u *Updater) (int64, error) {
 	return repo.update(ctx, repo.db, u)
 }
 
 // UpdateTx updates a Player many Players in a transaction
-func (repo *PostgresRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
+func (repo *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
@@ -378,9 +375,8 @@ func (repo *PostgresRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 	return repo.update(ctx, txx, u)
 }
 
-func (repo *PostgresRepository) update(ctx context.Context, runner nero.SQLRunner, u *Updater) (int64, error) {
-	qb := squirrel.Update("\"players\"").
-		PlaceholderFormat(squirrel.Dollar)
+func (repo *SQLiteRepository) update(ctx context.Context, runner nero.SQLRunner, u *Updater) (int64, error) {
+	qb := squirrel.Update("\"players\"")
 
 	cnt := 0
 
@@ -438,12 +434,12 @@ func (repo *PostgresRepository) update(ctx context.Context, runner nero.SQLRunne
 }
 
 // Delete deletes a Player or many Players
-func (repo *PostgresRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
+func (repo *SQLiteRepository) Delete(ctx context.Context, d *Deleter) (int64, error) {
 	return repo.delete(ctx, repo.db, d)
 }
 
 // Delete deletes a Player or many Players in a transaction
-func (repo *PostgresRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
+func (repo *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
@@ -452,9 +448,8 @@ func (repo *PostgresRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Del
 	return repo.delete(ctx, txx, d)
 }
 
-func (repo *PostgresRepository) delete(ctx context.Context, runner nero.SQLRunner, d *Deleter) (int64, error) {
-	qb := squirrel.Delete("\"players\"").
-		PlaceholderFormat(squirrel.Dollar)
+func (repo *SQLiteRepository) delete(ctx context.Context, runner nero.SQLRunner, d *Deleter) (int64, error) {
+	qb := squirrel.Delete("\"players\"")
 
 	preds := []*comparison.Predicate{}
 	for _, predFunc := range d.predFuncs {
@@ -481,12 +476,12 @@ func (repo *PostgresRepository) delete(ctx context.Context, runner nero.SQLRunne
 }
 
 // Aggregate runs an aggregate query
-func (repo *PostgresRepository) Aggregate(ctx context.Context, a *Aggregator) error {
+func (repo *SQLiteRepository) Aggregate(ctx context.Context, a *Aggregator) error {
 	return repo.aggregate(ctx, repo.db, a)
 }
 
 // Aggregate runs an aggregate query in a transaction
-func (repo *PostgresRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
+func (repo *SQLiteRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return errors.New("expecting tx to be *sql.Tx")
@@ -495,7 +490,7 @@ func (repo *PostgresRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *
 	return repo.aggregate(ctx, txx, a)
 }
 
-func (repo *PostgresRepository) aggregate(ctx context.Context, runner nero.SQLRunner, a *Aggregator) error {
+func (repo *SQLiteRepository) aggregate(ctx context.Context, runner nero.SQLRunner, a *Aggregator) error {
 	aggs := []*aggregate.Aggregate{}
 	for _, aggFunc := range a.aggFuncs {
 		aggs = aggFunc(aggs)
@@ -520,8 +515,7 @@ func (repo *PostgresRepository) aggregate(ctx context.Context, runner nero.SQLRu
 		}
 	}
 
-	qb := squirrel.Select(columns...).From("\"players\"").
-		PlaceholderFormat(squirrel.Dollar)
+	qb := squirrel.Select(columns...).From("\"players\"")
 
 	groupBys := []string{}
 	for _, groupBy := range a.groupBys {

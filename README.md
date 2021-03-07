@@ -79,7 +79,7 @@ Below is the list of supported back-ends.
 | Back-end             | Library                                                       |
 | -------------------- | ------------------------------------------------------------- |
 | PostgreSQL           | [lib/pq](http://github.com/lib/pq)                            |
-| SQLite (soon)        | [mattn/go-sqlite3](https://github.com/mattn/go-sqlite3)       |
+| SQLite               | [mattn/go-sqlite3](https://github.com/mattn/go-sqlite3)       |
 | MySQL/MariaDB (soon) | [go-sql-driver/mysql](https://github.com/go-sql-driver/mysql) |
 
 If your your back-end is not yet supported, you can implement your own [custom back-end](#custom-back-ends).
@@ -96,6 +96,7 @@ This project wouldn't be possible with the amazing open-source projects it was b
 
 - [Masterminds/squirrel](https://github.com/Masterminds/squirrel) - Fluent SQL generation in golang
 - [lib/pq](https://github.com/lib/pq) - Pure Go Postgres driver for database/sql
+- [mattn/go-sqlite3](https://github.com/mattn/go-sqlite3) - sqlite3 driver conforming to the built-in database/sql interface
 - [pkg/errors](https://github.com/pkg/errors) - Simple error handling primitives
 - [hashicorp/multierror](https://github.com/hashicorp/go-multierror) - A Go (golang) package for representing a list of errors as a single error.
 - [jinzhu/inflection](https://github.com/jinzhu/inflection) - Pluralizes and singularizes English nouns
