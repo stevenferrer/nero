@@ -25,7 +25,7 @@ $ go get github.com/sf9v/nero
 
 ## Example
 
-See the [integration test](./test/integration/playerrepo) for a more complete example.
+See the [official example](https://github.com/sf9v/nero-example) and [integration test](./test/integration/playerrepo) for a more complete demo.
 
 ```go
 import (
@@ -34,7 +34,7 @@ import (
     _ "github.com/lib/pq"
 
     // import the generated package
-    repo "github.com/sf9v/nero-example/repository"
+    "github.com/sf9v/nero-example/productrepo"
 )
 
 func main() {
@@ -45,28 +45,28 @@ func main() {
     ctx := context.Background()
 
 
-    // initialize a product repository and enable debug
-    productRepo := repo.NewPostgresRepository(db).Debug()
+    // initialize the repository (and optionally enable debug)
+    productRepo := productrepo.NewPostgresRepository(db).Debug()
 
     // create
-    creator := repo.NewCreator().Name("Product 1")
+    creator := productrepo.NewCreator().Name("Product 1")
     productID, err := productRepo.Create(ctx, creator)
     ...
 
     // query
-    queryer := repo.NewQueryer().Where(repo.IDEq(product1ID))
+    queryer := productrepo.NewQueryer().Where(productrepo.IDEq(product1ID))
     product, err := productRepo.QueryOne(ctx, queryr)
     ...
 
     // update
     now := time.Now()
-    updater := repo.NewUpdater().Name("Updated Product 1").
-        UpdatedAt(&now).Where(repo.IDEq(product1ID))
+    updater := productrepo.NewUpdater().Name("Updated Product 1").
+        UpdatedAt(&now).Where(productrepo.IDEq(product1ID))
     _, err = productRepo.Update(ctx, updater)
     ...
 
     // delete
-    deleter := repo.NewDeleter().Where(repo.IDEq(product1ID))
+    deleter := productrepo.NewDeleter().Where(productrepo.IDEq(product1ID))
     _, err = productRepo.Delete(ctx, deleter)
     ...
 }
@@ -92,7 +92,7 @@ See official [postgres template](./pg_template.go) for reference.
 
 ## Standing on the shoulders of giants
 
-This project wouldn't be possible with the amazing open-source projects it was built on.
+This project wouldn't be possible without the amazing open-source projects it was built upon:
 
 - [Masterminds/squirrel](https://github.com/Masterminds/squirrel) - Fluent SQL generation in golang
 - [lib/pq](https://github.com/lib/pq) - Pure Go Postgres driver for database/sql
