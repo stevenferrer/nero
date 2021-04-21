@@ -55,7 +55,7 @@ func main() {
 
     // query
     queryer := productrepo.NewQueryer().Where(productrepo.IDEq(product1ID))
-    product, err := productRepo.QueryOne(ctx, queryr)
+    product, err := productRepo.QueryOne(ctx, queryer)
     ...
 
     // update
