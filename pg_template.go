@@ -67,7 +67,7 @@ type PostgresRepository struct {
 
 var _ Repository = (*PostgresRepository)(nil)
 
-// NewPostgresRepository returns a PostresRepository
+// NewPostgresRepository returns a PostgresRepository
 func NewPostgresRepository(db *sql.DB) *PostgresRepository {
 	return &PostgresRepository{db: db}
 }
