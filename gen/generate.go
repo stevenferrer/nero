@@ -38,10 +38,10 @@ func Generate(schema *nero.Schema) ([]*File, error) {
 	}
 	files = append(files, file)
 
-	for _, tmpl := range schema.Templaters() {
-		buf, err := newTemplater(schema, tmpl)
+	for _, tmpl := range schema.Templates() {
+		buf, err := newTemplate(schema, tmpl)
 		if err != nil {
-			return nil, errors.Wrap(err, "templater file")
+			return nil, errors.Wrap(err, "template file")
 		}
 
 		files = append(files, &File{name: tmpl.Filename(), buf: buf.Bytes()})

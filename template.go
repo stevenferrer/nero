@@ -8,18 +8,18 @@ import (
 	"github.com/sf9v/mira"
 )
 
-// Templater is an interface that wraps the Filename and Template method
-type Templater interface {
+// Template is an interface that wraps the Filename and Content method
+type Template interface {
 	// Filename is the filename of the generated file
 	Filename() string
-	// Template is template for generating the repository implementation
-	Template() string
+	// Content is returns the template content
+	Content() string
 }
 
-// ParseTemplater parses the repository templater
-func ParseTemplater(tmpl Templater) (*template.Template, error) {
-	return template.New(tmpl.Filename() + ".tmpl").
-		Funcs(NewFuncMap()).Parse(tmpl.Template())
+// ParseTemplate parses the repository template
+func ParseTemplate(t Template) (*template.Template, error) {
+	return template.New(t.Filename() + ".tmpl").
+		Funcs(NewFuncMap()).Parse(t.Content())
 }
 
 // NewFuncMap returns a template func map

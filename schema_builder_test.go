@@ -24,9 +24,7 @@ func TestSchemaBuilder(t *testing.T) {
 			nero.NewFieldBuilder("id", ms.ID).
 				Auto().StructField("ID").Build(),
 		).
-		Fields(
-			nero.NewFieldBuilder("name", ms.Name).Build(),
-		)
+		Fields(nero.NewFieldBuilder("name", ms.Name).Build())
 
 	schema := schemaBuilder.Build()
 	assert.Equal(t, pkg, schema.PkgName())
@@ -34,7 +32,7 @@ func TestSchemaBuilder(t *testing.T) {
 	assert.NotNil(t, schema.Identity())
 	assert.Len(t, schema.Fields(), 1)
 	assert.Len(t, schema.Imports(), 2)
-	assert.Len(t, schema.Templaters(), 1)
+	assert.Len(t, schema.Templates(), 1)
 	assert.NotNil(t, schema.TypeInfo())
 	assert.Equal(t, "MyStruct", schema.TypeName())
 	assert.Equal(t, "MyStructs", schema.TypeNamePlural())
@@ -43,5 +41,5 @@ func TestSchemaBuilder(t *testing.T) {
 
 	tmpl := nero.NewPostgresTemplate()
 	schema = schemaBuilder.Templates(tmpl).Build()
-	assert.Len(t, schema.Templaters(), 1)
+	assert.Len(t, schema.Templates(), 1)
 }

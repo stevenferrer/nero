@@ -5,7 +5,7 @@ type PostgresTemplate struct {
 	filename string
 }
 
-var _ Templater = (*PostgresTemplate)(nil)
+var _ Template = (*PostgresTemplate)(nil)
 
 // NewPostgresTemplate returns a new PostgresTemplate
 func NewPostgresTemplate() *PostgresTemplate {
@@ -26,7 +26,7 @@ func (t *PostgresTemplate) Filename() string {
 }
 
 // Content returns the template content
-func (t *PostgresTemplate) Template() string {
+func (t *PostgresTemplate) Content() string {
 	return postgresTmpl
 }
 

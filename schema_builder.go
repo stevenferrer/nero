@@ -4,53 +4,18 @@ import (
 	"github.com/sf9v/mira"
 )
 
-// SchemaBuilder is schema builder
+// SchemaBuilder is used for building a schema
 type SchemaBuilder struct {
 	sc *Schema
 }
 
-// NewSchemaBuilder takes a model struct value and  returns a SchemaBuilder
+// NewSchemaBuilder takes a struct value and  returns a SchemaBuilder
 func NewSchemaBuilder(v interface{}) *SchemaBuilder {
 	return &SchemaBuilder{sc: &Schema{
-		typeInfo:   mira.NewTypeInfo(v),
-		fields:     []*Field{},
-		templaters: []Templater{},
+		typeInfo:  mira.NewTypeInfo(v),
+		fields:    []*Field{},
+		templates: []Template{},
 	}}
-}
-
-// Build builds the schema
-func (sb *SchemaBuilder) Build() *Schema {
-	templates := sb.sc.templaters
-
-	// use default template set
-	if len(templates) == 0 {
-		templates = []Templater{
-			NewPostgresTemplate(),
-		}
-	}
-
-	// get pkg imports
-	importMap := map[string]int{}
-	for _, fld := range append(sb.sc.fields, sb.sc.identity) {
-		if fld.typeInfo.PkgPath() != "" {
-			importMap[fld.typeInfo.PkgPath()] = 1
-		}
-	}
-
-	imports := []string{sb.sc.typeInfo.PkgPath()}
-	for imp := range importMap {
-		imports = append(imports, imp)
-	}
-
-	return &Schema{
-		typeInfo:   sb.sc.typeInfo,
-		pkgName:    sb.sc.pkgName,
-		collection: sb.sc.collection,
-		identity:   sb.sc.identity,
-		fields:     sb.sc.fields,
-		imports:    imports,
-		templaters: templates,
-	}
 }
 
 // PkgName sets the package name
@@ -78,7 +43,43 @@ func (sb *SchemaBuilder) Fields(fields ...*Field) *SchemaBuilder {
 }
 
 // Templates sets the templates
-func (sb *SchemaBuilder) Templates(templaters ...Templater) *SchemaBuilder {
-	sb.sc.templaters = append(sb.sc.templaters, templaters...)
+func (sb *SchemaBuilder) Templates(templates ...Template) *SchemaBuilder {
+	sb.sc.templates = append(sb.sc.templates, templates...)
 	return sb
+}
+
+// Build builds the schema
+func (sb *SchemaBuilder) Build() *Schema {
+	templates := sb.sc.templates
+
+	// use default template set
+	if len(templates) == 0 {
+		templates = []Template{
+			NewPostgresTemplate(),
+			NewSQLiteTemplate(),
+		}
+	}
+
+	// get pkg imports
+	importMap := map[string]int{}
+	for _, fld := range append(sb.sc.fields, sb.sc.identity) {
+		if fld.typeInfo.PkgPath() != "" {
+			importMap[fld.typeInfo.PkgPath()] = 1
+		}
+	}
+
+	imports := []string{sb.sc.typeInfo.PkgPath()}
+	for imp := range importMap {
+		imports = append(imports, imp)
+	}
+
+	return &Schema{
+		typeInfo:   sb.sc.typeInfo,
+		pkgName:    sb.sc.pkgName,
+		collection: sb.sc.collection,
+		identity:   sb.sc.identity,
+		fields:     sb.sc.fields,
+		imports:    imports,
+		templates:  templates,
+	}
 }

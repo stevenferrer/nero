@@ -5,7 +5,7 @@ type SQLiteTemplate struct {
 	filename string
 }
 
-var _ Templater = (*SQLiteTemplate)(nil)
+var _ Template = (*SQLiteTemplate)(nil)
 
 // NewSQLiteTemplate returns a new SQLiteTemplate
 func NewSQLiteTemplate() *SQLiteTemplate {
@@ -23,8 +23,8 @@ func (t *SQLiteTemplate) Filename() string {
 	return t.filename
 }
 
-// Template returns the template content
-func (t *SQLiteTemplate) Template() string {
+// Content returns the template content
+func (t *SQLiteTemplate) Content() string {
 	return sqliteTmpl
 }
 

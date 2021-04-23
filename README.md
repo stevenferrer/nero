@@ -86,7 +86,7 @@ If your your back-end is not yet supported, you can implement your own [custom b
 
 ## Custom back-ends
 
-Implementing a custom back-end is very easy. In fact, you don't have to use the official back-ends. You can implement custom back-ends (Oracle, MSSQL, BoltDB, MongoDB, etc.) by implementing the [_Templater_](./template.go) interface.
+Implementing a custom back-end is very easy. In fact, you don't have to use the official back-ends. You can implement custom back-ends (Oracle, MSSQL, BoltDB, MongoDB, etc.) by implementing the [_Template_](./template.go) interface.
 
 See official [postgres template](./pg_template.go) for reference.
 

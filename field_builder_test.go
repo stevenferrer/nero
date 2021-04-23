@@ -9,9 +9,8 @@ import (
 )
 
 func TestFieldBuilder(t *testing.T) {
-	field := nero.NewFieldBuilder("id", int64(0)).
-		Auto().StructField("ID").Optional().
-		Build()
+	field := nero.NewFieldBuilder("id", int64(0)).Auto().
+		StructField("ID").Optional().Build()
 
 	assert.True(t, field.IsOptional())
 	assert.True(t, field.IsAuto())

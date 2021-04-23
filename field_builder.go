@@ -7,23 +7,12 @@ type FieldBuilder struct {
 	f *Field
 }
 
-// NewFieldBuilder returns a FieldBuilder
+// NewFieldBuilder takes a field name and a value and returns a FieldBuilder
 func NewFieldBuilder(name string, v interface{}) *FieldBuilder {
 	return &FieldBuilder{&Field{
 		name:     name,
 		typeInfo: mira.NewTypeInfo(v),
 	}}
-}
-
-// Build builds the field
-func (fb *FieldBuilder) Build() *Field {
-	return &Field{
-		name:        fb.f.name,
-		typeInfo:    fb.f.typeInfo,
-		auto:        fb.f.auto,
-		optional:    fb.f.optional,
-		structField: fb.f.structField,
-	}
 }
 
 // Auto sets the auto-populated flag
@@ -42,4 +31,15 @@ func (fb *FieldBuilder) Optional() *FieldBuilder {
 func (fb *FieldBuilder) StructField(structField string) *FieldBuilder {
 	fb.f.structField = structField
 	return fb
+}
+
+// Build builds the field
+func (fb *FieldBuilder) Build() *Field {
+	return &Field{
+		name:        fb.f.name,
+		typeInfo:    fb.f.typeInfo,
+		auto:        fb.f.auto,
+		optional:    fb.f.optional,
+		structField: fb.f.structField,
+	}
 }

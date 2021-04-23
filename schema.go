@@ -20,8 +20,8 @@ type Schema struct {
 	fields []*Field
 	// imports are list of package imports
 	imports []string
-	// Templates is the list of custom repository templaters
-	templaters []Templater
+	// Templates is the list of custom repository templates
+	templates []Template
 }
 
 // PkgName returns the pkg name
@@ -49,9 +49,9 @@ func (s *Schema) Imports() []string {
 	return s.imports[:]
 }
 
-// Templaters returns the templaters
-func (s *Schema) Templaters() []Templater {
-	return s.templaters[:]
+// Templates returns the templates
+func (s *Schema) Templates() []Template {
+	return s.templates[:]
 }
 
 // TypeInfo returns the type info

@@ -34,10 +34,8 @@ func (p Player) Schema() *nero.Schema {
 	return nero.NewSchemaBuilder(&p).
 		PkgName("playerrepo").
 		Collection("players").
-		Identity(
-			nero.NewFieldBuilder("id", p.ID).
-				StructField("ID").Auto().Build(),
-		).
+		Identity(nero.NewFieldBuilder("id", p.ID).
+			StructField("ID").Auto().Build()).
 		Fields(
 			nero.NewFieldBuilder("email", p.Email).Build(),
 			nero.NewFieldBuilder("name", p.Name).Build(),

@@ -13,6 +13,6 @@ func TestSQLiteTemplate(t *testing.T) {
 	tmpl := nero.NewSQLiteTemplate().WithFilename("sqlite.go")
 	assert.Equal(t, "sqlite.go", tmpl.Filename())
 
-	_, err := nero.ParseTemplater(tmpl)
+	_, err := nero.ParseTemplate(tmpl)
 	require.NoError(t, err)
 }

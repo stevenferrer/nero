@@ -6,7 +6,7 @@ import (
 	"database/sql/driver"
 )
 
-// SQLRunner is the standard sql interface runner
+// SQLRunner is an interface that wraps the standard sql methods
 type SQLRunner interface {
 	Query(string, ...interface{}) (*sql.Rows, error)
 	QueryContext(context.Context, string, ...interface{}) (*sql.Rows, error)
@@ -16,7 +16,7 @@ type SQLRunner interface {
 	ExecContext(context.Context, string, ...interface{}) (sql.Result, error)
 }
 
-// ValueScanner is the composition of driver.Valuer and sql.Scanner interfaces
+// ValueScanner is an interface that wraps the driver.Valuer and sql.Scanner interface
 type ValueScanner interface {
 	driver.Valuer
 	sql.Scanner

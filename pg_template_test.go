@@ -13,6 +13,6 @@ func TestPostgresTemplate(t *testing.T) {
 	tmpl := nero.NewPostgresTemplate().WithFilename("pg.go")
 	assert.Equal(t, "pg.go", tmpl.Filename())
 
-	_, err := nero.ParseTemplater(tmpl)
+	_, err := nero.ParseTemplate(tmpl)
 	require.NoError(t, err)
 }

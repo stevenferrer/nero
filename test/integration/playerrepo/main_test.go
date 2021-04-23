@@ -1,5 +1,3 @@
-// +build integration
-
 package playerrepo_test
 
 import (
@@ -158,7 +156,8 @@ func newRepoTestRunner(repo playerrepo.Repository) func(t *testing.T) {
 				assert.Equal(t, "charr_100_mm", players[0].Name)
 
 				// with limit and offset
-				players, err = repo.Query(ctx, playerrepo.NewQueryer().Limit(1).Offset(1))
+				players, err = repo.Query(ctx, playerrepo.NewQueryer().
+					Limit(1).Offset(1))
 				assert.NoError(t, err)
 				assert.Len(t, players, 1)
 			})
@@ -178,7 +177,8 @@ func newRepoTestRunner(repo playerrepo.Repository) func(t *testing.T) {
 				assert.NotNil(t, usr)
 				assert.Equal(t, "1", usr.ID)
 
-				_, err = repo.QueryOne(ctx, playerrepo.NewQueryer().Where(playerrepo.IDEq("9999")))
+				_, err = repo.QueryOne(ctx, playerrepo.NewQueryer().
+					Where(playerrepo.IDEq("9999")))
 				assert.Error(t, err)
 				assert.Equal(t, sql.ErrNoRows, err)
 			})
@@ -213,7 +213,10 @@ func newRepoTestRunner(repo playerrepo.Repository) func(t *testing.T) {
 						playerrepo.Sum(playerrepo.FieldAge),
 						playerrepo.None(playerrepo.FieldRace),
 					).
-					Where(playerrepo.AgeGt(18), playerrepo.RaceNotEq(player.RaceHuman)).
+					Where(
+						playerrepo.AgeGt(18),
+						playerrepo.RaceNotEq(player.RaceHuman),
+					).
 					GroupBy(playerrepo.FieldRace).
 					Sort(playerrepo.Asc(playerrepo.FieldRace))
 
@@ -493,7 +496,8 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 
 				// with limit and offset
 				tx = newTx(ctx, t)
-				users, err = repo.Query(ctx, playerrepo.NewQueryer().Limit(1).Offset(1))
+				users, err = repo.Query(ctx, playerrepo.NewQueryer().
+					Limit(1).Offset(1))
 				assert.NoError(t, err)
 				assert.Len(t, users, 1)
 				assert.NoError(t, tx.Commit())
@@ -519,7 +523,8 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 				assert.NoError(t, tx.Commit())
 
 				tx = newTx(ctx, t)
-				_, err = repo.QueryOne(ctx, playerrepo.NewQueryer().Where(playerrepo.IDEq("9999")))
+				_, err = repo.QueryOne(ctx, playerrepo.NewQueryer().
+					Where(playerrepo.IDEq("9999")))
 				assert.Error(t, err)
 				assert.Equal(t, sql.ErrNoRows, err)
 				assert.NoError(t, tx.Commit())
