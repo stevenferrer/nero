@@ -1,3 +1,5 @@
+// +build integration
+
 package playerrepo_test
 
 import (

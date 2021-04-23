@@ -32,7 +32,7 @@ func TestSchemaBuilder(t *testing.T) {
 	assert.NotNil(t, schema.Identity())
 	assert.Len(t, schema.Fields(), 1)
 	assert.Len(t, schema.Imports(), 2)
-	assert.Len(t, schema.Templates(), 1)
+	assert.Len(t, schema.Templates(), 2)
 	assert.NotNil(t, schema.TypeInfo())
 	assert.Equal(t, "MyStruct", schema.TypeName())
 	assert.Equal(t, "MyStructs", schema.TypeNamePlural())

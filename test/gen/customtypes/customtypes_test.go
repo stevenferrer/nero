@@ -16,7 +16,7 @@ func TestCustomTypes(t *testing.T) {
 	c := customtypes.Custom{}
 	files, err := gen.Generate(c.Schema())
 	require.NoError(t, err)
-	assert.Len(t, files, 6)
+	assert.Len(t, files, 7, "should have 7 generated files")
 
 	// create base directory
 	basePath := path.Join("customrepo")
