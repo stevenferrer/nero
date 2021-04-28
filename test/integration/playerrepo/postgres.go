@@ -28,17 +28,18 @@ type PostgresRepository struct {
 
 var _ Repository = (*PostgresRepository)(nil)
 
-// NewPostgresRepository returns a PostresRepository
+// NewPostgresRepository returns a PostgresRepository
 func NewPostgresRepository(db *sql.DB) *PostgresRepository {
 	return &PostgresRepository{db: db}
 }
 
 // Debug enables debug mode
 func (repo *PostgresRepository) Debug() *PostgresRepository {
+	l := log.New(os.Stdout, "[nero] ", log.LstdFlags|log.Lmicroseconds|log.Lmsgprefix)
 	return &PostgresRepository{
 		db:     repo.db,
 		debug:  true,
-		logger: log.New(os.Stdout, "nero: ", 0),
+		logger: l,
 	}
 }
 

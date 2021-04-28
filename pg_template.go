@@ -73,11 +73,12 @@ func NewPostgresRepository(db *sql.DB) *PostgresRepository {
 }
 
 // Debug enables debug mode
-func (repo *PostgresRepository) Debug() *PostgresRepository {	
+func (repo *PostgresRepository) Debug() *PostgresRepository {
+	l := log.New(os.Stdout, "[nero] ", log.LstdFlags | log.Lmicroseconds | log.Lmsgprefix)
 	return &PostgresRepository{
 		db:  repo.db,	
 		debug: true,
-		logger: log.New(os.Stdout, "nero: ", 0),
+		logger: l,
 	}
 }
 

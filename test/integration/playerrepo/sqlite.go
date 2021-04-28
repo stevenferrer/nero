@@ -20,7 +20,7 @@ import (
 	"github.com/sf9v/nero/test/integration/player"
 )
 
-// SQLiteRepository is a repository that uses PostgreSQL as data store
+// SQLiteRepository is a repository that uses SQLite3 as data store
 type SQLiteRepository struct {
 	db     *sql.DB
 	logger nero.Logger
@@ -29,17 +29,18 @@ type SQLiteRepository struct {
 
 var _ Repository = (*SQLiteRepository)(nil)
 
-// NewSQLiteRepository returns a PostresRepository
+// NewSQLiteRepository returns a new SQLiteRepository
 func NewSQLiteRepository(db *sql.DB) *SQLiteRepository {
 	return &SQLiteRepository{db: db}
 }
 
 // Debug enables debug mode
 func (repo *SQLiteRepository) Debug() *SQLiteRepository {
+	l := log.New(os.Stdout, "[nero] ", log.LstdFlags|log.Lmicroseconds|log.Lmsgprefix)
 	return &SQLiteRepository{
 		db:     repo.db,
 		debug:  true,
-		logger: log.New(os.Stdout, "nero: ", 0),
+		logger: l,
 	}
 }
 

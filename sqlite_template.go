@@ -72,10 +72,11 @@ func NewSQLiteRepository(db *sql.DB) *SQLiteRepository {
 
 // Debug enables debug mode
 func (repo *SQLiteRepository) Debug() *SQLiteRepository {	
+	l := log.New(os.Stdout, "[nero] ", log.LstdFlags | log.Lmicroseconds | log.Lmsgprefix)
 	return &SQLiteRepository{
 		db:  repo.db,
 		debug: true,
-		logger: log.New(os.Stdout, "nero: ", 0),
+		logger: l,
 	}
 }
 
