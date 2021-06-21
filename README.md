@@ -90,6 +90,12 @@ Implementing a custom back-end is very easy. In fact, you don't have to use the 
 
 See official [postgres template](./pg_template.go) for reference.
 
+## Limitations
+
+Currently, we only support basic CRUD and aggregate operations (i.e. count, sum). If you have more complex requirements other than that, we suggest that you just write your repositories manually, at least for now.
+
+We're still in the process of brain-storming how to elegantly support other operations such as joins. If you have any ideas, we'd love to hear from you!
+
 ## Standing on the shoulders of giants
 
 This project wouldn't be possible without the amazing open-source projects it was built upon:
