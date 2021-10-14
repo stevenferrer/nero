@@ -1,4 +1,4 @@
-// +build integration
+//go:build integration
 
 package playerrepo_test
 
@@ -319,12 +319,12 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 		ctx := context.Background()
 
 		newTx := func(ctx context.Context, t *testing.T) nero.Tx {
-			tx, err := repo.Tx(ctx)
+			tx, err := repo.BeginTx(ctx)
 			assert.NoError(t, err)
 			return tx
 		}
 
-		t.Run("CreateTx", func(t *testing.T) {
+		t.Run("CreateInTx", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				now := time.Now()
 				for i := 1; i <= 50; i++ {
@@ -341,7 +341,7 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 					name := fmt.Sprintf("%s_%d", race, i)
 
 					tx := newTx(ctx, t)
-					id, err := repo.CreateTx(ctx, tx, playerrepo.NewCreator().
+					id, err := repo.CreateInTx(ctx, tx, playerrepo.NewCreator().
 						Email(email).Name(name).Age(randomAge()).Race(race).
 						UpdatedAt(&now))
 					assert.NoError(t, err)
@@ -352,20 +352,20 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 
 			t.Run("Error", func(t *testing.T) {
 				tx := newTx(ctx, t)
-				id, err := repo.CreateTx(ctx, tx, playerrepo.NewCreator())
+				id, err := repo.CreateInTx(ctx, tx, playerrepo.NewCreator())
 				assert.Error(t, err)
 				assert.Zero(t, id)
 
 				cctx, cancel := context.WithCancel(ctx)
 				tx = newTx(cctx, t)
 				cancel()
-				_, err = repo.CreateTx(cctx, tx, playerrepo.NewCreator())
+				_, err = repo.CreateInTx(cctx, tx, playerrepo.NewCreator())
 				assert.Error(t, err)
 				assert.Error(t, tx.Commit())
 			})
 		})
 
-		t.Run("CreateManyTx", func(t *testing.T) {
+		t.Run("CreateManyInTx", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				crs := []*playerrepo.Creator{}
 				for i := 51; i <= 100; i++ {
@@ -385,34 +385,34 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 						Email(email).Name(name).Age(randomAge()).Race(race))
 				}
 				tx := newTx(ctx, t)
-				err = repo.CreateManyTx(ctx, tx, crs...)
+				err = repo.CreateManyInTx(ctx, tx, crs...)
 				assert.NoError(t, err)
 				assert.NoError(t, tx.Commit())
 
 				tx = newTx(ctx, t)
-				err = repo.CreateManyTx(ctx, tx, []*playerrepo.Creator{}...)
+				err = repo.CreateManyInTx(ctx, tx, []*playerrepo.Creator{}...)
 				assert.NoError(t, err)
 				assert.NoError(t, tx.Commit())
 			})
 
 			t.Run("Error", func(t *testing.T) {
 				tx := newTx(ctx, t)
-				err := repo.CreateManyTx(ctx, tx, playerrepo.NewCreator())
+				err := repo.CreateManyInTx(ctx, tx, playerrepo.NewCreator())
 				assert.Error(t, err)
 
 				cctx, cancel := context.WithCancel(ctx)
 				tx = newTx(cctx, t)
 				cancel()
-				err = repo.CreateManyTx(cctx, tx, playerrepo.NewCreator())
+				err = repo.CreateManyInTx(cctx, tx, playerrepo.NewCreator())
 				assert.Error(t, err)
 				assert.Error(t, tx.Commit())
 			})
 		})
 
-		t.Run("QueryTx", func(t *testing.T) {
+		t.Run("QueryInTx", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				tx := newTx(ctx, t)
-				users, err := repo.QueryTx(ctx, tx, playerrepo.NewQueryer().
+				users, err := repo.QueryInTx(ctx, tx, playerrepo.NewQueryer().
 					Where(playerrepo.UpdatedAtIsNotNull()))
 				assert.NoError(t, err)
 				require.Len(t, users, 50)
@@ -425,7 +425,7 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 				assert.NoError(t, tx.Commit())
 
 				tx = newTx(ctx, t)
-				users, err = repo.QueryTx(ctx, tx, playerrepo.NewQueryer().
+				users, err = repo.QueryInTx(ctx, tx, playerrepo.NewQueryer().
 					Where(playerrepo.UpdatedAtIsNull()))
 				assert.NoError(t, err)
 				require.Len(t, users, 50)
@@ -439,7 +439,7 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 
 				// with predicates
 				tx = newTx(ctx, t)
-				users, err = repo.QueryTx(ctx, tx, playerrepo.NewQueryer().
+				users, err = repo.QueryInTx(ctx, tx, playerrepo.NewQueryer().
 					Where(playerrepo.IDEq("2"), playerrepo.IDNotEq("1")))
 				assert.NoError(t, err)
 				assert.Len(t, users, 1)
@@ -509,16 +509,16 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 				cctx, cancel := context.WithCancel(ctx)
 				tx := newTx(cctx, t)
 				cancel()
-				_, err = repo.QueryTx(cctx, tx, playerrepo.NewQueryer())
+				_, err = repo.QueryInTx(cctx, tx, playerrepo.NewQueryer())
 				assert.Error(t, err)
 				assert.Error(t, tx.Commit())
 			})
 		})
 
-		t.Run("QueryOneTx", func(t *testing.T) {
+		t.Run("QueryOneInTx", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				tx := newTx(ctx, t)
-				usr, err := repo.QueryOneTx(ctx, tx, playerrepo.NewQueryer())
+				usr, err := repo.QueryOneInTx(ctx, tx, playerrepo.NewQueryer())
 				assert.NoError(t, err)
 				assert.NotNil(t, usr)
 				assert.Equal(t, "1", usr.ID)
@@ -536,13 +536,13 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 				cctx, cancel := context.WithCancel(ctx)
 				tx := newTx(cctx, t)
 				cancel()
-				_, err = repo.QueryOneTx(cctx, tx, playerrepo.NewQueryer())
+				_, err = repo.QueryOneInTx(cctx, tx, playerrepo.NewQueryer())
 				assert.Error(t, err)
 				assert.Error(t, tx.Commit())
 			})
 		})
 
-		t.Run("AggregateTx", func(t *testing.T) {
+		t.Run("AggregateInTx", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				type aggt struct {
 					AvgAge   float64
@@ -572,7 +572,7 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 					Sort(playerrepo.Asc(playerrepo.FieldRace))
 
 				tx := newTx(ctx, t)
-				err := repo.AggregateTx(ctx, tx, a)
+				err := repo.AggregateInTx(ctx, tx, a)
 				require.NoError(t, err)
 				assert.Len(t, agg, 3)
 				assert.NoError(t, tx.Commit())
@@ -588,7 +588,7 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 			})
 		})
 
-		t.Run("UpdateTx", func(t *testing.T) {
+		t.Run("UpdateInTx", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				now := time.Now()
 				preds := []comparison.PredFunc{
@@ -600,7 +600,7 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 				age := 300
 
 				tx := newTx(ctx, t)
-				rowsAffected, err := repo.UpdateTx(ctx, tx, playerrepo.NewUpdater().
+				rowsAffected, err := repo.UpdateInTx(ctx, tx, playerrepo.NewUpdater().
 					Email(email).Name(name).Age(age).Race(player.RaceTitan).
 					UpdatedAt(&now).Where(preds...))
 				assert.NoError(t, err)
@@ -620,27 +620,27 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 			})
 
 			tx := newTx(ctx, t)
-			_, err = repo.UpdateTx(ctx, tx, playerrepo.NewUpdater())
+			_, err = repo.UpdateInTx(ctx, tx, playerrepo.NewUpdater())
 			assert.NoError(t, err)
 
 			t.Run("Error", func(t *testing.T) {
 				cctx, cancel := context.WithCancel(ctx)
 				tx = newTx(cctx, t)
 				cancel()
-				_, err = repo.UpdateTx(cctx, tx, playerrepo.NewUpdater().Age(1))
+				_, err = repo.UpdateInTx(cctx, tx, playerrepo.NewUpdater().Age(1))
 				assert.Error(t, err)
 				assert.Error(t, tx.Commit())
 			})
 		})
 
-		t.Run("DeleteTx", func(t *testing.T) {
+		t.Run("DeleteInTx", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				preds := []comparison.PredFunc{
 					playerrepo.IDEq("1"), playerrepo.IDNotEq("2"),
 				}
 				// delete one
 				tx := newTx(ctx, t)
-				rowsAffected, err := repo.DeleteTx(ctx, tx,
+				rowsAffected, err := repo.DeleteInTx(ctx, tx,
 					playerrepo.NewDeleter().Where(preds...))
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), rowsAffected)
@@ -665,7 +665,7 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 				cctx, cancel := context.WithCancel(ctx)
 				tx := newTx(ctx, t)
 				cancel()
-				_, err = repo.DeleteTx(cctx, tx, playerrepo.NewDeleter())
+				_, err = repo.DeleteInTx(cctx, tx, playerrepo.NewDeleter())
 				assert.Error(t, err)
 			})
 		})

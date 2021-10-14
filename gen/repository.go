@@ -42,39 +42,39 @@ import (
 	{{end -}}
 )
 
-// Repository is an interface that wraps the methods 
+// Repository is an interface that provides the methods 
 // for interacting with a {{.TypeInfo.Name}} repository
 type Repository interface {
-	// Tx begins a new transaction
-	Tx(context.Context) (nero.Tx, error)
+	// BeginTx starts a transaction
+	BeginTx(context.Context) (nero.Tx, error)
 	// Create creates a {{.TypeName}}
 	Create(context.Context, *Creator) (id {{rawType .Identity.TypeInfo.V}}, err error)
-	// CreateTx creates a {{.TypeName}} in a transaction
-	CreateTx(context.Context, nero.Tx, *Creator) (id {{rawType .Identity.TypeInfo.V}}, err error)
+	// CreateInTx creates a {{.TypeName}} in a transaction
+	CreateInTx(context.Context, nero.Tx, *Creator) (id {{rawType .Identity.TypeInfo.V}}, err error)
 	// CreateMany batch creates {{.TypeNamePlural}}
 	CreateMany(context.Context, ...*Creator) error
-	// CreateManyTx batch creates {{.TypeNamePlural}} in a transaction
-	CreateManyTx(context.Context, nero.Tx, ...*Creator) error
+	// CreateManyInTx batch creates {{.TypeNamePlural}} in a transaction
+	CreateManyInTx(context.Context, nero.Tx, ...*Creator) error
 	// Query queries {{.TypeNamePlural}}
 	Query(context.Context, *Queryer) ([]{{rawType .TypeInfo.V}}, error)
 	// QueryTx queries {{.TypeNamePlural}} in a transaction
-	QueryTx(context.Context, nero.Tx, *Queryer) ([]{{rawType .TypeInfo.V}}, error)
+	QueryInTx(context.Context, nero.Tx, *Queryer) ([]{{rawType .TypeInfo.V}}, error)
 	// QueryOne queries a {{.TypeName}}
 	QueryOne(context.Context, *Queryer) ({{rawType .TypeInfo.V}}, error)
 	// QueryOneTx queries a {{.TypeName}} in a transaction
-	QueryOneTx(context.Context, nero.Tx, *Queryer) ({{rawType .TypeInfo.V}}, error)
+	QueryOneInTx(context.Context, nero.Tx, *Queryer) ({{rawType .TypeInfo.V}}, error)
 	// Update updates a {{.TypeName}} or many {{.TypeNamePlural}}
 	Update(context.Context, *Updater) (rowsAffected int64, err error)
 	// UpdateTx updates a {{.TypeName}} many {{.TypeNamePlural}} in a transaction
-	UpdateTx(context.Context, nero.Tx, *Updater) (rowsAffected int64, err error)
+	UpdateInTx(context.Context, nero.Tx, *Updater) (rowsAffected int64, err error)
 	// Delete deletes a {{.TypeName}} or many {{.TypeNamePlural}}
 	Delete(context.Context, *Deleter) (rowsAffected int64, err error)
 	// Delete deletes a {{.TypeName}} or many {{.TypeNamePlural}} in a transaction
-	DeleteTx(context.Context, nero.Tx, *Deleter) (rowsAffected int64, err error)
-	// Aggregate runs an aggregate query
+	DeleteInTx(context.Context, nero.Tx, *Deleter) (rowsAffected int64, err error)
+	// Aggregate performs an aggregate query
 	Aggregate(context.Context, *Aggregator) error
-	// Aggregate runs an aggregate query in a transaction
-	AggregateTx(context.Context, nero.Tx, *Aggregator) error
+	// Aggregate performs an aggregate query in a transaction
+	AggregateInTx(context.Context, nero.Tx, *Aggregator) error
 }
 
 

@@ -49,8 +49,8 @@ func (repo *PostgresRepository) WithLogger(logger nero.Logger) *PostgresReposito
 	return repo
 }
 
-// Tx begins a new transaction
-func (repo *PostgresRepository) Tx(ctx context.Context) (nero.Tx, error) {
+// BeginTx starts a transaction
+func (repo *PostgresRepository) BeginTx(ctx context.Context) (nero.Tx, error) {
 	return repo.db.BeginTx(ctx, nil)
 }
 
@@ -59,8 +59,8 @@ func (repo *PostgresRepository) Create(ctx context.Context, c *Creator) (string,
 	return repo.create(ctx, repo.db, c)
 }
 
-// CreateTx creates a Player in a transaction
-func (repo *PostgresRepository) CreateTx(ctx context.Context, tx nero.Tx, c *Creator) (string, error) {
+// CreateInTx creates a Player in a transaction
+func (repo *PostgresRepository) CreateInTx(ctx context.Context, tx nero.Tx, c *Creator) (string, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return "", errors.New("expecting tx to be *sql.Tx")
@@ -118,8 +118,8 @@ func (repo *PostgresRepository) CreateMany(ctx context.Context, cs ...*Creator) 
 	return repo.createMany(ctx, repo.db, cs...)
 }
 
-// CreateManyTx batch creates Players in a transaction
-func (repo *PostgresRepository) CreateManyTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
+// CreateManyInTx batch creates Players in a transaction
+func (repo *PostgresRepository) CreateManyInTx(ctx context.Context, tx nero.Tx, cs ...*Creator) error {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return errors.New("expecting tx to be *sql.Tx")
@@ -176,8 +176,8 @@ func (repo *PostgresRepository) Query(ctx context.Context, q *Queryer) ([]*playe
 	return repo.query(ctx, repo.db, q)
 }
 
-// QueryTx queries Players in a transaction
-func (repo *PostgresRepository) QueryTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*player.Player, error) {
+// QueryInTx queries Players in a transaction
+func (repo *PostgresRepository) QueryInTx(ctx context.Context, tx nero.Tx, q *Queryer) ([]*player.Player, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
@@ -226,8 +226,8 @@ func (repo *PostgresRepository) QueryOne(ctx context.Context, q *Queryer) (*play
 	return repo.queryOne(ctx, repo.db, q)
 }
 
-// QueryOneTx queries a Player in a transaction
-func (repo *PostgresRepository) QueryOneTx(ctx context.Context, tx nero.Tx, q *Queryer) (*player.Player, error) {
+// QueryOneInTx queries a Player in a transaction
+func (repo *PostgresRepository) QueryOneInTx(ctx context.Context, tx nero.Tx, q *Queryer) (*player.Player, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return nil, errors.New("expecting tx to be *sql.Tx")
@@ -369,8 +369,8 @@ func (repo *PostgresRepository) Update(ctx context.Context, u *Updater) (int64, 
 	return repo.update(ctx, repo.db, u)
 }
 
-// UpdateTx updates a Player many Players in a transaction
-func (repo *PostgresRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
+// UpdateInTx updates a Player many Players in a transaction
+func (repo *PostgresRepository) UpdateInTx(ctx context.Context, tx nero.Tx, u *Updater) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
@@ -443,8 +443,8 @@ func (repo *PostgresRepository) Delete(ctx context.Context, d *Deleter) (int64, 
 	return repo.delete(ctx, repo.db, d)
 }
 
-// Delete deletes a Player or many Players in a transaction
-func (repo *PostgresRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
+// DeleteInTx deletes a Player or many Players in a transaction
+func (repo *PostgresRepository) DeleteInTx(ctx context.Context, tx nero.Tx, d *Deleter) (int64, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return 0, errors.New("expecting tx to be *sql.Tx")
@@ -481,13 +481,13 @@ func (repo *PostgresRepository) delete(ctx context.Context, runner nero.SQLRunne
 	return rowsAffected, nil
 }
 
-// Aggregate runs an aggregate query
+// Aggregate performs an aggregate query
 func (repo *PostgresRepository) Aggregate(ctx context.Context, a *Aggregator) error {
 	return repo.aggregate(ctx, repo.db, a)
 }
 
-// Aggregate runs an aggregate query in a transaction
-func (repo *PostgresRepository) AggregateTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
+// AggregateInTx performs an aggregate query in a transaction
+func (repo *PostgresRepository) AggregateInTx(ctx context.Context, tx nero.Tx, a *Aggregator) error {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
 		return errors.New("expecting tx to be *sql.Tx")

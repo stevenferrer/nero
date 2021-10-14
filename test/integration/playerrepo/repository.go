@@ -15,39 +15,39 @@ import (
 	"github.com/sf9v/nero/test/integration/player"
 )
 
-// Repository is an interface that wraps the methods
+// Repository is an interface that provides the methods
 // for interacting with a Player repository
 type Repository interface {
-	// Tx begins a new transaction
-	Tx(context.Context) (nero.Tx, error)
+	// BeginTx starts a transaction
+	BeginTx(context.Context) (nero.Tx, error)
 	// Create creates a Player
 	Create(context.Context, *Creator) (id string, err error)
-	// CreateTx creates a Player in a transaction
-	CreateTx(context.Context, nero.Tx, *Creator) (id string, err error)
+	// CreateInTx creates a Player in a transaction
+	CreateInTx(context.Context, nero.Tx, *Creator) (id string, err error)
 	// CreateMany batch creates Players
 	CreateMany(context.Context, ...*Creator) error
-	// CreateManyTx batch creates Players in a transaction
-	CreateManyTx(context.Context, nero.Tx, ...*Creator) error
+	// CreateManyInTx batch creates Players in a transaction
+	CreateManyInTx(context.Context, nero.Tx, ...*Creator) error
 	// Query queries Players
 	Query(context.Context, *Queryer) ([]*player.Player, error)
 	// QueryTx queries Players in a transaction
-	QueryTx(context.Context, nero.Tx, *Queryer) ([]*player.Player, error)
+	QueryInTx(context.Context, nero.Tx, *Queryer) ([]*player.Player, error)
 	// QueryOne queries a Player
 	QueryOne(context.Context, *Queryer) (*player.Player, error)
 	// QueryOneTx queries a Player in a transaction
-	QueryOneTx(context.Context, nero.Tx, *Queryer) (*player.Player, error)
+	QueryOneInTx(context.Context, nero.Tx, *Queryer) (*player.Player, error)
 	// Update updates a Player or many Players
 	Update(context.Context, *Updater) (rowsAffected int64, err error)
 	// UpdateTx updates a Player many Players in a transaction
-	UpdateTx(context.Context, nero.Tx, *Updater) (rowsAffected int64, err error)
+	UpdateInTx(context.Context, nero.Tx, *Updater) (rowsAffected int64, err error)
 	// Delete deletes a Player or many Players
 	Delete(context.Context, *Deleter) (rowsAffected int64, err error)
 	// Delete deletes a Player or many Players in a transaction
-	DeleteTx(context.Context, nero.Tx, *Deleter) (rowsAffected int64, err error)
-	// Aggregate runs an aggregate query
+	DeleteInTx(context.Context, nero.Tx, *Deleter) (rowsAffected int64, err error)
+	// Aggregate performs an aggregate query
 	Aggregate(context.Context, *Aggregator) error
-	// Aggregate runs an aggregate query in a transaction
-	AggregateTx(context.Context, nero.Tx, *Aggregator) error
+	// Aggregate performs an aggregate query in a transaction
+	AggregateInTx(context.Context, nero.Tx, *Aggregator) error
 }
 
 // Creator is a create builder
