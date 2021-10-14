@@ -47,7 +47,7 @@ func (f Field) String() string {
 }
 
 const (
-	Field{{.Identity.StructField}} Field = iota
+	Field{{.Identity.StructField}} Field = iota + 1
 	{{range $e := .Fields -}}
 		Field{{$e.StructField}}
     {{end -}}
