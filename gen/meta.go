@@ -30,8 +30,8 @@ const metaTmpl = `
 
 package {{.PkgName}}
 
-// Collection is the name of the database collection
-const Collection = "{{ .Collection }}"
+// Table is the database table
+const Table = "{{ .Table }}"
 
 // Field is a {{.TypeInfo.Name}} field
 type Field int
@@ -39,6 +39,7 @@ type Field int
 // String returns the string representation of the field
 func (f Field) String() string {
 	return [...]string{
+	"invalid",
 	"{{.Identity.Name}}",
     {{range .Fields -}}
 		"{{.Name}}",

@@ -136,7 +136,7 @@ func (repo *SQLiteRepository) create(ctx context.Context, runner nero.SQLRunner,
 		{{end -}}
 	{{end}}
 
-	qb := squirrel.Insert("\"{{.Collection}}\"").Columns(columns...).
+	qb := squirrel.Insert("\"{{.Table}}\"").Columns(columns...).
 		Values(values...).RunWith(runner)
 	if repo.debug && repo.logger != nil {
 		sql, args, err := qb.ToSql()
@@ -184,7 +184,7 @@ func (repo *SQLiteRepository) createMany(ctx context.Context, runner nero.SQLRun
 			{{end -}}
 		{{end -}}
 	}
-	qb := squirrel.Insert("\"{{.Collection}}\"").Columns(columns...)
+	qb := squirrel.Insert("\"{{.Table}}\"").Columns(columns...)
 	for _, c := range cs {
 		if err := c.Validate(); err != nil {
 			return err
@@ -301,7 +301,7 @@ func (repo *SQLiteRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 			"\"{{$field.Name}}\"",
 		{{end -}}
 	}
-	qb := squirrel.Select(columns...).From("\"{{.Collection}}\"")
+	qb := squirrel.Select(columns...).From("\"{{.Table}}\"")
 
 	preds := []*comparison.Predicate{}
 	for _, predFunc := range q.predFuncs {
@@ -407,7 +407,7 @@ func (repo *SQLiteRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Updat
 }
 
 func (repo *SQLiteRepository) update(ctx context.Context, runner nero.SQLRunner, u *Updater) (int64, error) {
-	qb := squirrel.Update("\"{{.Collection}}\"")
+	qb := squirrel.Update("\"{{.Table}}\"")
 
 	cnt := 0
 	{{range $field := .Fields }}
@@ -463,7 +463,7 @@ func (repo *SQLiteRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Delet
 }
 
 func (repo *SQLiteRepository) delete(ctx context.Context, runner nero.SQLRunner, d *Deleter) (int64, error) {
-	qb := squirrel.Delete("\"{{.Collection}}\"")
+	qb := squirrel.Delete("\"{{.Table}}\"")
 
 	preds := []*comparison.Predicate{}
 	for _, predFunc := range d.predFuncs {
@@ -529,7 +529,7 @@ func (repo *SQLiteRepository) aggregate(ctx context.Context, runner nero.SQLRunn
 		}
 	}
 
-	qb := squirrel.Select(columns...).From("\"{{.Collection}}\"")
+	qb := squirrel.Select(columns...).From("\"{{.Table}}\"")
 
 	groupBys := []string{}
 	for _, groupBy := range a.groupBys {

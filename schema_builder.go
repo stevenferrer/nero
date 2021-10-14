@@ -24,9 +24,9 @@ func (sb *SchemaBuilder) PkgName(pkgName string) *SchemaBuilder {
 	return sb
 }
 
-// Collection sets teh collection
-func (sb *SchemaBuilder) Collection(collection string) *SchemaBuilder {
-	sb.sc.collection = collection
+// Table sets the database table/collection name
+func (sb *SchemaBuilder) Table(table string) *SchemaBuilder {
+	sb.sc.table = table
 	return sb
 }
 
@@ -74,12 +74,12 @@ func (sb *SchemaBuilder) Build() *Schema {
 	}
 
 	return &Schema{
-		typeInfo:   sb.sc.typeInfo,
-		pkgName:    sb.sc.pkgName,
-		collection: sb.sc.collection,
-		identity:   sb.sc.identity,
-		fields:     sb.sc.fields,
-		imports:    imports,
-		templates:  templates,
+		typeInfo:  sb.sc.typeInfo,
+		pkgName:   sb.sc.pkgName,
+		table:     sb.sc.table,
+		identity:  sb.sc.identity,
+		fields:    sb.sc.fields,
+		imports:   imports,
+		templates: templates,
 	}
 }

@@ -10,8 +10,8 @@ import (
 type Schema struct {
 	// pkgName is the package name of the generated files
 	pkgName string
-	// Collection is the name of the database collection
-	collection string
+	// table is the database table name
+	table string
 	// typeInfo is the type info of the schema model
 	typeInfo *mira.TypeInfo
 	// identity is the identity field
@@ -29,9 +29,9 @@ func (s *Schema) PkgName() string {
 	return s.pkgName
 }
 
-// Collection returns the collection
-func (s *Schema) Collection() string {
-	return s.collection
+// Table returns the database table name
+func (s *Schema) Table() string {
+	return s.table
 }
 
 // Identity returns the identity field

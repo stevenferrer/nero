@@ -33,7 +33,7 @@ const (
 func (p Player) Schema() *nero.Schema {
 	return nero.NewSchemaBuilder(&p).
 		PkgName("playerrepo").
-		Collection("players").
+		Table("players").
 		Identity(nero.NewFieldBuilder("id", p.ID).
 			StructField("ID").Auto().Build()).
 		Fields(

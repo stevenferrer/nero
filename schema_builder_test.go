@@ -16,10 +16,10 @@ type MyStruct struct {
 
 func TestSchemaBuilder(t *testing.T) {
 	pkg := "mypkg"
-	collection := "mycollection"
+	table := "mytable"
 	ms := &MyStruct{}
 	schemaBuilder := nero.NewSchemaBuilder(ms).
-		PkgName(pkg).Collection(collection).
+		PkgName(pkg).Table(table).
 		Identity(
 			nero.NewFieldBuilder("id", ms.ID).
 				Auto().StructField("ID").Build(),
@@ -28,7 +28,7 @@ func TestSchemaBuilder(t *testing.T) {
 
 	schema := schemaBuilder.Build()
 	assert.Equal(t, pkg, schema.PkgName())
-	assert.Equal(t, collection, schema.Collection())
+	assert.Equal(t, table, schema.Table())
 	assert.NotNil(t, schema.Identity())
 	assert.Len(t, schema.Fields(), 1)
 	assert.Len(t, schema.Imports(), 2)

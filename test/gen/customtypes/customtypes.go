@@ -35,7 +35,7 @@ type Item struct {
 // Schema implements nero.Schemaer
 func (c Custom) Schema() *nero.Schema {
 	return nero.NewSchemaBuilder(&c).
-		PkgName("user").Collection("users").
+		PkgName("user").Table("users").
 		Identity(
 			nero.NewFieldBuilder("id", c.ID).
 				StructField("ID").Auto().Build(),

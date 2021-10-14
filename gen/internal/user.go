@@ -18,7 +18,7 @@ type User struct {
 // Schema returns the schema for user model
 func (u User) Schema() *nero.Schema {
 	return nero.NewSchemaBuilder(&u).
-		PkgName("userrepo").Collection("users").
+		PkgName("userrepo").Table("users").
 		Identity(
 			nero.NewFieldBuilder("id", u.ID).
 				StructField("ID").Auto().Build(),

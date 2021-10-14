@@ -142,7 +142,7 @@ func (repo *PostgresRepository) create(ctx context.Context, runner nero.SQLRunne
 		{{end -}}
 	{{end}}
 
-	qb := squirrel.Insert("\"{{.Collection}}\"").
+	qb := squirrel.Insert("\"{{.Table}}\"").
 		Columns(columns...).
 		Values(values...).
 		Suffix("RETURNING \"{{.Identity.Name}}\"").
@@ -190,7 +190,7 @@ func (repo *PostgresRepository) createMany(ctx context.Context, runner nero.SQLR
 		{{end -}}
 	}
 
-	qb := squirrel.Insert("\"{{.Collection}}\"").Columns(columns...)
+	qb := squirrel.Insert("\"{{.Table}}\"").Columns(columns...)
 	for _, c := range cs {
 		if err := c.Validate(); err != nil {
 			return err
@@ -322,7 +322,7 @@ func (repo *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 		{{end -}}
 	}
 	qb := squirrel.Select(columns...).
-		From("\"{{.Collection}}\"").
+		From("\"{{.Table}}\"").
 		PlaceholderFormat(squirrel.Dollar)
 
 	preds := []*comparison.Predicate{}
@@ -429,7 +429,7 @@ func (repo *PostgresRepository) UpdateTx(ctx context.Context, tx nero.Tx, u *Upd
 }
 
 func (repo *PostgresRepository) update(ctx context.Context, runner nero.SQLRunner, u *Updater) (int64, error) {
-	qb := squirrel.Update("\"{{.Collection}}\"").
+	qb := squirrel.Update("\"{{.Table}}\"").
 		PlaceholderFormat(squirrel.Dollar)
 
 	cnt := 0
@@ -490,7 +490,7 @@ func (repo *PostgresRepository) DeleteTx(ctx context.Context, tx nero.Tx, d *Del
 }
 
 func (repo *PostgresRepository) delete(ctx context.Context, runner nero.SQLRunner, d *Deleter) (int64, error) {
-	qb := squirrel.Delete("\"{{.Collection}}\"").
+	qb := squirrel.Delete("\"{{.Table}}\"").
 		PlaceholderFormat(squirrel.Dollar)
 
 	preds := []*comparison.Predicate{}
@@ -557,7 +557,7 @@ func (repo *PostgresRepository) aggregate(ctx context.Context, runner nero.SQLRu
 		}
 	}
 
-	qb := squirrel.Select(columns...).From("\"{{.Collection}}\"").
+	qb := squirrel.Select(columns...).From("\"{{.Table}}\"").
 		PlaceholderFormat(squirrel.Dollar)
 
 	groupBys := []string{}
