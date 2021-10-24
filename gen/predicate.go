@@ -87,7 +87,7 @@ import (
         {{end}}
 
         {{ range $op := $.LtGtOps }}
-            {{if $field.TypeInfo.IsNumeric }}
+            {{if or $field.TypeInfo.IsNumeric (isType $field.TypeInfo.V "time.Time")}}
                 // {{$field.StructField}}{{$op.String}} {{$op.Desc}} operator on {{$field.StructField}} field
                 func {{$field.StructField}}{{$op.String}} ({{$field.Identifier}} {{rawType $field.TypeInfo.V}}) comparison.PredFunc {
                     return func(preds []*comparison.Predicate) []*comparison.Predicate {
@@ -142,7 +142,7 @@ import (
 {{ range $op := $.EqOps }} 
     // FieldX{{$op.String}}FieldY fieldX {{$op.Desc}} fieldY
     //
-    // Note: fieldX and fieldY must be of the same type
+    // fieldX and fieldY must be of the same type
     func FieldX{{$op.String}}FieldY (fieldX, fieldY Field) comparison.PredFunc {
         return func(preds []*comparison.Predicate) []*comparison.Predicate {
             return append(preds, &comparison.Predicate{
@@ -157,7 +157,7 @@ import (
 {{ range $op := $.LtGtOps }} 
     // FieldX{{$op.String}}FieldY fieldX {{$op.Desc}} fieldY
     // 
-    // Note: fieldX and fieldY must be numeric types
+    // fieldX and fieldY must be of the same type
     func FieldX{{$op.String}}FieldY (fieldX, fieldY Field) comparison.PredFunc {
         return func(preds []*comparison.Predicate) []*comparison.Predicate {
             return append(preds, &comparison.Predicate{

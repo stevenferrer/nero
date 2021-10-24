@@ -30,6 +30,7 @@ func NewFuncMap() template.FuncMap {
 		"zeroValue":       zeroValueFunc,
 		"prependToFields": prependToFields,
 		"fileHeaders":     fileHeadersFunc,
+		"isType":          isTypeFunc,
 	}
 }
 
@@ -94,4 +95,8 @@ const fileHeaders = `
 // fileHeadersFunc returns the standard file headers
 func fileHeadersFunc() string {
 	return fileHeaders
+}
+
+func isTypeFunc(v interface{}, typeStr string) bool {
+	return typeFunc(v) == typeStr
 }

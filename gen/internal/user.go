@@ -11,8 +11,8 @@ type User struct {
 	ID         int64
 	Name       string
 	Department string
-	UpdatedAt  *time.Time
-	CreatedAt  *time.Time
+	UpdatedAt  time.Time
+	CreatedAt  time.Time
 }
 
 // Schema returns the schema for user model

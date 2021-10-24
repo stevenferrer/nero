@@ -2,6 +2,7 @@ package nero
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -63,6 +64,11 @@ func TestFuncs(t *testing.T) {
 		assert.Equal(t, expect, got)
 	})
 
+	t.Run("isType", func(t *testing.T) {
+		now := time.Now()
+		assert.True(t, isTypeFunc(now, "time.Time"))
+		assert.True(t, isTypeFunc(&now, "time.Time"))
+	})
 	assert.Len(t, prependToFields(&Field{}, []*Field{}), 1)
 	assert.NotEmpty(t, fileHeadersFunc())
 }
