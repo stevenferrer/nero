@@ -31,8 +31,6 @@ See the [official example](https://github.com/sf9v/nero-example) and [integratio
 import (
     "database/sql"
 
-    _ "github.com/lib/pq"
-
     // import the generated package
     "github.com/sf9v/nero-example/productrepo"
 )
