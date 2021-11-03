@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"text/template"
 
-	"github.com/sf9v/nero"
+	"github.com/stevenferrer/nero"
 )
 
 func newMetaFile(schema *nero.Schema) (*File, error) {

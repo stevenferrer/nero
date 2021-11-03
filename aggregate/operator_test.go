@@ -3,7 +3,7 @@ package aggregate_test
 import (
 	"testing"
 
-	"github.com/sf9v/nero/aggregate"
+	"github.com/stevenferrer/nero/aggregate"
 	"github.com/stretchr/testify/assert"
 )
 

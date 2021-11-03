@@ -2,7 +2,7 @@ package gen
 
 import (
 	"github.com/pkg/errors"
-	"github.com/sf9v/nero"
+	"github.com/stevenferrer/nero"
 )
 
 // Generate generates the repository code

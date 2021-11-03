@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/sf9v/nero"
+	"github.com/stevenferrer/nero"
 )
 
 func TestPostgresTemplate(t *testing.T) {

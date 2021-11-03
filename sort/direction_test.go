@@ -3,7 +3,7 @@ package sort_test
 import (
 	"testing"
 
-	"github.com/sf9v/nero/sort"
+	"github.com/stevenferrer/nero/sort"
 	"github.com/stretchr/testify/assert"
 )
 

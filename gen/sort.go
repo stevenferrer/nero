@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"text/template"
 
-	"github.com/sf9v/nero"
-	"github.com/sf9v/nero/sort"
+	"github.com/stevenferrer/nero"
+	"github.com/stevenferrer/nero/sort"
 )
 
 func newSortFile(schema *nero.Schema) (*File, error) {
@@ -40,7 +40,7 @@ const sortTmpl = `
 package {{.Schema.PkgName}}
 
 import (
-	"github.com/sf9v/nero/sort"
+	"github.com/stevenferrer/nero/sort"
 )
 
 {{range $direction := .Directions}}

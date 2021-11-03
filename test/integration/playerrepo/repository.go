@@ -8,11 +8,11 @@ import (
 
 	multierror "github.com/hashicorp/go-multierror"
 	"github.com/pkg/errors"
-	"github.com/sf9v/nero"
-	"github.com/sf9v/nero/aggregate"
-	"github.com/sf9v/nero/comparison"
-	"github.com/sf9v/nero/sort"
-	"github.com/sf9v/nero/test/integration/player"
+	"github.com/stevenferrer/nero"
+	"github.com/stevenferrer/nero/aggregate"
+	"github.com/stevenferrer/nero/comparison"
+	"github.com/stevenferrer/nero/sort"
+	"github.com/stevenferrer/nero/test/integration/player"
 )
 
 // Repository is an interface that provides the methods

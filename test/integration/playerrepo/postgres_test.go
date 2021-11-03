@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	_ "github.com/lib/pq"
-	"github.com/sf9v/nero/test/integration/playerrepo"
+	"github.com/stevenferrer/nero/test/integration/playerrepo"
 	"github.com/stretchr/testify/require"
 )
 

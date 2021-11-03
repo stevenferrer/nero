@@ -2,7 +2,7 @@
 package playerrepo
 
 import (
-	"github.com/sf9v/nero/sort"
+	"github.com/stevenferrer/nero/sort"
 )
 
 // Asc ascending sort direction

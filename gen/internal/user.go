@@ -3,7 +3,7 @@ package internal
 import (
 	"time"
 
-	"github.com/sf9v/nero"
+	"github.com/stevenferrer/nero"
 )
 
 // User is a user model

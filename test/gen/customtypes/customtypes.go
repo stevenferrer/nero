@@ -1,7 +1,7 @@
 package customtypes
 
 import (
-	"github.com/sf9v/nero"
+	"github.com/stevenferrer/nero"
 )
 
 // UUID is a uuid type

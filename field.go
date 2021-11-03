@@ -4,8 +4,8 @@ import (
 	"reflect"
 
 	"github.com/jinzhu/inflection"
-	"github.com/sf9v/mira"
-	stringsx "github.com/sf9v/nero/x/strings"
+	"github.com/stevenferrer/mira"
+	stringsx "github.com/stevenferrer/nero/x/strings"
 )
 
 // Field is a field

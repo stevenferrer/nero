@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/sf9v/nero/gen/internal"
+	"github.com/stevenferrer/nero/gen/internal"
 )
 
 func Test_newPredicateFile(t *testing.T) {

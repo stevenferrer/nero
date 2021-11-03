@@ -2,7 +2,7 @@
 package playerrepo
 
 import (
-	"github.com/sf9v/nero/aggregate"
+	"github.com/stevenferrer/nero/aggregate"
 )
 
 // Avg is the average aggregate operator

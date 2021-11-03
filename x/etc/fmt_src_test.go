@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/sf9v/nero/x/etc"
+	"github.com/stevenferrer/nero/x/etc"
 )
 
 const src = `
@@ -17,7 +17,7 @@ package main
 
 import ("fmt"
 "os"
-nero "github.com/sf9v/nero"
+nero "github.com/stevenferrer/nero"
 )
 func main() {
 fmt.Println("Hello, world!")

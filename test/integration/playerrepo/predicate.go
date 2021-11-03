@@ -4,8 +4,8 @@ package playerrepo
 import (
 	"time"
 
-	"github.com/sf9v/nero/comparison"
-	"github.com/sf9v/nero/test/integration/player"
+	"github.com/stevenferrer/nero/comparison"
+	"github.com/stevenferrer/nero/test/integration/player"
 )
 
 // IDEq equal operator on ID field

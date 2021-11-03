@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"text/template"
 
-	"github.com/sf9v/nero"
-	"github.com/sf9v/nero/comparison"
+	"github.com/stevenferrer/nero"
+	"github.com/stevenferrer/nero/comparison"
 )
 
 func newPredicateFile(schema *nero.Schema) (*File, error) {
@@ -59,7 +59,7 @@ package {{.Schema.PkgName}}
 
 import (
 	"github.com/lib/pq"
-	"github.com/sf9v/nero/comparison"
+	"github.com/stevenferrer/nero/comparison"
 	{{range $import := .Schema.Imports -}}
 		"{{$import}}"
 	{{end -}}

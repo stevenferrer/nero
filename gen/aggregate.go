@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"text/template"
 
-	"github.com/sf9v/nero"
-	"github.com/sf9v/nero/aggregate"
+	"github.com/stevenferrer/nero"
+	"github.com/stevenferrer/nero/aggregate"
 )
 
 func newAggregateFile(schema *nero.Schema) (*File, error) {
@@ -42,7 +42,7 @@ const aggregatesTmpl = `
 package {{.Schema.PkgName}}
 
 import (
-	"github.com/sf9v/nero/aggregate"
+	"github.com/stevenferrer/nero/aggregate"
 )
 
 {{range $op := .Operators}}

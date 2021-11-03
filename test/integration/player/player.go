@@ -3,7 +3,7 @@ package player
 import (
 	"time"
 
-	"github.com/sf9v/nero"
+	"github.com/stevenferrer/nero"
 )
 
 // Player is a plaer

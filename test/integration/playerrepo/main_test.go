@@ -13,10 +13,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/sf9v/nero"
-	"github.com/sf9v/nero/comparison"
-	"github.com/sf9v/nero/test/integration/player"
-	"github.com/sf9v/nero/test/integration/playerrepo"
+	"github.com/stevenferrer/nero"
+	"github.com/stevenferrer/nero/comparison"
+	"github.com/stevenferrer/nero/test/integration/player"
+	"github.com/stevenferrer/nero/test/integration/playerrepo"
 )
 
 // test runners

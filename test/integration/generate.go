@@ -5,8 +5,8 @@ import (
 	"os"
 	"path"
 
-	"github.com/sf9v/nero/gen"
-	"github.com/sf9v/nero/test/integration/player"
+	"github.com/stevenferrer/nero/gen"
+	"github.com/stevenferrer/nero/test/integration/player"
 )
 
 func main() {

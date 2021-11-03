@@ -1,7 +1,7 @@
 package nero
 
 import (
-	"github.com/sf9v/mira"
+	"github.com/stevenferrer/mira"
 )
 
 // SchemaBuilder is used for building a schema

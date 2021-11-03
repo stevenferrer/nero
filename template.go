@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"text/template"
 
-	"github.com/sf9v/mira"
+	"github.com/stevenferrer/mira"
 )
 
 // Template is an interface that wraps the Filename and Content method

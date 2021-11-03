@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/sf9v/nero/gen"
-	"github.com/sf9v/nero/gen/internal"
+	"github.com/stevenferrer/nero/gen"
+	"github.com/stevenferrer/nero/gen/internal"
 )
 
 func TestGenerate(t *testing.T) {

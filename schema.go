@@ -2,8 +2,8 @@ package nero
 
 import (
 	"github.com/jinzhu/inflection"
-	"github.com/sf9v/mira"
-	stringsx "github.com/sf9v/nero/x/strings"
+	"github.com/stevenferrer/mira"
+	stringsx "github.com/stevenferrer/nero/x/strings"
 )
 
 // Schema is a schema used for generating the repository

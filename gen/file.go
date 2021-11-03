@@ -6,7 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/sf9v/nero/x/etc"
+	"github.com/stevenferrer/nero/x/etc"
 )
 
 // File is a generated file

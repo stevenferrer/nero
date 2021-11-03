@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/sf9v/nero"
+	"github.com/stevenferrer/nero"
 )
 
 type MyStruct struct {

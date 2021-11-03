@@ -1,7 +1,7 @@
-[![GoDoc Reference](https://pkg.go.dev/badge/github.com/sf9v/nero)](https://pkg.go.dev/github.com/sf9v/nero)
-![Github Actions](https://github.com/sf9v/nero/workflows/test/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/sf9v/nero/badge.svg?branch=main)](https://coveralls.io/github/sf9v/nero?branch=main)
-[![Go Report Card](https://goreportcard.com/badge/github.com/sf9v/nero)](https://goreportcard.com/report/github.com/sf9v/nero)
+[![GoDoc Reference](https://pkg.go.dev/badge/github.com/stevenferrer/nero)](https://pkg.go.dev/github.com/stevenferrer/nero)
+![Github Actions](https://github.com/stevenferrer/nero/workflows/test/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/stevenferrer/nero/badge.svg?branch=main)](https://coveralls.io/github/stevenferrer/nero?branch=main)
+[![Go Report Card](https://goreportcard.com/badge/github.com/stevenferrer/nero)](https://goreportcard.com/report/github.com/stevenferrer/nero)
 
 # Nero
 
@@ -20,19 +20,19 @@ We heavily use the _[repository pattern](https://threedots.tech/post/repository-
 ## Installation
 
 ```console
-$ go get github.com/sf9v/nero
+$ go get github.com/stevenferrer/nero
 ```
 
 ## Example
 
-See the [official example](https://github.com/sf9v/nero-example) and [integration test](./test/integration/playerrepo) for a more complete demo.
+See the [official example](https://github.com/stevenferrer/nero-example) and [integration test](./test/integration/playerrepo) for a more complete demo.
 
 ```go
 import (
     "database/sql"
 
     // import the generated package
-    "github.com/sf9v/nero-example/productrepo"
+    "github.com/stevenferrer/nero-example/productrepo"
 )
 
 func main() {
@@ -113,7 +113,7 @@ Also, the following have a huge influence on this project and deserves most of t
 
 ## Contributing
 
-Any suggestions and ideas are very much welcome, feel free to [open an issue](https://github.com/sf9v/nero/issues) or [make a pull request](https://github.com/sf9v/nero/pulls)!
+Any suggestions and ideas are very much welcome, feel free to [open an issue](https://github.com/stevenferrer/nero/issues) or [make a pull request](https://github.com/stevenferrer/nero/pulls)!
 
 ## License
 

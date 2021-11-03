@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/sf9v/nero/gen"
-	"github.com/sf9v/nero/test/gen/customtypes"
+	"github.com/stevenferrer/nero/gen"
+	"github.com/stevenferrer/nero/test/gen/customtypes"
 )
 
 func TestCustomTypes(t *testing.T) {

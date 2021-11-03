@@ -4,7 +4,7 @@ import (
 	"bytes"
 
 	"github.com/pkg/errors"
-	"github.com/sf9v/nero"
+	"github.com/stevenferrer/nero"
 )
 
 func newTemplate(schema *nero.Schema, template nero.Template) (*bytes.Buffer, error) {

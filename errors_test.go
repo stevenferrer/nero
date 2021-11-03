@@ -3,7 +3,7 @@ package nero_test
 import (
 	"testing"
 
-	"github.com/sf9v/nero"
+	"github.com/stevenferrer/nero"
 	"github.com/stretchr/testify/assert"
 )
 

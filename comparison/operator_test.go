@@ -3,7 +3,7 @@ package comparison_test
 import (
 	"testing"
 
-	"github.com/sf9v/nero/comparison"
+	"github.com/stevenferrer/nero/comparison"
 	"github.com/stretchr/testify/assert"
 )
 
