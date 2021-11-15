@@ -111,6 +111,10 @@ Also, the following have a huge influence on this project and deserves most of t
 - [ent](https://github.com/facebook/ent) - An entity framework for Go. Simple, yet powerful ORM for modeling and querying data.
 - [SQLBoiler](https://github.com/volatiletech/sqlboiler) - Generate a Go ORM tailored to your database schema.
 
+## What's in the name?
+
+The project name is inspired by an [anti-bird](https://blackclover.fandom.com/wiki/Anti-bird) in an anime called [Black Clover](https://blackclover.fandom.com/wiki/Black_Clover_Wiki). The anti-bird, which the [Black Bulls](https://blackclover.fandom.com/wiki/Black_Bull) squad calls _Nero_ is apparently a human named [Secre Swallowtail](https://blackclover.fandom.com/wiki/Secre_Swallowtail). It's a really cool anime with lots of magic!
+
 ## Contributing
 
 Any suggestions and ideas are very much welcome, feel free to [open an issue](https://github.com/stevenferrer/nero/issues) or [make a pull request](https://github.com/stevenferrer/nero/pulls)!
