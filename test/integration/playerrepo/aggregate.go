@@ -7,8 +7,8 @@ import (
 
 // Avg is the average aggregate operator
 func Avg(field Field) aggregate.AggFunc {
-	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
-		return append(aggs, &aggregate.Aggregate{
+	return func(aggs []aggregate.Aggregate) []aggregate.Aggregate {
+		return append(aggs, aggregate.Aggregate{
 			Field: field.String(),
 			Op:    aggregate.Avg,
 		})
@@ -17,8 +17,8 @@ func Avg(field Field) aggregate.AggFunc {
 
 // Count is the count aggregate operator
 func Count(field Field) aggregate.AggFunc {
-	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
-		return append(aggs, &aggregate.Aggregate{
+	return func(aggs []aggregate.Aggregate) []aggregate.Aggregate {
+		return append(aggs, aggregate.Aggregate{
 			Field: field.String(),
 			Op:    aggregate.Count,
 		})
@@ -27,8 +27,8 @@ func Count(field Field) aggregate.AggFunc {
 
 // Max is the max aggregate operator
 func Max(field Field) aggregate.AggFunc {
-	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
-		return append(aggs, &aggregate.Aggregate{
+	return func(aggs []aggregate.Aggregate) []aggregate.Aggregate {
+		return append(aggs, aggregate.Aggregate{
 			Field: field.String(),
 			Op:    aggregate.Max,
 		})
@@ -37,8 +37,8 @@ func Max(field Field) aggregate.AggFunc {
 
 // Min is the min aggregate operator
 func Min(field Field) aggregate.AggFunc {
-	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
-		return append(aggs, &aggregate.Aggregate{
+	return func(aggs []aggregate.Aggregate) []aggregate.Aggregate {
+		return append(aggs, aggregate.Aggregate{
 			Field: field.String(),
 			Op:    aggregate.Min,
 		})
@@ -47,8 +47,8 @@ func Min(field Field) aggregate.AggFunc {
 
 // Sum is the sum aggregate operator
 func Sum(field Field) aggregate.AggFunc {
-	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
-		return append(aggs, &aggregate.Aggregate{
+	return func(aggs []aggregate.Aggregate) []aggregate.Aggregate {
+		return append(aggs, aggregate.Aggregate{
 			Field: field.String(),
 			Op:    aggregate.Sum,
 		})
@@ -57,8 +57,8 @@ func Sum(field Field) aggregate.AggFunc {
 
 // None is the none aggregate operator
 func None(field Field) aggregate.AggFunc {
-	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
-		return append(aggs, &aggregate.Aggregate{
+	return func(aggs []aggregate.Aggregate) []aggregate.Aggregate {
+		return append(aggs, aggregate.Aggregate{
 			Field: field.String(),
 			Op:    aggregate.None,
 		})

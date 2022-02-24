@@ -46,8 +46,8 @@ import (
 {{range $direction := .Directions}}
 // {{$direction.String}} {{$direction.Desc}} sort direction
 func {{$direction.String}}(field Field) sort.SortFunc {
-	return func(sorts []*sort.Sort) []*sort.Sort {
-		return append(sorts, &sort.Sort{
+	return func(sorts []sort.Sort) []sort.Sort {
+		return append(sorts, sort.Sort{
 			Field: field.String(),
 			Direction: sort.{{$direction.String}},
 		})

@@ -48,8 +48,8 @@ import (
 {{range $op := .Operators}}
 // {{$op.String}} is the {{$op.Desc}} aggregate operator
 func {{$op.String}}(field Field) aggregate.AggFunc {
-	return func(aggs []*aggregate.Aggregate) []*aggregate.Aggregate {
-		return append(aggs, &aggregate.Aggregate{
+	return func(aggs []aggregate.Aggregate) []aggregate.Aggregate {
+		return append(aggs, aggregate.Aggregate{
 			Field: field.String(),
 			Op: aggregate.{{$op.String}},
 		})

@@ -14,12 +14,12 @@ func TestPredicate(t *testing.T) {
 	now := time.Now()
 	tests := []struct {
 		predFunc comparison.PredFunc
-		want     *comparison.Predicate
+		want     comparison.Predicate
 	}{
 		// id
 		{
 			predFunc: playerrepo.IDEq("1"),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldID.String(),
 				Op:    comparison.Eq,
 				Arg:   "1",
@@ -27,7 +27,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.IDNotEq("1"),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldID.String(),
 				Op:    comparison.NotEq,
 				Arg:   "1",
@@ -35,7 +35,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.IDIn("1"),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldID.String(),
 				Op:    comparison.In,
 				Arg:   []interface{}{"1"},
@@ -43,7 +43,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.IDNotIn("1"),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldID.String(),
 				Op:    comparison.NotIn,
 				Arg:   []interface{}{"1"},
@@ -53,7 +53,7 @@ func TestPredicate(t *testing.T) {
 		// email
 		{
 			predFunc: playerrepo.EmailEq("me@me.io"),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldEmail.String(),
 				Op:    comparison.Eq,
 				Arg:   "me@me.io",
@@ -61,7 +61,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.EmailNotEq("me@me.io"),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldEmail.String(),
 				Op:    comparison.NotEq,
 				Arg:   "me@me.io",
@@ -69,7 +69,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.EmailIn("me@me.io"),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldEmail.String(),
 				Op:    comparison.In,
 				Arg:   []interface{}{"me@me.io"},
@@ -77,7 +77,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.EmailNotIn("me@me.io"),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldEmail.String(),
 				Op:    comparison.NotIn,
 				Arg:   []interface{}{"me@me.io"},
@@ -86,7 +86,7 @@ func TestPredicate(t *testing.T) {
 		// name
 		{
 			predFunc: playerrepo.NameEq("me"),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldName.String(),
 				Op:    comparison.Eq,
 				Arg:   "me",
@@ -94,7 +94,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.NameNotEq("me"),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldName.String(),
 				Op:    comparison.NotEq,
 				Arg:   "me",
@@ -102,7 +102,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.NameIn("me"),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldName.String(),
 				Op:    comparison.In,
 				Arg:   []interface{}{"me"},
@@ -110,7 +110,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.NameNotIn("me"),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldName.String(),
 				Op:    comparison.NotIn,
 				Arg:   []interface{}{"me"},
@@ -120,7 +120,7 @@ func TestPredicate(t *testing.T) {
 		// age
 		{
 			predFunc: playerrepo.AgeEq(18),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldAge.String(),
 				Op:    comparison.Eq,
 				Arg:   18,
@@ -128,7 +128,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.AgeNotEq(18),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldAge.String(),
 				Op:    comparison.NotEq,
 				Arg:   18,
@@ -136,7 +136,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.AgeGt(18),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldAge.String(),
 				Op:    comparison.Gt,
 				Arg:   18,
@@ -144,7 +144,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.AgeGtOrEq(18),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldAge.String(),
 				Op:    comparison.GtOrEq,
 				Arg:   18,
@@ -152,7 +152,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.AgeLt(18),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldAge.String(),
 				Op:    comparison.Lt,
 				Arg:   18,
@@ -160,7 +160,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.AgeLtOrEq(18),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldAge.String(),
 				Op:    comparison.LtOrEq,
 				Arg:   18,
@@ -168,7 +168,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.AgeNotEq(18),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldAge.String(),
 				Op:    comparison.NotEq,
 				Arg:   18,
@@ -177,7 +177,7 @@ func TestPredicate(t *testing.T) {
 
 		{
 			predFunc: playerrepo.AgeIn(18),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldAge.String(),
 				Op:    comparison.In,
 				Arg:   []interface{}{18},
@@ -185,7 +185,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.AgeNotIn(18),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldAge.String(),
 				Op:    comparison.NotIn,
 				Arg:   []interface{}{18},
@@ -195,7 +195,7 @@ func TestPredicate(t *testing.T) {
 		// race
 		{
 			predFunc: playerrepo.RaceEq(player.RaceHuman),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldRace.String(),
 				Op:    comparison.Eq,
 				Arg:   player.RaceHuman,
@@ -203,7 +203,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.RaceNotEq(player.RaceHuman),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldRace.String(),
 				Op:    comparison.NotEq,
 				Arg:   player.RaceHuman,
@@ -211,7 +211,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.RaceIn(player.RaceHuman),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldRace.String(),
 				Op:    comparison.In,
 				Arg:   []interface{}{player.RaceHuman},
@@ -219,7 +219,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.RaceNotIn(player.RaceHuman),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldRace.String(),
 				Op:    comparison.NotIn,
 				Arg:   []interface{}{player.RaceHuman},
@@ -229,7 +229,7 @@ func TestPredicate(t *testing.T) {
 		// updated at
 		{
 			predFunc: playerrepo.UpdatedAtEq(&now),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldUpdatedAt.String(),
 				Op:    comparison.Eq,
 				Arg:   &now,
@@ -237,7 +237,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.UpdatedAtNotEq(&now),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldUpdatedAt.String(),
 				Op:    comparison.NotEq,
 				Arg:   &now,
@@ -245,21 +245,21 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.UpdatedAtIsNull(),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldUpdatedAt.String(),
 				Op:    comparison.IsNull,
 			},
 		},
 		{
 			predFunc: playerrepo.UpdatedAtIsNotNull(),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldUpdatedAt.String(),
 				Op:    comparison.IsNotNull,
 			},
 		},
 		{
 			predFunc: playerrepo.UpdatedAtIn(&now),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldUpdatedAt.String(),
 				Op:    comparison.In,
 				Arg:   []interface{}{&now},
@@ -267,7 +267,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.UpdatedAtNotIn(&now),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldUpdatedAt.String(),
 				Op:    comparison.NotIn,
 				Arg:   []interface{}{&now},
@@ -277,7 +277,7 @@ func TestPredicate(t *testing.T) {
 		// created at
 		{
 			predFunc: playerrepo.CreatedAtEq(&now),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldCreatedAt.String(),
 				Op:    comparison.Eq,
 				Arg:   &now,
@@ -285,7 +285,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.CreatedAtNotEq(&now),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldCreatedAt.String(),
 				Op:    comparison.NotEq,
 				Arg:   &now,
@@ -293,21 +293,21 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.CreatedAtIsNull(),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldCreatedAt.String(),
 				Op:    comparison.IsNull,
 			},
 		},
 		{
 			predFunc: playerrepo.CreatedAtIsNotNull(),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldCreatedAt.String(),
 				Op:    comparison.IsNotNull,
 			},
 		},
 		{
 			predFunc: playerrepo.CreatedAtIn(&now),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldCreatedAt.String(),
 				Op:    comparison.In,
 				Arg:   []interface{}{&now},
@@ -315,7 +315,7 @@ func TestPredicate(t *testing.T) {
 		},
 		{
 			predFunc: playerrepo.CreatedAtNotIn(&now),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldCreatedAt.String(),
 				Op:    comparison.NotIn,
 				Arg:   []interface{}{&now},
@@ -328,7 +328,7 @@ func TestPredicate(t *testing.T) {
 				playerrepo.FieldUpdatedAt,
 				playerrepo.FieldCreatedAt,
 			),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldUpdatedAt.String(),
 				Op:    comparison.Eq,
 				Arg:   playerrepo.FieldCreatedAt,
@@ -339,7 +339,7 @@ func TestPredicate(t *testing.T) {
 				playerrepo.FieldUpdatedAt,
 				playerrepo.FieldCreatedAt,
 			),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldUpdatedAt.String(),
 				Op:    comparison.NotEq,
 				Arg:   playerrepo.FieldCreatedAt,
@@ -351,7 +351,7 @@ func TestPredicate(t *testing.T) {
 				playerrepo.FieldUpdatedAt,
 				playerrepo.FieldCreatedAt,
 			),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldUpdatedAt.String(),
 				Op:    comparison.Gt,
 				Arg:   playerrepo.FieldCreatedAt,
@@ -362,7 +362,7 @@ func TestPredicate(t *testing.T) {
 				playerrepo.FieldUpdatedAt,
 				playerrepo.FieldCreatedAt,
 			),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldUpdatedAt.String(),
 				Op:    comparison.GtOrEq,
 				Arg:   playerrepo.FieldCreatedAt,
@@ -374,7 +374,7 @@ func TestPredicate(t *testing.T) {
 				playerrepo.FieldUpdatedAt,
 				playerrepo.FieldCreatedAt,
 			),
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldUpdatedAt.String(),
 				Op:    comparison.Lt,
 				Arg:   playerrepo.FieldCreatedAt,
@@ -386,7 +386,7 @@ func TestPredicate(t *testing.T) {
 				playerrepo.FieldCreatedAt,
 			),
 
-			want: &comparison.Predicate{
+			want: comparison.Predicate{
 				Field: playerrepo.FieldUpdatedAt.String(),
 				Op:    comparison.LtOrEq,
 				Arg:   playerrepo.FieldCreatedAt,
@@ -395,7 +395,7 @@ func TestPredicate(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		got := tc.predFunc([]*comparison.Predicate{})[0]
+		got := tc.predFunc([]comparison.Predicate{})[0]
 		assert.Equal(t, tc.want.Field, got.Field)
 		assert.Equal(t, tc.want.Arg, got.Arg)
 		assert.Equal(t, tc.want.Op, got.Op)

@@ -325,13 +325,13 @@ func (repo *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 		From("\"{{.Table}}\"").
 		PlaceholderFormat(squirrel.Dollar)
 
-	preds := []*comparison.Predicate{}
+	preds := []comparison.Predicate{}
 	for _, predFunc := range q.predFuncs {
 		preds = predFunc(preds)
 	}
 	qb = squirrel.SelectBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), preds))
 
-	sorts := []*sort.Sort{}
+	sorts := []sort.Sort{}
 	for _, sortFunc := range q.sortFuncs {
 		sorts = sortFunc(sorts)
 	}
@@ -348,7 +348,8 @@ func (repo *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	return qb
 }
 
-func (repo *PostgresRepository) buildPreds(sb squirrel.StatementBuilderType, preds []*comparison.Predicate) squirrel.StatementBuilderType {
+func (repo *PostgresRepository) buildPreds(sb squirrel.StatementBuilderType, 
+	preds []comparison.Predicate) squirrel.StatementBuilderType {
 	for _, pred := range preds {	
 		ph := "?"
 		fieldX, arg := pred.Field, pred.Arg
@@ -399,7 +400,7 @@ func (repo *PostgresRepository) buildPreds(sb squirrel.StatementBuilderType, pre
 	return sb
 }
 
-func (repo *PostgresRepository) buildSort(qb squirrel.SelectBuilder, sorts []*sort.Sort) squirrel.SelectBuilder {
+func (repo *PostgresRepository) buildSort(qb squirrel.SelectBuilder, sorts []sort.Sort) squirrel.SelectBuilder {
 	for _, s := range sorts {
 		field := fmt.Sprintf("%q", s.Field)
 		switch s.Direction {
@@ -450,7 +451,7 @@ func (repo *PostgresRepository) update(ctx context.Context, runner nero.SQLRunne
 		return 0, nil
 	}
 
-	preds := []*comparison.Predicate{}
+	preds := []comparison.Predicate{}
 	for _, predFunc := range u.predFuncs {
 		preds = predFunc(preds)
 	}
@@ -493,7 +494,7 @@ func (repo *PostgresRepository) delete(ctx context.Context, runner nero.SQLRunne
 	qb := squirrel.Delete("\"{{.Table}}\"").
 		PlaceholderFormat(squirrel.Dollar)
 
-	preds := []*comparison.Predicate{}
+	preds := []comparison.Predicate{}
 	for _, predFunc := range d.predFuncs {
 		preds = predFunc(preds)
 	}
@@ -533,7 +534,7 @@ func (repo *PostgresRepository) AggregateInTx(ctx context.Context, tx nero.Tx, a
 }
 
 func (repo *PostgresRepository) aggregate(ctx context.Context, runner nero.SQLRunner, a *Aggregator) error {
-	aggs := []*aggregate.Aggregate{}
+	aggs := []aggregate.Aggregate{}
 	for _, aggFunc := range a.aggFuncs {
 		aggs = aggFunc(aggs)
 	}
@@ -566,13 +567,13 @@ func (repo *PostgresRepository) aggregate(ctx context.Context, runner nero.SQLRu
 	}
 	qb = qb.GroupBy(groupBys...)
 
-	preds := []*comparison.Predicate{}
+	preds := []comparison.Predicate{}
 	for _, predFunc := range a.predFuncs {
 		preds = predFunc(preds)
 	}
 	qb = squirrel.SelectBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), preds))
 
-	sorts := []*sort.Sort{}
+	sorts := []sort.Sort{}
 	for _, sortFunc := range a.sortFuncs {
 		sorts = sortFunc(sorts)
 	}	

@@ -273,13 +273,13 @@ func (repo *SQLiteRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	}
 	qb := squirrel.Select(columns...).From("\"players\"")
 
-	preds := []*comparison.Predicate{}
+	preds := []comparison.Predicate{}
 	for _, predFunc := range q.predFuncs {
 		preds = predFunc(preds)
 	}
 	qb = squirrel.SelectBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), preds))
 
-	sorts := []*sort.Sort{}
+	sorts := []sort.Sort{}
 	for _, sortFunc := range q.sortFuncs {
 		sorts = sortFunc(sorts)
 	}
@@ -296,7 +296,7 @@ func (repo *SQLiteRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	return qb
 }
 
-func (repo *SQLiteRepository) buildPreds(sb squirrel.StatementBuilderType, preds []*comparison.Predicate) squirrel.StatementBuilderType {
+func (repo *SQLiteRepository) buildPreds(sb squirrel.StatementBuilderType, preds []comparison.Predicate) squirrel.StatementBuilderType {
 	for _, pred := range preds {
 		ph := "?"
 		fieldX, arg := pred.Field, pred.Arg
@@ -347,7 +347,7 @@ func (repo *SQLiteRepository) buildPreds(sb squirrel.StatementBuilderType, preds
 	return sb
 }
 
-func (repo *SQLiteRepository) buildSort(qb squirrel.SelectBuilder, sorts []*sort.Sort) squirrel.SelectBuilder {
+func (repo *SQLiteRepository) buildSort(qb squirrel.SelectBuilder, sorts []sort.Sort) squirrel.SelectBuilder {
 	for _, s := range sorts {
 		field := fmt.Sprintf("%q", s.Field)
 		switch s.Direction {
@@ -410,7 +410,7 @@ func (repo *SQLiteRepository) update(ctx context.Context, runner nero.SQLRunner,
 		return 0, nil
 	}
 
-	preds := []*comparison.Predicate{}
+	preds := []comparison.Predicate{}
 	for _, predFunc := range u.predFuncs {
 		preds = predFunc(preds)
 	}
@@ -452,7 +452,7 @@ func (repo *SQLiteRepository) DeleteInTx(ctx context.Context, tx nero.Tx, d *Del
 func (repo *SQLiteRepository) delete(ctx context.Context, runner nero.SQLRunner, d *Deleter) (int64, error) {
 	qb := squirrel.Delete("\"players\"")
 
-	preds := []*comparison.Predicate{}
+	preds := []comparison.Predicate{}
 	for _, predFunc := range d.predFuncs {
 		preds = predFunc(preds)
 	}
@@ -492,7 +492,7 @@ func (repo *SQLiteRepository) AggregateInTx(ctx context.Context, tx nero.Tx, a *
 }
 
 func (repo *SQLiteRepository) aggregate(ctx context.Context, runner nero.SQLRunner, a *Aggregator) error {
-	aggs := []*aggregate.Aggregate{}
+	aggs := []aggregate.Aggregate{}
 	for _, aggFunc := range a.aggFuncs {
 		aggs = aggFunc(aggs)
 	}
@@ -524,13 +524,13 @@ func (repo *SQLiteRepository) aggregate(ctx context.Context, runner nero.SQLRunn
 	}
 	qb = qb.GroupBy(groupBys...)
 
-	preds := []*comparison.Predicate{}
+	preds := []comparison.Predicate{}
 	for _, predFunc := range a.predFuncs {
 		preds = predFunc(preds)
 	}
 	qb = squirrel.SelectBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), preds))
 
-	sorts := []*sort.Sort{}
+	sorts := []sort.Sort{}
 	for _, sortFunc := range a.sortFuncs {
 		sorts = sortFunc(sorts)
 	}

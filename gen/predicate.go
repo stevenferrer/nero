@@ -72,8 +72,8 @@ import (
         {{ range $op := $.EqOps }} 
             // {{$field.StructField}}{{$op.String}} {{$op.Desc}} operator on {{$field.StructField}} field
             func {{$field.StructField}}{{$op.String}} ({{$field.Identifier}} {{rawType $field.TypeInfo.V}}) comparison.PredFunc {
-                return func(preds []*comparison.Predicate) []*comparison.Predicate {
-                    return append(preds, &comparison.Predicate{
+                return func(preds []comparison.Predicate) []comparison.Predicate {
+                    return append(preds, comparison.Predicate{
                         Field: "{{$field.Name}}",
                         Op: comparison.{{$op.String}},
                         {{if and ($field.IsArray) (ne $field.IsValueScanner true) -}}
@@ -90,8 +90,8 @@ import (
             {{if or $field.TypeInfo.IsNumeric (isType $field.TypeInfo.V "time.Time")}}
                 // {{$field.StructField}}{{$op.String}} {{$op.Desc}} operator on {{$field.StructField}} field
                 func {{$field.StructField}}{{$op.String}} ({{$field.Identifier}} {{rawType $field.TypeInfo.V}}) comparison.PredFunc {
-                    return func(preds []*comparison.Predicate) []*comparison.Predicate {
-                        return append(preds, &comparison.Predicate{
+                    return func(preds []comparison.Predicate) []comparison.Predicate {
+                        return append(preds, comparison.Predicate{
                             Field: "{{$field.Name}}",
                             Op: comparison.{{$op.String}},
                             {{if and ($field.IsArray) (ne $field.IsValueScanner true) -}}
@@ -109,8 +109,8 @@ import (
             {{if $field.IsNillable}}
                 // {{$field.StructField}}{{$op.String}} {{$op.Desc}} operator on {{$field.StructField}} field
                 func {{$field.StructField}}{{$op.String}} () comparison.PredFunc {
-                    return func(preds []*comparison.Predicate) []*comparison.Predicate {
-                        return append(preds, &comparison.Predicate{
+                    return func(preds []comparison.Predicate) []comparison.Predicate {
+                        return append(preds, comparison.Predicate{
                             Field: "{{$field.Name}}",
                             Op: comparison.{{$op.String}},
                         })
@@ -127,8 +127,8 @@ import (
                     args = append(args, v)
                 }
 
-                return func(preds []*comparison.Predicate) []*comparison.Predicate {
-                    return append(preds, &comparison.Predicate{
+                return func(preds []comparison.Predicate) []comparison.Predicate {
+                    return append(preds, comparison.Predicate{
                         Field: "{{$field.Name}}",
                         Op: comparison.{{$op.String}},
                         Arg: args,
@@ -144,8 +144,8 @@ import (
     //
     // fieldX and fieldY must be of the same type
     func FieldX{{$op.String}}FieldY (fieldX, fieldY Field) comparison.PredFunc {
-        return func(preds []*comparison.Predicate) []*comparison.Predicate {
-            return append(preds, &comparison.Predicate{
+        return func(preds []comparison.Predicate) []comparison.Predicate {
+            return append(preds, comparison.Predicate{
                 Field: fieldX.String(),
                 Op: comparison.{{$op.String}},
                 Arg: fieldY,
@@ -159,8 +159,8 @@ import (
     // 
     // fieldX and fieldY must be of the same type
     func FieldX{{$op.String}}FieldY (fieldX, fieldY Field) comparison.PredFunc {
-        return func(preds []*comparison.Predicate) []*comparison.Predicate {
-            return append(preds, &comparison.Predicate{
+        return func(preds []comparison.Predicate) []comparison.Predicate {
+            return append(preds, comparison.Predicate{
                 Field: fieldX.String(),
                 Op: comparison.{{$op.String}},
                 Arg: fieldY,
