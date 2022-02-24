@@ -252,7 +252,7 @@ func (repo *SQLiteRepository) query(ctx context.Context, runner nero.SQLRunner, 
 			return nil, err
 		}
 
-		{{.TypeIdentifierPlural}} = append({{.TypeIdentifierPlural}}, &{{.TypeIdentifier}})
+		{{.TypeIdentifierPlural}} = append({{.TypeIdentifierPlural}}, {{.TypeIdentifier}})
 	}
 
 	return {{.TypeIdentifierPlural}}, nil
@@ -267,7 +267,7 @@ func (repo *SQLiteRepository) QueryOne(ctx context.Context, q *Queryer) ({{rawTy
 func (repo *SQLiteRepository) QueryOneInTx(ctx context.Context, tx nero.Tx, q *Queryer) ({{rawType .TypeInfo.V}}, error) {
 	txx, ok := tx.(*sql.Tx)
 	if !ok {
-		return nil, errors.New("expecting tx to be *sql.Tx")
+		return {{zeroValue .TypeInfo.V}}, errors.New("expecting tx to be *sql.Tx")
 	}
 
 	return repo.queryOne(ctx, txx, q)
@@ -280,7 +280,12 @@ func (repo *SQLiteRepository) queryOne(ctx context.Context, runner nero.SQLRunne
 		repo.logger.Printf("method: QueryOne, stmt: %q, args: %v, error: %v", sql, args, err)
 	}
 
-	var {{.TypeIdentifier}} {{type .TypeInfo.V}}
+	{{if .TypeInfo.IsNillable -}}
+		var {{.TypeIdentifier}} = new({{type .TypeInfo.V}})
+	{{else -}}
+		var {{.TypeIdentifier}} {{rawType .TypeInfo.V}}
+	{{end -}}
+
 	err := qb.RunWith(runner).
 		QueryRowContext(ctx).
 		Scan(
@@ -292,7 +297,7 @@ func (repo *SQLiteRepository) queryOne(ctx context.Context, runner nero.SQLRunne
 		return {{zeroValue .TypeInfo.V}}, err
 	}
 
-	return &{{.TypeIdentifier}}, nil
+	return {{.TypeIdentifier}}, nil
 }
 
 func (repo *SQLiteRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
@@ -303,13 +308,13 @@ func (repo *SQLiteRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	}
 	qb := squirrel.Select(columns...).From("\"{{.Table}}\"")
 
-	preds := []comparison.Predicate{}
+	preds := make([]comparison.Predicate, 0, len(q.predFuncs))
 	for _, predFunc := range q.predFuncs {
 		preds = predFunc(preds)
 	}
 	qb = squirrel.SelectBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), preds))
 
-	sorts := []sort.Sort{}
+	sorts := make([]sort.Sort, 0, len(q.sortFuncs))
 	for _, sortFunc := range q.sortFuncs {
 		sorts = sortFunc(sorts)
 	}
@@ -365,7 +370,7 @@ func (repo *SQLiteRepository) buildPreds(sb squirrel.StatementBuilderType, preds
 				fmtStr = "%q NOT IN (%s)"
 			}
 
-			phs := []string{}
+			phs := make([]string, 0, len(args))
 			for range args {
 				phs = append(phs, "?")
 			}
@@ -423,7 +428,7 @@ func (repo *SQLiteRepository) update(ctx context.Context, runner nero.SQLRunner,
 		return 0, nil
 	}
 
-	preds := []comparison.Predicate{}
+	preds := make([]comparison.Predicate, 0, len(u.predFuncs))
 	for _, predFunc := range u.predFuncs {
 		preds = predFunc(preds)
 	}
@@ -465,7 +470,7 @@ func (repo *SQLiteRepository) DeleteInTx(ctx context.Context, tx nero.Tx, d *Del
 func (repo *SQLiteRepository) delete(ctx context.Context, runner nero.SQLRunner, d *Deleter) (int64, error) {
 	qb := squirrel.Delete("\"{{.Table}}\"")
 
-	preds := []comparison.Predicate{}
+	preds := make([]comparison.Predicate, 0, len(d.predFuncs))
 	for _, predFunc := range d.predFuncs {
 		preds = predFunc(preds)
 	}
@@ -505,11 +510,11 @@ func (repo *SQLiteRepository) AggregateInTx(ctx context.Context, tx nero.Tx, a *
 }
 
 func (repo *SQLiteRepository) aggregate(ctx context.Context, runner nero.SQLRunner, a *Aggregator) error {
-	aggs := []aggregate.Aggregate{}
+	aggs := make([]aggregate.Aggregate, 0, len(a.aggFuncs))
 	for _, aggFunc := range a.aggFuncs {
 		aggs = aggFunc(aggs)
 	}
-	columns := []string{}
+	columns := make([]string, 0, len(aggs))
 	for _, agg := range aggs {
 		field := agg.Field
 		qf := fmt.Sprintf("%q", field)
@@ -531,19 +536,19 @@ func (repo *SQLiteRepository) aggregate(ctx context.Context, runner nero.SQLRunn
 
 	qb := squirrel.Select(columns...).From("\"{{.Table}}\"")
 
-	groupBys := []string{}
+	groupBys := make([]string, 0, len(a.groupBys))
 	for _, groupBy := range a.groupBys {
 		groupBys = append(groupBys, fmt.Sprintf("%q", groupBy.String()))
 	}
 	qb = qb.GroupBy(groupBys...)
 
-	preds := []comparison.Predicate{}
+	preds := make([]comparison.Predicate, 0, len(a.predFuncs))
 	for _, predFunc := range a.predFuncs {
 		preds = predFunc(preds)
 	}
 	qb = squirrel.SelectBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), preds))
 
-	sorts := []sort.Sort{}
+	sorts := make([]sort.Sort, 0, len(a.sortFuncs))
 	for _, sortFunc := range a.sortFuncs {
 		sorts = sortFunc(sorts)
 	}	

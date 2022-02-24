@@ -6,12 +6,12 @@ import (
 	"path"
 
 	"github.com/stevenferrer/nero/gen"
-	"github.com/stevenferrer/nero/test/integration/player"
+	"github.com/stevenferrer/nero/test/integration/playerpkg"
 )
 
 func main() {
 	// generate
-	p := player.Player{}
+	p := playerpkg.Player{}
 	files, err := gen.Generate(p.Schema())
 	checkErr(err)
 

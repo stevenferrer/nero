@@ -15,7 +15,7 @@ func TestGenerate(t *testing.T) {
 	u := internal.User{}
 	files, err := gen.Generate(u.Schema())
 	assert.NoError(t, err)
-	assert.Len(t, files, 6)
+	assert.Len(t, files, 7, "expecting 7 files")
 
 	for _, file := range files {
 		require.NotEmpty(t, file.Filename())

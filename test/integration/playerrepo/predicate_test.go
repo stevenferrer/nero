@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/stevenferrer/nero/comparison"
-	"github.com/stevenferrer/nero/test/integration/player"
+	"github.com/stevenferrer/nero/test/integration/playerpkg"
 	"github.com/stevenferrer/nero/test/integration/playerrepo"
 	"github.com/stretchr/testify/assert"
 )
@@ -194,35 +194,35 @@ func TestPredicate(t *testing.T) {
 
 		// race
 		{
-			predFunc: playerrepo.RaceEq(player.RaceHuman),
+			predFunc: playerrepo.RaceEq(playerpkg.RaceHuman),
 			want: comparison.Predicate{
 				Field: playerrepo.FieldRace.String(),
 				Op:    comparison.Eq,
-				Arg:   player.RaceHuman,
+				Arg:   playerpkg.RaceHuman,
 			},
 		},
 		{
-			predFunc: playerrepo.RaceNotEq(player.RaceHuman),
+			predFunc: playerrepo.RaceNotEq(playerpkg.RaceHuman),
 			want: comparison.Predicate{
 				Field: playerrepo.FieldRace.String(),
 				Op:    comparison.NotEq,
-				Arg:   player.RaceHuman,
+				Arg:   playerpkg.RaceHuman,
 			},
 		},
 		{
-			predFunc: playerrepo.RaceIn(player.RaceHuman),
+			predFunc: playerrepo.RaceIn(playerpkg.RaceHuman),
 			want: comparison.Predicate{
 				Field: playerrepo.FieldRace.String(),
 				Op:    comparison.In,
-				Arg:   []interface{}{player.RaceHuman},
+				Arg:   []interface{}{playerpkg.RaceHuman},
 			},
 		},
 		{
-			predFunc: playerrepo.RaceNotIn(player.RaceHuman),
+			predFunc: playerrepo.RaceNotIn(playerpkg.RaceHuman),
 			want: comparison.Predicate{
 				Field: playerrepo.FieldRace.String(),
 				Op:    comparison.NotIn,
-				Arg:   []interface{}{player.RaceHuman},
+				Arg:   []interface{}{playerpkg.RaceHuman},
 			},
 		},
 

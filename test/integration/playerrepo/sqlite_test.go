@@ -16,8 +16,6 @@ import (
 )
 
 func TestSQLiteRepository(t *testing.T) {
-	t.Parallel()
-
 	const dsn = "file:test.db?mode=memory&cache=shared"
 	db, err := sql.Open("sqlite3", dsn)
 	require.NoError(t, err)
@@ -29,8 +27,8 @@ func TestSQLiteRepository(t *testing.T) {
 	assert.NoError(t, err)
 
 	// initialize a new repo
-	repo := playerrepo.NewSQLiteRepository(db).Debug().
-		WithLogger(log.New(&bytes.Buffer{}, "", 0))
+	repo := playerrepo.NewSQLiteRepository(db).Debug()
+	// WithLogger(log.New(&bytes.Buffer{}, "", 0))
 	newRepoTestRunner(repo)(t)
 	// cleanup
 	require.NoError(t, dropTable(db))

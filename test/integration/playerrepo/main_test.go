@@ -15,7 +15,7 @@ import (
 
 	"github.com/stevenferrer/nero"
 	"github.com/stevenferrer/nero/comparison"
-	"github.com/stevenferrer/nero/test/integration/player"
+	player "github.com/stevenferrer/nero/test/integration/playerpkg"
 	"github.com/stevenferrer/nero/test/integration/playerrepo"
 )
 
@@ -292,10 +292,9 @@ func newRepoTestRunner(repo playerrepo.Repository) func(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), rowsAffected)
 
-				usr, err := repo.QueryOne(ctx,
+				_, err = repo.QueryOne(ctx,
 					playerrepo.NewQueryer().Where(preds...))
 				assert.Error(t, err, sql.ErrNoRows)
-				assert.Nil(t, usr)
 
 				// delete all
 				rowsAffected, err = repo.Delete(ctx, playerrepo.NewDeleter())
@@ -647,10 +646,9 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 				assert.NoError(t, tx.Commit())
 
 				tx = newTx(ctx, t)
-				usr, err := repo.QueryOne(ctx,
+				_, err = repo.QueryOne(ctx,
 					playerrepo.NewQueryer().Where(preds...))
 				assert.Error(t, err, sql.ErrNoRows)
-				assert.Nil(t, usr)
 				assert.NoError(t, tx.Commit())
 
 				// delete all

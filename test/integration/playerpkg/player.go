@@ -1,4 +1,4 @@
-package player
+package playerpkg
 
 import (
 	"time"
@@ -31,7 +31,7 @@ const (
 
 // Schema implements nero.Schemaer
 func (p Player) Schema() nero.Schema {
-	return nero.NewSchemaBuilder(&p).
+	return nero.NewSchemaBuilder(p).
 		PkgName("playerrepo").
 		Table("players").
 		Identity(
@@ -46,6 +46,9 @@ func (p Player) Schema() nero.Schema {
 			nero.NewFieldBuilder("updated_at", p.UpdatedAt).Optional().Build(),
 			nero.NewFieldBuilder("created_at", p.CreatedAt).Auto().Build(),
 		).
-		Templates(nero.NewPostgresTemplate(), nero.NewSQLiteTemplate()).
+		Templates(
+			nero.NewPostgresTemplate(),
+			nero.NewSQLiteTemplate(),
+		).
 		Build()
 }

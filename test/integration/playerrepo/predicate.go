@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/stevenferrer/nero/comparison"
-	"github.com/stevenferrer/nero/test/integration/player"
+	"github.com/stevenferrer/nero/test/integration/playerpkg"
 )
 
 // IDEq equal operator on ID field
@@ -269,7 +269,7 @@ func AgeNotIn(ages ...int) comparison.PredFunc {
 }
 
 // RaceEq equal operator on Race field
-func RaceEq(race player.Race) comparison.PredFunc {
+func RaceEq(race playerpkg.Race) comparison.PredFunc {
 	return func(preds []comparison.Predicate) []comparison.Predicate {
 		return append(preds, comparison.Predicate{
 			Field: "race",
@@ -280,7 +280,7 @@ func RaceEq(race player.Race) comparison.PredFunc {
 }
 
 // RaceNotEq not equal operator on Race field
-func RaceNotEq(race player.Race) comparison.PredFunc {
+func RaceNotEq(race playerpkg.Race) comparison.PredFunc {
 	return func(preds []comparison.Predicate) []comparison.Predicate {
 		return append(preds, comparison.Predicate{
 			Field: "race",
@@ -291,7 +291,7 @@ func RaceNotEq(race player.Race) comparison.PredFunc {
 }
 
 // RaceIn in operator on Race field
-func RaceIn(races ...player.Race) comparison.PredFunc {
+func RaceIn(races ...playerpkg.Race) comparison.PredFunc {
 	args := []interface{}{}
 	for _, v := range races {
 		args = append(args, v)
@@ -307,7 +307,7 @@ func RaceIn(races ...player.Race) comparison.PredFunc {
 }
 
 // RaceNotIn not in operator on Race field
-func RaceNotIn(races ...player.Race) comparison.PredFunc {
+func RaceNotIn(races ...playerpkg.Race) comparison.PredFunc {
 	args := []interface{}{}
 	for _, v := range races {
 		args = append(args, v)

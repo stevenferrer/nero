@@ -9,13 +9,12 @@ import (
 	"testing"
 
 	_ "github.com/lib/pq"
-	"github.com/stevenferrer/nero/test/integration/playerrepo"
 	"github.com/stretchr/testify/require"
+
+	"github.com/stevenferrer/nero/test/integration/playerrepo"
 )
 
 func TestPostgresRepository(t *testing.T) {
-	t.Parallel()
-
 	const dsn = "postgres://postgres:postgres@localhost:5432?sslmode=disable"
 
 	// regular methods
@@ -28,8 +27,8 @@ func TestPostgresRepository(t *testing.T) {
 	require.NoError(t, createPgTable(db))
 
 	// initialize a new repo
-	repo := playerrepo.NewPostgresRepository(db).Debug().
-		WithLogger(log.New(&bytes.Buffer{}, "", 0))
+	repo := playerrepo.NewPostgresRepository(db).Debug()
+	// WithLogger(log.New(&bytes.Buffer{}, "", 0))
 	newRepoTestRunner(repo)(t)
 	require.NoError(t, dropTable(db))
 

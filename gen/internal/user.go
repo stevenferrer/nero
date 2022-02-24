@@ -17,7 +17,7 @@ type User struct {
 
 // Schema returns the schema for user model
 func (u User) Schema() nero.Schema {
-	return nero.NewSchemaBuilder(&u).
+	return nero.NewSchemaBuilder(u).
 		PkgName("userrepo").Table("users").
 		Identity(
 			nero.NewFieldBuilder("id", u.ID).
@@ -29,6 +29,9 @@ func (u User) Schema() nero.Schema {
 			nero.NewFieldBuilder("updated_at", u.UpdatedAt).Optional().Build(),
 			nero.NewFieldBuilder("created_at", u.CreatedAt).Auto().Build(),
 		).
-		Templates(nero.NewPostgresTemplate(), nero.NewSQLiteTemplate()).
+		Templates(
+			nero.NewPostgresTemplate(),
+			nero.NewSQLiteTemplate(),
+		).
 		Build()
 }

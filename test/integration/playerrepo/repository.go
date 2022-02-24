@@ -12,7 +12,7 @@ import (
 	"github.com/stevenferrer/nero/aggregate"
 	"github.com/stevenferrer/nero/comparison"
 	"github.com/stevenferrer/nero/sort"
-	"github.com/stevenferrer/nero/test/integration/player"
+	"github.com/stevenferrer/nero/test/integration/playerpkg"
 )
 
 // Repository is an interface that provides the methods
@@ -29,13 +29,13 @@ type Repository interface {
 	// CreateManyInTx batch creates Players in a transaction
 	CreateManyInTx(context.Context, nero.Tx, ...*Creator) error
 	// Query queries Players
-	Query(context.Context, *Queryer) ([]*player.Player, error)
+	Query(context.Context, *Queryer) ([]playerpkg.Player, error)
 	// QueryTx queries Players in a transaction
-	QueryInTx(context.Context, nero.Tx, *Queryer) ([]*player.Player, error)
+	QueryInTx(context.Context, nero.Tx, *Queryer) ([]playerpkg.Player, error)
 	// QueryOne queries a Player
-	QueryOne(context.Context, *Queryer) (*player.Player, error)
+	QueryOne(context.Context, *Queryer) (playerpkg.Player, error)
 	// QueryOneTx queries a Player in a transaction
-	QueryOneInTx(context.Context, nero.Tx, *Queryer) (*player.Player, error)
+	QueryOneInTx(context.Context, nero.Tx, *Queryer) (playerpkg.Player, error)
 	// Update updates a Player or many Players
 	Update(context.Context, *Updater) (rowsAffected int64, err error)
 	// UpdateTx updates a Player many Players in a transaction
@@ -55,7 +55,7 @@ type Creator struct {
 	email     string
 	name      string
 	age       int
-	race      player.Race
+	race      playerpkg.Race
 	updatedAt *time.Time
 }
 
@@ -83,7 +83,7 @@ func (c *Creator) Age(age int) *Creator {
 }
 
 // Race sets the Race field
-func (c *Creator) Race(race player.Race) *Creator {
+func (c *Creator) Race(race playerpkg.Race) *Creator {
 	c.race = race
 	return c
 }
@@ -158,7 +158,7 @@ type Updater struct {
 	email     string
 	name      string
 	age       int
-	race      player.Race
+	race      playerpkg.Race
 	updatedAt *time.Time
 	predFuncs []comparison.PredFunc
 }
@@ -187,7 +187,7 @@ func (c *Updater) Age(age int) *Updater {
 }
 
 // Race sets the Race field
-func (c *Updater) Race(race player.Race) *Updater {
+func (c *Updater) Race(race playerpkg.Race) *Updater {
 	c.race = race
 	return c
 }
