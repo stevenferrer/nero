@@ -8,7 +8,7 @@ import (
 	"github.com/stevenferrer/nero/sort"
 )
 
-func newSortFile(schema *nero.Schema) (*File, error) {
+func newSortFile(schema nero.Schema) (*File, error) {
 	tmpl, err := template.New("sort.tmpl").
 		Funcs(nero.NewFuncMap()).Parse(sortTmpl)
 	if err != nil {
@@ -17,7 +17,7 @@ func newSortFile(schema *nero.Schema) (*File, error) {
 
 	data := struct {
 		Directions []sort.Direction
-		Schema     *nero.Schema
+		Schema     nero.Schema
 	}{
 		Directions: []sort.Direction{
 			sort.Asc, sort.Desc,

@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/stevenferrer/nero"
 	"github.com/stevenferrer/nero/gen/internal"
 )
 
@@ -18,6 +19,6 @@ func Test_newRepositoryFile(t *testing.T) {
 	_, err = format.Source(f.Bytes())
 	require.NoError(t, err)
 
-	_, err = newRepositoryFile(nil)
+	_, err = newRepositoryFile(nero.Schema{})
 	assert.Error(t, err)
 }

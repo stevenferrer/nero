@@ -7,7 +7,7 @@ import (
 	"github.com/stevenferrer/nero"
 )
 
-func newRepositoryFile(schema *nero.Schema) (*File, error) {
+func newRepositoryFile(schema nero.Schema) (*File, error) {
 	tmpl, err := template.New("repository.tmpl").
 		Funcs(nero.NewFuncMap()).Parse(repositoryTmpl)
 	if err != nil {

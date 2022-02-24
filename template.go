@@ -84,8 +84,8 @@ func zeroValueFunc(v interface{}) string {
 }
 
 // prependToFields prepends a field to the list of fields
-func prependToFields(field *Field, fields []*Field) []*Field {
-	return append([]*Field{field}, fields...)
+func prependToFields(field Field, fields []Field) []Field {
+	return append([]Field{field}, fields...)
 }
 
 const fileHeaders = `

@@ -4,12 +4,12 @@ import "github.com/stevenferrer/mira"
 
 // FieldBuilder is a field builder
 type FieldBuilder struct {
-	f *Field
+	f Field
 }
 
 // NewFieldBuilder takes a field name and a value and returns a FieldBuilder
 func NewFieldBuilder(name string, v interface{}) *FieldBuilder {
-	return &FieldBuilder{&Field{
+	return &FieldBuilder{Field{
 		name:     name,
 		typeInfo: mira.NewTypeInfo(v),
 	}}
@@ -34,8 +34,8 @@ func (fb *FieldBuilder) StructField(structField string) *FieldBuilder {
 }
 
 // Build builds the field
-func (fb *FieldBuilder) Build() *Field {
-	return &Field{
+func (fb *FieldBuilder) Build() Field {
+	return Field{
 		name:        fb.f.name,
 		typeInfo:    fb.f.typeInfo,
 		auto:        fb.f.auto,

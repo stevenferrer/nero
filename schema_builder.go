@@ -6,51 +6,51 @@ import (
 
 // SchemaBuilder is used for building a schema
 type SchemaBuilder struct {
-	sc *Schema
+	s Schema
 }
 
 // NewSchemaBuilder takes a struct value and  returns a SchemaBuilder
 func NewSchemaBuilder(v interface{}) *SchemaBuilder {
-	return &SchemaBuilder{sc: &Schema{
+	return &SchemaBuilder{s: Schema{
 		typeInfo:  mira.NewTypeInfo(v),
-		fields:    []*Field{},
-		templates: []Template{},
+		fields:    make([]Field, 0, 2),
+		templates: make([]Template, 0, 2),
 	}}
 }
 
 // PkgName sets the package name
 func (sb *SchemaBuilder) PkgName(pkgName string) *SchemaBuilder {
-	sb.sc.pkgName = pkgName
+	sb.s.pkgName = pkgName
 	return sb
 }
 
 // Table sets the database table/collection name
 func (sb *SchemaBuilder) Table(table string) *SchemaBuilder {
-	sb.sc.table = table
+	sb.s.table = table
 	return sb
 }
 
 // Identity sets the identity field
-func (sb *SchemaBuilder) Identity(field *Field) *SchemaBuilder {
-	sb.sc.identity = field
+func (sb *SchemaBuilder) Identity(field Field) *SchemaBuilder {
+	sb.s.identity = field
 	return sb
 }
 
 // Fields sets the fields
-func (sb *SchemaBuilder) Fields(fields ...*Field) *SchemaBuilder {
-	sb.sc.fields = append(sb.sc.fields, fields...)
+func (sb *SchemaBuilder) Fields(fields ...Field) *SchemaBuilder {
+	sb.s.fields = append(sb.s.fields, fields...)
 	return sb
 }
 
 // Templates sets the templates
 func (sb *SchemaBuilder) Templates(templates ...Template) *SchemaBuilder {
-	sb.sc.templates = append(sb.sc.templates, templates...)
+	sb.s.templates = append(sb.s.templates, templates...)
 	return sb
 }
 
 // Build builds the schema
-func (sb *SchemaBuilder) Build() *Schema {
-	templates := sb.sc.templates
+func (sb *SchemaBuilder) Build() Schema {
+	templates := sb.s.templates
 
 	// use default template set
 	if len(templates) == 0 {
@@ -62,23 +62,23 @@ func (sb *SchemaBuilder) Build() *Schema {
 
 	// get pkg imports
 	importMap := map[string]int{}
-	for _, fld := range append(sb.sc.fields, sb.sc.identity) {
+	for _, fld := range append(sb.s.fields, sb.s.identity) {
 		if fld.typeInfo.PkgPath() != "" {
 			importMap[fld.typeInfo.PkgPath()] = 1
 		}
 	}
 
-	imports := []string{sb.sc.typeInfo.PkgPath()}
+	imports := []string{sb.s.typeInfo.PkgPath()}
 	for imp := range importMap {
 		imports = append(imports, imp)
 	}
 
-	return &Schema{
-		typeInfo:  sb.sc.typeInfo,
-		pkgName:   sb.sc.pkgName,
-		table:     sb.sc.table,
-		identity:  sb.sc.identity,
-		fields:    sb.sc.fields,
+	return Schema{
+		typeInfo:  sb.s.typeInfo,
+		pkgName:   sb.s.pkgName,
+		table:     sb.s.table,
+		identity:  sb.s.identity,
+		fields:    sb.s.fields,
 		imports:   imports,
 		templates: templates,
 	}

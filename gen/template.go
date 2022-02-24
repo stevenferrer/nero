@@ -7,7 +7,7 @@ import (
 	"github.com/stevenferrer/nero"
 )
 
-func newTemplate(schema *nero.Schema, template nero.Template) (*bytes.Buffer, error) {
+func newTemplate(schema nero.Schema, template nero.Template) (*bytes.Buffer, error) {
 	tmpl, err := nero.ParseTemplate(template)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse template")

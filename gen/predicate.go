@@ -8,7 +8,7 @@ import (
 	"github.com/stevenferrer/nero/comparison"
 )
 
-func newPredicateFile(schema *nero.Schema) (*File, error) {
+func newPredicateFile(schema nero.Schema) (*File, error) {
 	tmpl, err := template.New("predicates.tmpl").
 		Funcs(nero.NewFuncMap()).Parse(predicatesTmpl)
 	if err != nil {
@@ -20,7 +20,7 @@ func newPredicateFile(schema *nero.Schema) (*File, error) {
 		LtGtOps []comparison.Operator
 		NullOps []comparison.Operator
 		InOps   []comparison.Operator
-		Schema  *nero.Schema
+		Schema  nero.Schema
 	}{
 		EqOps: []comparison.Operator{
 			comparison.Eq,

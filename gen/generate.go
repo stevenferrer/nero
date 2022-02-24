@@ -6,7 +6,7 @@ import (
 )
 
 // Generate generates the repository code
-func Generate(schema *nero.Schema) ([]*File, error) {
+func Generate(schema nero.Schema) ([]*File, error) {
 	files := []*File{}
 	file, err := newMetaFile(schema)
 	if err != nil {

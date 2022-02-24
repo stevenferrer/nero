@@ -69,6 +69,6 @@ func TestFuncs(t *testing.T) {
 		assert.True(t, isTypeFunc(now, "time.Time"))
 		assert.True(t, isTypeFunc(&now, "time.Time"))
 	})
-	assert.Len(t, prependToFields(&Field{}, []*Field{}), 1)
+	assert.Len(t, prependToFields(Field{}, []Field{}), 1)
 	assert.NotEmpty(t, fileHeadersFunc())
 }

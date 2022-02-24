@@ -30,25 +30,22 @@ const (
 )
 
 // Schema implements nero.Schemaer
-func (p Player) Schema() *nero.Schema {
+func (p Player) Schema() nero.Schema {
 	return nero.NewSchemaBuilder(&p).
 		PkgName("playerrepo").
 		Table("players").
-		Identity(nero.NewFieldBuilder("id", p.ID).
-			StructField("ID").Auto().Build()).
+		Identity(
+			nero.NewFieldBuilder("id", p.ID).
+				StructField("ID").Auto().Build(),
+		).
 		Fields(
 			nero.NewFieldBuilder("email", p.Email).Build(),
 			nero.NewFieldBuilder("name", p.Name).Build(),
 			nero.NewFieldBuilder("age", p.Age).Build(),
 			nero.NewFieldBuilder("race", p.Race).Build(),
-			nero.NewFieldBuilder("updated_at", p.UpdatedAt).
-				Optional().Build(),
-			nero.NewFieldBuilder("created_at", p.CreatedAt).
-				Auto().Build(),
+			nero.NewFieldBuilder("updated_at", p.UpdatedAt).Optional().Build(),
+			nero.NewFieldBuilder("created_at", p.CreatedAt).Auto().Build(),
 		).
-		Templates(
-			nero.NewPostgresTemplate(),
-			nero.NewSQLiteTemplate(),
-		).
+		Templates(nero.NewPostgresTemplate(), nero.NewSQLiteTemplate()).
 		Build()
 }

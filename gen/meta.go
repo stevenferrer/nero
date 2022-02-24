@@ -7,7 +7,7 @@ import (
 	"github.com/stevenferrer/nero"
 )
 
-func newMetaFile(schema *nero.Schema) (*File, error) {
+func newMetaFile(schema nero.Schema) (*File, error) {
 	tmpl, err := template.New("meta.tmpl").
 		Funcs(nero.NewFuncMap()).Parse(metaTmpl)
 	if err != nil {

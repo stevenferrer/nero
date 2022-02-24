@@ -8,7 +8,7 @@ import (
 	"github.com/stevenferrer/nero/aggregate"
 )
 
-func newAggregateFile(schema *nero.Schema) (*File, error) {
+func newAggregateFile(schema nero.Schema) (*File, error) {
 	tmpl, err := template.New("aggregates.tmpl").
 		Funcs(nero.NewFuncMap()).Parse(aggregatesTmpl)
 	if err != nil {
@@ -17,7 +17,7 @@ func newAggregateFile(schema *nero.Schema) (*File, error) {
 
 	data := struct {
 		Operators []aggregate.Operator
-		Schema    *nero.Schema
+		Schema    nero.Schema
 	}{
 		Operators: []aggregate.Operator{
 			aggregate.Avg, aggregate.Count,

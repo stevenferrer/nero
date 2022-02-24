@@ -33,7 +33,7 @@ type Item struct {
 }
 
 // Schema implements nero.Schemaer
-func (c Custom) Schema() *nero.Schema {
+func (c Custom) Schema() nero.Schema {
 	return nero.NewSchemaBuilder(&c).
 		PkgName("user").Table("users").
 		Identity(
