@@ -13,7 +13,7 @@ type Field struct {
 	// name is the field name
 	name string
 	// typeInfo is the field type info
-	typeInfo *mira.TypeInfo
+	typeInfo mira.TypeInfo
 	// StructField overrides the struct field
 	structField string
 	// Auto is the auto-filled flag
@@ -23,7 +23,7 @@ type Field struct {
 }
 
 // TypeInfo returns the type info
-func (f Field) TypeInfo() *mira.TypeInfo {
+func (f Field) TypeInfo() mira.TypeInfo {
 	return f.typeInfo
 }
 

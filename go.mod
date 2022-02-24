@@ -9,7 +9,7 @@ require (
 	github.com/lib/pq v1.10.4
 	github.com/mattn/go-sqlite3 v1.14.11
 	github.com/pkg/errors v0.9.1
-	github.com/stevenferrer/mira v0.3.0
+	github.com/stevenferrer/mira v0.3.1
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/tools v0.1.9
 )

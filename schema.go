@@ -13,7 +13,7 @@ type Schema struct {
 	// table is the database table name
 	table string
 	// typeInfo is the type info of the schema model
-	typeInfo *mira.TypeInfo
+	typeInfo mira.TypeInfo
 	// identity is the identity field
 	identity Field
 	// fields is the list of fields
@@ -55,7 +55,7 @@ func (s Schema) Templates() []Template {
 }
 
 // TypeInfo returns the type info
-func (s Schema) TypeInfo() *mira.TypeInfo {
+func (s Schema) TypeInfo() mira.TypeInfo {
 	return s.typeInfo
 }
 
