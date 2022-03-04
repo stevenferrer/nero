@@ -72,7 +72,7 @@ import (
         {{ range $op := $.EqOps }} 
             // {{$field.StructField}}{{$op.String}} {{$op.Desc}} operator on {{$field.StructField}} field
             func {{$field.StructField}}{{$op.String}} ({{$field.Identifier}} {{rawType $field.TypeInfo.V}}) predicate.Func {
-                return func(predicates []predicate.Predicate) []predicate.Predicate {
+                return func(predicates predicate.Predicates) predicate.Predicates {
                     return append(predicates, predicate.Predicate{
                         Field: "{{$field.Name}}",
                         Operator: predicate.{{$op.String}},
@@ -90,7 +90,7 @@ import (
             {{if or $field.TypeInfo.IsNumeric (isType $field.TypeInfo.V "time.Time")}}
                 // {{$field.StructField}}{{$op.String}} {{$op.Desc}} operator on {{$field.StructField}} field
                 func {{$field.StructField}}{{$op.String}} ({{$field.Identifier}} {{rawType $field.TypeInfo.V}}) predicate.Func {
-                    return func(predicates []predicate.Predicate) []predicate.Predicate {
+                    return func(predicates predicate.Predicates) predicate.Predicates {
                         return append(predicates, predicate.Predicate{
                             Field: "{{$field.Name}}",
                             Operator: predicate.{{$op.String}},
@@ -109,7 +109,7 @@ import (
             {{if $field.IsNillable}}
                 // {{$field.StructField}}{{$op.String}} {{$op.Desc}} operator on {{$field.StructField}} field
                 func {{$field.StructField}}{{$op.String}} () predicate.Func {
-                    return func(predicates []predicate.Predicate) []predicate.Predicate {
+                    return func(predicates predicate.Predicates) predicate.Predicates {
                         return append(predicates, predicate.Predicate{
                             Field: "{{$field.Name}}",
                             Operator: predicate.{{$op.String}},
@@ -127,7 +127,7 @@ import (
                     args = append(args, v)
                 }
 
-                return func(predicates []predicate.Predicate) []predicate.Predicate {
+                return func(predicates predicate.Predicates) predicate.Predicates {
                     return append(predicates, predicate.Predicate{
                         Field: "{{$field.Name}}",
                         Operator: predicate.{{$op.String}},
@@ -144,7 +144,7 @@ import (
     //
     // fieldX and fieldY must be of the same type
     func FieldX{{$op.String}}FieldY (fieldX, fieldY Field) predicate.Func {
-        return func(predicates []predicate.Predicate) []predicate.Predicate {
+        return func(predicates predicate.Predicates) predicate.Predicates {
             return append(predicates, predicate.Predicate{
                 Field: fieldX.String(),
                 Operator: predicate.{{$op.String}},
@@ -159,7 +159,7 @@ import (
     // 
     // fieldX and fieldY must be of the same type
     func FieldX{{$op.String}}FieldY (fieldX, fieldY Field) predicate.Func {
-        return func(predicates []predicate.Predicate) []predicate.Predicate {
+        return func(predicates predicate.Predicates) predicate.Predicates {
             return append(predicates, predicate.Predicate{
                 Field: fieldX.String(),
                 Operator: predicate.{{$op.String}},

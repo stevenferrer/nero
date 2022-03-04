@@ -44,9 +44,9 @@ type Repository interface {
 	Delete(context.Context, *Deleter) (rowsAffected int64, err error)
 	// DeleteInTx deletes a Player or many Players in a transaction
 	DeleteInTx(context.Context, nero.Tx, *Deleter) (rowsAffected int64, err error)
-	// Aggregate performs an aggregate query
+	// Aggregate executes an aggregate query
 	Aggregate(context.Context, *Aggregator) error
-	// AggregateInTx performs an aggregate query in a transaction
+	// AggregateInTx executes an aggregate query in a transaction
 	AggregateInTx(context.Context, nero.Tx, *Aggregator) error
 }
 

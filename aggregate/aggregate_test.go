@@ -3,8 +3,9 @@ package aggregate_test
 import (
 	"testing"
 
-	"github.com/stevenferrer/nero/aggregate"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/stevenferrer/nero/aggregate"
 )
 
 func TestOperatorStrings(t *testing.T) {

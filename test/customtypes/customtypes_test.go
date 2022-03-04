@@ -5,11 +5,11 @@ import (
 	"path"
 	"testing"
 
+	"github.com/stevenferrer/nero/gen"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/stevenferrer/nero/gen"
-	"github.com/stevenferrer/nero/test/gen/customtypes"
+	"github.com/stevenferrer/nero/test/customtypes"
 )
 
 func TestCustomTypes(t *testing.T) {

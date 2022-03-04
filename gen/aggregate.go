@@ -48,7 +48,7 @@ import (
 {{range $op := .Operators}}
 // {{$op.String}} is the {{$op.Desc}} aggregate operator
 func {{$op.String}}(fields ...Field) aggregate.Func {
-	return func(aggregates []aggregate.Aggregate) []aggregate.Aggregate {
+	return func(aggregates aggregate.Aggregates) aggregate.Aggregates {
 		for _, field := range fields {
 			aggregates = append(aggregates, aggregate.Aggregate{
 				Field: field.String(),

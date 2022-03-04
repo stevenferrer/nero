@@ -330,17 +330,11 @@ func (repo *PostgresRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 		From("\"{{.Table}}\"").
 		PlaceholderFormat(squirrel.Dollar)
 
-	preds := make([]predicate.Predicate, 0, len(q.predFuncs))
-	for _, predFunc := range q.predFuncs {
-		preds = predFunc(preds)
-	}
-	qb = squirrel.SelectBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), preds))
+	predicates := predicate.Build(q.predFuncs...)	
+	qb = squirrel.SelectBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), predicates))
 
-	sorts := make([]sorting.Sorting, 0, len(q.sortFuncs))
-	for _, sortFunc := range q.sortFuncs {
-		sorts = sortFunc(sorts)
-	}
-	qb = repo.buildSort(qb, sorts)
+	sortings := sorting.Build(q.sortFuncs...)
+	qb = repo.buildSort(qb, sortings)
 
 	if q.limit > 0 {
 		qb = qb.Limit(uint64(q.limit))
@@ -404,8 +398,8 @@ func (repo *PostgresRepository) buildPreds(sb squirrel.StatementBuilderType, pre
 	return sb
 }
 
-func (repo *PostgresRepository) buildSort(qb squirrel.SelectBuilder, sorts []sorting.Sorting) squirrel.SelectBuilder {
-	for _, s := range sorts {
+func (repo *PostgresRepository) buildSort(qb squirrel.SelectBuilder, sortings []sorting.Sorting) squirrel.SelectBuilder {
+	for _, s := range sortings {
 		field := fmt.Sprintf("%q", s.Field)
 		switch s.Direction {
 		case sorting.Asc:
@@ -455,11 +449,8 @@ func (repo *PostgresRepository) update(ctx context.Context, runner nero.SQLRunne
 		return 0, nil
 	}
 
-	preds := make([]predicate.Predicate, 0, len(u.predFuncs))
-	for _, predFunc := range u.predFuncs {
-		preds = predFunc(preds)
-	}
-	qb = squirrel.UpdateBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), preds))
+	predicates := predicate.Build(u.predFuncs...)
+	qb = squirrel.UpdateBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), predicates))
 
 	if repo.debug && repo.logger != nil {
 		sql, args, err := qb.ToSql()
@@ -498,11 +489,8 @@ func (repo *PostgresRepository) delete(ctx context.Context, runner nero.SQLRunne
 	qb := squirrel.Delete("\"{{.Table}}\"").
 		PlaceholderFormat(squirrel.Dollar)
 
-	preds := make([]predicate.Predicate, 0, len(d.predFuncs))
-	for _, predFunc := range d.predFuncs {
-		preds = predFunc(preds)
-	}
-	qb = squirrel.DeleteBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), preds))
+	predicates := predicate.Build(d.predFuncs...)	
+	qb = squirrel.DeleteBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), predicates))
 
 	if repo.debug && repo.logger != nil {
 		sql, args, err := qb.ToSql()
@@ -538,12 +526,9 @@ func (repo *PostgresRepository) AggregateInTx(ctx context.Context, tx nero.Tx, a
 }
 
 func (repo *PostgresRepository) aggregate(ctx context.Context, runner nero.SQLRunner, a *Aggregator) error {
-	aggs := make([]aggregate.Aggregate, 0, len(a.aggFuncs))
-	for _, aggFunc := range a.aggFuncs {
-		aggs = aggFunc(aggs)
-	}
-	columns := make([]string, 0, len(aggs))
-	for _, agg := range aggs {
+	aggregates := aggregate.Build(a.aggFuncs...)	
+	columns := make([]string, 0, len(aggregates))
+	for _, agg := range aggregates {
 		field := agg.Field
 		qf := fmt.Sprintf("%q", field)
 		switch agg.Operator {
@@ -571,17 +556,11 @@ func (repo *PostgresRepository) aggregate(ctx context.Context, runner nero.SQLRu
 	}
 	qb = qb.GroupBy(groupBys...)
 
-	preds := make([]predicate.Predicate, 0, len(a.predFuncs))
-	for _, predFunc := range a.predFuncs {
-		preds = predFunc(preds)
-	}
-	qb = squirrel.SelectBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), preds))
+	predicates := predicate.Build(a.predFuncs...)	
+	qb = squirrel.SelectBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), predicates))
 
-	sorts := make([]sorting.Sorting, 0, len(a.sortFuncs))
-	for _, sortFunc := range a.sortFuncs {
-		sorts = sortFunc(sorts)
-	}	
-	qb = repo.buildSort(qb, sorts)
+	sortings := sorting.Build(a.sortFuncs...)
+	qb = repo.buildSort(qb, sortings)
 
 	if repo.debug && repo.logger != nil {
 		sql, args, err := qb.ToSql()

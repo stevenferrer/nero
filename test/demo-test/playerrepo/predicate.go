@@ -10,7 +10,7 @@ import (
 
 // IDEq equal operator on ID field
 func IDEq(id string) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "id",
 			Operator: predicate.Eq,
@@ -21,7 +21,7 @@ func IDEq(id string) predicate.Func {
 
 // IDNotEq not equal operator on ID field
 func IDNotEq(id string) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "id",
 			Operator: predicate.NotEq,
@@ -37,7 +37,7 @@ func IDIn(ids ...string) predicate.Func {
 		args = append(args, v)
 	}
 
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "id",
 			Operator: predicate.In,
@@ -53,7 +53,7 @@ func IDNotIn(ids ...string) predicate.Func {
 		args = append(args, v)
 	}
 
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "id",
 			Operator: predicate.NotIn,
@@ -64,7 +64,7 @@ func IDNotIn(ids ...string) predicate.Func {
 
 // EmailEq equal operator on Email field
 func EmailEq(email string) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "email",
 			Operator: predicate.Eq,
@@ -75,7 +75,7 @@ func EmailEq(email string) predicate.Func {
 
 // EmailNotEq not equal operator on Email field
 func EmailNotEq(email string) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "email",
 			Operator: predicate.NotEq,
@@ -91,7 +91,7 @@ func EmailIn(emails ...string) predicate.Func {
 		args = append(args, v)
 	}
 
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "email",
 			Operator: predicate.In,
@@ -107,7 +107,7 @@ func EmailNotIn(emails ...string) predicate.Func {
 		args = append(args, v)
 	}
 
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "email",
 			Operator: predicate.NotIn,
@@ -118,7 +118,7 @@ func EmailNotIn(emails ...string) predicate.Func {
 
 // NameEq equal operator on Name field
 func NameEq(name string) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "name",
 			Operator: predicate.Eq,
@@ -129,7 +129,7 @@ func NameEq(name string) predicate.Func {
 
 // NameNotEq not equal operator on Name field
 func NameNotEq(name string) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "name",
 			Operator: predicate.NotEq,
@@ -145,7 +145,7 @@ func NameIn(names ...string) predicate.Func {
 		args = append(args, v)
 	}
 
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "name",
 			Operator: predicate.In,
@@ -161,7 +161,7 @@ func NameNotIn(names ...string) predicate.Func {
 		args = append(args, v)
 	}
 
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "name",
 			Operator: predicate.NotIn,
@@ -172,7 +172,7 @@ func NameNotIn(names ...string) predicate.Func {
 
 // AgeEq equal operator on Age field
 func AgeEq(age int) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "age",
 			Operator: predicate.Eq,
@@ -183,7 +183,7 @@ func AgeEq(age int) predicate.Func {
 
 // AgeNotEq not equal operator on Age field
 func AgeNotEq(age int) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "age",
 			Operator: predicate.NotEq,
@@ -194,7 +194,7 @@ func AgeNotEq(age int) predicate.Func {
 
 // AgeGt greater than operator on Age field
 func AgeGt(age int) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "age",
 			Operator: predicate.Gt,
@@ -205,7 +205,7 @@ func AgeGt(age int) predicate.Func {
 
 // AgeGtOrEq greater than or equal operator on Age field
 func AgeGtOrEq(age int) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "age",
 			Operator: predicate.GtOrEq,
@@ -216,7 +216,7 @@ func AgeGtOrEq(age int) predicate.Func {
 
 // AgeLt less than operator on Age field
 func AgeLt(age int) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "age",
 			Operator: predicate.Lt,
@@ -227,7 +227,7 @@ func AgeLt(age int) predicate.Func {
 
 // AgeLtOrEq less than or equal operator on Age field
 func AgeLtOrEq(age int) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "age",
 			Operator: predicate.LtOrEq,
@@ -243,7 +243,7 @@ func AgeIn(ages ...int) predicate.Func {
 		args = append(args, v)
 	}
 
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "age",
 			Operator: predicate.In,
@@ -259,7 +259,7 @@ func AgeNotIn(ages ...int) predicate.Func {
 		args = append(args, v)
 	}
 
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "age",
 			Operator: predicate.NotIn,
@@ -270,7 +270,7 @@ func AgeNotIn(ages ...int) predicate.Func {
 
 // RaceEq equal operator on Race field
 func RaceEq(race playerpkg.Race) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "race",
 			Operator: predicate.Eq,
@@ -281,7 +281,7 @@ func RaceEq(race playerpkg.Race) predicate.Func {
 
 // RaceNotEq not equal operator on Race field
 func RaceNotEq(race playerpkg.Race) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "race",
 			Operator: predicate.NotEq,
@@ -297,7 +297,7 @@ func RaceIn(races ...playerpkg.Race) predicate.Func {
 		args = append(args, v)
 	}
 
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "race",
 			Operator: predicate.In,
@@ -313,7 +313,7 @@ func RaceNotIn(races ...playerpkg.Race) predicate.Func {
 		args = append(args, v)
 	}
 
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "race",
 			Operator: predicate.NotIn,
@@ -324,7 +324,7 @@ func RaceNotIn(races ...playerpkg.Race) predicate.Func {
 
 // UpdatedAtEq equal operator on UpdatedAt field
 func UpdatedAtEq(updatedAt *time.Time) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "updated_at",
 			Operator: predicate.Eq,
@@ -335,7 +335,7 @@ func UpdatedAtEq(updatedAt *time.Time) predicate.Func {
 
 // UpdatedAtNotEq not equal operator on UpdatedAt field
 func UpdatedAtNotEq(updatedAt *time.Time) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "updated_at",
 			Operator: predicate.NotEq,
@@ -346,7 +346,7 @@ func UpdatedAtNotEq(updatedAt *time.Time) predicate.Func {
 
 // UpdatedAtGt greater than operator on UpdatedAt field
 func UpdatedAtGt(updatedAt *time.Time) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "updated_at",
 			Operator: predicate.Gt,
@@ -357,7 +357,7 @@ func UpdatedAtGt(updatedAt *time.Time) predicate.Func {
 
 // UpdatedAtGtOrEq greater than or equal operator on UpdatedAt field
 func UpdatedAtGtOrEq(updatedAt *time.Time) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "updated_at",
 			Operator: predicate.GtOrEq,
@@ -368,7 +368,7 @@ func UpdatedAtGtOrEq(updatedAt *time.Time) predicate.Func {
 
 // UpdatedAtLt less than operator on UpdatedAt field
 func UpdatedAtLt(updatedAt *time.Time) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "updated_at",
 			Operator: predicate.Lt,
@@ -379,7 +379,7 @@ func UpdatedAtLt(updatedAt *time.Time) predicate.Func {
 
 // UpdatedAtLtOrEq less than or equal operator on UpdatedAt field
 func UpdatedAtLtOrEq(updatedAt *time.Time) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "updated_at",
 			Operator: predicate.LtOrEq,
@@ -390,7 +390,7 @@ func UpdatedAtLtOrEq(updatedAt *time.Time) predicate.Func {
 
 // UpdatedAtIsNull is null operator on UpdatedAt field
 func UpdatedAtIsNull() predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "updated_at",
 			Operator: predicate.IsNull,
@@ -400,7 +400,7 @@ func UpdatedAtIsNull() predicate.Func {
 
 // UpdatedAtIsNotNull is not null operator on UpdatedAt field
 func UpdatedAtIsNotNull() predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "updated_at",
 			Operator: predicate.IsNotNull,
@@ -415,7 +415,7 @@ func UpdatedAtIn(updatedAts ...*time.Time) predicate.Func {
 		args = append(args, v)
 	}
 
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "updated_at",
 			Operator: predicate.In,
@@ -431,7 +431,7 @@ func UpdatedAtNotIn(updatedAts ...*time.Time) predicate.Func {
 		args = append(args, v)
 	}
 
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "updated_at",
 			Operator: predicate.NotIn,
@@ -442,7 +442,7 @@ func UpdatedAtNotIn(updatedAts ...*time.Time) predicate.Func {
 
 // CreatedAtEq equal operator on CreatedAt field
 func CreatedAtEq(createdAt *time.Time) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "created_at",
 			Operator: predicate.Eq,
@@ -453,7 +453,7 @@ func CreatedAtEq(createdAt *time.Time) predicate.Func {
 
 // CreatedAtNotEq not equal operator on CreatedAt field
 func CreatedAtNotEq(createdAt *time.Time) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "created_at",
 			Operator: predicate.NotEq,
@@ -464,7 +464,7 @@ func CreatedAtNotEq(createdAt *time.Time) predicate.Func {
 
 // CreatedAtGt greater than operator on CreatedAt field
 func CreatedAtGt(createdAt *time.Time) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "created_at",
 			Operator: predicate.Gt,
@@ -475,7 +475,7 @@ func CreatedAtGt(createdAt *time.Time) predicate.Func {
 
 // CreatedAtGtOrEq greater than or equal operator on CreatedAt field
 func CreatedAtGtOrEq(createdAt *time.Time) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "created_at",
 			Operator: predicate.GtOrEq,
@@ -486,7 +486,7 @@ func CreatedAtGtOrEq(createdAt *time.Time) predicate.Func {
 
 // CreatedAtLt less than operator on CreatedAt field
 func CreatedAtLt(createdAt *time.Time) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "created_at",
 			Operator: predicate.Lt,
@@ -497,7 +497,7 @@ func CreatedAtLt(createdAt *time.Time) predicate.Func {
 
 // CreatedAtLtOrEq less than or equal operator on CreatedAt field
 func CreatedAtLtOrEq(createdAt *time.Time) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "created_at",
 			Operator: predicate.LtOrEq,
@@ -508,7 +508,7 @@ func CreatedAtLtOrEq(createdAt *time.Time) predicate.Func {
 
 // CreatedAtIsNull is null operator on CreatedAt field
 func CreatedAtIsNull() predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "created_at",
 			Operator: predicate.IsNull,
@@ -518,7 +518,7 @@ func CreatedAtIsNull() predicate.Func {
 
 // CreatedAtIsNotNull is not null operator on CreatedAt field
 func CreatedAtIsNotNull() predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "created_at",
 			Operator: predicate.IsNotNull,
@@ -533,7 +533,7 @@ func CreatedAtIn(createdAts ...*time.Time) predicate.Func {
 		args = append(args, v)
 	}
 
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "created_at",
 			Operator: predicate.In,
@@ -549,7 +549,7 @@ func CreatedAtNotIn(createdAts ...*time.Time) predicate.Func {
 		args = append(args, v)
 	}
 
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    "created_at",
 			Operator: predicate.NotIn,
@@ -562,7 +562,7 @@ func CreatedAtNotIn(createdAts ...*time.Time) predicate.Func {
 //
 // fieldX and fieldY must be of the same type
 func FieldXEqFieldY(fieldX, fieldY Field) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    fieldX.String(),
 			Operator: predicate.Eq,
@@ -575,7 +575,7 @@ func FieldXEqFieldY(fieldX, fieldY Field) predicate.Func {
 //
 // fieldX and fieldY must be of the same type
 func FieldXNotEqFieldY(fieldX, fieldY Field) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    fieldX.String(),
 			Operator: predicate.NotEq,
@@ -588,7 +588,7 @@ func FieldXNotEqFieldY(fieldX, fieldY Field) predicate.Func {
 //
 // fieldX and fieldY must be of the same type
 func FieldXGtFieldY(fieldX, fieldY Field) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    fieldX.String(),
 			Operator: predicate.Gt,
@@ -601,7 +601,7 @@ func FieldXGtFieldY(fieldX, fieldY Field) predicate.Func {
 //
 // fieldX and fieldY must be of the same type
 func FieldXGtOrEqFieldY(fieldX, fieldY Field) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    fieldX.String(),
 			Operator: predicate.GtOrEq,
@@ -614,7 +614,7 @@ func FieldXGtOrEqFieldY(fieldX, fieldY Field) predicate.Func {
 //
 // fieldX and fieldY must be of the same type
 func FieldXLtFieldY(fieldX, fieldY Field) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    fieldX.String(),
 			Operator: predicate.Lt,
@@ -627,7 +627,7 @@ func FieldXLtFieldY(fieldX, fieldY Field) predicate.Func {
 //
 // fieldX and fieldY must be of the same type
 func FieldXLtOrEqFieldY(fieldX, fieldY Field) predicate.Func {
-	return func(predicates []predicate.Predicate) []predicate.Predicate {
+	return func(predicates predicate.Predicates) predicate.Predicates {
 		return append(predicates, predicate.Predicate{
 			Field:    fieldX.String(),
 			Operator: predicate.LtOrEq,

@@ -7,7 +7,7 @@ import (
 
 // Asc ascending sort direction
 func Asc(fields ...Field) sorting.Func {
-	return func(sortings []sorting.Sorting) []sorting.Sorting {
+	return func(sortings sorting.Sortings) sorting.Sortings {
 		for _, field := range fields {
 			sortings = append(sortings, sorting.Sorting{
 				Field:     field.String(),
@@ -21,7 +21,7 @@ func Asc(fields ...Field) sorting.Func {
 
 // Desc descending sort direction
 func Desc(fields ...Field) sorting.Func {
-	return func(sortings []sorting.Sorting) []sorting.Sorting {
+	return func(sortings sorting.Sortings) sorting.Sortings {
 		for _, field := range fields {
 			sortings = append(sortings, sorting.Sorting{
 				Field:     field.String(),

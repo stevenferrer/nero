@@ -7,7 +7,7 @@ import (
 
 // Avg is the average aggregate operator
 func Avg(fields ...Field) aggregate.Func {
-	return func(aggregates []aggregate.Aggregate) []aggregate.Aggregate {
+	return func(aggregates aggregate.Aggregates) aggregate.Aggregates {
 		for _, field := range fields {
 			aggregates = append(aggregates, aggregate.Aggregate{
 				Field:    field.String(),
@@ -20,7 +20,7 @@ func Avg(fields ...Field) aggregate.Func {
 
 // Count is the count aggregate operator
 func Count(fields ...Field) aggregate.Func {
-	return func(aggregates []aggregate.Aggregate) []aggregate.Aggregate {
+	return func(aggregates aggregate.Aggregates) aggregate.Aggregates {
 		for _, field := range fields {
 			aggregates = append(aggregates, aggregate.Aggregate{
 				Field:    field.String(),
@@ -33,7 +33,7 @@ func Count(fields ...Field) aggregate.Func {
 
 // Max is the max aggregate operator
 func Max(fields ...Field) aggregate.Func {
-	return func(aggregates []aggregate.Aggregate) []aggregate.Aggregate {
+	return func(aggregates aggregate.Aggregates) aggregate.Aggregates {
 		for _, field := range fields {
 			aggregates = append(aggregates, aggregate.Aggregate{
 				Field:    field.String(),
@@ -46,7 +46,7 @@ func Max(fields ...Field) aggregate.Func {
 
 // Min is the min aggregate operator
 func Min(fields ...Field) aggregate.Func {
-	return func(aggregates []aggregate.Aggregate) []aggregate.Aggregate {
+	return func(aggregates aggregate.Aggregates) aggregate.Aggregates {
 		for _, field := range fields {
 			aggregates = append(aggregates, aggregate.Aggregate{
 				Field:    field.String(),
@@ -59,7 +59,7 @@ func Min(fields ...Field) aggregate.Func {
 
 // Sum is the sum aggregate operator
 func Sum(fields ...Field) aggregate.Func {
-	return func(aggregates []aggregate.Aggregate) []aggregate.Aggregate {
+	return func(aggregates aggregate.Aggregates) aggregate.Aggregates {
 		for _, field := range fields {
 			aggregates = append(aggregates, aggregate.Aggregate{
 				Field:    field.String(),
@@ -72,7 +72,7 @@ func Sum(fields ...Field) aggregate.Func {
 
 // None is the none aggregate operator
 func None(fields ...Field) aggregate.Func {
-	return func(aggregates []aggregate.Aggregate) []aggregate.Aggregate {
+	return func(aggregates aggregate.Aggregates) aggregate.Aggregates {
 		for _, field := range fields {
 			aggregates = append(aggregates, aggregate.Aggregate{
 				Field:    field.String(),

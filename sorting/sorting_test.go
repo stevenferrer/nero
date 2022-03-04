@@ -3,8 +3,9 @@ package sorting_test
 import (
 	"testing"
 
-	"github.com/stevenferrer/nero/sorting"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/stevenferrer/nero/sorting"
 )
 
 func TestDirectionStrings(t *testing.T) {
