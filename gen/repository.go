@@ -33,8 +33,8 @@ import (
 	"reflect"
 	"github.com/pkg/errors"
 	"github.com/stevenferrer/nero"
-	"github.com/stevenferrer/nero/comparison"
-	"github.com/stevenferrer/nero/sort"
+	"github.com/stevenferrer/nero/predicate"
+	"github.com/stevenferrer/nero/sorting"
 	"github.com/stevenferrer/nero/aggregate"
 	multierror "github.com/hashicorp/go-multierror"
 	{{range $import := .Imports -}}
@@ -57,11 +57,11 @@ type Repository interface {
 	CreateManyInTx(context.Context, nero.Tx, ...*Creator) error
 	// Query queries {{.TypeNamePlural}}
 	Query(context.Context, *Queryer) ([]{{rawType .TypeInfo.V}}, error)
-	// QueryTx queries {{.TypeNamePlural}} in a transaction
+	// QueryInTx queries {{.TypeNamePlural}} in a transaction
 	QueryInTx(context.Context, nero.Tx, *Queryer) ([]{{rawType .TypeInfo.V}}, error)
 	// QueryOne queries a {{.TypeName}}
 	QueryOne(context.Context, *Queryer) ({{rawType .TypeInfo.V}}, error)
-	// QueryOneTx queries a {{.TypeName}} in a transaction
+	// QueryOneInTx queries a {{.TypeName}} in a transaction
 	QueryOneInTx(context.Context, nero.Tx, *Queryer) ({{rawType .TypeInfo.V}}, error)
 	// Update updates a {{.TypeName}} or many {{.TypeNamePlural}}
 	Update(context.Context, *Updater) (rowsAffected int64, err error)
@@ -69,11 +69,11 @@ type Repository interface {
 	UpdateInTx(context.Context, nero.Tx, *Updater) (rowsAffected int64, err error)
 	// Delete deletes a {{.TypeName}} or many {{.TypeNamePlural}}
 	Delete(context.Context, *Deleter) (rowsAffected int64, err error)
-	// Delete deletes a {{.TypeName}} or many {{.TypeNamePlural}} in a transaction
+	// DeleteInTx deletes a {{.TypeName}} or many {{.TypeNamePlural}} in a transaction
 	DeleteInTx(context.Context, nero.Tx, *Deleter) (rowsAffected int64, err error)
-	// Aggregate performs an aggregate query
+	// Aggregate executes an aggregate query
 	Aggregate(context.Context, *Aggregator) error
-	// Aggregate performs an aggregate query in a transaction
+	// AggregateInTx executes an aggregate query in a transaction
 	AggregateInTx(context.Context, nero.Tx, *Aggregator) error
 }
 
@@ -122,8 +122,8 @@ func (c *Creator) Validate() error {
 type Queryer struct {
 	limit  uint
 	offset uint
-	predFuncs []comparison.PredFunc
-	sortFuncs []sort.SortFunc
+	predFuncs []predicate.Func
+	sortFuncs []sorting.Func
 }
 
 // NewQueryer returns a Queryer
@@ -132,13 +132,13 @@ func NewQueryer() *Queryer {
 }
 
 // Where applies predicates
-func (q *Queryer) Where(predFuncs ...comparison.PredFunc) *Queryer {
+func (q *Queryer) Where(predFuncs ...predicate.Func) *Queryer {
 	q.predFuncs = append(q.predFuncs, predFuncs...)
 	return q
 }
 
 // Sort applies sorting expressions
-func (q *Queryer) Sort(sortFuncs ...sort.SortFunc) *Queryer {
+func (q *Queryer) Sort(sortFuncs ...sorting.Func) *Queryer {
 	q.sortFuncs = append(q.sortFuncs, sortFuncs...)
 	return q
 }
@@ -162,7 +162,7 @@ type Updater struct {
 			{{$field.Identifier}} {{rawType $field.TypeInfo.V}}
 		{{end -}}
 	{{end -}}
-	predFuncs []comparison.PredFunc
+	predFuncs []predicate.Func
 }
 
 // NewUpdater returns an Updater
@@ -181,14 +181,14 @@ func NewUpdater() *Updater {
 {{end -}}
 
 // Where applies predicates
-func (u *Updater) Where(predFuncs ...comparison.PredFunc) *Updater {
+func (u *Updater) Where(predFuncs ...predicate.Func) *Updater {
 	u.predFuncs = append(u.predFuncs, predFuncs...)
 	return u
 }
 
 // Deleter is a delete builder
 type Deleter struct {
-	predFuncs []comparison.PredFunc
+	predFuncs []predicate.Func
 }
 
 // NewDeleter returns a Deleter
@@ -197,7 +197,7 @@ func NewDeleter() *Deleter {
 }
 
 // Where applies predicates
-func (d *Deleter) Where(predFuncs ...comparison.PredFunc) *Deleter {
+func (d *Deleter) Where(predFuncs ...predicate.Func) *Deleter {
 	d.predFuncs = append(d.predFuncs, predFuncs...)
 	return d
 }
@@ -205,9 +205,9 @@ func (d *Deleter) Where(predFuncs ...comparison.PredFunc) *Deleter {
 // Aggregator is an aggregate query builder
 type Aggregator struct {
 	v      interface{}
-	aggFuncs	[]aggregate.AggFunc
-	predFuncs	[]comparison.PredFunc
-	sortFuncs	[]sort.SortFunc
+	aggFuncs	[]aggregate.Func
+	predFuncs	[]predicate.Func
+	sortFuncs	[]sorting.Func
 	groupBys []Field
 }
 
@@ -218,19 +218,19 @@ func NewAggregator(v interface{}) *Aggregator {
 }
 
 // Aggregate applies aggregate functions
-func (a *Aggregator) Aggregate(aggFuncs ...aggregate.AggFunc) *Aggregator {
+func (a *Aggregator) Aggregate(aggFuncs ...aggregate.Func) *Aggregator {
 	a.aggFuncs = append(a.aggFuncs, aggFuncs...)
 	return a
 }
 
 // Where applies predicates
-func (a *Aggregator) Where(predFuncs ...comparison.PredFunc) *Aggregator {
+func (a *Aggregator) Where(predFuncs ...predicate.Func) *Aggregator {
 	a.predFuncs = append(a.predFuncs, predFuncs...)
 	return a
 }
 
 // Sort applies sorting expressions
-func (a *Aggregator) Sort(sortFuncs ...sort.SortFunc) *Aggregator {
+func (a *Aggregator) Sort(sortFuncs ...sorting.Func) *Aggregator {
 	a.sortFuncs = append(a.sortFuncs, sortFuncs...)
 	return a
 }

@@ -47,8 +47,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stevenferrer/nero"
 	"github.com/stevenferrer/nero/aggregate"
-	"github.com/stevenferrer/nero/comparison"
-	"github.com/stevenferrer/nero/sort"
+	"github.com/stevenferrer/nero/predicate"
+	"github.com/stevenferrer/nero/sorting"
 	{{range $import := .Imports -}}
 		"{{$import}}"
 	{{end -}}
@@ -308,13 +308,13 @@ func (repo *SQLiteRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	}
 	qb := squirrel.Select(columns...).From("\"{{.Table}}\"")
 
-	preds := make([]comparison.Predicate, 0, len(q.predFuncs))
+	preds := make([]predicate.Predicate, 0, len(q.predFuncs))
 	for _, predFunc := range q.predFuncs {
 		preds = predFunc(preds)
 	}
 	qb = squirrel.SelectBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), preds))
 
-	sorts := make([]sort.Sort, 0, len(q.sortFuncs))
+	sorts := make([]sorting.Sorting, 0, len(q.sortFuncs))
 	for _, sortFunc := range q.sortFuncs {
 		sorts = sortFunc(sorts)
 	}
@@ -331,10 +331,10 @@ func (repo *SQLiteRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	return qb
 }
 
-func (repo *SQLiteRepository) buildPreds(sb squirrel.StatementBuilderType, preds []comparison.Predicate) squirrel.StatementBuilderType {
+func (repo *SQLiteRepository) buildPreds(sb squirrel.StatementBuilderType, preds []predicate.Predicate) squirrel.StatementBuilderType {
 	for _, pred := range preds {	
 		ph := "?"
-		fieldX, arg := pred.Field, pred.Arg
+		fieldX, arg := pred.Field, pred.Argument
 
 		args := []interface{}{}
 		if fieldY, ok := arg.(Field); ok { // a field
@@ -345,28 +345,28 @@ func (repo *SQLiteRepository) buildPreds(sb squirrel.StatementBuilderType, preds
 			args = append(args, arg)
 		}
 		
-		switch pred.Op {
-		case comparison.Eq:
+		switch pred.Operator {
+		case predicate.Eq:
 			sb = sb.Where(fmt.Sprintf("%q = "+ph, fieldX), args...)
-		case comparison.NotEq:
+		case predicate.NotEq:
 			sb = sb.Where(fmt.Sprintf("%q <> "+ph, fieldX), args...)
-		case comparison.Gt:
+		case predicate.Gt:
 			sb = sb.Where(fmt.Sprintf("%q > "+ph, fieldX), args...)
-		case comparison.GtOrEq:
+		case predicate.GtOrEq:
 			sb = sb.Where(fmt.Sprintf("%q >= "+ph, fieldX), args...)
-		case comparison.Lt:
+		case predicate.Lt:
 			sb = sb.Where(fmt.Sprintf("%q < "+ph, fieldX), args...)
-		case comparison.LtOrEq:
+		case predicate.LtOrEq:
 			sb = sb.Where(fmt.Sprintf("%q <= "+ph, fieldX), args...)
-		case comparison.IsNull, comparison.IsNotNull:
+		case predicate.IsNull, predicate.IsNotNull:
 			fmtStr := "%q IS NULL"
-			if pred.Op == comparison.IsNotNull {
+			if pred.Operator == predicate.IsNotNull {
 				fmtStr = "%q IS NOT NULL"
 			}
 			sb = sb.Where(fmt.Sprintf(fmtStr, fieldX))
-		case comparison.In, comparison.NotIn:
+		case predicate.In, predicate.NotIn:
 			fmtStr := "%q IN (%s)"
-			if pred.Op == comparison.NotIn {
+			if pred.Operator == predicate.NotIn {
 				fmtStr = "%q NOT IN (%s)"
 			}
 
@@ -382,13 +382,13 @@ func (repo *SQLiteRepository) buildPreds(sb squirrel.StatementBuilderType, preds
 	return sb
 }
 
-func (repo *SQLiteRepository) buildSort(qb squirrel.SelectBuilder, sorts []sort.Sort) squirrel.SelectBuilder {
+func (repo *SQLiteRepository) buildSort(qb squirrel.SelectBuilder, sorts []sorting.Sorting) squirrel.SelectBuilder {
 	for _, s := range sorts {
 		field := fmt.Sprintf("%q", s.Field)
 		switch s.Direction {
-		case sort.Asc:
+		case sorting.Asc:
 			qb = qb.OrderBy(field + " ASC")
-		case sort.Desc:
+		case sorting.Desc:
 			qb = qb.OrderBy(field + " DESC")
 		}
 	}
@@ -428,7 +428,7 @@ func (repo *SQLiteRepository) update(ctx context.Context, runner nero.SQLRunner,
 		return 0, nil
 	}
 
-	preds := make([]comparison.Predicate, 0, len(u.predFuncs))
+	preds := make([]predicate.Predicate, 0, len(u.predFuncs))
 	for _, predFunc := range u.predFuncs {
 		preds = predFunc(preds)
 	}
@@ -470,7 +470,7 @@ func (repo *SQLiteRepository) DeleteInTx(ctx context.Context, tx nero.Tx, d *Del
 func (repo *SQLiteRepository) delete(ctx context.Context, runner nero.SQLRunner, d *Deleter) (int64, error) {
 	qb := squirrel.Delete("\"{{.Table}}\"")
 
-	preds := make([]comparison.Predicate, 0, len(d.predFuncs))
+	preds := make([]predicate.Predicate, 0, len(d.predFuncs))
 	for _, predFunc := range d.predFuncs {
 		preds = predFunc(preds)
 	}
@@ -518,7 +518,7 @@ func (repo *SQLiteRepository) aggregate(ctx context.Context, runner nero.SQLRunn
 	for _, agg := range aggs {
 		field := agg.Field
 		qf := fmt.Sprintf("%q", field)
-		switch agg.Op {
+		switch agg.Operator {
 		case aggregate.Avg:
 			columns = append(columns, "AVG("+qf+") avg_"+field)
 		case aggregate.Count:
@@ -542,13 +542,13 @@ func (repo *SQLiteRepository) aggregate(ctx context.Context, runner nero.SQLRunn
 	}
 	qb = qb.GroupBy(groupBys...)
 
-	preds := make([]comparison.Predicate, 0, len(a.predFuncs))
+	preds := make([]predicate.Predicate, 0, len(a.predFuncs))
 	for _, predFunc := range a.predFuncs {
 		preds = predFunc(preds)
 	}
 	qb = squirrel.SelectBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), preds))
 
-	sorts := make([]sort.Sort, 0, len(a.sortFuncs))
+	sorts := make([]sorting.Sorting, 0, len(a.sortFuncs))
 	for _, sortFunc := range a.sortFuncs {
 		sorts = sortFunc(sorts)
 	}	

@@ -11,7 +11,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/require"
 
-	"github.com/stevenferrer/nero/test/integration/playerrepo"
+	"github.com/stevenferrer/nero/test/demo-test/playerrepo"
 )
 
 func TestPostgresRepository(t *testing.T) {

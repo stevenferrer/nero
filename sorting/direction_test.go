@@ -1,25 +1,25 @@
-package sort_test
+package sorting_test
 
 import (
 	"testing"
 
-	"github.com/stevenferrer/nero/sort"
+	"github.com/stevenferrer/nero/sorting"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestDirectionStrings(t *testing.T) {
 	tests := []struct {
-		direction sort.Direction
+		direction sorting.Direction
 		wantStr,
 		wantDesc string
 	}{
 		{
-			direction: sort.Asc,
+			direction: sorting.Asc,
 			wantStr:   "Asc",
 			wantDesc:  "ascending",
 		},
 		{
-			direction: sort.Desc,
+			direction: sorting.Desc,
 			wantStr:   "Desc",
 			wantDesc:  "descending",
 		},

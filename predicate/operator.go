@@ -1,9 +1,9 @@
-package comparison
+package predicate
 
-// Operator is comparison operator type
+// Operator is a predicate operator
 type Operator int
 
-// List of comparison operators
+// List of predicate operators
 const (
 	// Eq is an equal operator
 	Eq Operator = iota

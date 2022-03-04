@@ -5,7 +5,7 @@ import (
 	"text/template"
 
 	"github.com/stevenferrer/nero"
-	"github.com/stevenferrer/nero/sort"
+	sorting "github.com/stevenferrer/nero/sorting"
 )
 
 func newSortFile(schema nero.Schema) (*File, error) {
@@ -16,11 +16,11 @@ func newSortFile(schema nero.Schema) (*File, error) {
 	}
 
 	data := struct {
-		Directions []sort.Direction
+		Directions []sorting.Direction
 		Schema     nero.Schema
 	}{
-		Directions: []sort.Direction{
-			sort.Asc, sort.Desc,
+		Directions: []sorting.Direction{
+			sorting.Asc, sorting.Desc,
 		},
 		Schema: schema,
 	}
@@ -31,7 +31,7 @@ func newSortFile(schema nero.Schema) (*File, error) {
 		return nil, err
 	}
 
-	return &File{name: "sort.go", buf: buf.Bytes()}, nil
+	return &File{name: "sorting.go", buf: buf.Bytes()}, nil
 }
 
 const sortTmpl = `
@@ -40,17 +40,21 @@ const sortTmpl = `
 package {{.Schema.PkgName}}
 
 import (
-	"github.com/stevenferrer/nero/sort"
+	"github.com/stevenferrer/nero/sorting"
 )
 
 {{range $direction := .Directions}}
 // {{$direction.String}} {{$direction.Desc}} sort direction
-func {{$direction.String}}(field Field) sort.SortFunc {
-	return func(sorts []sort.Sort) []sort.Sort {
-		return append(sorts, sort.Sort{
-			Field: field.String(),
-			Direction: sort.{{$direction.String}},
-		})
+func {{$direction.String}}(fields ...Field) sorting.Func {
+	return func(sortings []sorting.Sorting) []sorting.Sorting {
+		for _, field := range fields {
+			sortings = append(sortings, sorting.Sorting{
+				Field: field.String(),
+				Direction: sorting.{{$direction.String}},
+			})
+		}
+
+		return sortings
 	}
 }
 {{end}}

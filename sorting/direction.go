@@ -1,4 +1,4 @@
-package sort
+package sorting
 
 // Direction is a sort direction
 type Direction int

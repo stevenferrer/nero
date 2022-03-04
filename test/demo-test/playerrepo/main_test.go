@@ -14,9 +14,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/stevenferrer/nero"
-	"github.com/stevenferrer/nero/comparison"
-	player "github.com/stevenferrer/nero/test/integration/playerpkg"
-	"github.com/stevenferrer/nero/test/integration/playerrepo"
+	"github.com/stevenferrer/nero/predicate"
+	player "github.com/stevenferrer/nero/test/demo-test/playerpkg"
+	"github.com/stevenferrer/nero/test/demo-test/playerrepo"
 )
 
 // test runners
@@ -283,7 +283,7 @@ func newRepoTestRunner(repo playerrepo.Repository) func(t *testing.T) {
 
 		t.Run("Delete", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
-				preds := []comparison.PredFunc{
+				preds := []predicate.Func{
 					playerrepo.IDEq("1"), playerrepo.IDNotEq("2"),
 				}
 				// delete one
@@ -590,7 +590,7 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 		t.Run("UpdateInTx", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
 				now := time.Now()
-				preds := []comparison.PredFunc{
+				preds := []predicate.Func{
 					playerrepo.IDEq("1"), playerrepo.IDNotEq("2"),
 				}
 
@@ -634,7 +634,7 @@ func newRepoTestRunnerTx(repo playerrepo.Repository) func(t *testing.T) {
 
 		t.Run("DeleteInTx", func(t *testing.T) {
 			t.Run("Ok", func(t *testing.T) {
-				preds := []comparison.PredFunc{
+				preds := []predicate.Func{
 					playerrepo.IDEq("1"), playerrepo.IDNotEq("2"),
 				}
 				// delete one

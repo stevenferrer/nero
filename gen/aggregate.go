@@ -47,12 +47,15 @@ import (
 
 {{range $op := .Operators}}
 // {{$op.String}} is the {{$op.Desc}} aggregate operator
-func {{$op.String}}(field Field) aggregate.AggFunc {
-	return func(aggs []aggregate.Aggregate) []aggregate.Aggregate {
-		return append(aggs, aggregate.Aggregate{
-			Field: field.String(),
-			Op: aggregate.{{$op.String}},
-		})
+func {{$op.String}}(fields ...Field) aggregate.Func {
+	return func(aggregates []aggregate.Aggregate) []aggregate.Aggregate {
+		for _, field := range fields {
+			aggregates = append(aggregates, aggregate.Aggregate{
+				Field: field.String(),
+				Operator: aggregate.{{$op.String}},
+			})
+		}
+		return aggregates
 	}
 }
 {{end}}

@@ -5,7 +5,7 @@ import (
 	"text/template"
 
 	"github.com/stevenferrer/nero"
-	"github.com/stevenferrer/nero/comparison"
+	"github.com/stevenferrer/nero/predicate"
 )
 
 func newPredicateFile(schema nero.Schema) (*File, error) {
@@ -16,29 +16,29 @@ func newPredicateFile(schema nero.Schema) (*File, error) {
 	}
 
 	data := struct {
-		EqOps   []comparison.Operator
-		LtGtOps []comparison.Operator
-		NullOps []comparison.Operator
-		InOps   []comparison.Operator
+		EqOps   []predicate.Operator
+		LtGtOps []predicate.Operator
+		NullOps []predicate.Operator
+		InOps   []predicate.Operator
 		Schema  nero.Schema
 	}{
-		EqOps: []comparison.Operator{
-			comparison.Eq,
-			comparison.NotEq,
+		EqOps: []predicate.Operator{
+			predicate.Eq,
+			predicate.NotEq,
 		},
-		LtGtOps: []comparison.Operator{
-			comparison.Gt,
-			comparison.GtOrEq,
-			comparison.Lt,
-			comparison.LtOrEq,
+		LtGtOps: []predicate.Operator{
+			predicate.Gt,
+			predicate.GtOrEq,
+			predicate.Lt,
+			predicate.LtOrEq,
 		},
-		NullOps: []comparison.Operator{
-			comparison.IsNull,
-			comparison.IsNotNull,
+		NullOps: []predicate.Operator{
+			predicate.IsNull,
+			predicate.IsNotNull,
 		},
-		InOps: []comparison.Operator{
-			comparison.In,
-			comparison.NotIn,
+		InOps: []predicate.Operator{
+			predicate.In,
+			predicate.NotIn,
 		},
 		Schema: schema,
 	}
@@ -59,7 +59,7 @@ package {{.Schema.PkgName}}
 
 import (
 	"github.com/lib/pq"
-	"github.com/stevenferrer/nero/comparison"
+	"github.com/stevenferrer/nero/predicate"
 	{{range $import := .Schema.Imports -}}
 		"{{$import}}"
 	{{end -}}
@@ -71,15 +71,15 @@ import (
 	{{if $field.IsComparable  -}}
         {{ range $op := $.EqOps }} 
             // {{$field.StructField}}{{$op.String}} {{$op.Desc}} operator on {{$field.StructField}} field
-            func {{$field.StructField}}{{$op.String}} ({{$field.Identifier}} {{rawType $field.TypeInfo.V}}) comparison.PredFunc {
-                return func(preds []comparison.Predicate) []comparison.Predicate {
-                    return append(preds, comparison.Predicate{
+            func {{$field.StructField}}{{$op.String}} ({{$field.Identifier}} {{rawType $field.TypeInfo.V}}) predicate.Func {
+                return func(predicates []predicate.Predicate) []predicate.Predicate {
+                    return append(predicates, predicate.Predicate{
                         Field: "{{$field.Name}}",
-                        Op: comparison.{{$op.String}},
+                        Operator: predicate.{{$op.String}},
                         {{if and ($field.IsArray) (ne $field.IsValueScanner true) -}}
-                            Arg: pq.Array({{$field.Identifier}}),
+                            Argument: pq.Array({{$field.Identifier}}),
                         {{else -}}
-                            Arg: {{$field.Identifier}},
+                            Argument: {{$field.Identifier}},
                         {{end -}}
                     })
                 }
@@ -89,15 +89,15 @@ import (
         {{ range $op := $.LtGtOps }}
             {{if or $field.TypeInfo.IsNumeric (isType $field.TypeInfo.V "time.Time")}}
                 // {{$field.StructField}}{{$op.String}} {{$op.Desc}} operator on {{$field.StructField}} field
-                func {{$field.StructField}}{{$op.String}} ({{$field.Identifier}} {{rawType $field.TypeInfo.V}}) comparison.PredFunc {
-                    return func(preds []comparison.Predicate) []comparison.Predicate {
-                        return append(preds, comparison.Predicate{
+                func {{$field.StructField}}{{$op.String}} ({{$field.Identifier}} {{rawType $field.TypeInfo.V}}) predicate.Func {
+                    return func(predicates []predicate.Predicate) []predicate.Predicate {
+                        return append(predicates, predicate.Predicate{
                             Field: "{{$field.Name}}",
-                            Op: comparison.{{$op.String}},
+                            Operator: predicate.{{$op.String}},
                             {{if and ($field.IsArray) (ne $field.IsValueScanner true) -}}
-                                Arg: pq.Array({{$field.Identifier}}),
+                                Argument: pq.Array({{$field.Identifier}}),
                             {{else -}}
-                                Arg: {{$field.Identifier}},
+                                Argument: {{$field.Identifier}},
                             {{end -}}
                         })
                     }
@@ -108,11 +108,11 @@ import (
         {{ range $op := $.NullOps }}
             {{if $field.IsNillable}}
                 // {{$field.StructField}}{{$op.String}} {{$op.Desc}} operator on {{$field.StructField}} field
-                func {{$field.StructField}}{{$op.String}} () comparison.PredFunc {
-                    return func(preds []comparison.Predicate) []comparison.Predicate {
-                        return append(preds, comparison.Predicate{
+                func {{$field.StructField}}{{$op.String}} () predicate.Func {
+                    return func(predicates []predicate.Predicate) []predicate.Predicate {
+                        return append(predicates, predicate.Predicate{
                             Field: "{{$field.Name}}",
-                            Op: comparison.{{$op.String}},
+                            Operator: predicate.{{$op.String}},
                         })
                     }
                 }
@@ -121,17 +121,17 @@ import (
 
         {{ range $op := $.InOps }}
             // {{$field.StructField}}{{$op.String}} {{$op.Desc}} operator on {{$field.StructField}} field
-            func {{$field.StructField}}{{$op.String}} ({{$field.IdentifierPlural}} ...{{rawType $field.TypeInfo.V}}) comparison.PredFunc {
+            func {{$field.StructField}}{{$op.String}} ({{$field.IdentifierPlural}} ...{{rawType $field.TypeInfo.V}}) predicate.Func {
                 args := []interface{}{}
                 for _, v := range {{$field.IdentifierPlural}} {
                     args = append(args, v)
                 }
 
-                return func(preds []comparison.Predicate) []comparison.Predicate {
-                    return append(preds, comparison.Predicate{
+                return func(predicates []predicate.Predicate) []predicate.Predicate {
+                    return append(predicates, predicate.Predicate{
                         Field: "{{$field.Name}}",
-                        Op: comparison.{{$op.String}},
-                        Arg: args,
+                        Operator: predicate.{{$op.String}},
+                        Argument: args,
                     })
                 }
             }
@@ -143,12 +143,12 @@ import (
     // FieldX{{$op.String}}FieldY fieldX {{$op.Desc}} fieldY
     //
     // fieldX and fieldY must be of the same type
-    func FieldX{{$op.String}}FieldY (fieldX, fieldY Field) comparison.PredFunc {
-        return func(preds []comparison.Predicate) []comparison.Predicate {
-            return append(preds, comparison.Predicate{
+    func FieldX{{$op.String}}FieldY (fieldX, fieldY Field) predicate.Func {
+        return func(predicates []predicate.Predicate) []predicate.Predicate {
+            return append(predicates, predicate.Predicate{
                 Field: fieldX.String(),
-                Op: comparison.{{$op.String}},
-                Arg: fieldY,
+                Operator: predicate.{{$op.String}},
+                Argument: fieldY,
             })
         }
     }
@@ -158,12 +158,12 @@ import (
     // FieldX{{$op.String}}FieldY fieldX {{$op.Desc}} fieldY
     // 
     // fieldX and fieldY must be of the same type
-    func FieldX{{$op.String}}FieldY (fieldX, fieldY Field) comparison.PredFunc {
-        return func(preds []comparison.Predicate) []comparison.Predicate {
-            return append(preds, comparison.Predicate{
+    func FieldX{{$op.String}}FieldY (fieldX, fieldY Field) predicate.Func {
+        return func(predicates []predicate.Predicate) []predicate.Predicate {
+            return append(predicates, predicate.Predicate{
                 Field: fieldX.String(),
-                Op: comparison.{{$op.String}},
-                Arg: fieldY,
+                Operator: predicate.{{$op.String}},
+                Argument: fieldY,
             })
         }
     }

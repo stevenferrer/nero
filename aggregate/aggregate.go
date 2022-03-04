@@ -1,10 +1,10 @@
 package aggregate
 
-// Aggregate is an aggregate parameter
+// Aggregate is an aggregate
 type Aggregate struct {
-	Field string
-	Op    Operator
+	Field    string
+	Operator Operator
 }
 
-// AggFunc is an aggregate list decorator
-type AggFunc func([]Aggregate) []Aggregate
+// Func is an aggregate func
+type Func func([]Aggregate) []Aggregate

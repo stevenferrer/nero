@@ -1,65 +1,66 @@
-package comparison_test
+package predicate_test
 
 import (
 	"testing"
 
-	"github.com/stevenferrer/nero/comparison"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/stevenferrer/nero/predicate"
 )
 
 func TestOperatorStrings(t *testing.T) {
 	tests := []struct {
-		op comparison.Operator
+		op predicate.Operator
 		wantStr,
 		wantDesc string
 	}{
 		{
-			op:       comparison.Eq,
+			op:       predicate.Eq,
 			wantStr:  "Eq",
 			wantDesc: "equal",
 		},
 		{
-			op:       comparison.NotEq,
+			op:       predicate.NotEq,
 			wantStr:  "NotEq",
 			wantDesc: "not equal",
 		},
 		{
-			op:       comparison.Gt,
+			op:       predicate.Gt,
 			wantStr:  "Gt",
 			wantDesc: "greater than",
 		},
 		{
-			op:       comparison.GtOrEq,
+			op:       predicate.GtOrEq,
 			wantStr:  "GtOrEq",
 			wantDesc: "greater than or equal",
 		},
 		{
-			op:       comparison.Lt,
+			op:       predicate.Lt,
 			wantStr:  "Lt",
 			wantDesc: "less than",
 		},
 		{
-			op:       comparison.LtOrEq,
+			op:       predicate.LtOrEq,
 			wantStr:  "LtOrEq",
 			wantDesc: "less than or equal",
 		},
 		{
-			op:       comparison.IsNull,
+			op:       predicate.IsNull,
 			wantStr:  "IsNull",
 			wantDesc: "is null",
 		},
 		{
-			op:       comparison.IsNotNull,
+			op:       predicate.IsNotNull,
 			wantStr:  "IsNotNull",
 			wantDesc: "is not null",
 		},
 		{
-			op:       comparison.In,
+			op:       predicate.In,
 			wantStr:  "In",
 			wantDesc: "in",
 		},
 		{
-			op:       comparison.NotIn,
+			op:       predicate.NotIn,
 			wantStr:  "NotIn",
 			wantDesc: "not in",
 		},

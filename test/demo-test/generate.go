@@ -6,7 +6,7 @@ import (
 	"path"
 
 	"github.com/stevenferrer/nero/gen"
-	"github.com/stevenferrer/nero/test/integration/playerpkg"
+	"github.com/stevenferrer/nero/test/demo-test/playerpkg"
 )
 
 func main() {
