@@ -1,4 +1,4 @@
-package etc_test
+package fmtsrc_test
 
 import (
 	"io/ioutil"
@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/stevenferrer/nero/x/etc"
+	"github.com/stevenferrer/nero/x/fmtsrc"
 )
 
 const src = `
@@ -30,12 +30,12 @@ func TestFmtSrc(t *testing.T) {
 	err := ioutil.WriteFile(filepath, []byte(src), 0644)
 	require.NoError(t, err)
 
-	err = etc.FmtSrc(filepath)
+	err = fmtsrc.FmtSrc(filepath)
 	assert.NoError(t, err)
 
 	// cleanup
 	assert.NoError(t, os.Remove(filepath))
 
-	err = etc.FmtSrc(filepath)
+	err = fmtsrc.FmtSrc(filepath)
 	assert.Error(t, err)
 }

@@ -6,7 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/stevenferrer/nero/x/etc"
+	"github.com/stevenferrer/nero/x/fmtsrc"
 )
 
 // File is a generated file
@@ -29,7 +29,7 @@ func (f *File) Render(basePath string) error {
 		return errors.Wrap(err, "write file")
 	}
 
-	return errors.Wrap(etc.FmtSrc(filePath), "format source")
+	return errors.Wrap(fmtsrc.FmtSrc(filePath), "format source")
 }
 
 // Filename returns the filename
