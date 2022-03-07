@@ -88,7 +88,7 @@ If your your back-end is not yet supported, you can write your own [custom templ
 
 For writing custom templates, the official templates can serve as a reference. You can write your own template with custom back-ends (Oracle, MSSQL, BoltDB, MongoDB, etc.) by implementing the [_Template_](./template.go) interface.
 
-See official [postgres template](./pg_template.go) for reference.
+See official [postgres template](./postgres_template.go) for reference.
 
 ## Limitations
 
