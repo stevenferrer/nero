@@ -341,8 +341,8 @@ func (repo *SQLiteRepository) buildPreds(sb squirrel.StatementBuilderType, preds
 	return sb
 }
 
-func (repo *SQLiteRepository) buildSorting(qb squirrel.SelectBuilder, sorts []sorting.Sorting) squirrel.SelectBuilder {
-	for _, s := range sorts {
+func (repo *SQLiteRepository) buildSorting(qb squirrel.SelectBuilder, sortings []sorting.Sorting) squirrel.SelectBuilder {
+	for _, s := range sortings {
 		field := fmt.Sprintf("%q", s.Field)
 		switch s.Direction {
 		case sorting.Asc:
