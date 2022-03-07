@@ -312,7 +312,7 @@ func (repo *SQLiteRepository) buildSelect(q *Queryer) squirrel.SelectBuilder {
 	qb = squirrel.SelectBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), predicates))
 
 	sortings := sorting.Build(q.sortFuncs...)	
-	qb = repo.buildSort(qb, sortings)
+	qb = repo.buildSorting(qb, sortings)
 
 	if q.limit > 0 {
 		qb = qb.Limit(uint64(q.limit))
@@ -376,7 +376,7 @@ func (repo *SQLiteRepository) buildPreds(sb squirrel.StatementBuilderType, preds
 	return sb
 }
 
-func (repo *SQLiteRepository) buildSort(qb squirrel.SelectBuilder, sorts []sorting.Sorting) squirrel.SelectBuilder {
+func (repo *SQLiteRepository) buildSorting(qb squirrel.SelectBuilder, sorts []sorting.Sorting) squirrel.SelectBuilder {
 	for _, s := range sorts {
 		field := fmt.Sprintf("%q", s.Field)
 		switch s.Direction {
@@ -531,7 +531,7 @@ func (repo *SQLiteRepository) aggregate(ctx context.Context, runner nero.SQLRunn
 	qb = squirrel.SelectBuilder(repo.buildPreds(squirrel.StatementBuilderType(qb), predicates))
 
 	sortings := sorting.Build(a.sortFuncs...)
-	qb = repo.buildSort(qb, sortings)
+	qb = repo.buildSorting(qb, sortings)
 
 	if repo.debug && repo.logger != nil {
 		sql, args, err := qb.ToSql()
