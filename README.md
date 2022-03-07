@@ -9,9 +9,11 @@ A library for generating the repository pattern.
 
 ## Motivation
 
-We heavily use the _[repository pattern](https://threedots.tech/post/repository-pattern-in-go/)_ in our codebases and we often [write our queries manually](https://golang.org/pkg/database/sql/#example_DB_QueryContext). It becomes tedious and repetitive as we have more tables/models to maintain. So, we decided to experiment on creating this library to generate our repositories automatically.
+Writing _[repositories](https://www.martinfowler.com/eaaCatalog/repository.html)_ [manually](https://golang.org/pkg/database/sql/#example_DB_QueryContext) can be tedious, so why not just generate them?
 
 ## Goals
+
+Below are the goals of this project.
 
 - Decouple implementation from the `Repository` interface
 - Easy integration with existing codebase
@@ -25,7 +27,7 @@ $ go get github.com/stevenferrer/nero
 
 ## Example
 
-See the [official example](https://github.com/stevenferrer/nero-example) and [integration test](./test/integration/playerrepo) for a more complete demo.
+See the [official example](https://github.com/stevenferrer/nero-example) and [demo test](./test/demo-test/playerrepo) for a more complete example.
 
 ```go
 import (
@@ -80,23 +82,23 @@ Below is the list of supported back-ends.
 | SQLite               | [mattn/go-sqlite3](https://github.com/mattn/go-sqlite3)       |
 | MySQL/MariaDB (soon) | [go-sql-driver/mysql](https://github.com/go-sql-driver/mysql) |
 
-If your your back-end is not yet supported, you can implement your own [custom back-end](#custom-back-ends).
+If your your back-end is not yet supported, you can write your own [custom template](#custom-templates).
 
-## Custom back-ends
+## Custom templates
 
-Implementing a custom back-end is very easy. In fact, you don't have to use the official back-ends. You can implement custom back-ends (Oracle, MSSQL, BoltDB, MongoDB, etc.) by implementing the [_Template_](./template.go) interface.
+For writing custom templates, the official templates can serve as a reference. You can write your own template with custom back-ends (Oracle, MSSQL, BoltDB, MongoDB, etc.) by implementing the [_Template_](./template.go) interface.
 
 See official [postgres template](./pg_template.go) for reference.
 
 ## Limitations
 
-Currently, we only support basic CRUD and aggregate operations (i.e. count, sum). If you have more complex requirements other than that, we suggest that you just write your repositories manually, at least for now.
+Currently, the supported operations are basic CRUD and aggregate (i.e. count, sum). For more complex requirements, we suggest that you just write your repositories manually for now.
 
-We're still in the process of brain-storming how to elegantly support other operations such as joins. If you have any ideas, we'd love to hear from you!
+We're still planning how to support compound predicates (and, or), joins and relationships. Feel free to share any ideas!
 
 ## Standing on the shoulders of giants
 
-This project wouldn't be possible without the amazing open-source projects it was built upon:
+This project wouldn't be possible without these amazing open-source projects:
 
 - [Masterminds/squirrel](https://github.com/Masterminds/squirrel) - Fluent SQL generation in golang
 - [lib/pq](https://github.com/lib/pq) - Pure Go Postgres driver for database/sql
@@ -113,7 +115,7 @@ Also, the following have a huge influence on this project and deserves most of t
 
 ## What's in the name?
 
-The project name is inspired by an [anti-bird](https://blackclover.fandom.com/wiki/Anti-bird) in an anime called [Black Clover](https://blackclover.fandom.com/wiki/Black_Clover_Wiki). The anti-bird, which the [Black Bulls](https://blackclover.fandom.com/wiki/Black_Bull) squad calls _Nero_ is apparently a human named [Secre Swallowtail](https://blackclover.fandom.com/wiki/Secre_Swallowtail). It's a really cool anime with lots of magic!
+The project name was inspired by an [anti-bird](https://blackclover.fandom.com/wiki/Anti-bird) in an anime called [Black Clover](https://blackclover.fandom.com/wiki/Black_Clover_Wiki). The anti-bird, which the [Black Bulls](https://blackclover.fandom.com/wiki/Black_Bull) squad calls _Nero_ is apparently a human named [Secre Swallowtail](https://blackclover.fandom.com/wiki/Secre_Swallowtail). It's a really cool anime with lots of magic!
 
 ## Contributing
 
