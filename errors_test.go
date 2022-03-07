@@ -3,8 +3,9 @@ package nero_test
 import (
 	"testing"
 
-	"github.com/stevenferrer/nero"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/stevenferrer/nero"
 )
 
 func TestErrRequiredField(t *testing.T) {

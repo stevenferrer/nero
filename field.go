@@ -5,6 +5,7 @@ import (
 
 	"github.com/jinzhu/inflection"
 	"github.com/stevenferrer/mira"
+
 	stringsx "github.com/stevenferrer/nero/x/strings"
 )
 

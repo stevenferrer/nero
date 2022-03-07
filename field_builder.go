@@ -1,6 +1,8 @@
 package nero
 
-import "github.com/stevenferrer/mira"
+import (
+	"github.com/stevenferrer/mira"
+)
 
 // FieldBuilder is a field builder
 type FieldBuilder struct {

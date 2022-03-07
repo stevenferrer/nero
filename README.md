@@ -15,7 +15,7 @@ We heavily use the _[repository pattern](https://threedots.tech/post/repository-
 
 - Decouple implementation from the `Repository` interface
 - Easy integration with existing codebase
-- Minimal API
+- Minimal and easy to use API
 
 ## Installation
 

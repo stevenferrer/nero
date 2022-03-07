@@ -5,7 +5,7 @@ import (
 	"text/template"
 
 	"github.com/stevenferrer/nero"
-	sorting "github.com/stevenferrer/nero/sorting"
+	"github.com/stevenferrer/nero/sorting"
 )
 
 func newSortFile(schema nero.Schema) (*File, error) {

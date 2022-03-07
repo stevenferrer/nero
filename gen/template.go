@@ -4,6 +4,7 @@ import (
 	"bytes"
 
 	"github.com/pkg/errors"
+
 	"github.com/stevenferrer/nero"
 )
 
